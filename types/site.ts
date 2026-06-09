@@ -44,3 +44,8 @@ export interface StrandedSite {
     status?: 'active' | 'inactive' | 'captured'
   }
 }
+
+export interface StrandedSitesCollection {
+  type: 'FeatureCollection'
+  features: StrandedSite[]
+}

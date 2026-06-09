@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -15,53 +16,198 @@ const ASIC_MACHINES = [
   { id: 's19', name: 'Antminer S19', hashrate_ths: 95, power_w: 3250, efficiency_j_th: 34.2, cost_cad: 1800, manufacturer: 'Bitmain' }
 ]
 
-export default function SiteDetailsPanel({ site, onClose }: any) {
+const FIAT_OPTIONS = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+] as const
+
+type FiatCode = typeof FIAT_OPTIONS[number]['code']
+type BtcPriceMap = Record<Lowercase<FiatCode>, number>
+
+export default function SiteDetailsPanel({ 
+  site, 
+  onClose, 
+  onAddToMission, 
+  liveBtcPrice = 85000 
+}: { 
+  site: any
+  onClose: () => void
+  onAddToMission?: (site: any) => void
+  liveBtcPrice?: number 
+}) {
   if (!site) return null
   const p = site.properties || {}
-  const [currency, setCurrency] = useState('CAD')
+
+  const [selectedFiat, setSelectedFiat] = useState<FiatCode>('USD')
+  const [btcPrices, setBtcPrices] = useState<BtcPriceMap>({ usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 })
   const [selectedASIC, setSelectedASIC] = useState(ASIC_MACHINES[0])
   const [machineCount, setMachineCount] = useState(100)
   const [overclockPercent, setOverclockPercent] = useState(0)
   const [advancedMode, setAdvancedMode] = useState(false)
-  const [btcPrice, setBtcPrice] = useState(85000)
+  const [btcPrice, setBtcPrice] = useState(85000) // Price of 1 BTC in the *selected* fiat (BTC is always the base)
   const [uptimePercent, setUptimePercent] = useState(95)
-  const exchangeRate = 1.35
-  const currencySymbol = currency === 'CAD' ? 'C$' : '$'
+
+  // Generator integration for real per-site Value (CapEx on production side)
+  const [selectedGenset, setSelectedGenset] = useState<GensetId>('jenbacher316')
+  const [debtPercent, setDebtPercent] = useState(60)
+  const [interestRate, setInterestRate] = useState(8)
+
+  // Advanced parameters for more honest modeling
+  const [fixedSetupCostCad, setFixedSetupCostCad] = useState(25000) // One-time site prep, generator base, install, etc.
+  const [poolFeePercent, setPoolFeePercent] = useState(1.5)
+  const [maintenanceAnnualPercent, setMaintenanceAnnualPercent] = useState(5)
+  const [revenuePerThPerDayBtc, setRevenuePerThPerDayBtc] = useState(0.0000009) // Editable: current network hashprice in BTC/TH/day (approximate)
+
+  const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
+  const currencySymbol = currentFiat.symbol
+
+  // Fetch live BTC prices for top 5 fiats (BTC always the denominator)
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,jpy,gbp,cad')
+        const data = await res.json()
+        if (data?.bitcoin) {
+          const prices = {
+            usd: data.bitcoin.usd || 85000,
+            eur: data.bitcoin.eur || 78000,
+            jpy: data.bitcoin.jpy || 12500000,
+            gbp: data.bitcoin.gbp || 65000,
+            cad: data.bitcoin.cad || 115000,
+          }
+          setBtcPrices(prices)
+          // Use current selectedFiat at fetch time
+          const key = selectedFiat.toLowerCase() as Lowercase<FiatCode>
+          const live = prices[key] || prices.usd
+          setBtcPrice(live)
+        }
+      } catch (_) {}
+    }
+    fetchPrices()
+  }, [selectedFiat]) // re-fetch if fiat changes before initial load (rare)
+
+  const handleFiatChange = (newFiat: FiatCode) => {
+    setSelectedFiat(newFiat)
+    const live = btcPrices[newFiat.toLowerCase() as Lowercase<FiatCode>]
+    if (live) setBtcPrice(live)
+  }
+
+  const siteEmission = p.emission_rate_kg_day || 0
 
   const calculations = useMemo(() => {
     const overclockMultiplier = 1 + (overclockPercent / 100)
     const adjustedHashrate = selectedASIC.hashrate_ths * overclockMultiplier
     const adjustedPower = selectedASIC.power_w * overclockMultiplier * (1 + overclockPercent / 200)
     const totalPowerKw = (adjustedPower * machineCount) / 1000
-    const dailyBtc = (adjustedHashrate * machineCount * 0.000001)
-    const effectiveDailyBtc = dailyBtc * (uptimePercent / 100)
-    const rate = currency === 'CAD' ? exchangeRate : 1
-    const dailyRevenue = effectiveDailyBtc * btcPrice * rate
-    const dailyPowerCost = totalPowerKw * 24 * 0.04 * rate
-    const dailyProfit = dailyRevenue - dailyPowerCost
-    const hardwareCost = selectedASIC.cost_cad * machineCount * rate
-    
+
+    // Generator integration: limit power from site's real emission using chosen genset
+    const generatorPowerKw = computeGeneratorPower(siteEmission, selectedGenset)
+    const effectivePowerKw = Math.min(totalPowerKw, generatorPowerKw)
+    const effectiveMachineCount = Math.min(machineCount, Math.floor(generatorPowerKw * 1000 / selectedASIC.power_w ))
+
+    // Honest revenue: use editable per-TH/day BTC rate (accounts for current difficulty, fees, etc.)
+    const dailyBtcGross = adjustedHashrate * effectiveMachineCount * revenuePerThPerDayBtc
+    const dailyBtcAfterPool = dailyBtcGross * (1 - poolFeePercent / 100)
+    const effectiveDailyBtc = dailyBtcAfterPool * (uptimePercent / 100)
+
+    const btcPriceInFiat = btcPrice
+
+    const dailyRevenueBtc = effectiveDailyBtc
+    const dailyRevenueFiat = effectiveDailyBtc * btcPriceInFiat
+
+    // Power cost: base assumption 0.04 in USD/kWh, converted via BTC rates for honesty across currencies
+    const powerCostUsd = effectivePowerKw * 24 * 0.04
+    const usdBtcPrice = btcPrices.usd || 85000
+    const dailyPowerCostBtc = powerCostUsd / usdBtcPrice
+    const dailyPowerCostFiat = dailyPowerCostBtc * btcPriceInFiat
+
+    // Maintenance as annual % of hardware investment (realistic opex)
+    const cadBtcPrice = btcPrices.cad || 115000
+    const hardwareCostBtc = (selectedASIC.cost_cad * effectiveMachineCount) / cadBtcPrice
+    const hardwareCostFiat = hardwareCostBtc * btcPriceInFiat
+    const dailyMaintBtc = hardwareCostBtc * (maintenanceAnnualPercent / 100) / 365
+    const dailyMaintFiat = dailyMaintBtc * btcPriceInFiat
+
+    const dailyProfitBtc = dailyRevenueBtc - dailyPowerCostBtc - dailyMaintBtc
+    const dailyProfitFiat = dailyProfitBtc * btcPriceInFiat
+
+    // Generator CapEx (production side, real from dataset)
+    const gensetCapexCad = GENSET_DATA[selectedGenset].powerKW * GENSET_DATA[selectedGenset].capexPerKW
+    const gensetCapexBtc = gensetCapexCad / cadBtcPrice
+    const gensetCapexFiat = gensetCapexBtc * btcPriceInFiat
+
+    // Fixed setup costs (site prep, base generator, permitting, shipping, install) — do NOT scale linearly with every ASIC
+    const fixedCostBtc = fixedSetupCostCad / cadBtcPrice
+    const fixedCostFiat = fixedCostBtc * btcPriceInFiat
+    const totalInvestmentBtc = hardwareCostBtc + fixedCostBtc + gensetCapexBtc
+    const totalInvestmentFiat = hardwareCostFiat + fixedCostFiat + gensetCapexFiat
+
+    // Payback now correctly uses TOTAL investment (fixed + variable + generator). 
+    const paybackDays = dailyProfitBtc > 0 ? totalInvestmentBtc / dailyProfitBtc : Infinity
+
+    // Marginal payback (for one additional machine, ignoring fixed) — for transparency
+    const marginalDailyProfitBtc = (adjustedHashrate * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100)) 
+      - (adjustedPower / 1000 * 24 * 0.04 / usdBtcPrice) 
+      - ( (selectedASIC.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365 )
+    const marginalPayback = marginalDailyProfitBtc > 0 ? (selectedASIC.cost_cad / cadBtcPrice) / marginalDailyProfitBtc : Infinity
+
+    // Methane loss opportunity cost (the daily profit you lose by venting instead of capturing)
+    const maxPossibleDailyBtc = (generatorPowerKw * 1000 / selectedASIC.power_w ) * selectedASIC.hashrate_ths * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100)
+    const maxPossibleDailyProfitBtc = maxPossibleDailyBtc - (generatorPowerKw * 24 * 0.04 / usdBtcPrice) - ( (selectedASIC.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365 ) - (gensetCapexBtc / 365)
+    const methaneLossDailyBtc = maxPossibleDailyBtc
+
+    // Financing for CapEx (debt % at interest, simple annual cost)
+    const debtAmount = totalInvestmentBtc * (debtPercent / 100)
+    const annualFinancingCostBtc = debtAmount * (interestRate / 100) * 0.2 // approx 5yr amort factor
+    const financedPaybackDays = (dailyProfitBtc - annualFinancingCostBtc) > 0 ? totalInvestmentBtc / (dailyProfitBtc - annualFinancingCostBtc) : Infinity
+
     return { 
-      effectiveDailyBtc: effectiveDailyBtc || 0, 
-      dailyRevenue: dailyRevenue || 0,
-      dailyPowerCost: dailyPowerCost || 0,
-      dailyProfit: dailyProfit || 0,
-      monthlyProfit: (dailyProfit * 30) || 0,
-      hardwareCost: hardwareCost || 0,
-      paybackDays: dailyProfit > 0 ? hardwareCost / dailyProfit : Infinity,
-      totalPowerKw: totalPowerKw || 0
+      effectiveDailyBtc: effectiveDailyBtc || 0,
+      dailyRevenueBtc: dailyRevenueBtc || 0,
+      dailyRevenueFiat: dailyRevenueFiat || 0,
+      dailyPowerCostBtc: dailyPowerCostBtc || 0,
+      dailyPowerCostFiat: dailyPowerCostFiat || 0,
+      dailyMaintBtc: dailyMaintBtc || 0,
+      dailyMaintFiat: dailyMaintFiat || 0,
+      dailyProfitBtc: dailyProfitBtc || 0,
+      dailyProfitFiat: dailyProfitFiat || 0,
+      monthlyProfitBtc: (dailyProfitBtc * 30) || 0,
+      monthlyProfitFiat: (dailyProfitFiat * 30) || 0,
+      hardwareCostBtc: hardwareCostBtc || 0,
+      hardwareCostFiat: hardwareCostFiat || 0,
+      fixedCostBtc: fixedCostBtc || 0,
+      fixedCostFiat: fixedCostFiat || 0,
+      totalInvestmentBtc: totalInvestmentBtc || 0,
+      totalInvestmentFiat: totalInvestmentFiat || 0,
+      paybackDays: paybackDays,
+      marginalPayback: marginalPayback,
+      totalPowerKw: totalPowerKw || 0,
+      generatorPowerKw: generatorPowerKw || 0,
+      gensetCapexBtc: gensetCapexBtc || 0,
+      methaneLossDailyBtc: methaneLossDailyBtc || 0,
+      financedPaybackDays: financedPaybackDays,
+      effectiveMachineCount: effectiveMachineCount || 0,
+      gensetName: GENSET_DATA[selectedGenset].name
     }
-  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, currency])
+  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, selectedFiat, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission])
 
   const fmt = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'
     if (val >= 1e6) return currencySymbol + (val/1e6).toFixed(2) + 'M'
-if (val >= 1e3) return currencySymbol + (val/1e3).toFixed(1) + 'K'
+    if (val >= 1e3) return currencySymbol + (val/1e3).toFixed(1) + 'K'
     return currencySymbol + val.toFixed(2)
   }
-return
-(
-    <div className="absolute top-20 right-4 z-50 bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-[calc(100vh-120px)] overflow-y-auto">
+
+  const fmtBtc = (val: number) => {
+    if (!isFinite(val) || isNaN(val)) return '0.000000'
+    return val.toFixed(6)
+  }
+
+  return (
+    <div className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-white">{p.name || 'Unknown'}</h2>
@@ -69,15 +215,23 @@ return
         </div>
         <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
       </div>
-      <div className="flex justify-end mb-4">
-        <div className="flex bg-slate-800 rounded-lg p-1">
-          <button onClick={() => setCurrency('CAD')} className={`px-3 py-1 rounded text-sm ${currency === 'CAD' ? 'bg-[#5BC0BE] text-slate-900' : 'text-gray-400'}`}>CAD</button>
-          <button onClick={() => setCurrency('USD')} className={`px-3 py-1 rounded text-sm ${currency === 'USD' ? 'bg-[#5BC0BE] text-slate-900' : 'text-gray-400'}`}>USD</button>
-        </div>
+      {/* Currency dropdown - BTC always the base/denominator */}
+      <div className="mb-4">
+        <label className="text-sm font-semibold text-[#5BC0BE]">BTC Price in</label>
+        <select 
+          value={selectedFiat} 
+          onChange={(e) => handleFiatChange(e.target.value as FiatCode)}
+          className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
+        >
+          {FIAT_OPTIONS.map(opt => (
+            <option key={opt.code} value={opt.code}>{opt.code} ({opt.symbol}) — {opt.name}</option>
+          ))}
+        </select>
       </div>
       <div className="space-y-2 text-sm mb-4 p-3 bg-slate-800/50 rounded-lg">
-        <div className="flex justify-between"><span className="text-gray-400">Total Power</span><span className="text-[#5BC0BE]">{calculations.totalPowerKw.toFixed(1)} kW</span></div>
-        <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{fmt(calculations.hardwareCost)}</span></div>
+        <div className="flex justify-between"><span className="text-gray-400">Total Power (ASICs)</span><span className="text-[#5BC0BE]">{calculations.totalPowerKw.toFixed(1)} kW</span></div>
+        <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
+        <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{calculations.hardwareCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span></div>
       </div>
       <div className="mb-4">
         <label className="text-sm font-semibold text-[#5BC0BE]">ASIC Model</label>
@@ -86,36 +240,164 @@ return
         </select>
       </div>
       <div className="mb-4">
-        <label className="text-sm font-semibold text-[#5BC0BE]">Machines: {machineCount.toLocaleString()}</label>
+        <label className="text-sm font-semibold text-[#5BC0BE]">Machines: {machineCount.toLocaleString()} (capped by generator power: {calculations.generatorPowerKw.toFixed(0)} kW from site gas)</label>
         <input type="range" min="1" max="10000" value={machineCount} onChange={(e) => setMachineCount(Number(e.target.value))} className="w-full mt-2 accent-[#5BC0BE]" />
       </div>
-      <div className="bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4">
-        <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between"><span className="text-gray-400">Daily BTC</span><span className="text-white">{calculations.effectiveDailyBtc.toFixed(6)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Daily Revenue</span><span className="text-green-400 font-semibold">{fmt(calculations.dailyRevenue)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Power Cost</span><span className="text-red-400">{fmt(calculations.dailyPowerCost)}</span></div>
-          <div className="flex justify-between border-t border-slate-600 pt-2"><span className="text-gray-400">Daily Profit</span><span className={`font-bold ${calculations.dailyProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>{fmt(calculations.dailyProfit)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Monthly Profit</span><span className={`font-bold ${calculations.monthlyProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>{fmt(calculations.monthlyProfit)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Payback</span><span className={calculations.paybackDays < 365 ? 'text-green-400' : 'text-yellow-400'}>{isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays) + ' days' : 'N/A'}</span></div>
+
+      {/* Generator integration + Financing for real CapEx / methane loss ROI */}
+      <div className="mb-4">
+        <label className="text-sm font-semibold text-[#5BC0BE]">Generator Model (production side from real site gas)</label>
+        <select value={selectedGenset} onChange={(e) => setSelectedGenset(e.target.value as GensetId)} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
+          {Object.keys(GENSET_DATA).map(id => <option key={id} value={id}>{GENSET_DATA[id as GensetId].name}</option>)}
+        </select>
+      </div>
+      <div className="mb-2 text-xs text-gray-400">Financing for total CapEx (generator + mining hardware)</div>
+      <div className="flex gap-3 mb-4">
+        <div className="flex-1">
+          <label className="text-xs">Debt %: {debtPercent}%</label>
+          <input type="range" min="0" max="90" value={debtPercent} onChange={e => setDebtPercent(+e.target.value)} className="w-full accent-[#FF8C00]" />
+        </div>
+        <div className="flex-1">
+          <label className="text-xs">Interest: {interestRate}%</label>
+          <input type="range" min="3" max="15" step="0.5" value={interestRate} onChange={e => setInterestRate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
         </div>
       </div>
-      <button onClick={() => setAdvancedMode(!advancedMode)} className="w-full
-py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors">{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
-      {advancedMode && (
-        <div className="space-y-3 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm">
-          <div>
-            <label className="text-xs text-gray-400">BTC Price ({currencySymbol})</label>
-            <input type="number" value={Math.round(btcPrice * (currency === 'CAD' ? exchangeRate : 1))} onChange={(e) => setBtcPrice(Number(e.target.value) / (currency === 'CAD' ? exchangeRate : 1))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+      <div className="bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4">
+        <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary <span className="text-xs font-normal">(BTC first — always the denominator)</span></h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between"><span className="text-gray-400">Daily BTC Earned (after pool)</span><span className="text-white">{calculations.effectiveDailyBtc.toFixed(6)} BTC</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Daily Revenue</span><span className="text-green-400 font-semibold">{calculations.dailyRevenueBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyRevenueFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Power Cost</span><span className="text-red-400">{calculations.dailyPowerCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyPowerCostFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Daily Maintenance</span><span className="text-red-400">{calculations.dailyMaintBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyMaintFiat)})</span></span></div>
+          <div className="flex justify-between border-t border-slate-600 pt-2"><span className="text-gray-400">Daily Profit (net)</span><span className={`font-bold ${calculations.dailyProfitBtc >= 0 ? 'text-green-400' : 'text-red-400'}`}>{calculations.dailyProfitBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyProfitFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Monthly Profit (net)</span><span className={`font-bold ${calculations.monthlyProfitBtc >= 0 ? 'text-green-400' : 'text-red-400'}`}>{calculations.monthlyProfitBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.monthlyProfitFiat)})</span></span></div>
+
+          <div className="flex justify-between mt-2 pt-2 border-t border-slate-600">
+            <span className="text-gray-400">Hardware (variable)</span>
+            <span className="text-white">{calculations.hardwareCostBtc.toFixed(4)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span>
           </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">+ Fixed Setup (one-time)</span>
+            <span className="text-white">{calculations.fixedCostBtc.toFixed(4)} BTC <span className="text-xs text-gray-400">({fmt(calculations.fixedCostFiat)})</span></span>
+          </div>
+          <div className="flex justify-between font-semibold">
+            <span className="text-gray-300">Total Investment</span>
+            <span>{calculations.totalInvestmentBtc.toFixed(4)} BTC <span className="text-xs text-gray-400">({fmt(calculations.totalInvestmentFiat)})</span></span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-400">+ Generator CapEx ({calculations.gensetName})</span>
+            <span className="text-white">{calculations.gensetCapexBtc.toFixed(4)} BTC</span>
+          </div>
+
+          <div className="flex justify-between mt-2 pt-2 border-t border-slate-600">
+            <span className="text-gray-400">Payback (Total Capital)</span>
+            <span className={calculations.paybackDays < 365 ? 'text-green-400' : 'text-yellow-400'}>{isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays) + ' days' : 'N/A'}</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-400">Financed Payback ({debtPercent}% debt @ {interestRate}%)</span>
+            <span className="text-gray-300">{isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays) + ' days' : 'N/A'}</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-400">Marginal Payback (per extra machine)</span>
+            <span className="text-gray-300">{isFinite(calculations.marginalPayback) ? Math.round(calculations.marginalPayback) + ' days' : 'N/A'}</span>
+          </div>
+          <div className="flex justify-between text-xs mt-1 border-t border-slate-700 pt-1">
+            <span className="text-red-400">Methane Loss (daily BTC if vented)</span>
+            <span className="text-red-400">{calculations.methaneLossDailyBtc.toFixed(4)} BTC</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-400">Financed Payback (after debt cost)</span>
+            <span className="text-gray-300">{isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays) + ' days' : 'N/A'}</span>
+          </div>
+        </div>
+      </div>
+      <button onClick={() => setAdvancedMode(!advancedMode)} className="w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors">{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
+      {advancedMode && (
+        <div className="space-y-4 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm">
+          <div>
+            <label className="text-xs text-gray-400">BTC Price in {selectedFiat} (live default, editable)</label>
+            <input 
+              type="number" 
+              value={btcPrice} 
+              onChange={(e) => setBtcPrice(Number(e.target.value))} 
+              className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" 
+            />
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — current network estimate</label>
+            <input type="number" step="0.0000001" value={revenuePerThPerDayBtc} onChange={(e) => setRevenuePerThPerDayBtc(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+            <div className="text-[10px] text-gray-500 mt-0.5">This is the key honest variable. Adjust based on real hashprice data.</div>
+          </div>
+
           <div>
             <label className="text-xs text-gray-400">Overclock %</label>
             <input type="range" min="0" max="50" value={overclockPercent} onChange={(e) => setOverclockPercent(Number(e.target.value))} className="w-full mt-1 accent-[#FF8C00]" />
             <div className="text-right text-xs text-gray-400">+{overclockPercent}%</div>
           </div>
+
+          <div className="pt-2 border-t border-slate-700 space-y-3">
+            <div>
+              <label className="text-xs text-gray-400">Fixed Setup Cost (CAD) — one-time (permitting, generator base, install, etc.)</label>
+              <input type="number" value={fixedSetupCostCad} onChange={(e) => setFixedSetupCostCad(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400">Pool Fee %</label>
+              <input type="range" min="0" max="5" step="0.1" value={poolFeePercent} onChange={(e) => setPoolFeePercent(Number(e.target.value))} className="w-full mt-1 accent-[#FF8C00]" />
+              <div className="text-right text-xs text-gray-400">{poolFeePercent}%</div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400">Annual Maintenance % of Hardware Cost</label>
+              <input type="range" min="0" max="15" step="0.5" value={maintenanceAnnualPercent} onChange={(e) => setMaintenanceAnnualPercent(Number(e.target.value))} className="w-full mt-1 accent-[#FF8C00]" />
+              <div className="text-right text-xs text-gray-400">{maintenanceAnnualPercent}% / year</div>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-gray-500 pt-2 border-t border-slate-700">
+            These advanced inputs make the model more realistic. Fixed costs mean payback improves with scale. All values are estimates only — see disclaimer below.
+          </div>
         </div>
       )}
-      <p className="text-xs text-gray-500 text-center">v0.3.0 - GiveAbit Intelligence</p>
+
+      <details className="mt-1 mb-2">
+        <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-200">All raw properties from dataset ({Object.keys(p).length} fields)</summary>
+        <pre className="text-[10px] mt-1 p-2 bg-black/40 rounded overflow-auto max-h-44 text-gray-300 whitespace-pre-wrap break-all">{JSON.stringify(p, null, 2)}</pre>
+      </details>
+
+      {onAddToMission && (
+        <button
+          onClick={() => onAddToMission(site)}
+          className="mt-2 w-full py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black active:scale-[0.985] transition flex items-center justify-center gap-2"
+        >
+          + ADD TO MISSION PORTFOLIO
+        </button>
+      )}
+
+      <div className="flex gap-2 mt-2">
+        <button 
+          onClick={() => {
+            const summary = `Site: ${p.name} (${p.province})\nDaily Profit: ${fmt(calculations.dailyProfitFiat)}\nMonthly: ${fmt(calculations.monthlyProfitFiat)}\nPayback: ${isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays) + ' days' : 'N/A'}\nBTC Price used: $${Math.round(liveBtcPrice)}`;
+            navigator.clipboard.writeText(summary);
+            // Simple toast via alert for now (sonner global)
+            alert('ROI summary copied!');
+          }}
+          className="flex-1 py-2 text-xs border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10"
+        >
+          Copy ROI Summary
+        </button>
+      </div>
+
+      <div className="mt-4 pt-3 border-t border-slate-700 text-[10px] text-gray-500 leading-snug">
+        <strong>Important Honesty Note:</strong> This is a simplified model for educational purposes only. 
+        Real Bitcoin mining revenue varies constantly with network difficulty, transaction fees, hardware degradation, 
+        actual gas composition, weather, maintenance downtime, and local regulations. Power costs, hardware prices, 
+        and BTC price are highly volatile. Fixed costs are an estimate. Do not use these numbers for actual investment decisions without independent verification and professional advice. 
+        Past or modeled performance is not a guarantee of future results.
+      </div>
+
+      <p className="text-xs text-gray-500 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
     </div>
   )
 }

@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stranded | Marketing & Sales Hub | GiveAbit Intelligence</title>
+    <meta name="description" content="Professional marketing collateral for Stranded: Executive Summary, One-Pager, Mission & Vision, Roadmap & Funding. Stranded Energy, Bitcoin Access. Powered by GiveAbit Intelligence.">
+    <meta name="keywords" content="stranded energy, bitcoin mining, methane capture, CETA funding, Canada energy grants, stranded methane, GiveAbit Intelligence">
+    <meta property="og:title" content="Stranded | Marketing & Sales Hub">
+    <meta property="og:description" content="Turn wasted energy into verifiable wealth. Download our full suite of professional marketing documents.">
+    <meta property="og:image" content="/images/3.jpg">
+    <meta property="og:url" content="http://localhost:3003/map">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --orange: #FF8C00;
+            --teal: #5BC0BE;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .heading-font {
+            font-family: 'Space Grotesk', 'Inter', system_ui, sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .glass {
+            background: rgba(40, 52, 72, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 140, 0, 0.15);
+        }
+
+        .section-header {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-header:after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(to right, #FF8C00, transparent);
+        }
+
+        .marketing-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .marketing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .nav-link {
+            transition: color 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: #FF8C00;
+        }
+
+        .stat-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .professional-shadow {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        .doc-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(15 23 42 / 0.2);
+        }
+
+        .subtle-grid {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .premium-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .premium-button:after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -100%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                transparent 20%,
+                rgba(255,255,255,0.3) 50%,
+                transparent 80%
+            );
+            transform: skewX(-25deg);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% {
+                transform: skewX(-25deg) translateX(300%);
+            }
+        }
+
+        .metric-value {
+            font-feature-settings: "ss02";
+        }
+
+        .tax-tag.\!bg-\[\#FF8C00\] {
+            background-color: #FF8C00 !important;
+            color: #0b111f !important;
+            border-color: #FF8C00 !important;
+        }
+
+        /* Excellent Print / PDF styles for the full accumulation */
+        @media print {
+            .sticky, nav, .premium-button, a[href*="localhost:3003/map"], button, .fa-download, .fa-envelope { display: none !important; }
+            body { background: white; color: #111; }
+            .glass, .doc-card { background: #fff; color: #111; border: 1px solid #ddd; box-shadow: none; }
+            .text-white, .text-gray-300, .text-gray-400 { color: #222 !important; }
+            .text-\\[\\#FF8C00\\], .text-orange { color: #c2410c !important; }
+            .text-\\[\\#5BC0BE\\] { color: #0e7490 !important; }
+            img { max-height: 240px; object-fit: contain; page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+            .mb-16, .mb-12, section, div[id^="chapter-"] { page-break-inside: auto; }
+            .border-b, .border-t { border-color: #ddd !important; }
+            .subtle-grid, .bg-\\[\\#0b111f\\] { background: transparent !important; }
+            .print\\:hidden { display: none; }
+            @page { margin: 0.6in; }
+            .glass.rounded-3xl { border-radius: 8px; }
+        }
+
+        /* Subtle faded GiveAbit parent branding on every major section */
+        .chapter-giveabit {
+            font-size: 9px;
+            letter-spacing: 1px;
+            opacity: 0.35;
+            font-family: system-ui, sans-serif;
+        }
+
+        /* World-class semi-transparent document overlay / modal */
+        .doc-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(18, 26, 42, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 24px;
+        }
+        .doc-overlay.open {
+            display: flex;
+        }
+        .doc-modal {
+            width: 100%;
+            max-width: 980px;
+            max-height: 92vh;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .doc-modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .doc-modal-body {
+            overflow-y: auto;
+            padding: 32px 40px;
+            flex: 1;
+            font-size: 15.5px;
+            line-height: 1.7;
+        }
+        .doc-modal-body h1 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.6rem;
+        }
+        .doc-modal-body h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-top: 1.6rem;
+            margin-bottom: 0.6rem;
+            color: #fff;
+            letter-spacing: -0.015em;
+        }
+        .doc-modal-body h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1.1rem;
+            color: #5BC0BE;
+        }
+        .doc-modal-body p {
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+        .doc-modal-body ul {
+            margin: 0.8rem 0 1.2rem;
+            padding-left: 1.2rem;
+        }
+        .doc-modal-body li {
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+        }
+        .doc-modal-body img {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin: 1.2rem 0;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+        }
+        .doc-modal-body .doc-stat {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255,140,0,0.15);
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin: 12px 0;
+        }
+        .doc-modal-body .doc-callout {
+            border-left: 4px solid #FF8C00;
+            background: rgba(255,140,0,0.06);
+            padding: 16px 20px;
+            margin: 1.4rem 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .doc-modal .giveabit-subtle {
+            opacity: 0.3;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .doc-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #94a3b8;
+            transition: all .1s ease;
+        }
+        .doc-close:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+        .doc-action-btn {
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .1s ease;
+        }
+        .doc-action-btn:hover {
+            background: rgba(255,140,0,0.1);
+            border-color: #FF8C00;
+            color: #FF8C00;
+        }
+    </style>
+</head>
+<body class="bg-[#243447] text-white">
+    <!-- Navigation -->
+    <nav class="border-b border-white/10 bg-[#243447]/90 backdrop-blur-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <img src="/logo.png" alt="Stranded" class="h-8 w-auto" />
+                    <div>
+                        <span class="font-bold text-2xl tracking-tighter text-[#FF8C00]">Stranded</span>
+                        <div class="text-[10px] text-[#FF8C00]/70 -mt-0.5 tracking-[1.5px]">Value</div>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8 text-sm">
+                    <a href="#chapter-executive" class="nav-link text-gray-300 hover:text-white">Executive Summary</a>
+                    <a href="#chapter-onepager" class="nav-link text-gray-300 hover:text-white">One-Pager</a>
+                    <a href="#chapter-mission-values" class="nav-link text-gray-300 hover:text-white">Mission &amp; Vision</a>
+                    <a href="#chapter-roadmap" class="nav-link text-gray-300 hover:text-white">Roadmap &amp; Funding</a>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <a href="http://localhost:3003/map" target="_blank" 
+                       class="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition">
+                        <i class="fa-solid fa-map mr-2"></i>
+                        <span>Live Platform</span>
+                    </a>
+                    <a href="mailto:hello@giveabit.io" 
+                       class="inline-flex items-center px-5 py-2 text-sm font-semibold bg-[#FF8C00] text-[#0b111f] rounded-xl hover:bg-[#ff9d33] transition">
+                        <i class="fa-solid fa-envelope mr-2"></i>
+                        <span>Contact</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="relative overflow-hidden border-b border-white/10">
+        <div class="absolute inset-0 subtle-grid"></div>
+        <div class="max-w-7xl mx-auto px-6 pt-16 pb-20">
+            <div class="max-w-4xl">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm mb-6">
+                    <div class="w-2 h-2 bg-[#FF8C00] rounded-full animate-pulse"></div>
+                    <span class="font-medium tracking-wider text-[#FF8C00]">PROFESSIONAL MARKETING ASSETS • V1.0</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-6">
+                    Stranded Energy.<br>
+                    <span class="text-[#FF8C00]">Bitcoin Access.</span>
+                </h1>
+                
+                <p class="max-w-2xl text-2xl text-gray-300 mb-8">
+                    A complete suite of world-class marketing and sales materials for the future of energy intelligence.
+                </p>
+                
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="#documents" 
+                       class="premium-button inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#FF8C00] hover:bg-[#ff9d33] text-[#0b111f] font-semibold text-lg rounded-2xl transition-all active:scale-[0.985]">
+                        <span>Browse All Documents</span>
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </a>
+                    <a href="http://localhost:3003/map" target="_blank"
+                       class="inline-flex items-center justify-center gap-3 px-8 py-4 border border-white/20 hover:bg-white/5 font-medium rounded-2xl transition">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>Explore Live Platform</span>
+                    </a>
+                </div>
+                
+                <div class="mt-8 flex items-center gap-6 text-sm text-gray-400">
+                    <div class="flex -space-x-2">
+                        <div class="w-7 h-7 bg-white/10 border border-white/20 rounded-full overflow-hidden"><img src="/images/4.jpg" class="w-full h-full object-cover"></div>
+                        <div class="w-7 h-7 bg-white/10 border border-white/20 rounded-full overflow-hidden"><img src="/images/2.jpg" class="w-full h-full object-cover"></div>
+                        <div class="w-7 h-7 bg-white/10 border border-white/20 rounded-full overflow-hidden"><img src="/images/1.jpg" class="w-full h-full object-cover"></div>
+                    </div>
+                    <div>Trusted by operators, funds &amp; provinces</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hero image -->
+        <div class="absolute right-0 bottom-0 hidden xl:block w-5/12 h-[620px] opacity-40">
+            <img src="/images/3.jpg" alt="Stranded Command Center" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-l from-[#0b111f] via-[#0b111f]/70 to-transparent"></div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-8 border-b border-white/10">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-[#FF8C00]/10 flex items-center justify-center">
+                    <i class="fa-solid fa-map text-[#FF8C00] text-2xl"></i>
+                </div>
+                <div>
+                    <div class="font-mono text-3xl font-semibold tracking-tighter">2,611</div>
+                    <div class="text-sm text-gray-400 -mt-1">Verified Sites</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-[#5BC0BE]/10 flex items-center justify-center">
+                    <i class="fa-solid fa-chart-line text-[#5BC0BE] text-2xl"></i>
+                </div>
+                <div>
+                    <div class="font-mono text-3xl font-semibold tracking-tighter">5</div>
+                    <div class="text-sm text-gray-400 -mt-1">Professional Documents</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <i class="fa-solid fa-globe text-white text-2xl"></i>
+                </div>
+                <div>
+                    <div class="font-mono text-3xl font-semibold tracking-tighter">4</div>
+                    <div class="text-sm text-gray-400 -mt-1">Capital Pools</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-[#FF8C00]/10 flex items-center justify-center">
+                    <i class="fa-solid fa-rocket text-[#FF8C00] text-2xl"></i>
+                </div>
+                <div>
+                    <div class="font-mono text-3xl font-semibold tracking-tighter">2028</div>
+                    <div class="text-sm text-gray-400 -mt-1">Full Ecosystem Live</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVOLVING TAXONOMY — The Surprise Interactive Layer -->
+        <div id="taxonomy" class="py-12 border-b border-white/10">
+            <div class="flex items-end justify-between mb-6">
+                <div>
+                    <div class="uppercase text-xs tracking-[3px] text-[#FF8C00] font-medium">LIVING SYSTEM</div>
+                    <h2 class="text-4xl font-semibold tracking-tighter">Evolving Taxonomy of Stranded Energy</h2>
+                    <p class="text-gray-400 mt-2 max-w-2xl">A filterable classification framework that connects every document, metric, and opportunity. Click any tag to surface the most relevant insights, visuals, and calls-to-action across the entire suite. This taxonomy will grow as we add wind, solar curtailment, hydro, waste heat, and biomass verticals.</p>
+                </div>
+                <div class="text-[10px] text-gray-500 hidden md:block">v1.0 • June 2026 • Updates as platform expands</div>
+            </div>
+
+            <!-- Taxonomy Tags -->
+            <div class="flex flex-wrap gap-2 mb-6" id="taxonomy-tags">
+                <button data-tag="methane" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Methane (Current)</button>
+                <button data-tag="bitcoin" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Bitcoin Offtake</button>
+                <button data-tag="ceta" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">CETA / Europe</button>
+                <button data-tag="capital" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Capital Ready</button>
+                <button data-tag="highscore" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">High Stranded Score</button>
+                <button data-tag="community" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Community First</button>
+                <button data-tag="multi" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Multi-Energy (2027+)</button>
+                <button data-tag="sovereign" class="tax-tag px-4 py-1.5 rounded-full bg-white/5 hover:bg-[#FF8C00]/20 border border-white/10 text-sm transition active:scale-[0.985]">Sovereign Wealth</button>
+            </div>
+
+            <!-- Dynamic Insights Panel -->
+            <div id="taxonomy-insights" class="glass rounded-3xl p-8 border border-white/10 min-h-[220px]">
+                <div class="text-sm text-gray-400 mb-3">SELECT A TAG ABOVE TO EXPLORE CONNECTED INSIGHTS</div>
+                <div id="taxonomy-content" class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div class="text-gray-300">This living taxonomy unifies the five documents. Every opportunity is tagged with attributes that surface the right capital pathways, risk profile, and community considerations — directly from the Executive Summary, One-Pager, Mission, Values, and full Roadmap.</div>
+                    <div class="text-xs text-gray-500">Example: Selecting <span class="text-[#FF8C00]">"CETA / Europe"</span> will highlight the $200B+ advantage, preferred grant programs, and how the funding intelligence layer in Phase 3 connects Canadian projects to European capital with currency flexibility.</div>
+                </div>
+            </div>
+            <div class="mt-3 text-[10px] text-gray-500">The taxonomy evolves. New branches for curtailed renewables and industrial waste heat will appear here in 2027.</div>
+        </div>
+
+        <!-- Documents Hub - Premium Suite (exact look & feel from your reference) -->
+        <div id="documents" class="pt-12 pb-8">
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <div class="uppercase text-xs tracking-[2.5px] text-[#FF8C00] font-medium">PROFESSIONAL ASSETS</div>
+                    <h2 class="text-5xl font-semibold tracking-tighter">Marketing &amp; Sales Suite</h2>
+                </div>
+                <a href="#" onclick="window.print(); return false;" class="hidden md:inline-flex items-center gap-2 text-sm px-5 py-2.5 border border-white/20 hover:bg-white/5 rounded-2xl transition">
+                    <i class="fa-solid fa-download mr-2"></i>
+                    <span>Print / Save as PDF</span>
+                </a>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <!-- Executive -->
+                <div class="doc-card glass rounded-3xl p-7 border border-white/10 flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="px-3 py-1 text-xs font-semibold bg-[#FF8C00] text-black rounded">EXECUTIVE</div>
+                        <div class="text-[10px] text-gray-400 font-mono">1-Executive-Summary-Enhanced.md</div>
+                    </div>
+                    <h3 class="text-2xl font-semibold leading-tight tracking-tighter mb-3">Executive Summary</h3>
+                    <p class="text-gray-300 text-[15px] leading-relaxed flex-1">High-level overview for investors, partners, and government. Platform traction, the massive opportunity, capital formation layer, and deliberate expansion into the full stranded energy asset class.</p>
+                    <div class="mt-auto pt-5 flex items-center gap-2">
+                        <button type="button" data-doc="executive" onclick="openDocModal('executive')" class="view-doc-btn flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-sm font-medium rounded-2xl transition"><i class="fa-solid fa-file-lines"></i> View Document</button>
+                        <a href="/docs/1-Executive-Summary-Enhanced.md" download class="px-3 py-3 text-sm border border-white/20 hover:bg-white/5 rounded-2xl"><i class="fa-solid fa-download"></i></a>
+                    </div>
+                </div>
+
+                <!-- One-Pager -->
+                <div class="doc-card glass rounded-3xl p-7 border border-white/10 flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">SALES &amp; MARKETING</div>
+                        <div class="text-[10px] text-gray-400 font-mono">2-Marketing-One-Pager-Enhanced.md</div>
+                    </div>
+                    <h3 class="text-2xl font-semibold leading-tight tracking-tighter mb-3">Marketing One-Pager</h3>
+                    <p class="text-gray-300 text-[15px] leading-relaxed flex-1">Concise, high-impact sales asset. Perfect for email outreach, investor meetings, government briefings, and quick introductions to the platform and vision.</p>
+                    <div class="mt-auto pt-5 flex items-center gap-2">
+                        <button type="button" data-doc="onepager" onclick="openDocModal('onepager')" class="view-doc-btn flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-sm font-medium rounded-2xl transition"><i class="fa-solid fa-file-lines"></i> View Document</button>
+                        <a href="/docs/2-Marketing-One-Pager-Enhanced.md" download class="px-3 py-3 text-sm border border-white/20 hover:bg-white/5 rounded-2xl"><i class="fa-solid fa-download"></i></a>
+                    </div>
+                </div>
+
+                <!-- Mission -->
+                <div class="doc-card glass rounded-3xl p-7 border border-white/10 flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="px-3 py-1 text-xs font-semibold bg-white/80 text-black rounded">BRAND</div>
+                        <div class="text-[10px] text-gray-400 font-mono">3-Mission-Statement-Enhanced.md</div>
+                    </div>
+                    <h3 class="text-2xl font-semibold leading-tight tracking-tighter mb-3">Mission Statement</h3>
+                    <p class="text-gray-300 text-[15px] leading-relaxed flex-1">Powerful, quotable mission with deep "Why We Exist" context. Ideal for website, investor decks, team onboarding, and external communications.</p>
+                    <div class="mt-auto pt-5 flex items-center gap-2">
+                        <button type="button" data-doc="mission" onclick="openDocModal('mission')" class="view-doc-btn flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-sm font-medium rounded-2xl transition"><i class="fa-solid fa-file-lines"></i> View Document</button>
+                        <a href="/docs/3-Mission-Statement-Enhanced.md" download class="px-3 py-3 text-sm border border-white/20 hover:bg-white/5 rounded-2xl"><i class="fa-solid fa-download"></i></a>
+                    </div>
+                </div>
+
+                <!-- Values -->
+                <div class="doc-card glass rounded-3xl p-7 border border-white/10 flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="px-3 py-1 text-xs font-semibold bg-white/80 text-black rounded">BRAND</div>
+                        <div class="text-[10px] text-gray-400 font-mono">4-Mission-Vision-Values-Enhanced.md</div>
+                    </div>
+                    <h3 class="text-2xl font-semibold leading-tight tracking-tighter mb-3">Mission, Vision &amp; Values</h3>
+                    <p class="text-gray-300 text-[15px] leading-relaxed flex-1">Comprehensive brand foundation document with detailed values, positioning by audience, and "How We Know We're Winning" metrics. Perfect for partners and team.</p>
+                    <div class="mt-auto pt-5 flex items-center gap-2">
+                        <button type="button" data-doc="values" onclick="openDocModal('values')" class="view-doc-btn flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-sm font-medium rounded-2xl transition"><i class="fa-solid fa-file-lines"></i> View Document</button>
+                        <a href="/docs/4-Mission-Vision-Values-Enhanced.md" download class="px-3 py-3 text-sm border border-white/20 hover:bg-white/5 rounded-2xl"><i class="fa-solid fa-download"></i></a>
+                    </div>
+                </div>
+
+                <!-- Roadmap (wide) -->
+                <div class="doc-card glass rounded-3xl p-7 border border-white/10 flex flex-col h-full lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">STRATEGY</div>
+                        <div class="text-[10px] text-gray-400 font-mono">5-Roadmap-Funding-Enhanced.md</div>
+                    </div>
+                    <h3 class="text-2xl font-semibold leading-tight tracking-tighter mb-3">Stranded Energy Roadmap &amp; Funding</h3>
+                    <p class="text-gray-300 text-[15px] leading-relaxed flex-1">The most comprehensive document in the suite. Detailed 3-phase roadmap, full funding intelligence (Canadian + CETA + Bitcoin-native), talent strategy, execution timeline, and partner-specific calls to action.</p>
+                    <div class="mt-auto pt-5 flex items-center gap-2">
+                        <button type="button" data-doc="roadmap" onclick="openDocModal('roadmap')" class="view-doc-btn flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-sm font-medium rounded-2xl transition"><i class="fa-solid fa-file-lines"></i> View Full Roadmap</button>
+                        <a href="/docs/5-Roadmap-Funding-Enhanced.md" download class="px-3 py-3 text-sm border border-white/20 hover:bg-white/5 rounded-2xl"><i class="fa-solid fa-download"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Professional Visuals & Data (refreshed with new cinematic assets) -->
+        <div class="py-8 border-t border-white/10">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="uppercase tracking-[2px] text-xs text-[#FF8C00]">VISUAL ASSETS</div>
+                    <h3 class="text-3xl font-semibold tracking-tighter">Professional Creative Suite</h3>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="/images/7-canada-energy.jpg" alt="Canada Stranded Energy Map with Bitcoin overlay" class="w-full h-full object-cover">
+                </div>
+                <div class="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="/images/8-flywheel.jpg" alt="Energy to Bitcoin Flywheel" class="w-full h-full object-cover">
+                </div>
+                <div class="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="/images/6-provincial-roi.jpg" alt="Provincial Bitcoin ROI Potential" class="w-full h-full object-cover">
+                </div>
+                <div class="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="/images/10-capital-streams.jpg" alt="Four Capital Streams" class="w-full h-full object-cover">
+                </div>
+                <div class="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-white/10">
+                    <img src="/images/11-taxonomy.jpg" alt="Evolving Taxonomy of Stranded Energy" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="text-center mt-3 text-[10px] text-gray-500">New high-end cinematic assets generated for this suite • Additional brand kit available on request</div>
+        </div>
+
+        <!-- Sample Chart (fixed & stable) -->
+        <div class="py-8">
+            <div class="glass rounded-3xl p-8 border border-white/10">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <div class="text-sm text-[#FF8C00] tracking-wider">OPPORTUNITY SIZE</div>
+                        <h4 class="text-2xl font-semibold">Projected Capital Deployment by 2028</h4>
+                    </div>
+                    <div class="text-xs text-gray-400">Illustrative • Based on roadmap</div>
+                </div>
+                
+                <div class="relative w-full h-[320px] mt-4 mb-2" style="min-height: 280px;">
+                  <canvas id="capitalChart"></canvas>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded bg-[#FF8C00]"></div>
+                        <div>Canadian Public Capital <span class="text-gray-400">— $180M</span></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded bg-[#5BC0BE]"></div>
+                        <div>CETA / European Funds <span class="text-gray-400">— $220M</span></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded bg-white"></div>
+                        <div>Bitcoin-Native Capital <span class="text-gray-400">— $75M</span></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded bg-emerald-400"></div>
+                        <div>Traditional PE / Infra <span class="text-gray-400">— $125M</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THE COMPLETE ILLUSTRATED COLLECTION — The Accumulation of All 5 Documents -->
+        <div id="illustrated" class="pt-8 pb-16 border-t border-white/10">
+            <div class="text-center mb-10">
+                <div class="uppercase text-xs tracking-[3px] text-[#FF8C00]">THE SINGLE SOURCE OF TRUTH</div>
+                <h2 class="text-4xl md:text-5xl font-semibold tracking-tighter mt-2">The Complete Illustrated Collection</h2>
+                <p class="max-w-2xl mx-auto text-gray-400 mt-3">A beautifully formatted, self-contained accumulation of all five documents with integrated professional graphics, diagrams, data visualizations, and the Evolving Taxonomy. Print this page or save as PDF for the definitive sales &amp; marketing asset.</p>
+            </div>
+
+            <!-- Chapter 1: Executive Summary -->
+            <div class="mb-16" id="chapter-executive">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="px-3 py-1 text-xs font-semibold bg-[#FF8C00] text-black rounded">EXECUTIVE</div>
+                    <div class="text-xs text-gray-400 tracking-widest">CHAPTER 01 / 05</div>
+                </div>
+                <h3 class="text-3xl font-semibold tracking-tighter mb-4">Executive Summary — Turning Wasted Energy into Verifiable Wealth</h3>
+                <div class="prose prose-invert max-w-none text-gray-300">
+                    <p>Canada possesses 2,611 verified sites where natural gas is vented or flared because capture infrastructure is uneconomical. This is stranded methane — our starting point for <strong>Stranded Value</strong>. We map every site, integrate real generator models (6+ methane-to-power machines with specs, CAPEX, efficiency), and compute honest per-site Value/ROI (generator CapEx + ASIC mining with live BTC + explicit methane loss opportunity cost + financing). One of the planet’s highest-impact climate + capital opportunities.</p>
+                </div>
+                <div class="my-6 rounded-3xl overflow-hidden border border-white/10">
+                    <img src="/images/7-canada-energy.jpg" class="w-full" alt="Canada map with 2,611 glowing stranded energy sites">
+                </div>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div><strong class="text-[#FF8C00]">The Paradox:</strong> Billions of dollars of extractable energy and some of the world’s most potent greenhouse gas emissions sit in a country with world-class data, abundant capital, and no shortage of technological sophistication. What has been missing is the bridge.</div>
+                    <div><strong class="text-[#FF8C00]">Why Now:</strong> Public ECCC data + Bitcoin mining as the perfect offtaker + synchronized capital appetite (Canadian, CETA €200B+, Bitcoin-native, traditional PE). We have built the transparent platform that makes these opportunities visible, modelable, and fundable.</div>
+                </div>
+                <div class="mt-4 text-[10px] text-gray-500">Full source: 1-Executive-Summary-Enhanced.md • Success target: $500M+ deployed, 100+ projects, platform as default starting point by 2028–2029.</div>
+                <div class="mt-2 chapter-giveabit">GiveAbit Intelligence — subtle parent brand</div>
+            </div>
+
+            <!-- Chapter 2: One-Pager -->
+            <div class="mb-16" id="chapter-onepager">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">SALES &amp; MARKETING</div>
+                    <div class="text-xs text-gray-400 tracking-widest">CHAPTER 02 / 05</div>
+                </div>
+                <h3 class="text-3xl font-semibold tracking-tighter mb-4">Marketing One-Pager — The Intelligence Platform</h3>
+                <div class="my-6 rounded-3xl overflow-hidden border border-white/10">
+                    <img src="/images/8-flywheel.jpg" class="w-full" alt="The Energy to Bitcoin Flywheel">
+                </div>
+                <div class="prose prose-invert max-w-none text-gray-300">
+                    <p>We built the world’s most sophisticated public intelligence system for turning wasted energy into revenue: Command Center Map (all 2,611 sites), Bitcoin-first Economics Engine with honest modeling, Stranded Score™ proprietary ranking, Portfolio Simulator, and radical transparency. Bitcoin mining is the only offtaker that can deploy in weeks, operate completely off-grid, monetize power no one else wants, and create globally verifiable value.</p>
+                </div>
+                <div class="mt-2 text-[10px] text-gray-500">Full source: 2-Marketing-One-Pager-Enhanced.md • Who this is for: Operators, Capital, Government, First Nations, Talent.</div>
+                <div class="mt-2 chapter-giveabit">GiveAbit Intelligence — subtle parent brand</div>
+            </div>
+
+            <!-- Chapter 3+4: Mission + Values -->
+            <div class="mb-16" id="chapter-mission-values">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="px-3 py-1 text-xs font-semibold bg-white/80 text-black rounded">BRAND</div>
+                    <div class="text-xs text-gray-400 tracking-widest">CHAPTER 03–04 / 05</div>
+                </div>
+                <h3 class="text-3xl font-semibold tracking-tighter mb-4">Mission, Vision &amp; Values — Dual Bottom Line</h3>
+                <div class="my-6 rounded-3xl overflow-hidden border border-white/10">
+                    <img src="/images/9-dual-bottom-line.jpg" class="w-full" alt="Dual Bottom Line: Climate + Capital">
+                </div>
+                <div class="prose prose-invert max-w-none text-gray-300">
+                    <p><strong>Mission:</strong> To transform wasted energy into verifiable wealth—starting with methane in Canada and scaling to every form of stranded or curtailed energy on Earth.</p>
+                    <p class="mt-3">We refuse the false choice between climate and capital. The best projects deliver both. We build in radical transparency, future-proof architecture, capital efficiency, sovereignty &amp; local benefit, craftsmanship, and long-term orientation. Seven values that are lived, not laminated.</p>
+                </div>
+                <div class="mt-2 text-[10px] text-gray-500">Full sources: 3-Mission-Statement-Enhanced.md + 4-Mission-Vision-Values-Enhanced.md • Positioning available for Operators, Capital, and Government.</div>
+                <div class="mt-2 chapter-giveabit">GiveAbit Intelligence — subtle parent brand</div>
+            </div>
+
+            <!-- Chapter 5: Roadmap -->
+            <div class="mb-8" id="chapter-roadmap">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">STRATEGY</div>
+                    <div class="text-xs text-gray-400 tracking-widest">CHAPTER 05 / 05 — MASTER DOCUMENT</div>
+                </div>
+                <h3 class="text-3xl font-semibold tracking-tighter mb-4">Roadmap &amp; Funding — From Methane to the Stranded Energy Operating System</h3>
+                <div class="grid md:grid-cols-5 gap-4 mb-6">
+                    <div class="rounded-2xl border border-white/10 p-4"><div class="text-[#FF8C00] text-xs">PHASE 1</div><div class="font-semibold">Methane Mastery</div><div class="text-xs text-gray-400">Now → Q4 2026</div></div>
+                    <div class="rounded-2xl border border-white/10 p-4"><div class="text-[#FF8C00] text-xs">PHASE 2</div><div class="font-semibold">Multi-Energy Expansion</div><div class="text-xs text-gray-400">2027</div></div>
+                    <div class="rounded-2xl border border-white/10 p-4 md:col-span-3"><div class="text-[#FF8C00] text-xs">PHASE 3</div><div class="font-semibold">Capital Formation Layer</div><div class="text-xs text-gray-400">2027 Q2 → 2028 • $500M+ target</div></div>
+                </div>
+                <div class="my-4 rounded-3xl overflow-hidden border border-white/10">
+                    <img src="/images/10-capital-streams.jpg" class="w-full" alt="Four Capital Streams">
+                </div>
+                <div class="prose prose-invert max-w-none text-gray-300 text-sm">
+                    <p>Three deliberate phases. Four aligned capital streams (Canadian public, CETA Europe with $200B+ advantage, Bitcoin-native, Traditional PE). The platform will evolve from discovery &amp; modeling into a true capital formation engine that shows developers not just the best sites, but the clearest funding path in the currency of their choice.</p>
+                </div>
+                <div class="mt-2 text-[10px] text-gray-500">Full source: 5-Roadmap-Funding-Enhanced.md (the master strategic document)</div>
+                <div class="mt-2 chapter-giveabit">GiveAbit Intelligence — subtle parent brand</div>
+            </div>
+        </div>
+
+        <!-- Final CTA -->
+        <div class="text-center py-12 border-t border-white/10">
+            <h3 class="text-3xl font-semibold tracking-tighter mb-3">Ready to turn stranded energy into real capital?</h3>
+            <p class="text-gray-400 max-w-md mx-auto mb-6">These documents are designed to be living assets. Download, customize, and use them in conversations with operators, capital, and government.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="http://localhost:3003/map" target="_blank" 
+                   class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#FF8C00] text-[#0b111f] font-semibold rounded-2xl hover:bg-[#ff9d33]">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Launch the Command Center</span>
+                </a>
+                <a href="mailto:hello@giveabit.io" 
+                   class="inline-flex items-center justify-center gap-3 px-8 py-4 border border-white/20 hover:bg-white/5 font-medium rounded-2xl">
+                    <i class="fa-solid fa-handshake"></i>
+                    <span>Start a Partnership Conversation</span>
+                </a>
+            </div>
+            
+            <div class="mt-8 text-[10px] text-gray-500 tracking-widest">
+                GIVEABIT INTELLIGENCE • STRANDED ENERGY, BITCOIN ACCESS • BUILT FOR THE LONG GAME
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENT OVERLAY MODALS - Semi-transparent world-class presentation for the 5 documents + capital viz -->
+    <div id="doc-overlay" class="doc-overlay" onclick="if (event.target.id === 'doc-overlay') closeDocModal()">
+        <div class="doc-modal" onclick="event.stopImmediatePropagation()">
+            <div id="doc-modal-header" class="doc-modal-header"></div>
+            <div id="doc-modal-body" class="doc-modal-body"></div>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/10 py-8 text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>© 2026 GiveAbit Intelligence. All rights reserved.</div>
+            <div class="flex items-center gap-5">
+                <a href="https://giveabit.io" class="hover:text-white">Give A Bit</a>
+                <a href="http://localhost:3003/map" class="hover:text-white">Live Platform</a>
+                <a href="mailto:hello@giveabit.io" class="hover:text-white">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tailwind script
+        function initializeTailwind() {
+            document.documentElement.style.setProperty('--accent-orange', '#FF8C00');
+            document.documentElement.style.setProperty('--accent-teal', '#5BC0BE');
+        }
+        
+        // Chart
+        function initializeChart() {
+            const ctx = document.getElementById('capitalChart');
+            if (!ctx) return;
+            
+            // Destroy any previous instance to prevent duplicate charts / growth
+            const existing = Chart.getChart ? Chart.getChart(ctx) : null;
+            if (existing) existing.destroy();
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Canadian Public', 'CETA / Europe', 'Bitcoin-Native', 'Traditional PE'],
+                    datasets: [{
+                        label: 'Projected Capital (USD millions)',
+                        data: [180, 220, 75, 125],
+                        backgroundColor: ['#FF8C00', '#5BC0BE', '#ffffff', '#10b981'],
+                        borderColor: ['#FF8C00', '#5BC0BE', '#ffffff', '#10b981'],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 13 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            ticks: { color: '#64748b', font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            ticks: { color: '#64748b', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Keyboard shortcut for docs
+        document.addEventListener('keydown', function(e) {
+            if (e.metaKey && e.key === "/") {
+                e.preventDefault();
+                const docsSection = document.getElementById('documents');
+                if (docsSection) docsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        
+        // Initialize everything
+        function init() {
+            initializeTailwind();
+            initializeChart();
+            
+            // Subtle scroll hint
+            console.log('%c[Stranded] Marketing Hub initialized. Professional assets ready.', 'color:#64748b');
+        }
+        
+        window.onload = init;
+        
+        // Print optimization
+        window.addEventListener('beforeprint', () => {
+            document.body.classList.add('print-mode');
+        });
+
+        // === EVOLVING TAXONOMY INTERACTIVE (Surprise feature) ===
+        (function() {
+            const tags = document.querySelectorAll('.tax-tag');
+            const content = document.getElementById('taxonomy-content');
+            const insights = document.getElementById('taxonomy-insights');
+
+            const data = {
+                'methane': {
+                    title: 'Methane (Phase 1 — Live)',
+                    visual: '7-canada-energy.jpg',
+                    text: '2,611 verified ECCC sites. Highest leverage climate action available today (25× CO₂ potency). Immediate deployment via mobile mining. Core of the Executive Summary and current platform.',
+                    highlight: 'See "The Opportunity" in Executive Summary + Provincial ROI chart.'
+                },
+                'bitcoin': {
+                    title: 'Bitcoin Offtake — The Perfect Buyer',
+                    visual: '8-flywheel.jpg',
+                    text: 'Location-agnostic, rapidly deployable, pays real rates for stranded power, creates verifiable non-discretionary value. The only offtaker that removes the infrastructure bottleneck for remote and small-scale resources.',
+                    highlight: 'Central thesis of the One-Pager and Mission Statement.'
+                },
+                'ceta': {
+                    title: 'CETA / European Capital Advantage',
+                    visual: '10-capital-streams.jpg',
+                    text: '$200B+ in committed European green climate capital with preferential access for Canadian projects. One of the most under-appreciated asymmetric advantages in North American energy transition.',
+                    highlight: 'Detailed in Roadmap & Funding (Stream 2) and Executive Summary capital formation layer.'
+                },
+                'capital': {
+                    title: 'Capital Ready — Four Aligned Streams',
+                    visual: '10-capital-streams.jpg',
+                    text: 'Canadian public (federal + provincial), CETA/European, Bitcoin-native treasuries & miners, and traditional infrastructure/PE. The platform will show not just sites, but the clearest capital path for each.',
+                    highlight: 'Full treatment in Roadmap Phase 3 + the capital chart in this Hub.'
+                },
+                'highscore': {
+                    title: 'High Stranded Score™ Sites',
+                    visual: '6-provincial-roi.jpg',
+                    text: 'Our proprietary 0–99 ranking surfaces the sites with the best combination of emission volume, grid proximity, internet quality, and economics. Top sites (Keele Valley, Brady Road, etc.) are already featured in the live map and education page.',
+                    highlight: 'Featured Opportunities on the homepage and in the One-Pager.'
+                },
+                'community': {
+                    title: 'Community First & Sovereign Wealth',
+                    visual: '9-dual-bottom-line.jpg',
+                    text: 'Energy belongs where it is found. Landowners, First Nations, and provinces capture real revenue. The platform surfaces opportunities that create local jobs and wealth rather than extracting value for distant parties.',
+                    highlight: 'Core Value #5 in Mission, Vision & Values + "How We Know We\'re Winning".'
+                },
+                'multi': {
+                    title: 'Multi-Energy Future (2027+)',
+                    visual: '11-taxonomy.jpg',
+                    text: 'The same stack (map → score → model → capital) applies to curtailed wind & solar, excess hydro, industrial waste heat, biomass, and behind-the-meter resources. Methane is proof of concept.',
+                    highlight: 'Phase 2 of the full Roadmap & Funding document.'
+                },
+                'sovereign': {
+                    title: 'Sovereign Wealth & Strategic Positioning',
+                    visual: '7-canada-energy.jpg',
+                    text: 'Canada can lead the world in responsible, Bitcoin-enabled, distributed energy transition. This is not just climate marketing — it is the creation of a new, verifiable, distributed energy asset class with national strategic value.',
+                    highlight: 'Vision statements across all five documents, especially Executive Summary "Why Stranded Wins".'
+                }
+            };
+
+            tags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    const key = tag.dataset.tag;
+                    const d = data[key];
+                    if (!d) return;
+
+                    // visual active state
+                    tags.forEach(t => t.classList.remove('!bg-[#FF8C00]', '!text-black', 'border-[#FF8C00]'));
+                    tag.classList.add('!bg-[#FF8C00]', '!text-black', 'border-[#FF8C00]');
+
+                    content.innerHTML = `
+                        <div>
+                            <div class="font-semibold text-lg text-white mb-2">${d.title}</div>
+                            <div class="text-gray-300 leading-relaxed">${d.text}</div>
+                            <div class="mt-3 text-xs text-[#5BC0BE]">${d.highlight}</div>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-white/10">
+                            <img src="/images/${d.visual}" class="w-full h-full object-cover" style="max-height: 210px;" alt="${d.title}">
+                        </div>
+                    `;
+                    insights.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+
+            // Optional: pre-select one on load for delight
+            setTimeout(() => {
+                const first = document.querySelector('[data-tag="bitcoin"]');
+                if (first && !document.querySelector('.tax-tag.!bg-\\[\\#FF8C00\\]')) {
+                    first.click();
+                }
+            }, 1200);
+        })();
+
+        // === WORLD-CLASS SEMI-TRANSPARENT DOCUMENT OVERLAYS ===
+        // One elegant modal, populated with full sexy formatted content for each of the 5 (plus capital as 6th)
+        const docContents = {
+            'executive': `
+                <div class="max-w-[860px] mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00] text-black text-xs font-bold tracking-widest mb-4">EXECUTIVE</div>
+                    <h1 class="text-5xl font-bold tracking-tighter mb-3">Executive Summary</h1>
+                    <p class="text-xl text-gray-400 mb-8">Stranded: Turning Wasted Energy into Verifiable Wealth<br><span class="text-sm">A Capital Formation Platform for the World's Largest Untapped Energy Asset</span></p>
+
+                    <img src="/images/7-canada-energy.jpg" alt="Canada map with 2,611 glowing stranded energy sites ready for Bitcoin-powered capture" class="mb-8">
+
+                    <p class="text-lg">Canada possesses an extraordinary, largely invisible energy asset: <strong>2,611 verified sites</strong> where natural gas is vented or flared because the infrastructure to capture it is uneconomical.</p>
+                    <p>This is stranded methane — our starting point for <strong>Stranded Value</strong>. Real generators + per-site Value (CapEx, methane-loss ROI, financing) turn liability into sovereign Bitcoin wealth. Highest-leverage climate + capital opportunity available today.</p>
+
+                    <div class="doc-callout">
+                        <strong>The paradox is striking:</strong> Billions of dollars of extractable energy, combined with some of the world's most potent greenhouse gas emissions, concentrated in a country with world-class data infrastructure, abundant capital availability, and no shortage of technological sophistication.
+                    </div>
+
+                    <h2>Why This Moment</h2>
+                    <p><strong>1. The Data Exists — And It's Public.</strong> ECCC has compiled a comprehensive, geospatially rich dataset. Verified, attributable, ready to be analyzed at scale.</p>
+                    <p><strong>2. Bitcoin Mining Has Become the Perfect Offtaker.</strong> It requires zero locational specificity, operates profitably at remote sites, pays grid-equivalent rates (or better), generates a globally marketable commodity, and can deploy in weeks not years.</p>
+                    <p><strong>3. Capital Is Looking for This Exact Thesis.</strong> European climate funds (via CETA), Canadian federal and provincial governments, Bitcoin-native treasuries, traditional infrastructure PE, and community/Indigenous wealth initiatives are all actively seeking exactly what we offer: transparent data, honest economics, and de-risked opportunities.</p>
+
+                    <h2>What We Have Built</h2>
+                    <p>Stranded is currently one of the most sophisticated public intelligence platforms for energy opportunity evaluation in the world.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                        <div class="doc-stat"><strong>Command Center Map</strong><br>All 2,611 sites with full geospatial precision and 20+ attribute filters.</div>
+                        <div class="doc-stat"><strong>ROI &amp; Economics Engine</strong><br>Bitcoin-first modeling with realistic costs, multi-currency, sensitivity testing.</div>
+                        <div class="doc-stat"><strong>Stranded Score™</strong><br>Proprietary 0–99 ranking by emissions, proximity, internet, economics.</div>
+                        <div class="doc-stat"><strong>Portfolio &amp; Mission Simulator</strong><br>Model entire capture scenarios and export executive briefs.</div>
+                    </div>
+
+                    <h2>The Bigger Vision</h2>
+                    <p>Methane is our proof of concept. We are architecting every component to expand across the entire spectrum of stranded and curtailed energy: curtailed renewables, remote hydro, industrial waste heat, biomass, behind-the-meter opportunities.</p>
+                    <p class="doc-callout">By 2028 we envision Stranded as the default platform for energy operators, investors, and policymakers across multiple verticals.</p>
+
+                    <div class="giveabit-subtle">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `,
+
+            'onepager': `
+                <div class="max-w-[860px] mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5BC0BE] text-black text-xs font-bold tracking-widest mb-4">SALES &amp; MARKETING</div>
+                    <h1 class="text-5xl font-bold tracking-tighter mb-3">Marketing One-Pager</h1>
+                    <p class="text-xl text-gray-400 mb-8">The Intelligence Platform That Transforms Wasted Energy Into Wealth</p>
+
+                    <img src="/images/8-flywheel.jpg" alt="The elegant Energy to Bitcoin Flywheel">
+
+                    <p class="text-lg">We built the world's most sophisticated public intelligence system for turning wasted energy into revenue.</p>
+
+                    <h2>Core Platform</h2>
+                    <ul>
+                        <li><strong>Command Center Map</strong> — Every one of the 2,611 verified sites, fully attributed and searchable.</li>
+                        <li><strong>Economics Engine (Bitcoin-First)</strong> — Honest ROI modeling that includes pool fees, maintenance, uptime, degradation. Modeling in BTC, EUR, CAD, or USD.</li>
+                        <li><strong>Stranded Score™</strong> — Proprietary algorithm that surfaces the sites with the highest combination of capture potential, accessibility, and economics.</li>
+                        <li><strong>Portfolio Simulator</strong> — Model entire scenarios. See daily profit, CO₂ impact, payback. Export briefs.</li>
+                        <li><strong>Full Transparency</strong> — Every dataset attribute inspectable. Every scoring decision documented. Every model assumption visible.</li>
+                    </ul>
+
+                    <h2>Why Bitcoin Mining?</h2>
+                    <p>It is the only offtaker that can turn stranded energy into productive use because it deploys in weeks, operates completely off-grid, monetizes power no one else wants, creates globally-verifiable value, and scales seamlessly from kilowatts to megawatts.</p>
+
+                    <div class="doc-callout">This isn't "dirty Bitcoin." This is Bitcoin as a climate solution when paired with genuinely stranded resources.</div>
+
+                    <h2>Who This Is For</h2>
+                    <p><strong>Bitcoin Miners &amp; Operators</strong> — Source premium sites. Model real economics. Deploy faster.<br>
+                    <strong>Capital Providers</strong> — Access transparent, modeled opportunities with real environmental upside.<br>
+                    <strong>Government &amp; Provinces</strong> — Use our data to design smarter incentives and measure actual impact.<br>
+                    <strong>First Nations &amp; Landowners</strong> — Understand the revenue potential on your land.</p>
+
+                    <div class="giveabit-subtle">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `,
+
+            'mission': `
+                <div class="max-w-[860px] mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 text-black text-xs font-bold tracking-widest mb-4">BRAND</div>
+                    <h1 class="text-5xl font-bold tracking-tighter mb-3">Mission Statement</h1>
+                    <p class="text-2xl font-medium text-white mb-8">To transform wasted energy into verifiable wealth — starting with methane in Canada and scaling to every form of stranded or curtailed energy on Earth.</p>
+
+                    <img src="/images/9-dual-bottom-line.jpg" alt="Dual bottom line — climate restoration perfectly balanced with capital returns">
+
+                    <h2>Why We Exist</h2>
+                    <p>The paradox at the heart of the modern energy system is striking and persistent: Billions of dollars of extractable energy sits in verified locations across Canada — right now — while the same resource generates some of the planet's most potent greenhouse gas emissions. The data exists. The technology exists. The capital exists.</p>
+                    <p><strong>What has been missing is the bridge.</strong></p>
+
+                    <p>We exist because the climate math demands the highest-leverage actions, the economics work for everyone involved, the data belongs in the hands of those who can act on it, and capital is ready but has been waiting for clarity, not hype.</p>
+
+                    <h2>Our Commitment</h2>
+                    <ul>
+                        <li>Build in radical transparency</li>
+                        <li>Pursue dual bottom lines — climate + capital</li>
+                        <li>Stay future-focused (architecture built for every form of stranded energy)</li>
+                        <li>Connect capital efficiently</li>
+                        <li>Honor place and sovereignty</li>
+                        <li>Move with urgency and craft</li>
+                    </ul>
+
+                    <div class="giveabit-subtle">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `,
+
+            'values': `
+                <div class="max-w-[860px] mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 text-black text-xs font-bold tracking-widest mb-4">BRAND</div>
+                    <h1 class="text-5xl font-bold tracking-tighter mb-3">Mission, Vision &amp; Values</h1>
+                    <p class="text-xl text-gray-400 mb-8">We envision a world where no energy is wasted.</p>
+
+                    <div class="doc-callout">
+                        <strong>Mission:</strong> To transform wasted energy into verifiable wealth — starting with methane in Canada and scaling to every form of stranded or curtailed energy on Earth.
+                    </div>
+
+                    <h2>Core Values</h2>
+                    <p><strong>1. Radical Transparency</strong> — Every dataset, methodology, and limitation is open to inspection. Trust is earned through clarity.</p>
+                    <p><strong>2. Dual Bottom Line: Climate + Capital</strong> — We refuse the false choice. The best stranded energy projects deliver measurable environmental impact and compelling financial returns simultaneously.</p>
+                    <p><strong>3. Future-Proof by Design</strong> — Every component is architected to handle methane today and every other form of stranded energy tomorrow.</p>
+                    <p><strong>4. Capital Efficiency is Intelligence Work</strong> — The biggest bottleneck is friction. We are obsessed with removing it.</p>
+                    <p><strong>5. Sovereignty and Local Benefit</strong> — Energy belongs where it is found. Our platform amplifies communities, landowners, and First Nations — it does not extract for distant capital.</p>
+                    <p><strong>6. Craftsmanship and Sustained Excellence</strong> — Frontier work requires both speed and care. We build tools that are a pleasure to use.</p>
+                    <p><strong>7. Long-Term Orientation</strong> — We are building infrastructure that will compound in value for decades.</p>
+
+                    <h2>How We Know We're Winning</h2>
+                    <p>Projects that were invisible are being developed. Capital is flowing into opportunities with real climate impact. Communities are capturing meaningful revenue. The word "stranded energy" is becoming recognized terminology. Other jurisdictions are replicating our approach.</p>
+
+                    <div class="giveabit-subtle">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `,
+
+            'roadmap': `
+                <div class="max-w-[860px] mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5BC0BE] text-black text-xs font-bold tracking-widest mb-4">STRATEGY</div>
+                    <h1 class="text-5xl font-bold tracking-tighter mb-3">Stranded Energy Roadmap &amp; Funding</h1>
+                    <p class="text-xl text-gray-400 mb-8">From Methane Intelligence to the Stranded Energy Operating System</p>
+
+                    <img src="/images/10-capital-streams.jpg" alt="Four aligned capital streams flowing into Canadian stranded energy projects">
+
+                    <h2>Three Deliberate Phases</h2>
+                    <p><strong>Phase 1 — Methane Mastery (Now → Q4 2026)</strong><br>Complete 2,611-site platform, Stranded Score, honest ROI engine, funding intelligence mapping (federal + provincial + CETA pilot), first pilot deployments.</p>
+                    <p><strong>Phase 2 — Multi-Energy Expansion (2027)</strong><br>Curtailed wind &amp; solar, excess hydro, industrial waste heat, biomass. Same battle-tested stack: map → score → model → capital connection.</p>
+                    <p><strong>Phase 3 — Capital Formation Layer (2027 Q2 → 2028)</strong><br>The platform becomes a true capital formation engine. Funding matcher, capital mapping dashboard, structuring intelligence across all four streams, talent marketplace. Target: <strong>$500M+</strong> in committed capital deployed through the platform.</p>
+
+                    <h2>Four Capital Streams</h2>
+                    <ul>
+                        <li><strong>Canadian Public Capital</strong> — Federal grants, provincial incentives, tax credits, Indigenous mechanisms.</li>
+                        <li><strong>CETA / European Capital</strong> — $200B+ in committed green finance with preferential access. One of the most powerful underutilized levers for Canadian developers.</li>
+                        <li><strong>Bitcoin-Native Capital</strong> — Mining operations, public Bitcoin companies, crypto-native funds with treasury deployment mandates.</li>
+                        <li><strong>Traditional Infrastructure &amp; PE</strong> — Climate-focused funds, energy transition specialists, family offices.</li>
+                    </ul>
+
+                    <div class="doc-callout">By 2028 we expect stranded energy to be a recognized, liquid, investable category with multiple standard funding pathways and Canada as the global leader in responsible, verifiable, Bitcoin-enabled energy transition.</div>
+
+                    <div class="giveabit-subtle">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `,
+
+            'capital': `
+                <div class="max-w-[860px] mx-auto text-center">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400 text-black text-xs font-bold tracking-widest mb-4">VISUAL DOCUMENT</div>
+                    <h1 class="text-4xl font-bold tracking-tighter mb-2">Projected Capital Deployment by 2028</h1>
+                    <p class="text-gray-400 mb-8">Illustrative • Based on the full 3-phase roadmap</p>
+
+                    <div class="mx-auto max-w-[620px]">
+                        <!-- The actual chart is already on the page; here we present a clean "document" version -->
+                        <div class="glass rounded-3xl p-8 border border-white/10 mb-8">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-left text-sm">
+                                <div><div class="w-3 h-3 rounded bg-[#FF8C00] inline-block mr-2"></div>Canadian Public Capital<br><span class="text-2xl font-semibold text-white">$180M</span></div>
+                                <div><div class="w-3 h-3 rounded bg-[#5BC0BE] inline-block mr-2"></div>CETA / European Funds<br><span class="text-2xl font-semibold text-white">$220M</span></div>
+                                <div><div class="w-3 h-3 rounded bg-white inline-block mr-2"></div>Bitcoin-Native Capital<br><span class="text-2xl font-semibold text-white">$75M</span></div>
+                                <div><div class="w-3 h-3 rounded bg-emerald-400 inline-block mr-2"></div>Traditional PE / Infra<br><span class="text-2xl font-semibold text-white">$125M</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="max-w-md mx-auto">This visual represents the capital formation thesis at the heart of the Roadmap &amp; Funding document. Four aligned streams. Multiple pathways for every project. The platform will eventually show not just the best sites, but the clearest funding path in the currency of the developer's choice.</p>
+
+                    <div class="giveabit-subtle mt-8">GiveAbit Intelligence • Subtle parent brand • Stranded Energy, Bitcoin Access</div>
+                </div>
+            `
+        };
+
+        let currentDoc = null;
+
+        function openDocModal(docId) {
+            const overlay = document.getElementById('doc-overlay');
+            const header = document.getElementById('doc-modal-header');
+            const body = document.getElementById('doc-modal-body');
+
+            const content = docContents[docId];
+            if (!content) return;
+
+            currentDoc = docId;
+
+            // Build beautiful header
+            let badge = '';
+            let title = '';
+            if (docId === 'executive') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-[#FF8C00] text-black rounded">EXECUTIVE</span>'; title = 'Executive Summary'; }
+            else if (docId === 'onepager') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">SALES &amp; MARKETING</span>'; title = 'Marketing One-Pager'; }
+            else if (docId === 'mission') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-white/80 text-black rounded">BRAND</span>'; title = 'Mission Statement'; }
+            else if (docId === 'values') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-white/80 text-black rounded">BRAND</span>'; title = 'Mission, Vision &amp; Values'; }
+            else if (docId === 'roadmap') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-[#5BC0BE] text-black rounded">STRATEGY</span>'; title = 'Stranded Energy Roadmap &amp; Funding'; }
+            else if (docId === 'capital') { badge = '<span class="px-3 py-1 text-xs font-semibold bg-emerald-400 text-black rounded">VISUAL DOCUMENT</span>'; title = 'Projected Capital Deployment by 2028'; }
+
+            header.innerHTML = `
+                <div class="flex items-center gap-3">
+                    ${badge}
+                    <div class="font-semibold text-xl tracking-tighter">${title}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="downloadCurrentDoc()" class="doc-action-btn"><i class="fa-solid fa-download"></i> <span class="hidden sm:inline">Download MD</span></button>
+                    <button onclick="printCurrentDoc()" class="doc-action-btn"><i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Print</span></button>
+                    <button onclick="closeDocModal()" class="doc-close"><i class="fa-solid fa-times text-lg"></i></button>
+                </div>
+            `;
+
+            body.innerHTML = content;
+
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDocModal() {
+            const overlay = document.getElementById('doc-overlay');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function downloadCurrentDoc() {
+            const map = {
+                'executive': '/docs/1-Executive-Summary-Enhanced.md',
+                'onepager': '/docs/2-Marketing-One-Pager-Enhanced.md',
+                'mission': '/docs/3-Mission-Statement-Enhanced.md',
+                'values': '/docs/4-Mission-Vision-Values-Enhanced.md',
+                'roadmap': '/docs/5-Roadmap-Funding-Enhanced.md'
+            };
+            const url = map[currentDoc];
+            if (url) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = url.split('/').pop();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert('Raw MD available for the five main documents. The capital visual is part of the hub PDF.');
+            }
+        }
+
+        function printCurrentDoc() {
+            const body = document.getElementById('doc-modal-body');
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html><head><title>Stranded • ${document.getElementById('doc-modal-header').innerText}</title>
+                <style>
+                    body { font-family: system-ui, sans-serif; background: white; color: #111; padding: 40px; line-height: 1.6; max-width: 860px; margin: 0 auto; }
+                    h1 { font-size: 2rem; margin-bottom: .5rem; }
+                    img { max-width: 100%; border-radius: 12px; }
+                    .doc-callout, .doc-stat { border: 1px solid #ddd; padding: 16px; margin: 12px 0; border-radius: 8px; }
+                </style>
+                </head><body>${body.innerHTML}</body></html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => { printWindow.print(); }, 300);
+        }
+
+        // Wire up the view buttons (event delegation)
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.view-doc-btn');
+            if (btn) {
+                e.preventDefault();
+                const docId = btn.getAttribute('data-doc');
+                openDocModal(docId);
+            }
+        });
+
+        // Keyboard support for overlay
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('doc-overlay');
+                if (overlay && overlay.classList.contains('open')) closeDocModal();
+            }
+        });
+
+        // Bonus: make the capital chart section also open the capital modal when clicked (for the "6th")
+        setTimeout(() => {
+            const chartSection = document.querySelector('#capitalChart')?.closest('.glass');
+            if (chartSection) {
+                chartSection.style.cursor = 'pointer';
+                chartSection.addEventListener('click', () => openDocModal('capital'));
+            }
+        }, 800);
+    </script>
+</body>
+</html>

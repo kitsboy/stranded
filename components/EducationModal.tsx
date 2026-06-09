@@ -10,7 +10,7 @@ export default function EducationModal() {
       <button
         onClick={() => setIsOpen(true)}
         className="absolute bottom-4 right-4 z-10 bg-[#5BC0BE]/20 hover:bg-[#5BC0BE]/30 border border-[#5BC0BE]/50 text-[#5BC0BE] rounded-full p-3 transition-colors"
-        title="Learn about stranded methane"
+        title="Learn about Stranded Value (methane capture + Bitcoin)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -24,7 +24,7 @@ export default function EducationModal() {
       <div className="bg-[#1e293b] border border-[#5BC0BE]/30 rounded-xl max-w-lg w-full p-6 shadow-2xl">
         <div className="flex items-start justify-between mb-4">
           <h2 className="text-xl font-bold text-white">
-            About Stranded Methane
+            About Stranded Value
           </h2>
           <button
             onClick={() => setIsOpen(false)}
@@ -36,7 +36,7 @@ export default function EducationModal() {
         
         <div className="space-y-4 text-sm text-gray-300">
           <p>
-            <strong className="text-[#FF8C00]">Stranded methane</strong> refers to natural gas 
+            <strong className="text-[#FF8C00]">Stranded methane</strong> (our starting point for Stranded Value) refers to natural gas 
             that is uneconomical to capture and transport through pipelines. This methane is 
             often vented or flared, releasing potent greenhouse gases into the atmosphere.
           </p>

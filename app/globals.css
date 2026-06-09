@@ -2,12 +2,152 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-dark: #243447; /* 20% lighter than previous #1e293b for better readability while keeping premium dark feel */
+  --glass: rgba(42, 58, 75, 0.85); /* lighter glass base */
+  --accent-orange: #FF8C00;
+  --accent-teal: #5BC0BE;
+  --score-high: #22c55e;
+  --score-med: #eab308;
+  --score-low: #f97316;
+}
 
-/* Fix marker clickability */
+/* Premium glassmorphism */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(91, 192, 190, 0.15);
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border-color: rgba(255, 140, 0, 0.25);
+}
+
+.glass-strong {
+  background: rgba(36, 52, 71, 0.92); /* lighter to match new bg */
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 140, 0, 0.2);
+}
+
+/* Enhanced business CTAs and buttons */
+.btn-primary {
+  background: var(--accent-orange);
+  color: #1e293b;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  background: #ff9d33;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgb(255 140 0 / 0.3);
+}
+
+.btn-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Sexy Stranded Score badges */
+.stranded-score {
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid currentColor;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3) inset;
+}
+
+.score-high { color: var(--score-high); background: rgba(34, 197, 94, 0.1); }
+.score-med { color: var(--score-med); background: rgba(234, 179, 8, 0.1); }
+.score-low { color: var(--score-low); background: rgba(249, 115, 22, 0.1); }
+
+/* Marker clickability + premium selected state */
 .maplibregl-canvas {
   pointer-events: none !important;
 }
 .maplibregl-marker {
   pointer-events: auto !important;
   z-index: 10 !important;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.maplibregl-marker.selected {
+  z-index: 50 !important;
+  transform: scale(1.35);
+  filter: drop-shadow(0 0 12px rgba(255,140,0,0.6));
+}
+
+/* Mission control premium elements */
+.mission-stat {
+  transition: all 0.2s cubic-bezier(0.23, 1.0, 0.32, 1);
+}
+.mission-stat .value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Command palette */
+.command-palette {
+  animation: palettePop 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes palettePop {
+  from { opacity: 0; transform: translateY(-12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Beautiful range + chips */
+.filter-chip {
+  transition: all 0.1s ease;
+}
+.filter-chip.active {
+  background: #FF8C00;
+  color: #1e293b;
+  border-color: #FF8C00;
+}
+
+/* Live ticker */
+.btc-ticker {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+/* Card lift for sites */
+.site-card {
+  transition: transform 0.2s cubic-bezier(0.23,1,0.32,1), box-shadow 0.2s ease;
+}
+.site-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Fix for map height with sticky nav */
+.map-container {
+  height: calc(100vh - 3.5rem);
+}
+
+/* Subtle data viz bars */
+.viz-bar {
+  transition: height 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
