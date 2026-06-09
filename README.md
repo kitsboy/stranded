@@ -86,3 +86,4 @@ Recent completed: 25+ home enhancements, 20+ education (incl. machines/configura
 Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHub), more verticals (wind, heat, etc.), live API refreshes, "Stranded Value Certified", used-market explorer, full map ROI.
 
 Built with love for the orange pill and the blue planet.
+
