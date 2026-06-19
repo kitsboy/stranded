@@ -115,3 +115,75 @@ Pull this handoff and latest code for HERMES/Obsidian. Git is clean on main.
 Ready for new chat on separate stuff (e.g., deploy, more verticals, or whatever you want). Let's make it the best!
 
 **Build status:** Success. All wired, dynamic, current. Rock star effort complete for this session. GO! 🚀
+
+## Latest Session Summary (from 2026-06-09 goodbye)
+**Chat Topic**: Updating and cleaning all documentation, marketing docs, maps, and information for the Stranded project to be current after rebrand to "Stranded Value" (removing "Canada"), GitHub repo rename from stranded-canada to stranded, and switch from old Worker/wrangler setup to proper Cloudflare Pages project for stranded.giveabit.io.
+
+**Key Things We Did**:
+- Updated README.md, app/layout.tsx, public/manifest.json, and all docs/ files (SOURCE-OF-TRUTH.md, DEPLOYMENT.md, DOCUMENTATION.md, Marketing/*.md files, and the self-contained Marketing-Hub.html).
+- Guided full GitHub repo rename process (update remote, reconnect CF Pages integration).
+- Created then removed wrangler.toml as part of transitioning from Worker + Assets to clean Pages project (the toml was temporary for old setup).
+- Fixed Cloudflare build configuration: build command `npm run build`, deploy `npx wrangler deploy` (temporarily), output directory `dist`, watch paths cleaned (removed "dist"), variables like BUILD_STATIC=true.
+- Pushed final cleanup commit removing wrangler.toml.
+- Troubleshooting CF domain propagation (CNAME to new .pages.dev, status Active in dashboard but full connectivity pending) and build issues.
+- Confirmed successful push of cleanup (commit 8b544ba).
+
+**Finished in this session**:
+- All main documentation and marketing assets (5 .md docs + Hub) updated to current branding ("Stranded", "Stranded Value", "Stranded Energy, Bitcoin Access"), tech stack (Next.js static export to dist/, GitHub "stranded", CF Pages), and features (generators, per-site Value/ROI from 2611 dataset, education enhancements, flow/persona).
+- Repo clean (wrangler.toml removed), GitHub renamed, CF project is proper Pages with Git integration.
+- Custom domain addition in progress (CNAME stranded -> strandedbuild.pages.dev set, listed as Active).
+
+**Still to do**:
+- Full custom domain propagation and verification: Ensure https://stranded.giveabit.io loads the live site (DNS/CNAME fully active; currently "refused to connect" while .pages.dev preview works — wait 15-60 min or re-check status).
+- Confirm new Pages project build settings (npm run build + output dist) and that Git pushes to main auto-deploy cleanly.
+- Remove the domain from any old Worker project if still attached; optionally delete/rename the old "stranded" Worker project for clean dashboard.
+- Test full end-to-end (push change → build → custom domain update).
+
+**Next for Kimi**: Integrate this summary into MASTER-BRAIN.md / Kanban / Obsidian vault. Update any maps or architecture notes for the shift to pure Pages project + clean Git flow. The wrangler.toml was temporary and has been removed from the repo. Educate Hermes on the current Pages-based deployment for stranded.giveabit.io. Use the giveabit-project-handoff skill for future projects to keep hand-offs automatic and clean.
+
+**All details above are the source of truth for current state. Sync to MASTER-BRAIN.**
+
+## Latest Session Summary (from 2026-06-09 goodbye)
+**Chat Topic**: Updating and cleaning all documentation, marketing docs, maps, and information for the Stranded project to be current after rebrand to "Stranded Value" (removing "Canada"), GitHub repo rename from stranded-canada to stranded, and switch from old Worker/wrangler setup to proper Cloudflare Pages project for stranded.giveabit.io.
+
+**Key Things We Did**:
+- Updated README.md, app/layout.tsx, public/manifest.json, and all docs/ files (SOURCE-OF-TRUTH.md, DEPLOYMENT.md, DOCUMENTATION.md, Marketing/*.md files, and the self-contained Marketing-Hub.html).
+- Guided full GitHub repo rename process (update remote, reconnect CF Pages integration).
+- Created then removed wrangler.toml as part of transitioning from Worker + Assets to clean Pages project (the toml was temporary for old setup).
+- Fixed Cloudflare build configuration: build command `npm run build`, deploy `npx wrangler deploy` (temporarily), output directory `dist`, watch paths cleaned (removed "dist"), variables like BUILD_STATIC=true.
+- Pushed final cleanup commit removing wrangler.toml.
+- Troubleshooting CF domain propagation (CNAME to new .pages.dev, status Active in dashboard but full connectivity pending) and build issues.
+- Confirmed successful push of cleanup (commit 8b544ba).
+
+**Finished in this session**:
+- All main documentation and marketing assets (5 .md docs + Hub) updated to current branding ("Stranded", "Stranded Value", "Stranded Energy, Bitcoin Access"), tech stack (Next.js static export to dist/, GitHub "stranded", CF Pages), and features (generators, per-site Value/ROI from 2611 dataset, education enhancements, flow/persona).
+- Repo clean (wrangler.toml removed), GitHub renamed, CF project is proper Pages with Git integration.
+- Custom domain addition in progress (CNAME stranded -> strandedbuild.pages.dev set, listed as Active).
+
+**Still to do**:
+- Full custom domain propagation and verification: Ensure https://stranded.giveabit.io loads the live site (DNS/CNAME fully active; currently "refused to connect" while .pages.dev preview works — wait 15-60 min or re-check status).
+- Confirm new Pages project build settings (npm run build + output dist) and that Git pushes to main auto-deploy cleanly.
+- Remove the domain from any old Worker project if still attached; optionally delete/rename the old "stranded" Worker project for clean dashboard.
+- Test full end-to-end (push change → build → custom domain update).
+
+**Next for Kimi**: Integrate this summary into MASTER-BRAIN.md / Kanban / Obsidian vault. Update any maps or architecture notes for the shift to pure Pages project + clean Git flow. The wrangler.toml was temporary and has been removed from the repo. Educate Hermes on the current Pages-based deployment for stranded.giveabit.io. Use the giveabit-project-handoff skill for future projects to keep hand-offs automatic and clean.
+
+**All details above are the source of truth for current state. Sync to MASTER-BRAIN.**
+
+## 2026-06-10 — Stranded
+
+**One line:** Finalized the production-ready modernized KIMI-HANDOFF and compact GOODBYE APPEND templates optimized for Kimi's direct style and the vault SOURCE-OF-TRUTH as single living reference.
+
+**Delivered:**
+- Multiple rounds of tightening for extreme conciseness, consistency, and zero fluff.
+- Elevated `~/MASTER-BRAIN/Obsidian/03-ProjectsM4/[PROJECT]/SOURCE-OF-TRUTH.md` as the explicit single living reference in both templates.
+- Delivered the two templates in the exact labeled "FINAL ..." format requested, ready for immediate skill implementation.
+
+**Kimi:**
+- Replace `~/MASTER-BRAIN/Obsidian/03-ProjectsM4/stranded/SOURCE-OF-TRUTH.md` with latest from project when ready
+- Update the giveabit-project-handoff and goodbye skill files at ~/.agents/skills/ with the new final templates
+- Begin using the new compact "## [DATE] — [PROJECT]" append format for all future handoffs
+
+**Weekly:** Ask the user 3 useful questions.
+
+Done ✅ — sovereignty tools for Give A Bit at giveabit.io
