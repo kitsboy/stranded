@@ -106,6 +106,7 @@ export default function PitchPage() {
   const [stats, setStats] = useState<LiveStats | null>(null)
   const [btc, setBtc] = useState(85000)
   const [error, setError] = useState('')
+  const [btcSensitivity, setBtcSensitivity] = useState(100)
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -153,10 +154,18 @@ export default function PitchPage() {
     return () => { script.remove() }
   }, [stats])
 
+  const adjustedBtc = useMemo(() => btc * (btcSensitivity / 100), [btc, btcSensitivity])
+
   const liveRevenue = useMemo(() => {
     if (!stats) return 0
-    return Math.round(stats.valueModel.annualBtc * btc)
-  }, [stats, btc])
+    return Math.round(stats.valueModel.annualBtc * adjustedBtc)
+  }, [stats, adjustedBtc])
+
+  const monteCarlo = useMemo(() => {
+    if (!stats) return { low: 0, mid: 0, high: 0 }
+    const base = stats.valueModel.annualRevenueUsd
+    return { low: Math.round(base * 0.6), mid: base, high: Math.round(base * 1.8) }
+  }, [stats])
 
   const tierItems = useMemo(() => {
     if (!stats) return []
@@ -283,8 +292,20 @@ export default function PitchPage() {
         </div>
       </section>
 
+      {/* BTC Sensitivity + Monte Carlo */}
+      <section className="px-6 py-10 max-w-4xl mx-auto pitch-print">
+        <h2 className="text-xl font-bold mb-4">Sensitivity Analysis</h2>
+        <label className="text-xs text-gray-400">BTC price scenario: {btcSensitivity}% of live (${adjustedBtc.toLocaleString()})</label>
+        <input type="range" min={40} max={200} value={btcSensitivity} onChange={e => setBtcSensitivity(+e.target.value)} className="w-full accent-[#FBBF24] mt-2" />
+        <div className="grid grid-cols-3 gap-4 mt-6 text-center text-sm">
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4"><div className="text-gray-400">Bear</div><div className="text-xl font-bold text-red-400">{fmtUsd(monteCarlo.low)}</div></div>
+          <div className="rounded-xl border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-4"><div className="text-gray-400">Base</div><div className="text-xl font-bold text-[#FF8C00]">{fmtUsd(monteCarlo.mid)}</div></div>
+          <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4"><div className="text-gray-400">Bull</div><div className="text-xl font-bold text-green-400">{fmtUsd(monteCarlo.high)}</div></div>
+        </div>
+      </section>
+
       {/* Impact + Value */}
-      <section className="border-y border-white/10 bg-gradient-to-r from-[#FF8C00]/08 via-transparent to-[#5BC0BE]/08 px-6 py-14">
+      <section className="border-y border-white/10 bg-gradient-to-r from-[#FF8C00]/08 via-transparent to-[#5BC0BE]/08 px-6 py-14 pitch-print">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 text-center">Climate + Capital Impact</h2>
           <div className="grid md:grid-cols-3 gap-6">

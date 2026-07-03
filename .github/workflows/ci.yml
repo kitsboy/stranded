@@ -19,6 +19,8 @@ jobs:
 
       - run: npm ci
 
+      - run: npx playwright install chromium --with-deps
+
       - run: npm run validate
 
       - run: npm run docs:sync
@@ -35,6 +37,21 @@ jobs:
           test -f dist/verticals.html
           test -f dist/funding.html
           test -f dist/data/live-stats.json
+
+      - name: E2E smoke tests
+        run: |
+          npx serve -p 3003 dist &
+          sleep 3
+          PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run e2e
+
+      - name: Notify on success
+        if: success() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ Stranded CI passed — ${{ github.sha }}\"}" \
+            "$SLACK_WEBHOOK_URL" || true
 
       - name: Notify on failure
         if: failure() && env.SLACK_WEBHOOK_URL != ''

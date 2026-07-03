@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
+import { toggleBookmark, getBookmarks, getSiteNote, setSiteNote } from '@/lib/bookmarks'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -64,6 +65,14 @@ export default function SiteDetailsPanel({
   const [gasTreatmentDerate, setGasTreatmentDerate] = useState(1.0)
   const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
+  const [bookmarked, setBookmarked] = useState(false)
+  const [note, setNote] = useState('')
+
+  useEffect(() => {
+    if (!site) return
+    setBookmarked(getBookmarks().includes(site.id))
+    setNote(getSiteNote(site.id))
+  }, [site?.id])
 
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
   const currencySymbol = currentFiat.symbol
@@ -226,7 +235,10 @@ export default function SiteDetailsPanel({
           <h2 className="text-xl font-bold text-white">{p.name || 'Unknown'}</h2>
           <p className="text-sm text-gray-400">{p.city || 'Unknown'}, {p.province || ''}</p>
         </div>
-        <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+        <div className="flex gap-2">
+          <button onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }} className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}>{bookmarked ? '★' : '☆'}</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+        </div>
       </div>
       {/* Currency dropdown - BTC always the base/denominator */}
       <div className="mb-4">
@@ -394,6 +406,10 @@ export default function SiteDetailsPanel({
         </div>
       )}
 
+      <div className="mb-3">
+        <label className="text-xs text-gray-400">Site notes (saved locally)</label>
+        <textarea value={note} onChange={e => setNote(e.target.value)} onBlur={() => site && setSiteNote(site.id, note)} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-xs h-16" placeholder="Due diligence notes…" />
+      </div>
       <details className="mt-1 mb-2">
         <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-200">All raw properties from dataset ({Object.keys(p).length} fields)</summary>
         <pre className="text-[10px] mt-1 p-2 bg-black/40 rounded overflow-auto max-h-44 text-gray-300 whitespace-pre-wrap break-all">{JSON.stringify(p, null, 2)}</pre>

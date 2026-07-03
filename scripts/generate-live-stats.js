@@ -124,10 +124,12 @@ function main() {
   const annualRevenueUsd = Math.round(annualBtcPortfolio * defaultBtc)
 
   const generatedAt = new Date().toISOString()
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'))
 
   const stats = {
     generatedAt,
-    version: '1.0.0',
+    version: pkg.version || '2.1.0',
+    buildId: generatedAt.replace(/[^0-9]/g, '').slice(0, 14),
     siteCount,
     provinceCount: Object.keys(provinces).length,
     provinces: Object.entries(provinces)
@@ -219,8 +221,20 @@ ${stats.gensetRecommendations.map(g => `- **${g.id}:** ${g.count} sites (${g.pct
 `
 
   fs.writeFileSync(OUT_MD, md)
+
+  const status = {
+    status: 'operational',
+    service: 'stranded.giveabit.io',
+    version: stats.version,
+    buildId: stats.buildId,
+    siteCount,
+    generatedAt,
+  }
+  fs.writeFileSync(path.join(ROOT, 'public', 'status.json'), JSON.stringify(status, null, 2))
+
   console.log(`✓ live-stats.json — ${siteCount} sites, ${Object.keys(provinces).length} provinces`)
   console.log(`✓ docs/LIVE-STATS.md updated`)
+  console.log(`✓ status.json updated`)
 }
 
 main()

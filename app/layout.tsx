@@ -6,6 +6,7 @@ import { Toaster } from 'sonner'
 import GlobalCommand from '@/components/GlobalCommand'
 import Providers from '@/components/Providers'
 import JsonLd from '@/components/JsonLd'
+import MobileCtaBar from '@/components/MobileCtaBar'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
@@ -48,6 +49,7 @@ export default function RootLayout({
         <Footer />
         <Toaster position="top-center" richColors closeButton />
         <GlobalCommand />
+        <MobileCtaBar />
         <Providers>{null}</Providers>
       </body>
     </html>

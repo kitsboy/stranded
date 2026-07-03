@@ -26,7 +26,7 @@ export default function Footer() {
             <span className="hidden sm:inline text-white/20">•</span>
             <span>2026 • 2,611 sites{statsDate && <> • stats {statsDate}</>}</span>
             <span className="hidden sm:inline text-white/20">•</span>
-            <span className="font-mono text-[#FF8C00]">v2.0</span>
+            <span className="font-mono text-[#FF8C00]">v2.1</span>
             <Link href="/education" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Methodology</Link>
             <Link href="/partnerships" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Partnerships</Link>
             <Link href="/funding" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Funding</Link>

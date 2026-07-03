@@ -1,1 +1,8 @@
-# No SPA redirects — HashRouter handles routing
+# Trailing slash normalization
+/map/ /map 301
+/pitch/ /pitch 301
+/dashboard/ /dashboard 301
+/verticals/ /verticals 301
+/funding/ /funding 301
+/partnerships/ /partnerships 301
+/provinces/ /provinces 301

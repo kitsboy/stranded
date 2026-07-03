@@ -1,6 +1,15 @@
-# giveabit.io — Cloudflare Pages _headers
-/assets/*.css
-  Content-Type: text/css
+# Cloudflare Pages headers
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
 
-/assets/*.js
-  Content-Type: application/javascript
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/data/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/images/*
+  Cache-Control: public, max-age=86400
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

@@ -1,6 +1,7 @@
 export type LiveStats = {
   generatedAt: string
   version: string
+  buildId?: string
   siteCount: number
   provinceCount: number
   provinces: { name: string; count: number; pct: number }[]

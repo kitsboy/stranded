@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -16,6 +16,7 @@ interface CommandPaletteProps {
 export default function CommandPalette({ sites, onSelectSite, open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState<EnrichedSite[]>([])
+  const [selectedIdx, setSelectedIdx] = useState(0)
   const router = useRouter()
 
   // Load recent from localStorage (power-up)
@@ -62,6 +63,19 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
     { label: 'Marketing Hub', href: '/Marketing-Hub.html' },
   ]
 
+  const handleSelect = useCallback((site: EnrichedSite) => {
+    onClose()
+    setQuery('')
+    saveRecent(site)
+    if (onSelectSite) {
+      onSelectSite(site)
+    } else {
+      router.push(`/map?site=${encodeURIComponent(site.id)}`)
+    }
+  }, [onClose, onSelectSite, router])
+
+  useEffect(() => { setSelectedIdx(0) }, [query, results.length])
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -69,23 +83,15 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
         if (open) onClose()
         else window.dispatchEvent(new CustomEvent('open-command-palette'))
       }
-      if (e.key === 'Escape' && open) onClose()
+      if (!open) return
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIdx(i => Math.min(i + 1, results.length - 1)) }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIdx(i => Math.max(i - 1, 0)) }
+      if (e.key === 'Enter' && results[selectedIdx]) handleSelect(results[selectedIdx])
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [open, onClose])
-
-  const handleSelect = (site: EnrichedSite) => {
-    onClose()
-    setQuery('')
-    saveRecent(site)
-    if (onSelectSite) {
-      onSelectSite(site)
-    } else {
-      // Fallback: go to map with deep link
-      router.push(`/map?site=${encodeURIComponent(site.id)}`)
-    }
-  }
+  }, [open, onClose, results, selectedIdx, handleSelect])
 
   if (!open) return null
 
@@ -116,16 +122,17 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
             {results.length === 0 && (
               <div className="px-5 py-8 text-center text-gray-400">No matches. Try a province or company name.</div>
             )}
-            {results.map((site) => {
+            {results.map((site, idx) => {
               const p = site.properties
+              const highlight = query.trim() && (p.name || '').toLowerCase().includes(query.toLowerCase())
               return (
                 <button
                   key={site.id}
                   onClick={() => handleSelect(site)}
-                  className="w-full text-left px-5 py-3 flex items-center gap-4 hover:bg-white/5 group"
+                  className={`w-full text-left px-5 py-3 flex items-center gap-4 group ${idx === selectedIdx ? 'bg-[#FF8C00]/15' : 'hover:bg-white/5'}`}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white group-hover:text-[#FF8C00] truncate">{p.name || 'Unnamed site'}</div>
+                    <div className="font-medium text-white group-hover:text-[#FF8C00] truncate">{highlight ? <span>{p.name?.split(new RegExp(`(${query})`, 'i')).map((part, i) => part.toLowerCase() === query.toLowerCase() ? <mark key={i} className="bg-[#FF8C00]/40 text-white">{part}</mark> : part)}</span> : (p.name || 'Unnamed site')}</div>
                     <div className="text-xs text-gray-400 truncate">
                       {p.province} • {p.city || p.region || 'Remote'} • {p.source_type}
                     </div>

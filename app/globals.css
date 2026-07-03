@@ -179,6 +179,28 @@
   touch-action: manipulation;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html.theme-light {
+  --bg-dark: #f1f5f9;
+  color-scheme: light;
+}
+html.theme-light body {
+  color: #1e293b;
+}
+html.theme-light .glass,
+html.theme-light nav,
+html.theme-light footer {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1e293b;
+}
+
 @media print {
   nav, footer, button, .no-print { display: none !important; }
   body { background: white !important; color: black !important; }

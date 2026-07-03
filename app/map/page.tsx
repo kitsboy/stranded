@@ -14,6 +14,8 @@ import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
+import { parseMapUrl } from '@/lib/map-url'
+
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 
@@ -36,15 +38,24 @@ function StrandedCommandCenter() {
   const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false })
   const [compareSites, setCompareSites] = useState<EnrichedSite[]>([])
   const [showCompare, setShowCompare] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [loadProgress, setLoadProgress] = useState(0)
 
   const searchParams = useSearchParams()
   const router = useRouter()
 
   // Load full 2611 with enrichment (performance + types)
   useEffect(() => {
+    setLoadProgress(30)
     loadSites().then(sites => {
+      setLoadProgress(100)
       setAllSites(sites)
       setLoading(false)
+
+      const urlState = parseMapUrl(searchParams)
+      if (urlState.minScore != null) setMinScore(urlState.minScore)
+      if (urlState.minEmission != null) setMinEmission(urlState.minEmission)
+      if (urlState.provinces?.length) setSelectedProvinces(new Set(urlState.provinces))
 
       const siteId = searchParams.get('site')
       if (siteId) {
@@ -228,6 +239,12 @@ function StrandedCommandCenter() {
     toast.success('PDF print dialog opened')
   }
 
+  const emailMission = () => {
+    if (!portfolio.length) return
+    const body = portfolio.map(s => `${s.properties.name} (${s.properties.province}) — score ${s.strandedScore}`).join('%0A')
+    window.location.href = `mailto:hello@giveabit.io?subject=Stranded Mission (${portfolio.length} sites)&body=${body}`
+  }
+
   const shareMission = async () => {
     if (!portfolio.length) return
     const url = portfolioShareUrl(portfolio)
@@ -270,7 +287,12 @@ function StrandedCommandCenter() {
   const totalPotential = portfolio.reduce((s, x) => s + x.potentialDailyProfitCAD, 0)
 
   return (
-    <div className="relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-container">
+    <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-live="polite" aria-label="Stranded command center map">
+      {loading && loadProgress < 100 && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-full bg-[#FF8C00] transition-all" style={{ width: `${loadProgress}%` }} />
+        </div>
+      )}
       <Toaster position="top-center" richColors closeButton />
 
       {/* Top mission HUD */}
@@ -423,8 +445,12 @@ function StrandedCommandCenter() {
             <button onClick={exportMissionCsv} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">CSV</button>
             <button onClick={exportMissionPdf} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">PDF</button>
             <button onClick={shareMission} className="text-[10px] px-2 py-1 rounded-full bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 text-[#5BC0BE]">Share</button>
+            <button onClick={emailMission} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">Email</button>
           </div>
         )}
+        <button onClick={() => setFullscreen(f => !f)} className="text-[10px] self-end px-2 py-1 rounded-full border border-white/15 text-gray-400 hover:text-white">
+          {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+        </button>
         {compareSites.length >= 2 && (
           <button onClick={() => setShowCompare(true)} className="text-xs px-3 py-1 rounded-full bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">
             Compare {compareSites.length} sites

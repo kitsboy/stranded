@@ -54,6 +54,7 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
         </div>
       </div>
       <div className="text-[10px] text-gray-400 mt-2">Mission Generator Capacity: {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
+      <div className="text-[10px] text-gray-500 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
 
       <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Selected sites</div>
       <div className="max-h-[148px] overflow-auto space-y-1 pr-1 text-xs">

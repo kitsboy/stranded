@@ -1,10 +1,10 @@
 {
   "name": "stranded",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
-    "prebuild": "node scripts/generate-live-stats.js",
+    "prebuild": "node scripts/generate-live-stats.js && node scripts/generate-sitemap.js",
     "build": "BUILD_STATIC=true next build",
     "postbuild": "node scripts/sync-docs.js",
     "start": "npx serve -p 3003 dist",

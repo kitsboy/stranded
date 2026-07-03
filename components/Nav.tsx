@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { Search, Command } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
+import ThemeToggle from './ThemeToggle'
+import MobileNav from './MobileNav'
 
 export default function Nav() {
   const pathname = usePathname()
@@ -59,10 +61,13 @@ export default function Nav() {
           {navLink('/education', 'Education')}
           {navLink('/sites', 'All Sites')}
           {navLink('/pitch', 'Pitch')}
-          {navLink('/verticals', 'Verticals')}
+          {navLink('/dashboard', 'Dashboard')}
+          <span className="hidden lg:inline">{navLink('/verticals', 'Verticals')}</span>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
+          <MobileNav />
+          <ThemeToggle />
           <LanguageToggle />
           <button
             onClick={openPalette}
