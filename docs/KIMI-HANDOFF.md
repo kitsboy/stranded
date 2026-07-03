@@ -1,5 +1,26 @@
 # Kimi Handoff — Stranded
 
+## Handoff to Kimi — 2026-07-03 (upgrades 101–150, v2.2.0)
+
+**Machine:** M3 (Grok) · **Commit:** `56eb847`
+
+### Done
+- [x] Confirmed git push deploy pipeline; production was stuck on v1.0.0 (CF auto-deploy lagging)
+- [x] Round 4 upgrades 101–150: heatmap, IndexedDB, filter presets, 5 new pages, KML/GeoJSON export
+- [x] Education quiz share + progress + genset table; ROI halving chart; Tadbuy/Sherpacarta hooks
+- [x] PWA v3, offline indicator, pitch embed mode, keyboard help, v2.2.0
+
+### Deploy note
+- Wrangler manual deploy blocked (no CLOUDFLARE_API_TOKEN). Rely on CF Pages git hook.
+- If production stays on v1.0.0, check CF Pages project connection to `kitsboy/stranded` main.
+
+### What's Next
+- Wire CF API token for manual `wrangler pages deploy` fallback
+- Rotate git remote HTTPS token → SSH
+- Full emission heatmap tuning; OAuth portfolios (still localStorage)
+
+---
+
 ## Handoff to Kimi — 2026-07-03 (50 upgrades complete)
 
 ### Batch 1 (1–25)
