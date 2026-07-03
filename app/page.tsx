@@ -1,16 +1,34 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Rocket } from 'lucide-react'
+import type { LiveStats } from '@/types/live-stats'
+
+type FeaturedSite = { id?: string; name: string; province: string; emission: number; score: number; link: string }
 
 export default function LandingPage() {
   const [btc, setBtc] = useState(85000)
+  const [featured, setFeatured] = useState<FeaturedSite[]>([])
 
   useEffect(() => {
     fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
       .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd)).catch(() => {})
+    fetch('/data/live-stats.json')
+      .then(r => r.json())
+      .then((stats: LiveStats) => {
+        setFeatured(stats.topSites.slice(0, 3).map(s => ({
+          id: s.id,
+          name: s.name,
+          province: s.province,
+          emission: s.emissionKgDay,
+          score: s.score,
+          link: `/map?site=${s.id}`,
+        })))
+      })
+      .catch(() => {})
   }, [])
 
   return (
@@ -41,10 +59,10 @@ export default function LandingPage() {
           >
             Explore the Full Map →
           </Link>
-          <Link
-            href="/sites"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition"
-          >
+          <Link href="/pitch" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] hover:bg-[#FF8C00]/10 text-lg transition">
+            Live Pitch Deck
+          </Link>
+          <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
             Browse All 2,611 Sites
           </Link>
         </div>
@@ -115,17 +133,13 @@ export default function LandingPage() {
           <Link href="/sites" className="text-sm text-[#5BC0BE] hover:underline">See all →</Link>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
-          {[
-            { name: "Keele Valley Landfill", province: "ON", emission: 56014, score: 92, link: "/map?site=ec-0001" },
-            { name: "Brady Road Resource Management", province: "MB", emission: 48874, score: 88, link: "/map?site=ec-0002" },
-            { name: "Enbridge Gas Inc. - Distribution", province: "ON", emission: 37260, score: 85, link: "/map?site=ec-0003" },
-          ].map((site, i) => (
-            <Link key={i} href={site.link} className="glass p-5 rounded-2xl border border-white/10 hover:border-[#FF8C00]/50 transition block">
-              <div className="flex justify-between">
-                <div className="font-semibold">{site.name}</div>
-                <div className="stranded-score score-high text-xs">{site.score}</div>
+          {(featured.length ? featured : [{ name: 'Loading top sites…', province: '', emission: 0, score: 0, link: '/map' }]).map((site, i) => (
+            <Link key={site.id || i} href={site.link} className="glass p-5 rounded-2xl border border-white/10 hover:border-[#FF8C00]/50 transition block">
+              <div className="flex justify-between gap-2">
+                <div className="font-semibold truncate">{site.name}</div>
+                {site.score > 0 && <div className={`stranded-score text-xs ${site.score >= 85 ? 'score-high' : site.score >= 65 ? 'score-med' : 'score-low'}`}>{site.score}</div>}
               </div>
-              <div className="text-sm text-gray-400 mt-1">{site.province} • {site.emission.toLocaleString()} kg/day • Generator sizing on map</div>
+              <div className="text-sm text-gray-400 mt-1">{site.province} • {site.emission.toLocaleString()} kg/day • Live from dataset</div>
               <div className="text-xs text-[#5BC0BE] mt-3">View on map → (real CapEx + ROI with gensets)</div>
             </Link>
           ))}
@@ -190,7 +204,7 @@ export default function LandingPage() {
               <p className="mt-4 text-gray-300 max-w-md">The most elegant climate + capital flywheel available today. One offtaker that actually works for stranded resources.</p>
             </div>
             <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-              <img src="/images/5.jpg" alt="Energy to Bitcoin Flywheel" className="w-full h-auto" />
+              <Image src="/images/5.jpg" alt="Energy to Bitcoin Flywheel" width={800} height={500} className="w-full h-auto" />
             </div>
           </div>
         </div>

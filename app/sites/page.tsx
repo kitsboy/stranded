@@ -99,8 +99,11 @@ export default function AllSitesExplorer() {
                       else next.add(site.id)
                       setSelectedIds(next)
                     }} onClick={e => e.stopPropagation()} className="accent-[#FF8C00]" />
-                    <div className={`stranded-score ml-auto ${site.strandedScore > 72 ? 'score-high' : site.strandedScore > 45 ? 'score-med' : 'score-low'}`}>
-                      {site.strandedScore}
+                    <div className="ml-auto text-right">
+                      <div className={`stranded-score ${site.strandedScore > 72 ? 'score-high' : site.strandedScore > 45 ? 'score-med' : 'score-low'}`}>
+                        {site.strandedScore}
+                      </div>
+                      {site.scoreBadge && <div className="text-[9px] text-[#5BC0BE] mt-0.5">{site.scoreBadge}</div>}
                     </div>
                   </div>
                 </div>

@@ -13,7 +13,10 @@
     "validate": "node scripts/validate-data.js",
     "test": "npm run validate",
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
-    "verify": "bash scripts/verify-pipeline.sh"
+    "verify": "bash scripts/verify-pipeline.sh",
+    "e2e": "playwright test",
+    "refresh-data": "node scripts/refresh-eccc-data.js",
+    "nightly": "bash scripts/nightly-docs-sync.sh"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",
@@ -39,6 +42,7 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@playwright/test": "^1.49.0"
   }
 }

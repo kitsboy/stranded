@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
+import { computeAdvancedRoi } from '@/lib/roi-model'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -59,7 +60,10 @@ export default function SiteDetailsPanel({
   const [fixedSetupCostCad, setFixedSetupCostCad] = useState(25000) // One-time site prep, generator base, install, etc.
   const [poolFeePercent, setPoolFeePercent] = useState(1.5)
   const [maintenanceAnnualPercent, setMaintenanceAnnualPercent] = useState(5)
-  const [revenuePerThPerDayBtc, setRevenuePerThPerDayBtc] = useState(0.0000009) // Editable: current network hashprice in BTC/TH/day (approximate)
+  const [revenuePerThPerDayBtc, setRevenuePerThPerDayBtc] = useState(0.0000009)
+  const [gasTreatmentDerate, setGasTreatmentDerate] = useState(1.0)
+  const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
+  const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
 
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
   const currencySymbol = currentFiat.symbol
@@ -205,6 +209,14 @@ export default function SiteDetailsPanel({
     return val.toFixed(6)
   }
 
+  const advancedRoi = site ? computeAdvancedRoi(site, selectedGenset, {
+    liveBtcUsd: btcPrice,
+    historicalBtcUsd: historicalBtcUsd || undefined,
+    difficultyMultiplier,
+    gasTreatmentDerate,
+    txFeeBtcPerDay: 0.0002,
+  }) : null
+
   if (!site || !calculations) return null
 
   return (
@@ -262,6 +274,18 @@ export default function SiteDetailsPanel({
           <label className="text-xs">Interest: {interestRate}%</label>
           <input type="range" min="3" max="15" step="0.5" value={interestRate} onChange={e => setInterestRate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
         </div>
+      </div>
+      {advancedRoi && (
+        <div className="mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2">
+          <div><span className="text-gray-400">LCOE</span><div className="font-mono text-white">${advancedRoi.lcoeUsdPerKwh}/kWh</div></div>
+          <div><span className="text-gray-400">Carbon credits</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
+          <div><span className="text-gray-400">Incentives</span><div className="font-mono text-[#5BC0BE]">${advancedRoi.incentiveGrantUsd.toLocaleString()}</div></div>
+          <div><span className="text-gray-400">Jobs</span><div className="font-mono">{advancedRoi.jobs.total} FTE</div></div>
+        </div>
+      )}
+      <div className="mb-3">
+        <label className="text-xs text-gray-400">Gas treatment derate: {(gasTreatmentDerate * 100).toFixed(0)}%</label>
+        <input type="range" min="0.7" max="1" step="0.01" value={gasTreatmentDerate} onChange={e => setGasTreatmentDerate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
       </div>
       <div className="bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4">
         <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary <span className="text-xs font-normal">(BTC first — always the denominator)</span></h3>
@@ -325,6 +349,14 @@ export default function SiteDetailsPanel({
             />
           </div>
 
+          <div>
+            <label className="text-xs text-gray-400">Historical BTC backtest (USD, 0 = use live)</label>
+            <input type="number" value={historicalBtcUsd || ''} placeholder={String(liveBtcPrice)} onChange={e => setHistoricalBtcUsd(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400">Difficulty multiplier: {difficultyMultiplier.toFixed(2)}×</label>
+            <input type="range" min="0.5" max="1.5" step="0.05" value={difficultyMultiplier} onChange={e => setDifficultyMultiplier(+e.target.value)} className="w-full accent-[#FF8C00]" />
+          </div>
           <div>
             <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — current network estimate</label>
             <input type="number" step="0.0000001" value={revenuePerThPerDayBtc} onChange={(e) => setRevenuePerThPerDayBtc(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />

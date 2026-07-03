@@ -5,6 +5,8 @@ interface LayerControlsProps {
     sites: boolean
     grid: boolean
     internet: boolean
+    satellite?: boolean
+    terrain?: boolean
   }
   onToggle: (layer: keyof LayerControlsProps['layers']) => void
 }
@@ -57,6 +59,15 @@ export default function LayerControls({ layers, onToggle }: LayerControlsProps) 
               Internet Coverage (fiber/starlink)
             </span>
           </div>
+        </label>
+
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input type="checkbox" checked={!!layers.satellite} onChange={() => onToggle('satellite')} className="w-4 h-4 accent-purple-400" />
+          <span className="text-sm text-gray-300 group-hover:text-white">Satellite Imagery</span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input type="checkbox" checked={!!layers.terrain} onChange={() => onToggle('terrain')} className="w-4 h-4 accent-emerald-400" />
+          <span className="text-sm text-gray-300 group-hover:text-white">3D Terrain View</span>
         </label>
       </div>
       

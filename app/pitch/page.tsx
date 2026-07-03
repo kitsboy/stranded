@@ -125,6 +125,34 @@ export default function PitchPage() {
     return () => clearInterval(id)
   }, [])
 
+  useEffect(() => {
+    if (!stats) return
+    const script = document.createElement('script')
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js'
+    script.onload = () => {
+      const canvas = document.getElementById('pitch-province-chart') as HTMLCanvasElement
+      if (!canvas || !(window as any).Chart) return
+      const Chart = (window as any).Chart
+      if ((canvas as any)._chart) (canvas as any)._chart.destroy()
+      const chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: stats.provinces.slice(0, 10).map(p => p.name.split(' ')[0]),
+          datasets: [{
+            label: 'Sites',
+            data: stats.provinces.slice(0, 10).map(p => p.count),
+            backgroundColor: COLORS.slice(0, 10),
+            borderRadius: 6,
+          }],
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, x: { ticks: { color: '#94a3b8' } } } },
+      })
+      ;(canvas as any)._chart = chart
+    }
+    document.head.appendChild(script)
+    return () => { script.remove() }
+  }, [stats])
+
   const liveRevenue = useMemo(() => {
     if (!stats) return 0
     return Math.round(stats.valueModel.annualBtc * btc)
@@ -185,12 +213,28 @@ export default function PitchPage() {
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/map" className="px-6 py-3 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold hover:bg-[#FF8C00]/90 transition">Open Live Map →</Link>
             <Link href="/Marketing-Hub.html" className="px-6 py-3 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 transition">Marketing Hub</Link>
+            <button onClick={() => window.print()} className="no-print px-6 py-3 rounded-xl border border-white/25 hover:bg-white/10 transition">Print / PDF</button>
           </div>
         </div>
       </section>
 
+      {/* Province choropleth (simplified Canada) */}
+      <section className="px-6 py-10 max-w-6xl mx-auto pitch-print">
+        <h2 className="text-xl font-bold mb-4">Canada Site Density</h2>
+        <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+          {stats.provinces.map((p, i) => (
+            <div key={p.name} className="rounded-xl p-3 text-center border transition hover:scale-105" style={{ backgroundColor: COLORS[i % COLORS.length] + '33', borderColor: COLORS[i % COLORS.length] }}>
+              <div className="text-lg font-bold tabular-nums">{p.count}</div>
+              <div className="text-[10px] text-gray-300 truncate">{p.name}</div>
+              <div className="text-[9px] text-gray-400">{p.pct}%</div>
+            </div>
+          ))}
+        </div>
+        <canvas id="pitch-province-chart" className="w-full max-h-64 mt-6 no-print" height={200} />
+      </section>
+
       {/* Headline stats */}
-      <section className="border-y border-white/10 bg-black/25 px-6 py-10">
+      <section className="border-y border-white/10 bg-black/25 px-6 py-10 pitch-print">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <StatCard label="Verified Sites" value={fmt(stats.siteCount)} accent="#FF8C00" />
           <StatCard label="Daily Methane" value={`${fmt(t.emissionKgDay)} kg`} sub="aggregate vent rate" accent="#5BC0BE" />

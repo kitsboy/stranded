@@ -54,6 +54,14 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
     { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => (s.properties.distance_to_grid_km || 999) < 10 },
   ]
 
+  const routes = [
+    { label: 'Pitch Deck', href: '/pitch' },
+    { label: 'Funding Wizard', href: '/funding' },
+    { label: 'Partnerships', href: '/partnerships' },
+    { label: 'Verticals', href: '/verticals' },
+    { label: 'Marketing Hub', href: '/Marketing-Hub.html' },
+  ]
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -138,7 +146,17 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
             })}
           </div>
 
-          {/* Presets & Recent - Command Palette power-up */}
+          <div className="px-5 py-2 border-t border-white/10">
+            <div className="text-[10px] text-gray-400 mb-2">PAGES</div>
+            <div className="flex flex-wrap gap-2">
+              {routes.map(r => (
+                <button key={r.href} onClick={() => { onClose(); router.push(r.href) }} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="px-5 py-3 border-t border-white/10">
             <div className="text-[10px] text-gray-400 mb-2">QUICK PRESETS</div>
             <div className="flex flex-wrap gap-2 mb-3">

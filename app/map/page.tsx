@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, Suspense } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,7 +10,10 @@ import { Toaster, toast } from 'sonner'
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
 import LayerControls from '@/components/LayerControls'
 import MissionPanel from '@/components/MissionPanel'
+import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite } from '@/lib/sites'
+import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml } from '@/lib/portfolio'
+import { decodePortfolioShare } from '@/lib/portfolio'
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
 
@@ -30,7 +33,9 @@ function StrandedCommandCenter() {
   const [minScore, setMinScore] = useState(0)
   const [showAllProvinces, setShowAllProvinces] = useState(false)
 
-  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false })
+  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false })
+  const [compareSites, setCompareSites] = useState<EnrichedSite[]>([])
+  const [showCompare, setShowCompare] = useState(false)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -40,26 +45,30 @@ function StrandedCommandCenter() {
     loadSites().then(sites => {
       setAllSites(sites)
       setLoading(false)
-      console.log(`[COMMAND CENTER] 2,611 enriched sites loaded. Wild mode engaged.`)
 
-      // Restore deep link
       const siteId = searchParams.get('site')
       if (siteId) {
         const match = sites.find(s => s.id === siteId)
-        if (match) {
-          setTimeout(() => {
-            setSelectedSite(match)
-            // Auto-add a little portfolio love
-            if (!portfolio.some(p => p.id === match.id)) {
-              // don't auto add, just select
-            }
-          }, 420)
+        if (match) setTimeout(() => setSelectedSite(match), 420)
+      }
+
+      const missionToken = searchParams.get('mission')
+      if (missionToken) {
+        const ids = decodePortfolioShare(missionToken)
+        const restored = ids.map(id => sites.find(s => s.id === id)).filter(Boolean) as EnrichedSite[]
+        if (restored.length) setPortfolio(restored)
+      } else {
+        const savedIds = loadPortfolioIds()
+        if (savedIds.length) {
+          const restored = savedIds.map(id => sites.find(s => s.id === id)).filter(Boolean) as EnrichedSite[]
+          if (restored.length) setPortfolio(restored)
         }
       }
     }).catch(err => {
       console.error(err)
       setLoading(false)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Live BTC price (wild useful)
@@ -112,7 +121,7 @@ function StrandedCommandCenter() {
     const params = new URLSearchParams(searchParams.toString())
     params.set('site', selectedSite.id)
     router.replace(`/map?${params.toString()}`, { scroll: false })
-  }, [selectedSite])
+  }, [selectedSite, router, searchParams])
 
   // Note: Global CommandPalette is now handled at root layout via GlobalCommand.tsx + Nav Cmd+K
 
@@ -141,25 +150,33 @@ function StrandedCommandCenter() {
     setSelectedSources(next)
   }
 
-  const addToPortfolio = (site: EnrichedSite) => {
-    if (portfolio.some(p => p.id === site.id)) {
-      toast.info('Already in mission')
-      return
-    }
-    const next = [...portfolio, site]
-    setPortfolio(next)
+  const addToPortfolio = useCallback((site: EnrichedSite) => {
+    setPortfolio(prev => {
+      if (prev.some(p => p.id === site.id)) {
+        toast.info('Already in mission')
+        return prev
+      }
+      const next = [...prev, site]
+      savePortfolio(next)
+      toast.success('Added to Mission', { description: `${site.properties.name} • Score ${site.strandedScore}` })
+      return next
+    })
     setSelectedSite(site)
-    toast.success('Added to Mission', { 
-      description: `${site.properties.name} • Score ${site.strandedScore}`,
-      action: { label: 'View Portfolio', onClick: () => {} }
+  }, [])
+
+  const toggleCompare = (site: EnrichedSite) => {
+    setCompareSites(prev => {
+      if (prev.some(s => s.id === site.id)) return prev.filter(s => s.id !== site.id)
+      if (prev.length >= 3) { toast.info('Max 3 sites for compare'); return prev }
+      return [...prev, site]
     })
   }
 
   const removeFromPortfolio = (id: string) => {
-    setPortfolio(p => p.filter(s => s.id !== id))
+    setPortfolio(p => { const n = p.filter(s => s.id !== id); savePortfolio(n); return n })
   }
 
-  const clearPortfolio = () => setPortfolio([])
+  const clearPortfolio = () => { setPortfolio([]); savePortfolio([]) }
 
   const flyToFromPortfolio = (site: EnrichedSite) => {
     setSelectedSite(site)
@@ -187,7 +204,39 @@ function StrandedCommandCenter() {
     a.download = `stranded-mission-${portfolio.length}-sites.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Mission brief exported')
+    toast.success('Mission brief exported (JSON)')
+  }
+
+  const exportMissionCsv = () => {
+    if (!portfolio.length) return
+    const csv = exportPortfolioCsv(portfolio, liveBtcPrice)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `stranded-mission-${portfolio.length}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('CSV exported')
+  }
+
+  const exportMissionPdf = () => {
+    if (!portfolio.length) return
+    const html = exportPortfolioPdfHtml(portfolio, liveBtcPrice)
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close(); w.print() }
+    toast.success('PDF print dialog opened')
+  }
+
+  const shareMission = async () => {
+    if (!portfolio.length) return
+    const url = portfolioShareUrl(portfolio)
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Mission share link copied', { description: url })
+    } catch {
+      toast.info(url)
+    }
   }
 
   const resetFilters = () => {
@@ -197,7 +246,7 @@ function StrandedCommandCenter() {
     setSelectedSources(new Set())
     setMinScore(0)
     setViewMode('precise')
-    setLayers({ sites: true, grid: false, internet: false })
+    setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false })
     toast.success('Showing all 2,611 locations')
   }
 
@@ -216,7 +265,7 @@ function StrandedCommandCenter() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedSite])
+  }, [selectedSite, addToPortfolio])
 
   const totalPotential = portfolio.reduce((s, x) => s + x.potentialDailyProfitCAD, 0)
 
@@ -334,6 +383,9 @@ function StrandedCommandCenter() {
         selectedId={selectedSite?.id}
         portfolioIds={portfolio.map(p => p.id)}
         viewMode={viewMode}
+        showSatellite={layers.satellite}
+        showTerrain={layers.terrain}
+        liveBtcPrice={liveBtcPrice}
       />
 
       {/* Right side — SiteDetails + Mission (sexy stacked) - mobile friendly, properly constrained above footer */}
@@ -366,13 +418,24 @@ function StrandedCommandCenter() {
         />
 
         {portfolio.length > 0 && (
-          <button 
-            onClick={exportMission}
-            className="self-end text-xs flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10"
-          >
-            <Download size={13} /> EXPORT MISSION BRIEF
+          <div className="flex flex-wrap gap-1.5 justify-end">
+            <button onClick={exportMission} className="text-[10px] flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 border border-white/10"><Download size={11} /> JSON</button>
+            <button onClick={exportMissionCsv} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">CSV</button>
+            <button onClick={exportMissionPdf} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">PDF</button>
+            <button onClick={shareMission} className="text-[10px] px-2 py-1 rounded-full bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 text-[#5BC0BE]">Share</button>
+          </div>
+        )}
+        {compareSites.length >= 2 && (
+          <button onClick={() => setShowCompare(true)} className="text-xs px-3 py-1 rounded-full bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">
+            Compare {compareSites.length} sites
           </button>
         )}
+        {selectedSite && (
+          <button onClick={() => toggleCompare(selectedSite)} className="text-[10px] text-gray-400 hover:text-white self-end">
+            {compareSites.some(s => s.id === selectedSite.id) ? 'Remove from compare' : 'Add to compare'}
+          </button>
+        )}
+      {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       </div>
 
       {/* Floating Layer + View controls (enhanced) */}

@@ -12,6 +12,9 @@ interface MapProps {
   selectedId?: string | null
   portfolioIds?: string[]
   viewMode?: 'precise' | 'clusters'
+  showSatellite?: boolean
+  showTerrain?: boolean
+  liveBtcPrice?: number
 }
 
 export default function Map({ 
@@ -19,7 +22,10 @@ export default function Map({
   onSiteClick, 
   selectedId, 
   portfolioIds = [], 
-  viewMode = 'precise' 
+  viewMode = 'precise',
+  showSatellite = false,
+  showTerrain = false,
+  liveBtcPrice = 85000,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
@@ -51,9 +57,11 @@ export default function Map({
         const avgLat = group.reduce((s, g) => s + g.geometry.coordinates[1], 0) / group.length
         const totalEmission = group.reduce((s, g) => s + g.emission, 0)
         const avgScore = Math.round(group.reduce((s, g) => s + g.strandedScore, 0) / group.length)
+        const clusterRevenue = group.reduce((s, g) => s + g.potentialDailyProfitCAD, 0)
 
         const size = Math.min(38, Math.max(16, Math.sqrt(totalEmission) / 9))
         const el = document.createElement('div')
+        el.title = `${group.length} sites · avg score ${avgScore} · C$${clusterRevenue.toLocaleString()}/day · ~${(clusterRevenue / liveBtcPrice * 0.0007).toFixed(3)} BTC/d`
         el.className = `flex items-center justify-center rounded-full border-2 border-white/80 text-[10px] font-bold shadow-xl cursor-pointer ${avgScore > 72 ? 'bg-[#22c55e]' : avgScore > 45 ? 'bg-[#eab308]' : 'bg-[#FF8C00]'}`
         el.style.width = `${size}px`
         el.style.height = `${size}px`
@@ -117,7 +125,26 @@ export default function Map({
         markersRef.current.push(marker)
       })
     }
-  }, [onSiteClick, portfolioIds, selectedId, viewMode])
+  }, [onSiteClick, portfolioIds, selectedId, viewMode, liveBtcPrice])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded?.()) return
+    const layers = (map as any)._strandedLayers || {}
+    if (showSatellite !== layers.satellite) {
+      if (showSatellite && !map.getLayer('satellite')) {
+        map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } })
+      } else if (!showSatellite && map.getLayer('satellite')) {
+        map.removeLayer('satellite')
+      }
+      layers.satellite = showSatellite
+    }
+    if (showTerrain !== layers.terrain) {
+      map.setPitch(showTerrain ? 50 : 0)
+      layers.terrain = showTerrain
+    }
+    ;(map as any)._strandedLayers = layers
+  }, [showSatellite, showTerrain])
 
   // Initialize map once
   useEffect(() => {
@@ -127,13 +154,21 @@ export default function Map({
       container: mapContainer.current,
       style: {
         version: 8,
-        sources: { 'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 } },
-        layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+        sources: {
+          'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OSM' },
+          'satellite': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 },
+          'terrain': { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize: 256, encoding: 'terrarium', maxzoom: 15 },
+        },
+        layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
       },
       center: [-95.5, 55.8],
       zoom: 3.2,
       attributionControl: false,
+      pitch: showTerrain ? 45 : 0,
+      touchZoomRotate: true,
+      cooperativeGestures: false,
     })
+    ;(map as any)._strandedLayers = { satellite: false, terrain: showTerrain }
     mapRef.current = map
 
     map.on('load', () => {
@@ -173,6 +208,6 @@ export default function Map({
     })
   }, [selectedId, filteredSites])
 
-  return <div ref={mapContainer} className="w-full h-full" />
+  return <div ref={mapContainer} className="w-full h-full touch-manipulation" style={{ touchAction: 'pan-x pan-y pinch-zoom' }} role="application" aria-label="Interactive map of stranded methane sites" />
 }
 

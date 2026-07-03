@@ -1,4 +1,4 @@
 # stranded — Last Updated 2026-07-03 by Grok
 
-Brief: Pitch page, auto-sync docs, pipeline CI, lint fixes
-Commit: (pending push)
+Brief: All 50 upgrades — scoring v2, pitch charts, PWA, ROI model, new pages
+Commit: (pending)

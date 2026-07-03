@@ -18,7 +18,9 @@ let scoreSum = 0
 features.forEach(f => {
   const em = f.properties.emission_rate_kg_day || 0
   const dist = f.properties.distance_to_grid_km || 50
-  const score = Math.max(8, Math.min(99, Math.round((Math.min(em/8000,3) * Math.max(0.4,12/(dist+3)) * 28) * 10)/10 ))
+  const emissionScore = (Math.log10(Math.max(em, 10)) / Math.log10(60000)) * 52
+  const proximityScore = Math.min(22, Math.max(4, 24 - dist * 0.25))
+  const score = Math.max(18, Math.min(99, Math.round((emissionScore + proximityScore + 16) * 10) / 10))
   scoreSum += score
 })
 

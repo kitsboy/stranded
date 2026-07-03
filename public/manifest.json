@@ -22,6 +22,8 @@
     {"name": "Open Map", "url": "/map"},
     {"name": "Education Center", "url": "/education"},
     {"name": "All Sites", "url": "/sites"},
-    {"name": "Marketing Hub", "url": "/Marketing-Hub.html"}
+    {"name": "Pitch Deck", "url": "/pitch"},
+    {"name": "Marketing Hub", "url": "/Marketing-Hub.html"},
+    {"name": "Funding Wizard", "url": "/funding"}
   ]
 }

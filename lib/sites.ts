@@ -1,44 +1,18 @@
 import { StrandedSite } from '@/types/site'
+import { computeStrandedScore, scorePercentile, scoreBadgeLabel } from './scoring'
 
 export type EnrichedSite = StrandedSite & {
   id: string
   strandedScore: number
+  scorePercentile?: number
+  scoreBadge?: string
   potentialDailyProfitCAD: number // rough optimistic
   emission: number
   recommendedGenset?: keyof typeof GENSET_DATA
   maxGeneratorPowerKW?: number
 }
 
-const INTERNET_FACTOR: Record<string, number> = {
-  fiber: 1.35,
-  starlink: 1.15,
-  lte: 1.0,
-  cable: 1.05,
-  none: 0.7,
-}
-
-const CONFIDENCE_FACTOR: Record<string, number> = {
-  high: 1.25,
-  medium: 1.0,
-  low: 0.75,
-}
-
-export function computeStrandedScore(site: StrandedSite): number {
-  const p = site.properties
-  const emission = p.emission_rate_kg_day || 0
-  const dist = p.distance_to_grid_km ?? 50
-  const internet = (p.internet_type || 'none').toLowerCase()
-  const conf = (p.confidence || 'medium').toLowerCase() as keyof typeof CONFIDENCE_FACTOR
-
-  // Wild but useful formula: high emission + close to grid + good connectivity + high confidence = high score
-  const emissionFactor = Math.min(emission / 8000, 3) // cap influence
-  const proximityFactor = Math.max(0.4, 12 / (dist + 3))
-  const infraFactor = INTERNET_FACTOR[internet] || 0.85
-  const confFactor = CONFIDENCE_FACTOR[conf] || 1
-
-  const raw = emissionFactor * proximityFactor * infraFactor * confFactor * 28
-  return Math.max(8, Math.min(99.5, Math.round(raw * 10) / 10))
-}
+export { computeStrandedScore, scorePercentile, scoreBadgeLabel }
 
 export function enrichSite(site: StrandedSite): EnrichedSite {
   const p = site.properties
@@ -66,7 +40,13 @@ export async function loadSites(): Promise<EnrichedSite[]> {
   const res = await fetch('/data/stranded-sites.geojson')
   const data = await res.json()
   const features: StrandedSite[] = data.features || []
-  return features.map(enrichSite)
+  const enriched = features.map(enrichSite)
+  const allScores = enriched.map(s => s.strandedScore)
+  return enriched.map(s => ({
+    ...s,
+    scorePercentile: scorePercentile(s.strandedScore, allScores),
+    scoreBadge: scoreBadgeLabel(scorePercentile(s.strandedScore, allScores)),
+  }))
 }
 
 export function getProvinces(sites: EnrichedSite[]) {
