@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { EnrichedSite } from '@/lib/sites'
+import { getBookmarks } from '@/lib/bookmarks'
 
 interface CommandPaletteProps {
   sites: EnrichedSite[]
@@ -56,12 +57,21 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
   ]
 
   const routes = [
+    { label: 'Dashboard', href: '/dashboard' },
     { label: 'Pitch Deck', href: '/pitch' },
+    { label: 'Bookmarks', href: '/bookmarks' },
+    { label: 'Provinces', href: '/provinces' },
     { label: 'Funding Wizard', href: '/funding' },
     { label: 'Partnerships', href: '/partnerships' },
     { label: 'Verticals', href: '/verticals' },
+    { label: 'Methodology', href: '/methodology' },
+    { label: 'Global', href: '/global' },
+    { label: 'Benchmarks', href: '/benchmarks' },
     { label: 'Marketing Hub', href: '/Marketing-Hub.html' },
   ]
+
+  const bookmarkIds = typeof window !== 'undefined' ? getBookmarks() : []
+  const bookmarkSites = bookmarkIds.map(id => sites.find(s => s.id === id)).filter(Boolean) as EnrichedSite[]
 
   const handleSelect = useCallback((site: EnrichedSite) => {
     onClose()
@@ -177,6 +187,19 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
                 </button>
               ))}
             </div>
+
+            {bookmarkSites.length > 0 && (
+              <>
+                <div className="text-[10px] text-gray-400 mb-2">BOOKMARKS</div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {bookmarkSites.slice(0, 5).map(site => (
+                    <button key={site.id} onClick={() => handleSelect(site)} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 truncate max-w-[140px]">
+                      ★ {site.properties.name || site.id}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
             {recent.length > 0 && (
               <>

@@ -15,6 +15,10 @@ const LINKS = [
   { href: '/verticals', label: 'Verticals' },
   { href: '/funding', label: 'Funding' },
   { href: '/partnerships', label: 'Partnerships' },
+  { href: '/bookmarks', label: 'Saved' },
+  { href: '/methodology', label: 'Methodology' },
+  { href: '/global', label: 'Global' },
+  { href: '/benchmarks', label: 'Benchmarks' },
 ]
 
 export default function MobileNav() {

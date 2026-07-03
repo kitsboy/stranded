@@ -11,6 +11,8 @@ import {
 } from 'lucide-react'
 import { loadSites, EnrichedSite, GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 import { USED_ASIC_MARKET } from '@/lib/roi-model'
+import { markEduSection, getEduProgress } from '@/lib/bookmarks'
+import GensetComparisonTable from '@/components/GensetComparisonTable'
 
 function QuizSection() {
   const questions = [
@@ -42,15 +44,29 @@ function QuizSection() {
     setCurrent(0); setScore(0); setSelected(null); setFinished(false);
   };
 
+  const shareScore = async () => {
+    const pct = Math.round((score / questions.length) * 100);
+    const url = `${window.location.origin}/education?quiz=${score}&total=${questions.length}&pct=${pct}`;
+    const text = `I scored ${score}/${questions.length} (${pct}%) on the Stranded Value IQ quiz! ${url}`;
+    try {
+      if (navigator.share) await navigator.share({ title: 'Stranded Value IQ', text, url });
+      else { await navigator.clipboard.writeText(text); alert('Score link copied!'); }
+    } catch { /* cancelled */ }
+  };
+
   if (finished) {
     const pct = Math.round((score / questions.length) * 100);
     const rec = pct > 80 ? "You're a Stranded Value expert — go build a mission on the map!" : pct > 50 ? "Solid foundation — try the Advanced Simulator next." : "Great start — explore the glossary and basic simulator.";
+    markEduSection('quiz-complete');
     return (
       <div className="glass p-8 rounded-3xl text-center mb-16">
         <h3 className="text-2xl font-semibold mb-2">Your Stranded Value IQ: {score}/{questions.length} ({pct}%)</h3>
         <p className="text-gray-300 mb-4">{rec}</p>
-        <button onClick={reset} className="px-6 py-2 bg-[#FF8C00] text-black rounded-xl font-medium">Retake Quiz</button>
-        <p className="text-xs mt-3 text-gray-500">Share your score and tag @give_bit to join the movement.</p>
+        <div className="flex gap-3 justify-center flex-wrap">
+          <button onClick={reset} className="px-6 py-2 bg-[#FF8C00] text-black rounded-xl font-medium">Retake Quiz</button>
+          <button onClick={shareScore} className="px-6 py-2 border border-white/20 rounded-xl font-medium flex items-center gap-2"><Share2 size={16} /> Share score</button>
+        </div>
+        <p className="text-xs mt-3 text-gray-500">Tag @give_bit to join the movement.</p>
       </div>
     );
   }
@@ -101,6 +117,12 @@ export default function EducationContent() {
   const [persona, setPersona] = useState<'operator' | 'investor' | 'government' | 'landowner'>('investor')
   const [financingDebtPercent, setFinancingDebtPercent] = useState(60)
   const [financingInterestRate, setFinancingInterestRate] = useState(8) // %
+  const [eduProgress, setEduProgress] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    setEduProgress(getEduProgress())
+    markEduSection('education-visit')
+  }, [])
 
   // ASIC models for per-site mining ROI (reused from platform for consistency)
   const ASIC_MACHINES = [
@@ -245,6 +267,17 @@ export default function EducationContent() {
           </button>
         ))}
       </div>
+      {Object.keys(eduProgress).length > 0 && (
+        <div className="mb-6 p-4 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5">
+          <div className="flex justify-between text-xs text-gray-400 mb-2">
+            <span>Learning progress (local)</span>
+            <span>{Object.values(eduProgress).filter(Boolean).length} sections</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-full bg-[#5BC0BE]" style={{ width: `${Math.min(100, Object.values(eduProgress).filter(Boolean).length * 20)}%` }} />
+          </div>
+        </div>
+      )}
       {/* 1. Enhanced Hero */}
       <div className="text-center mb-16">
         <Link href="/" className="text-sm text-[#5BC0BE] hover:underline mb-4 inline-block">← Back to home</Link>
@@ -709,6 +742,12 @@ export default function EducationContent() {
           ))}
         </div>
         <p className="text-[10px] text-gray-500 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
+      </div>
+
+      <div className="mb-16">
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Cpu className="text-[#FF8C00]" /> Genset Comparison Table</h2>
+        <p className="text-sm text-gray-400 mb-4">Side-by-side methane-to-power units used in Stranded ROI models.</p>
+        <GensetComparisonTable />
       </div>
 
       {/* 6. Stranded Value IQ Quiz (high engagement education tool) */}

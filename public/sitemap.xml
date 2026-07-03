@@ -13,5 +13,10 @@
   <url><loc>https://stranded.giveabit.io/changelog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://stranded.giveabit.io/status</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://stranded.giveabit.io/docs/api</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://stranded.giveabit.io/bookmarks</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://stranded.giveabit.io/methodology</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://stranded.giveabit.io/about</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://stranded.giveabit.io/global</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://stranded.giveabit.io/benchmarks</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://stranded.giveabit.io/Marketing-Hub.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

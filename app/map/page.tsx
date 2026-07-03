@@ -15,6 +15,11 @@ import { loadSites, filterSites, EnrichedSite } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl } from '@/lib/map-url'
+import { getFilterPresets, saveFilterPreset, type FilterPreset } from '@/lib/bookmarks'
+import { exportFilteredGeojson, exportSitesKml, downloadBlob } from '@/lib/export-formats'
+import { savePortfolioProfile } from '@/lib/portfolio-profiles'
+import { addSiteAlert } from '@/lib/alerts'
+import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -35,7 +40,10 @@ function StrandedCommandCenter() {
   const [minScore, setMinScore] = useState(0)
   const [showAllProvinces, setShowAllProvinces] = useState(false)
 
-  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false })
+  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false })
+  const [presetName, setPresetName] = useState('')
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [compareSites, setCompareSites] = useState<EnrichedSite[]>([])
   const [showCompare, setShowCompare] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
@@ -263,7 +271,7 @@ function StrandedCommandCenter() {
     setSelectedSources(new Set())
     setMinScore(0)
     setViewMode('precise')
-    setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false })
+    setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false })
     toast.success('Showing all 2,611 locations')
   }
 
@@ -279,12 +287,55 @@ function StrandedCommandCenter() {
         e.preventDefault()
         addToPortfolio(selectedSite)
       }
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault()
+        setShowKeyboardHelp(true)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [selectedSite, addToPortfolio])
 
   const totalPotential = portfolio.reduce((s, x) => s + x.potentialDailyProfitCAD, 0)
+
+  const applyPreset = (preset: FilterPreset) => {
+    setMinScore(preset.minScore)
+    setMinEmission(preset.minEmission)
+    setSelectedProvinces(new Set(preset.provinces))
+    toast.success(`Loaded preset: ${preset.name}`)
+  }
+
+  const saveCurrentPreset = () => {
+    const name = presetName.trim() || `Preset ${new Date().toLocaleDateString()}`
+    saveFilterPreset({ name, minScore, minEmission, provinces: Array.from(selectedProvinces) })
+    setPresetName('')
+    toast.success(`Saved filter preset: ${name}`)
+  }
+
+  const exportKml = () => {
+    const sites = portfolio.length ? portfolio : filteredSites.slice(0, 200)
+    downloadBlob(exportSitesKml(sites), `stranded-${sites.length}-sites.kml`, 'application/vnd.google-earth.kml+xml')
+    toast.success('KML exported')
+  }
+
+  const exportGeo = () => {
+    downloadBlob(exportFilteredGeojson(filteredSites), `stranded-filtered-${filteredSites.length}.geojson`, 'application/geo+json')
+    toast.success('GeoJSON exported')
+  }
+
+  const saveMissionProfile = () => {
+    if (!portfolio.length) return
+    const name = window.prompt('Mission profile name')?.trim()
+    if (!name) return
+    savePortfolioProfile(name, portfolio.map(p => p.id))
+    toast.success(`Saved mission profile: ${name}`)
+  }
+
+  const watchSite = () => {
+    if (!selectedSite) return
+    addSiteAlert({ siteId: selectedSite.id, name: selectedSite.properties.name || selectedSite.id, minScore: selectedSite.strandedScore })
+    toast.success('Site alert saved locally')
+  }
 
   return (
     <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-live="polite" aria-label="Stranded command center map">
@@ -389,6 +440,19 @@ function StrandedCommandCenter() {
           </div>
         </div>
 
+        <div className="mt-4 pt-3 border-t border-white/10">
+          <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">FILTER PRESETS</div>
+          <div className="flex gap-1 mb-2">
+            <input value={presetName} onChange={e => setPresetName(e.target.value)} placeholder="Preset name" className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
+            <button onClick={saveCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">Save</button>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {getFilterPresets().map(p => (
+              <button key={p.name} onClick={() => applyPreset(p)} className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 hover:border-[#5BC0BE]/50">{p.name}</button>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-5 pt-4 border-t border-white/10 flex gap-2">
           <button onClick={() => setViewMode(viewMode === 'precise' ? 'clusters' : 'precise')} className="flex-1 text-xs py-2 rounded-2xl border border-white/20 hover:bg-white/5 flex items-center justify-center gap-2">
             {viewMode === 'precise' ? 'CLUSTER VIEW (perf)' : 'PRECISE MARKERS'}
@@ -407,6 +471,7 @@ function StrandedCommandCenter() {
         viewMode={viewMode}
         showSatellite={layers.satellite}
         showTerrain={layers.terrain}
+        showHeatmap={layers.heatmap}
         liveBtcPrice={liveBtcPrice}
       />
 
@@ -446,7 +511,13 @@ function StrandedCommandCenter() {
             <button onClick={exportMissionPdf} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">PDF</button>
             <button onClick={shareMission} className="text-[10px] px-2 py-1 rounded-full bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 text-[#5BC0BE]">Share</button>
             <button onClick={emailMission} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">Email</button>
+            <button onClick={exportKml} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">KML</button>
+            <button onClick={exportGeo} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">GeoJSON</button>
+            <button onClick={saveMissionProfile} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">Save profile</button>
           </div>
+        )}
+        {selectedSite && (
+          <button onClick={watchSite} className="text-[10px] self-end text-gray-400 hover:text-[#5BC0BE]">Watch site (local alert)</button>
         )}
         <button onClick={() => setFullscreen(f => !f)} className="text-[10px] self-end px-2 py-1 rounded-full border border-white/15 text-gray-400 hover:text-white">
           {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
@@ -463,6 +534,7 @@ function StrandedCommandCenter() {
         )}
       {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       </div>
+      <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
 
       {/* Floating Layer + View controls (enhanced) */}
       <div className="absolute bottom-5 right-5 z-[60]">

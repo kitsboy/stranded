@@ -37,9 +37,26 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
 }
 
 export async function loadSites(): Promise<EnrichedSite[]> {
-  const res = await fetch('/data/stranded-sites.geojson')
-  const data = await res.json()
-  const features: StrandedSite[] = data.features || []
+  let data: GeoJSON.FeatureCollection
+  try {
+    const res = await fetch('/data/stranded-sites.geojson')
+    if (!res.ok) throw new Error('fetch failed')
+    data = await res.json()
+    if (typeof window !== 'undefined') {
+      const { setCachedGeojson } = await import('./offline-db')
+      await setCachedGeojson(data)
+    }
+  } catch {
+    if (typeof window !== 'undefined') {
+      const { getCachedGeojson } = await import('./offline-db')
+      const cached = await getCachedGeojson()
+      if (!cached?.features?.length) throw new Error('No site data available')
+      data = cached
+    } else {
+      throw new Error('No site data available')
+    }
+  }
+  const features: StrandedSite[] = (data.features || []) as StrandedSite[]
   const enriched = features.map(enrichSite)
   const allScores = enriched.map(s => s.strandedScore)
   return enriched.map(s => ({

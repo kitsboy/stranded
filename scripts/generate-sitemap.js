@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 
 const BASE = 'https://stranded.giveabit.io'
-const routes = ['/', '/map', '/education', '/sites', '/pitch', '/dashboard', '/verticals', '/funding', '/partnerships', '/provinces', '/changelog', '/status', '/docs/api', '/Marketing-Hub.html']
+const routes = ['/', '/map', '/education', '/sites', '/pitch', '/dashboard', '/verticals', '/funding', '/partnerships', '/provinces', '/changelog', '/status', '/docs/api', '/bookmarks', '/methodology', '/about', '/global', '/benchmarks', '/Marketing-Hub.html']
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

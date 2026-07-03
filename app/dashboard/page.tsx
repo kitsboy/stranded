@@ -10,9 +10,14 @@ export default function DashboardPage() {
   const [btc, setBtc] = useState(85000)
 
   useEffect(() => {
-    fetch('/data/live-stats.json').then(r => r.json()).then(setStats)
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-      .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd))
+    const refresh = () => {
+      fetch('/data/live-stats.json').then(r => r.json()).then(setStats)
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+        .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd))
+    }
+    refresh()
+    const id = setInterval(refresh, 60_000)
+    return () => clearInterval(id)
   }, [])
 
   if (!stats) return <div className="p-12 text-center text-gray-400">Loading command dashboard…</div>

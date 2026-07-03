@@ -1,4 +1,4 @@
 # stranded — Last Updated 2026-07-03 by Grok
 
-Brief: All 50 upgrades — scoring v2, pitch charts, PWA, ROI model, new pages
-Commit: bfc7b24
+Brief: Upgrades 101–150 — heatmap, IndexedDB, 5 new pages, v2.2.0
+Commit: (pending)

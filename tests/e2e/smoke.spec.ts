@@ -19,3 +19,17 @@ test('education page loads', async ({ page }) => {
   await page.goto('/education')
   await expect(page.getByText(/Stranded Value/i).first()).toBeVisible()
 })
+
+test('v2.1 routes load', async ({ page }) => {
+  for (const path of ['/dashboard', '/provinces', '/status', '/docs/api']) {
+    await page.goto(path)
+    await expect(page.locator('body')).not.toContainText('404')
+  }
+})
+
+test('v2.2 routes load', async ({ page }) => {
+  for (const path of ['/bookmarks', '/methodology', '/about', '/global', '/benchmarks']) {
+    await page.goto(path)
+    await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 })
+  }
+})

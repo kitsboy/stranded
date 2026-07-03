@@ -1,10 +1,17 @@
-const CACHE = 'stranded-v2'
+const CACHE = 'stranded-v3'
 const PRECACHE = [
   '/',
   '/map',
   '/education',
   '/sites',
   '/pitch',
+  '/dashboard',
+  '/provinces',
+  '/bookmarks',
+  '/methodology',
+  '/about',
+  '/global',
+  '/benchmarks',
   '/data/stranded-sites.geojson',
   '/data/live-stats.json',
   '/logo.png',
@@ -27,7 +34,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetched = fetch(e.request).then(res => {
-        if (res.ok && e.request.url.includes('/data/')) {
+        if (res.ok && (e.request.url.includes('/data/') || e.request.url.endsWith('.html'))) {
           caches.open(CACHE).then(c => c.put(e.request, res.clone()))
         }
         return res

@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import type { LiveStats } from '@/types/live-stats'
@@ -102,11 +103,18 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
   )
 }
 
-export default function PitchPage() {
+function PitchContent() {
+  const searchParams = useSearchParams()
+  const embed = searchParams.get('embed') === '1'
   const [stats, setStats] = useState<LiveStats | null>(null)
   const [btc, setBtc] = useState(85000)
   const [error, setError] = useState('')
   const [btcSensitivity, setBtcSensitivity] = useState(100)
+
+  useEffect(() => {
+    if (embed) document.documentElement.classList.add('pitch-embed')
+    return () => document.documentElement.classList.remove('pitch-embed')
+  }, [embed])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -384,5 +392,13 @@ export default function PitchPage() {
         <p className="text-[10px] text-gray-600 mt-10">Stats generated {new Date(stats.generatedAt).toLocaleString('en-CA')} · Not financial advice</p>
       </section>
     </div>
+  )
+}
+
+export default function PitchPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-gray-400">Loading pitch deck…</div>}>
+      <PitchContent />
+    </Suspense>
   )
 }

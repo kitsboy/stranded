@@ -7,6 +7,7 @@ import GlobalCommand from '@/components/GlobalCommand'
 import Providers from '@/components/Providers'
 import JsonLd from '@/components/JsonLd'
 import MobileCtaBar from '@/components/MobileCtaBar'
+import OfflineIndicator from '@/components/OfflineIndicator'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
@@ -50,6 +51,7 @@ export default function RootLayout({
         <Toaster position="top-center" richColors closeButton />
         <GlobalCommand />
         <MobileCtaBar />
+        <OfflineIndicator />
         <Providers>{null}</Providers>
       </body>
     </html>

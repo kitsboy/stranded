@@ -63,6 +63,7 @@ export default function Nav() {
           {navLink('/pitch', 'Pitch')}
           {navLink('/dashboard', 'Dashboard')}
           <span className="hidden lg:inline">{navLink('/verticals', 'Verticals')}</span>
+          <span className="hidden xl:inline">{navLink('/bookmarks', 'Saved')}</span>
         </div>
 
         <div className="flex items-center gap-2 text-xs">

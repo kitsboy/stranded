@@ -14,6 +14,7 @@ interface MapProps {
   viewMode?: 'precise' | 'clusters'
   showSatellite?: boolean
   showTerrain?: boolean
+  showHeatmap?: boolean
   liveBtcPrice?: number
 }
 
@@ -25,6 +26,7 @@ export default function Map({
   viewMode = 'precise',
   showSatellite = false,
   showTerrain = false,
+  showHeatmap = false,
   liveBtcPrice = 85000,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -184,11 +186,61 @@ export default function Map({
     }
   }, [])
 
+  const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
+    const map = mapRef.current
+    if (!map) return
+    if (!map.isStyleLoaded?.()) {
+      map.once('load', () => syncHeatmap(sitesToRender))
+      return
+    }
+    const srcId = 'emission-heat'
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: sitesToRender.map(s => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: s.geometry.coordinates },
+        properties: { weight: Math.max(0.1, Math.log10(Math.max(s.emission, 10))) },
+      })),
+    }
+    if (map.getSource(srcId)) {
+      (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
+    } else {
+      map.addSource(srcId, { type: 'geojson', data: geojson })
+      map.addLayer({
+        id: 'emission-heat-layer',
+        type: 'heatmap',
+        source: srcId,
+        paint: {
+          'heatmap-weight': ['get', 'weight'],
+          'heatmap-intensity': 0.6,
+          'heatmap-radius': 28,
+          'heatmap-opacity': 0.75,
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(20,184,166,0)',
+            0.3, '#14b8a6',
+            0.6, '#fbbf24',
+            1, '#f43f5e',
+          ],
+        },
+      })
+    }
+    if (map.getLayer('emission-heat-layer')) {
+      map.setLayoutProperty('emission-heat-layer', 'visibility', showHeatmap ? 'visible' : 'none')
+    }
+  }, [showHeatmap])
+
   // React to filtered data + viewMode (core of performance + live filters)
   useEffect(() => {
     if (!mapRef.current) return
-    addMarkers(filteredSites)
-  }, [filteredSites, addMarkers, viewMode])
+    if (showHeatmap) {
+      syncHeatmap(filteredSites)
+      clearMarkers()
+    } else {
+      addMarkers(filteredSites)
+      syncHeatmap(filteredSites)
+    }
+  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap])
 
   // Sexy fly-to + highlight when selection changes
   useEffect(() => {

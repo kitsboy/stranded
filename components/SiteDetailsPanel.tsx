@@ -4,6 +4,9 @@ import { useState, useMemo, useEffect } from 'react'
 import { GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks, getSiteNote, setSiteNote } from '@/lib/bookmarks'
+import Link from 'next/link'
+import RoiProjectionChart from '@/components/RoiProjectionChart'
+import { integrationUrl } from '@/lib/integrations'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -233,7 +236,10 @@ export default function SiteDetailsPanel({
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-white">{p.name || 'Unknown'}</h2>
-          <p className="text-sm text-gray-400">{p.city || 'Unknown'}, {p.province || ''}</p>
+          <p className="text-sm text-gray-400">
+            {p.city || 'Unknown'},{' '}
+            {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
+          </p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }} className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}>{bookmarked ? '★' : '☆'}</button>
@@ -295,6 +301,13 @@ export default function SiteDetailsPanel({
           <div><span className="text-gray-400">Jobs</span><div className="font-mono">{advancedRoi.jobs.total} FTE</div></div>
         </div>
       )}
+      <div className="mb-4 p-3 bg-slate-800/40 rounded-lg">
+        <RoiProjectionChart dailyBtc={calculations.effectiveDailyBtc} btcUsd={btcPrice} />
+      </div>
+      <div className="mb-3 flex gap-2 text-[10px]">
+        <a href={integrationUrl('tadbuy', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#FF8C00]/40 text-gray-400 hover:text-[#FF8C00]">ASICs via Tadbuy</a>
+        <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
+      </div>
       <div className="mb-3">
         <label className="text-xs text-gray-400">Gas treatment derate: {(gasTreatmentDerate * 100).toFixed(0)}%</label>
         <input type="range" min="0.7" max="1" step="0.01" value={gasTreatmentDerate} onChange={e => setGasTreatmentDerate(+e.target.value)} className="w-full accent-[#5BC0BE]" />

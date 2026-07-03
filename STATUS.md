@@ -11,7 +11,7 @@
 **Pipeline:** `npm run verify` — full commit/push/deploy check + GitHub Actions CI
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-03T18:53:50.699Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-03T19:00:15.596Z
 
 | Metric | Value |
 |--------|-------|
