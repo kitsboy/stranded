@@ -268,7 +268,7 @@ But the core mission will not change: **Turn every molecule of stranded energy i
 **Next Steps**
 
 **Explore the Platform**
-[Live Platform (local dev: http://localhost:3003/map)](http://localhost:3003/map) | [Education Center](http://localhost:3003/education) | [Marketing Hub](/Marketing-Hub.html)
+[Live Platform](https://stranded.giveabit.io/map) | [Education Center](https://stranded.giveabit.io/education) | [Pitch Deck](https://stranded.giveabit.io/pitch) | [Marketing Hub](/Marketing-Hub.html)
 
 **For Partnerships, Investment, or Data Collaboration**
 hello@giveabit.io

@@ -1,0 +1,335 @@
+{
+  "generatedAt": "2026-07-03T18:37:54.496Z",
+  "version": "1.0.0",
+  "siteCount": 2611,
+  "provinceCount": 13,
+  "provinces": [
+    {
+      "name": "Alberta",
+      "count": 1176,
+      "pct": 45
+    },
+    {
+      "name": "Ontario",
+      "count": 454,
+      "pct": 17.4
+    },
+    {
+      "name": "British Columbia",
+      "count": 296,
+      "pct": 11.3
+    },
+    {
+      "name": "Saskatchewan",
+      "count": 280,
+      "pct": 10.7
+    },
+    {
+      "name": "Quebec",
+      "count": 243,
+      "pct": 9.3
+    },
+    {
+      "name": "Manitoba",
+      "count": 50,
+      "pct": 1.9
+    },
+    {
+      "name": "Nova Scotia",
+      "count": 37,
+      "pct": 1.4
+    },
+    {
+      "name": "New Brunswick",
+      "count": 30,
+      "pct": 1.1
+    },
+    {
+      "name": "Newfoundland and Labrador",
+      "count": 18,
+      "pct": 0.7
+    },
+    {
+      "name": "Northwest Territories",
+      "count": 10,
+      "pct": 0.4
+    },
+    {
+      "name": "Nunavut",
+      "count": 8,
+      "pct": 0.3
+    },
+    {
+      "name": "Prince Edward Island",
+      "count": 5,
+      "pct": 0.2
+    },
+    {
+      "name": "Yukon",
+      "count": 4,
+      "pct": 0.2
+    }
+  ],
+  "sourceTypes": [
+    {
+      "name": "oil_gas_extraction",
+      "count": 1330,
+      "pct": 50.9
+    },
+    {
+      "name": "industrial_other",
+      "count": 648,
+      "pct": 24.8
+    },
+    {
+      "name": "power_generation",
+      "count": 220,
+      "pct": 8.4
+    },
+    {
+      "name": "coal_mining",
+      "count": 129,
+      "pct": 4.9
+    },
+    {
+      "name": "landfill_waste",
+      "count": 111,
+      "pct": 4.3
+    },
+    {
+      "name": "pulp_paper",
+      "count": 81,
+      "pct": 3.1
+    },
+    {
+      "name": "refinery",
+      "count": 37,
+      "pct": 1.4
+    },
+    {
+      "name": "gas_processing",
+      "count": 37,
+      "pct": 1.4
+    },
+    {
+      "name": "pipeline_transmission",
+      "count": 12,
+      "pct": 0.5
+    },
+    {
+      "name": "oil_gas_support",
+      "count": 4,
+      "pct": 0.2
+    },
+    {
+      "name": "oil_sands",
+      "count": 2,
+      "pct": 0.1
+    }
+  ],
+  "gensetRecommendations": [
+    {
+      "id": "mobile250",
+      "count": 2530,
+      "pct": 96.9
+    },
+    {
+      "id": "jenbacher316",
+      "count": 47,
+      "pct": 1.8
+    },
+    {
+      "id": "cat3520",
+      "count": 22,
+      "pct": 0.8
+    },
+    {
+      "id": "man",
+      "count": 12,
+      "pct": 0.5
+    }
+  ],
+  "emissionTiers": {
+    "mega": 12,
+    "large": 69,
+    "medium": 316,
+    "small": 1055,
+    "micro": 1159
+  },
+  "confidenceCounts": {
+    "high": 675,
+    "medium": 901,
+    "low": 1035
+  },
+  "totals": {
+    "emissionKgDay": 2053504,
+    "avgEmissionKgDay": 786,
+    "ch4TonnesYear": 749529,
+    "avgStrandedScore": 8.2,
+    "totalGeneratorKW": 9958985,
+    "highScoreSites": 0
+  },
+  "impact": {
+    "co2eAvoided5PctTonnes": 1049340,
+    "co2eAvoided100PctTonnes": 20986807,
+    "sitesAt5Pct": 131,
+    "methaneGwp": 28
+  },
+  "valueModel": {
+    "defaultBtcUsd": 85000,
+    "roughDailyBtc": 511.9994,
+    "annualBtc": 177535.79,
+    "annualRevenueUsd": 15090541726,
+    "note": "Portfolio model uses Jenbacher-class power + ASIC heuristics; live BTC on pitch page."
+  },
+  "topSites": [
+    {
+      "id": "G10161",
+      "name": "Keele Valley Landfill",
+      "province": "Ontario",
+      "emissionKgDay": 56014,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 20445
+    },
+    {
+      "id": "G10026",
+      "name": "Brady Road Resource Management Facility",
+      "province": "Manitoba",
+      "emissionKgDay": 48874,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 17839
+    },
+    {
+      "id": "G12147",
+      "name": "Enbridge Gas Inc. - Distribution",
+      "province": "Ontario",
+      "emissionKgDay": 37260,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 13600
+    },
+    {
+      "id": "G10187",
+      "name": "Mildred Lake and Aurora Plant Sites",
+      "province": "Alberta",
+      "emissionKgDay": 37140,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 13556
+    },
+    {
+      "id": "G10115",
+      "name": "Fording River Operations",
+      "province": "British Columbia",
+      "emissionKgDay": 32951,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 12027
+    },
+    {
+      "id": "G10365",
+      "name": "Essex-Windsor Regional Landfill",
+      "province": "Ontario",
+      "emissionKgDay": 32856,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 11993
+    },
+    {
+      "id": "G10558",
+      "name": "Suncor Energy Inc. Oil Sands",
+      "province": "Alberta",
+      "emissionKgDay": 28525,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 10412
+    },
+    {
+      "id": "G10105",
+      "name": "Elkview Operations",
+      "province": "British Columbia",
+      "emissionKgDay": 27161,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 9914
+    },
+    {
+      "id": "G10343",
+      "name": "Ridge Landfill",
+      "province": "Ontario",
+      "emissionKgDay": 26786,
+      "score": 29.4,
+      "genset": "man",
+      "ch4TonnesYear": 9777
+    },
+    {
+      "id": "G12447",
+      "name": "Donkin Mine",
+      "province": "Nova Scotia",
+      "emissionKgDay": 23672,
+      "score": 29,
+      "genset": "man",
+      "ch4TonnesYear": 8640
+    },
+    {
+      "id": "G10131",
+      "name": "Greenhills Operations",
+      "province": "British Columbia",
+      "emissionKgDay": 20392,
+      "score": 25,
+      "genset": "man",
+      "ch4TonnesYear": 7443
+    },
+    {
+      "id": "G10109",
+      "name": "Enbridge Gas Distribution Inc.",
+      "province": "Ontario",
+      "emissionKgDay": 26159,
+      "score": 23.5,
+      "genset": "man",
+      "ch4TonnesYear": 9548
+    },
+    {
+      "id": "G10337",
+      "name": "Walker Environmental Group Inc. Landfill Sites",
+      "province": "Ontario",
+      "emissionKgDay": 19130,
+      "score": 23.4,
+      "genset": "cat3520",
+      "ch4TonnesYear": 6982
+    },
+    {
+      "id": "G10344",
+      "name": "Sainte Sophie Landfill",
+      "province": "Quebec",
+      "emissionKgDay": 18970,
+      "score": 23.2,
+      "genset": "cat3520",
+      "ch4TonnesYear": 6924
+    },
+    {
+      "id": "G12048",
+      "name": "Vista Mine",
+      "province": "Alberta",
+      "emissionKgDay": 17753,
+      "score": 21.7,
+      "genset": "cat3520",
+      "ch4TonnesYear": 6480
+    }
+  ],
+  "routes": {
+    "home": "/",
+    "map": "/map",
+    "education": "/education",
+    "sites": "/sites",
+    "pitch": "/pitch",
+    "marketingHub": "/Marketing-Hub.html"
+  },
+  "urls": {
+    "production": "https://stranded.giveabit.io",
+    "github": "https://github.com/kitsboy/stranded",
+    "dataSource": "https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
+  }
+}

@@ -484,7 +484,7 @@ The work begins. The best is still ahead.
 - **For capital:** Review the 5 docs in the Hub. Let's discuss modeled opportunities and CETA/Bitcoin pathways.
 - **For government:** Leverage our data + Education Center for policy and investment attraction.
 - **For talent:** We're building infrastructure that matters. hello@giveabit.io
-- **Explore:** [Command Center](http://localhost:3003/map) • [Education Center](http://localhost:3003/education) • [Marketing Hub](/Marketing-Hub.html)
+- **Explore:** [Command Center](https://stranded.giveabit.io/map) • [Education Center](https://stranded.giveabit.io/education) • [Pitch](https://stranded.giveabit.io/pitch) • [Marketing Hub](/Marketing-Hub.html)
 
 ---
 

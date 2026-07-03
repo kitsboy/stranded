@@ -63,6 +63,14 @@ export default function Footer() {
             )}
 
             {/* Marketing Hub — modern lucide icon, consistent styling, teal accent */}
+            <Link
+              href="/pitch"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition"
+              title="Live investor pitch — auto-updating charts & stats"
+            >
+              <span>Pitch</span>
+            </Link>
+
             <a
               href="/Marketing-Hub.html"
               className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#5BC0BE]/40 bg-white/5 hover:bg-white/10 hover:border-[#5BC0BE]/70 text-[#5BC0BE] hover:text-white transition focus:outline-none focus:ring-1 focus:ring-[#5BC0BE]/40"

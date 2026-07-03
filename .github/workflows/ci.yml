@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run validate
+
+      - run: npm run docs:sync
+
+      - run: npm run lint
+
+      - run: npm run build
+
+      - name: Verify static output
+        run: |
+          test -f dist/index.html
+          test -f dist/map.html
+          test -f dist/pitch.html
+          test -f dist/data/live-stats.json

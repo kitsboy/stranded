@@ -179,7 +179,7 @@ Stranded is the platform that makes it real.
 ## Join the Movement
 
 **🚀 Explore the Platform**  
-[Command Center /map (local dev: http://localhost:3003/map)](http://localhost:3003/map) • [Education Center /education](http://localhost:3003/education) • [Marketing Hub](/Marketing-Hub.html)
+[Command Center /map](https://stranded.giveabit.io/map) • [Education Center /education](https://stranded.giveabit.io/education) • [Pitch /pitch](https://stranded.giveabit.io/pitch) • [Marketing Hub](/Marketing-Hub.html)
 
 Live now with:
 - Command Center Map (2,611 sites)

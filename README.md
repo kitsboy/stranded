@@ -17,6 +17,7 @@ This project is the definitive interactive experience for that thesis:
 - **Education Center** (`/education`) — World-class: simulators with live BTC + real gensets, 6+ generator models with specs/prices, per-site Value explorer wired to real geojson (emission → power kW → ASICs → daily BTC revenue + CapEx + financed payback), animated chemistry, Stranded Value IQ quiz, risk matrix, timeline, Value Toolkit + downloads.
 - **All Sites** (`/sites`) — Explorer with generator power kW + recommended genset columns.
 - **Home** — Clear "Stranded Value Flow" (Discover → Learn → Build → Fund) + persona-driven business paths (Operators, Capital, Gov, Landowners).
+- **Pitch Deck** (`/pitch`) — Live investor page with auto-updating charts, province/emission/genset breakdowns, BTC revenue model, top sites table.
 - **Marketing Hub** (`/Marketing-Hub.html`) — Self-contained professional suite with 5 docs, visuals, charts, print/PDF.
 - Every single one of the 2,611 original properties is preserved and explorable with honest, dynamic calcs.
 
@@ -79,7 +80,7 @@ Interface & intelligence layer: GiveAbit Intelligence.
 
 ## Current & Next
 
-See `docs/SOURCE-OF-TRUTH.md`, `docs/DEPLOYMENT.md`, `docs/DOCUMENTATION.md` and `docs/Marketing/` for living docs (updated June 2026 with Stranded Value rebrand, full generator integration + per-site real-data Value calcs, home flow/persona, lighter design, education 2.0, Marketing Hub).
+See `docs/SOURCE-OF-TRUTH.md`, `docs/DEPLOYMENT.md`, `docs/DOCUMENTATION.md`, `docs/LIVE-STATS.md` (auto-generated), and `docs/Marketing/` for living docs. Run `npm run docs:sync` to refresh all stats from the 2,611-site dataset.
 
 Recent completed: 25+ home enhancements, 20+ education (incl. machines/configurator/chemistry/persona), generator wiring across panel/map/education/lib, 30 premium items (LCOE, financing, regional, viz, etc.), global design polish, full docs + marketing cleanup.
 
@@ -87,3 +88,19 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 
 Built with love for the orange pill and the blue planet.
 
+<!-- LIVE-STATS:START -->
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-03T18:37:54.496Z
+
+| Metric | Value |
+|--------|-------|
+| Sites | 2,611 |
+| Provinces | 13 |
+| Daily methane (kg) | 2,053,504 |
+| CH₄ (tonnes/yr) | 749,529 |
+| Avg Stranded Score | 8.2 |
+| High-score sites (≥80) | 0 |
+| 5% CO₂e avoided/yr | 1,049,340 t |
+| Model annual revenue | $15,090,541,726 (@ $85,000 BTC) |
+
+Full breakdown: [docs/LIVE-STATS.md](./LIVE-STATS.md) · Live JSON: `/data/live-stats.json` · Pitch: [https://stranded.giveabit.io/pitch](https://stranded.giveabit.io/pitch)
+<!-- LIVE-STATS:END -->

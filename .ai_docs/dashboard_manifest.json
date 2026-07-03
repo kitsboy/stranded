@@ -1,0 +1,67 @@
+{
+  "project": "stranded",
+  "displayName": "Stranded — Stranded Energy, Bitcoin Access",
+  "version": "1.0.0",
+  "framework": "Next.js (static export)",
+  "frameworkVersion": "14.2.5",
+  "language": "TypeScript",
+  "cssFramework": "Tailwind CSS 3.4.10",
+  "animationLibrary": "framer-motion 12.40.0",
+  "type": "static-spa",
+  "domain": "stranded.giveabit.io",
+  "port": 3003,
+  "buildCommand": "BUILD_STATIC=true next build",
+  "buildOutput": "dist/",
+  "devCommand": "next dev -p 3003",
+  "startCommand": "npx serve -p 3003 dist",
+  "previewCommand": "npm run preview",
+  "deployTarget": "Cloudflare Pages",
+  "gitRemote": "github.com/kitsboy/stranded.git",
+  "githubRepo": "kitsboy/stranded",
+  "pwaEnabled": true,
+  "mapLibraries": ["maplibre-gl 5.22.0", "leaflet 1.9.4", "react-leaflet 4.2.1"],
+  "dataSources": [
+    {
+      "name": "ECCC Stranded Methane Sites",
+      "type": "GeoJSON",
+      "count": 2611,
+      "sourceFile": "data/stranded-sites-REAL.geojson",
+      "publicFile": "public/data/stranded-sites.geojson"
+    }
+  ],
+  "routes": [
+    { "path": "/", "name": "Home / Landing", "file": "app/page.tsx" },
+    { "path": "/map", "name": "Command Center Map", "file": "app/map/page.tsx" },
+    { "path": "/education", "name": "Education Center", "file": "app/education/page.tsx" },
+    { "path": "/sites", "name": "All Sites Explorer", "file": "app/sites/page.tsx" },
+    { "path": "/Marketing-Hub.html", "name": "Marketing Hub", "file": "public/Marketing-Hub.html" }
+  ],
+  "directories": {
+    "app": "Next.js App Router pages",
+    "components": "Shared UI components (10 files)",
+    "lib": "Shared logic and data layer",
+    "data": "Source GeoJSON (never mutated)",
+    "types": "TypeScript type definitions",
+    "public": "Static assets",
+    "scripts": "Utility scripts",
+    "docs": "Living project documentation",
+    "dist": "Static build output"
+  },
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "BUILD_STATIC=true next build",
+    "start": "npx serve -p 3003 dist",
+    "preview": "npm run build && npm run start",
+    "lint": "next lint",
+    "validate": "node scripts/validate-data.js",
+    "test": "npm run validate"
+  },
+  "colors": {
+    "primary": "#FF8C00",
+    "secondary": "#5BC0BE",
+    "background": "#243447"
+  },
+  "pathAlias": "@/* -> ./*",
+  "nodeVersion": ">=18",
+  "lastAudited": "2026-07-02"
+}

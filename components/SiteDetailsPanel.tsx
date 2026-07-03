@@ -38,8 +38,8 @@ export default function SiteDetailsPanel({
   onAddToMission?: (site: any) => void
   liveBtcPrice?: number 
 }) {
-  if (!site) return null
-  const p = site.properties || {}
+  const p = site?.properties || {}
+  const siteEmission = p.emission_rate_kg_day || 0
 
   const [selectedFiat, setSelectedFiat] = useState<FiatCode>('USD')
   const [btcPrices, setBtcPrices] = useState<BtcPriceMap>({ usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 })
@@ -95,9 +95,8 @@ export default function SiteDetailsPanel({
     if (live) setBtcPrice(live)
   }
 
-  const siteEmission = p.emission_rate_kg_day || 0
-
   const calculations = useMemo(() => {
+    if (!site) return null
     const overclockMultiplier = 1 + (overclockPercent / 100)
     const adjustedHashrate = selectedASIC.hashrate_ths * overclockMultiplier
     const adjustedPower = selectedASIC.power_w * overclockMultiplier * (1 + overclockPercent / 200)
@@ -205,6 +204,8 @@ export default function SiteDetailsPanel({
     if (!isFinite(val) || isNaN(val)) return '0.000000'
     return val.toFixed(6)
   }
+
+  if (!site || !calculations) return null
 
   return (
     <div className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative">

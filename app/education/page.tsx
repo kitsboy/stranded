@@ -266,7 +266,7 @@ export default function EducationPage() {
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF8C00]/10 text-[#FF8C00] rounded-full text-xs tracking-widest mb-3">THE CORE THESIS</div>
           <h2 className="text-3xl font-semibold tracking-tighter">What is Stranded Value?</h2>
-          <p className="max-w-2xl mx-auto text-gray-300 mt-2">It's not just methane — it's the highest-leverage climate + capital opportunity on Earth. One molecule of stranded gas = avoided emissions + Bitcoin revenue + community wealth + sovereign energy independence.</p>
+          <p className="max-w-2xl mx-auto text-gray-300 mt-2">It&apos;s not just methane — it&apos;s the highest-leverage climate + capital opportunity on Earth. One molecule of stranded gas = avoided emissions + Bitcoin revenue + community wealth + sovereign energy independence.</p>
         </div>
         <div className="grid md:grid-cols-4 gap-4 text-center">
           {[
@@ -617,7 +617,7 @@ export default function EducationPage() {
                   {/* Genset + ASIC controls for this site */}
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-xs">Generator for this site's gas</label>
+                      <label className="text-xs">Generator for this site&apos;s gas</label>
                       <select value={realSiteGenset} onChange={e => setRealSiteGenset(e.target.value)} className="w-full mt-1 bg-[#0f172a] border border-white/20 rounded px-3 py-2 text-sm">
                         {Object.keys(gensetData).map(id => <option key={id} value={id}>{(gensetData as any)[id].name}</option>)}
                       </select>
@@ -660,7 +660,7 @@ export default function EducationPage() {
                   </div>
 
                   <div className="mt-4 text-xs">
-                    <strong>Methane Loss (Opportunity Cost if vented):</strong> {methaneLossDailyBtc.toFixed(2)} BTC/day (~${(methaneLossDailyBtc * liveBtc).toLocaleString()}) lost forever. This is the "methane loss ROI" — the value destroyed by not capturing.
+                    <strong>Methane Loss (Opportunity Cost if vented):</strong> {methaneLossDailyBtc.toFixed(2)} BTC/day (~${(methaneLossDailyBtc * liveBtc).toLocaleString()}) lost forever. This is the &ldquo;methane loss ROI&rdquo; — the value destroyed by not capturing.
                   </div>
 
                   <div className="mt-3 text-[10px] text-gray-500">{personaNote} All numbers use real emission from dataset + current live BTC + your generator/ASIC choices. CapEx and opex are honest (no hype).</div>

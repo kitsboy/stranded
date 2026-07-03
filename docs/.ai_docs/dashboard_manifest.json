@@ -1,0 +1,28 @@
+{
+  "projectName": "stranded",
+  "projectType": "energy-intelligence",
+  "deployType": "auto",
+  "primaryPort": "3003",
+  "version": "unknown",
+  "status": "active",
+  "framework": "nextjs-14",
+  "styling": "tailwind-css",
+  "routing": "nextjs-app-router",
+  "maps": "maplibre-gl",
+  "animations": "framer-motion",
+  "lastDocAudit": "2026-07-03T03:25:43Z",
+  "automationReady": true,
+  "entryPoints": [
+    "app/",
+    "components/",
+    "docs/",
+    "dist/"
+  ],
+  "datasets": [
+    "ecoc-sites-2611"
+  ],
+  "research": [
+    "eu-horizon-europe"
+  ],
+  "deployScript": "deploy.sh"
+}

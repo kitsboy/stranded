@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
+    "prebuild": "node scripts/generate-live-stats.js",
     "build": "BUILD_STATIC=true next build",
+    "postbuild": "node scripts/sync-docs.js",
     "start": "npx serve -p 3003 dist",
     "preview": "npm run build && npm run start",
     "lint": "next lint",
     "validate": "node scripts/validate-data.js",
-    "test": "npm run validate"
+    "test": "npm run validate",
+    "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
+    "verify": "bash scripts/verify-pipeline.sh"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

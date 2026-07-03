@@ -56,6 +56,7 @@ export default function Nav() {
           {navLink('/map', 'Map')}
           {navLink('/education', 'Education')}
           {navLink('/sites', 'All Sites')}
+          {navLink('/pitch', 'Pitch')}
         </div>
 
         <div className="flex items-center gap-3 text-xs">
