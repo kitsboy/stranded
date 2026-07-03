@@ -5,10 +5,11 @@
 **Build:** Next.js static export — `npm run build` → `dist/`  
 **Dev:** `npm run dev` → `localhost:3003`  
 **Data:** 2,611 ECCC methane sites, live map, education hub, pitch deck, marketing hub  
-**Status:** Live — all routes work, map loads, auto-sync docs active
+**Version:** 2.2.0 · **Routes:** 21 static pages  
+**Status:** Live — deploy confirmed, `live-stats.json` reports v2.2.0
 
-**New:** `/pitch` live investor deck with auto-updating charts from `live-stats.json`  
-**Pipeline:** `npm run verify` — full commit/push/deploy check + GitHub Actions CI
+**New in v2.2:** heatmap layer, IndexedDB cache, `/bookmarks`, `/methodology`, `/about`, `/global`, `/benchmarks`  
+**Pipeline:** `npm run verify` — validate → docs:sync → lint → build → push dry-run
 
 <!-- LIVE-STATS:START -->
 > **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-03T19:00:15.596Z

@@ -1,5 +1,49 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-03 goodbye)
+
+**Chat topic:** Confirm deployment, then implement upgrades 101–150.
+
+**Finished this session:**
+- Deploy confirmed live at **v2.2.0** (was stuck on v1.0.0; CF caught up after push)
+- Round 4 (101–150): heatmap, IndexedDB, 5 new pages, export formats, education polish, integrations
+- 150 total upgrades shipped across four rounds; 21 static routes
+- Handoff + session summary written; git clean on `main`
+
+**Still to do:**
+- CF API token for wrangler fallback; SSH git remote; OAuth portfolios
+- Kimi: sync `SESSION-SUMMARY-2026-07-03.md` + this file into Obsidian / MASTER-BRAIN
+
+**Next for Kimi:** Update Stranded Kanban, architecture map, educate Hermes on v2.2 routes and deploy pipeline. Do not sync to M4 until Cam says go.
+
+---
+
+## Handoff to Kimi — 2026-07-03 (session end)
+
+**Machine:** M3 (Grok)
+**Project:** stranded
+
+### Done
+- [x] Deployment verified — https://stranded.giveabit.io at v2.2.0
+- [x] Upgrades 101–150 (round 4) committed and pushed
+- [x] SESSION-SUMMARY-2026-07-03.md + goodbye handoff complete
+
+### Decisions
+- Git push → CF Pages remains primary deploy; wrangler needs API token
+- Privacy-first: local analytics stub, IndexedDB cache, no third-party trackers
+
+### What's Next
+- Round 5 upgrades (151+) if Cam wants another batch
+- Security: rotate embedded git HTTPS token → SSH
+- CF dashboard: confirm project watches `kitsboy/stranded` `main`
+
+### Git State
+- Last commit SHA: `dd5615a088edfc1a45eca66cd2095db490a00b1d`
+- Branch: `main`
+- Unpushed: none
+
+---
+
 ## Handoff to Kimi — 2026-07-03 (upgrades 101–150, v2.2.0)
 
 **Machine:** M3 (Grok) · **Commit:** `56eb847`
