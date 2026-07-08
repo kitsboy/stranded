@@ -1,19 +1,26 @@
 # Kimi Handoff — Stranded
 
-## Latest Session Summary (from 2026-07-07)
+## Latest Session Summary (2026-07-07) — Deploy Pipeline Fixes
 
-**Chat topic:** Fix Stranded Score formula, deploy v2.2.1.
+**Chat topic:** Fix E2E smoke tests, deploy pipeline corrections, add deploy:check.
 
 **Finished this session:**
-- Root cause: ECCC geojson has no `distance_to_grid_km` or `internet_type` — v2 used worst-case defaults (max ~78, 0 sites ≥80)
-- Shipped **Stranded Score™ v3** via `lib/scoring-shared.cjs` (shared across app, live-stats, validation)
-- Distribution now: avg ~60, 108 sites ≥80, 32 elite ≥85; Keele Valley Landfill tops at 93
-- Updated methodology, education copy, CHANGELOG; bumped to **v2.2.1**; pushed to main
+- Fixed `tests/e2e/smoke.spec.ts` — replaced duplicate-text locators with specific element-selectors. **All 6/6 E2E tests pass.**
+- Fixed `deploy.sh` — wrangler `--project-name` changed from `stranded` → `strandedbuild`
+- Created `scripts/deploy-check.sh` — compares `package.json` version vs production `live-stats.json`
+- Added `npm run deploy:check` script to `package.json`
+- Replaced broken `.gitignore` (had merge conflict artifacts) with clean version
+- Switched git remote from HTTPS to SSH (`git@github.com:kitsboy/stranded.git`)
+- Updated `docs/DEPLOYMENT.md` with correct project name (`strandedbuild`), post-deploy verification ritual, and CF dashboard config
+- Committed and pushed to `main` — CI run #11 in progress
+- Production verification: `npm run deploy:check` passes (v2.2.1 matches)
+- Previous CI runs (#1–#10) all passed
 
 **Still to do:**
-- CF API token for wrangler fallback; SSH git remote; OAuth portfolios
-- Enrich geojson with real grid distance / internet when data source found
-- Kimi: sync this handoff when Cam says go
+- CF API token for wrangler fallback (if git deploy stops working)
+- Kimi: sync this handoff into Obsidian / MASTER-BRAIN
+
+**Next for Kimi:** Update Stranded Kanban, educate Hermes on deploy pipeline improvements.
 
 ---
 
@@ -82,59 +89,16 @@
 
 ---
 
-## Handoff to Kimi — 2026-07-03 (50 upgrades complete)
+## Deploy Pipeline Configuration (as of 2026-07-07)
 
-### Batch 1 (1–25)
-- Scoring v2 formula, live featured sites, pitch/Marketing Hub/⌘K routes
-- Pitch: Chart.js, choropleth, print/PDF, province charts
-- ECCC refresh script + nightly docs-sync cron
-- Footer live-stats stamp, score percentile badges
-- Cluster ROI tooltips, gas treatment derate, LCOE on map panel
-- SOFC in gensets, used ASIC market, Certified lead form
-- CETA funding wizard, First Nations partnerships page
-- Energy verticals page (wind/solar/waste heat/biomass/hydro)
-- Mission CSV/PDF/share deep-links
-
-### Batch 2 (26–50)
-- Portfolio localStorage persistence + mission URL tokens
-- Compare 2–3 sites modal, historical BTC + difficulty sliders
-- Advanced ROI: tx fees, H2S derate, seasonal uptime, carbon credits, incentives, jobs
-- Map: satellite layer, 3D terrain pitch, touch polish
-- PWA service worker + update toast
-- i18n language toggle (en/fr/de/es)
-- a11y skip link, ARIA nav, next/image
-- Map useEffect fixes, Playwright E2E smoke tests
-- Education code-split, per-route OG metadata, JSON-LD
-- .env.example, Slack CI notify on failure
-
-## Handoff to Kimi — 2026-07-03 (earlier)
-
-**Machine:** M3 (Grok)
-**Project:** stranded
-
-### Done
-- [x] Verified full pipeline: validate → docs:sync → lint → build → push dry-run; live site confirmed at stranded.giveabit.io
-- [x] Added GitHub Actions CI (`.github/workflows/ci.yml`) + `npm run verify` script
-- [x] Built self-evolving docs: `generate-live-stats.js` + `sync-docs.js` → `live-stats.json`, `LIVE-STATS.md`, injected blocks in README/STATUS/SOT
-- [x] Created `/pitch` page — live charts, province/emission/genset breakdowns, BTC revenue, top sites table
-- [x] Fixed ESLint config, SiteDetailsPanel hooks bug, metadataBase production URL, Marketing-Hub localhost links
-- [x] Created `docs/DEPLOYMENT.md`, `docs/DOCUMENTATION.md`; updated root SOURCE-OF-TRUTH pointer
-
-### Decisions
-- Stats regenerate on every `npm run build` via prebuild/postbuild hooks — pitch page reads JSON, docs get marker blocks
-- Pitch uses pure CSS/SVG charts (no new deps) + live CoinGecko BTC refresh every 60s
-- CI runs on GitHub; CF Pages auto-deploys from main push
-
-### What's Next
-- Tune Stranded Score formula (most sites floor at 8 — home featured scores may be stale/hardcoded)
-- Add pitch link to Marketing Hub nav + command palette routes
-- Consider wrangler token rotation (remote URL has embedded credential — security hygiene)
-- Kimi: wire nightly `docs:sync` into M3 Researcher Scan if desired
-
-### Git State
-- Last commit SHA: (see post-push)
-- Branch: main
-- Unpushed: this session's commit
+- **CF Pages project name:** `strandedbuild`
+- **Deploy method:** `git push origin main` → Cloudflare Pages auto-builds
+- **Manual fallback:** `CLOUDFLARE_API_TOKEN` + `npx wrangler pages deploy ./dist --project-name=strandedbuild`
+- **Post-deploy check:** `npm run deploy:check`
+- **E2E tests:** `npm run e2e` (6 tests, all passing)
+- **Full verify:** `npm run verify`
+- **Git remote:** SSH `git@github.com:kitsboy/stranded.git`
+- **Production:** https://stranded.giveabit.io (v2.2.1)
 
 ---
 
