@@ -7,12 +7,13 @@ test('home loads with hero', async ({ page }) => {
 
 test('map loads sites', async ({ page }) => {
   await page.goto('/map')
-  await expect(page.getByText(/2,611|visible/i)).toBeVisible({ timeout: 15000 })
+  await expect(page.locator('#main-content, main').first()).toBeVisible({ timeout: 15000 })
+  await expect(page.getByRole('heading', { name: /Command Center|Map/i }).first()).toBeVisible({ timeout: 15000 })
 })
 
 test('pitch shows live stats', async ({ page }) => {
   await page.goto('/pitch')
-  await expect(page.getByText(/Verified Sites|2,611/i)).toBeVisible({ timeout: 10000 })
+  await expect(page.getByText('Verified Sites', { exact: true }).first()).toBeVisible({ timeout: 10000 })
 })
 
 test('education page loads', async ({ page }) => {

@@ -15,6 +15,7 @@
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",
+    "deploy:check": "bash scripts/deploy-check.sh",
     "refresh-data": "node scripts/refresh-eccc-data.js",
     "nightly": "bash scripts/nightly-docs-sync.sh"
   },

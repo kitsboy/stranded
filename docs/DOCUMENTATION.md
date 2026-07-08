@@ -73,7 +73,7 @@ npm run verify       # Full pipeline check
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-08T00:28:36.434Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-08T00:57:40.087Z
 
 | Metric | Value |
 |--------|-------|

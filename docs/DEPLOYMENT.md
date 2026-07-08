@@ -2,7 +2,8 @@
 
 **Production:** https://stranded.giveabit.io  
 **GitHub:** https://github.com/kitsboy/stranded (branch: `main`)  
-**Deploy target:** Cloudflare Pages (auto-deploy on push)
+**Deploy target:** Cloudflare Pages (auto-deploy on push)  
+**CF Pages project name:** `strandedbuild`
 
 ---
 
@@ -16,6 +17,7 @@
 | Build | `npm run build` | Static export → `dist/` |
 | Push | `git push origin main` | CF Pages auto-builds |
 | Full verify | `npm run verify` | Runs all checks + dry-run push |
+| Deploy check | `npm run deploy:check` | Confirms prod version matches package.json |
 
 **CI:** `.github/workflows/ci.yml` runs on every push/PR to `main`.
 
@@ -28,9 +30,19 @@
    - **Build command:** `npm run build`
    - **Output directory:** `dist`
    - **Env:** `BUILD_STATIC=true` (set in CF dashboard or via build command)
-3. Custom domain `stranded.giveabit.io` → Pages project `stranded`
+3. Custom domain `stranded.giveabit.io` → Pages project `strandedbuild`
 
 No wrangler required for normal deploys.
+
+---
+
+## Post-Deploy Verification
+
+```bash
+npm run deploy:check
+```
+
+Compares `package.json` version against production `live-stats.json`. Expects a match within 5–10 minutes of push. If mismatch, CF may still be building.
 
 ---
 
@@ -56,11 +68,15 @@ npx serve -p 3003 dist
 
 ## Manual CF Deploy (Fallback)
 
+Requires `CLOUDFLARE_API_TOKEN` with Cloudflare Pages Edit permission.
+
 ```bash
+export CLOUDFLARE_API_TOKEN="PASTE_TOKEN"
 ./deploy.sh
 # or:
 npm run build
-wrangler pages deploy ./dist --project-name=stranded
+wrangler pages deploy ./dist --project-name=strandedbuild
+npm run deploy:check
 ```
 
 ---
@@ -75,6 +91,18 @@ wrangler pages deploy ./dist --project-name=stranded
 - `dist/data/live-stats.json` — Self-updating platform metrics
 - `dist/data/stranded-sites.geojson` — 2,611 ECCC sites
 - `dist/Marketing-Hub.html` — Marketing suite
+
+---
+
+## CF Dashboard Configuration
+
+- **Project:** `strandedbuild`
+- **Repo:** `kitsboy/stranded`
+- **Branch:** `main`
+- **Build command:** `npm run build`
+- **Output directory:** `dist`
+- **Auto deploy:** Enabled
+- **DNS:** `stranded.giveabit.io` CNAME `strandedbuild.pages.dev` (proxied)
 
 ---
 

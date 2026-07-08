@@ -19,7 +19,7 @@ echo "🔨 Building (static export)..."
 npm run build
 
 echo "📤 Deploying to Cloudflare Pages (project: stranded — update --project-name if your Pages project has a different slug)..."
-wrangler pages deploy ./dist --project-name=stranded --commit-dirty=true || echo "(wrangler optional — Cloudflare Pages auto-deploys from GitHub main)"
+wrangler pages deploy ./dist --project-name=strandedbuild --commit-dirty=true || echo "(wrangler optional — Cloudflare Pages auto-deploys from GitHub main)"
 
 echo "✅ Build ready in ./dist. Push to main for CF Pages deploy to https://stranded.giveabit.io"
 echo "   Preview locally: npx serve -p 3003 dist"
