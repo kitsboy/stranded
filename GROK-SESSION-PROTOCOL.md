@@ -4,107 +4,89 @@
 
 ---
 
+## CANONICAL RULES SOURCE
+
+Your canonical rules come from **MASTER-BRAIN.md** on M4 (`~/MASTER-BRAIN/MASTER-BRAIN.md`).
+Do NOT create new canonical files, duplicate rules, or invent new workflows outside this protocol.
+
+**If it is not in MASTER-BRAIN.md, it is not a rule.**
+
+---
+
 ## Your Role
 
 You are the **M3 coding agent** (via Grok). You edit code, run builds, and push to GitHub.
 Kimi (on M4) handles orchestration, docs, automation, and the Obsidian vault.
 
-**DO NOT** touch M4 files (~/MASTER-BRAIN/, Obsidian, .hermes/). Your domain is `~/projects/` only.
+**M3 root:** `/Users/cam/projects/` — open this folder as workspace.
+**M4 domain** (`~/MASTER-BRAIN/`, Obsidian, `.hermes/`): DO NOT touch from M3.
 
-**M3 root:** `/Users/cam/projects/` — open this folder as workspace, not `/Users/cam` (home).
-
-**Project selection:** Only work on Finder-tagged **PRODUCTION** projects unless Cam says otherwise.
-- **Green + PRODUCTION** = active now (giveabit, satohash, tadbuy, motopass, sherpacarta, stranded, openstrata, katoa).
-- **Red + PRODUCTION** = queued next month — do not build yet (lindala, camtaylor).
-- See `GiveABit-Goose-Main/PRODUCTION-PROJECTS.md` for the full registry.
+**M3 is code only.** No new canonical files in `~/projects/`.
 
 ---
 
 ## End-of-Session Handoff (MANDATORY — every session)
 
-Before you say goodbye, YOU MUST run ALL of these steps:
+Before you say goodbye, run ALL of these steps:
 
-### Step 1 — Write Handoff File
+### Step 1 — Write Handoff to `docs/KIMI-HANDOFF.md`
 
-Append to `docs/KIMI-HANDOFF.md` in the current project:
+Append a new section to `docs/KIMI-HANDOFF.md` in the current project with:
 
-```
-## Handoff to Kimi — YYYY-MM-DD
+```markdown
+## Session — YYYY-MM-DD
 
-**Machine:** M3 (Grok)
-**Project:** motopass
+**Done:**
+- Item 1
 
-### Done
-- [x] Item 1
-- [x] Item 2
+**Decisions:**
+- Why
 
-### Decisions
-- Why you did what you did
-
-### What's Next
-- Next steps for Kimi
-
-### Git State
-- Last commit SHA: <run `git log -1 --format=%H`>
-- Branch: <run `git branch --show-current`>
-- Unpushed: <run `git log --oneline origin/main..HEAD`>
-
----
-
-*Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
+**Git State:**
+- SHA: `git log -1 --format=%H`
+- Unpushed: `git log --oneline origin/main..HEAD`
 ```
 
-### Step 2 — Save Memory Entry (Critical Cross-Platform Signal)
+### Step 2 — Verify Git
 
-Grok cannot directly call Hermes memory(). Instead, write a one-line signal file:
-
-```
-echo "[YYYY-MM-DD] Grok updated motopass — see docs/KIMI-HANDOFF.md" >> ~/projects/PROJECT-UPDATE-LOG.md
-```
-
-This file is picked up by the M3 Researcher Scan (daily 1AM) and visible to Kimi.
-
-### Step 3 — Git State Verification
-
-```
-cd ~/projects/motopass
-git status                                    # should be clean
-git log --oneline origin/main..HEAD           # any unpushed commits?
-echo "Branch: $(git branch --show-current)"   # confirm branch
+```bash
+cd ~/projects/<project>
+git status
+git log --oneline origin/main..HEAD
 ```
 
-If there are unpushed commits, push them: `git push origin main`
+If unpushed commits, push: `git push origin main`
 
-### Step 4 — Summary One-Liner
+### Step 3 — Write `LATEST-UPDATE.md`
 
-Leave a clean one-line summary in the project root at `LATEST-UPDATE.md`:
-
-```
-# motopass — Last Updated YYYY-MM-DD by Grok
-
-Brief: <what was done in 10 words or less>
-Commit: <first 7 chars of last commit>
+```markdown
+# <project> — Last Updated YYYY-MM-DD by Grok
+Brief: <one line>
+Commit: <sha>
 ```
 
 ---
 
 ## File Locations
 
-| Project | Path |
-|---------|------|
+| Project | Handoff |
+|---------|---------|
+| stranded | `~/projects/stranded/docs/KIMI-HANDOFF.md` |
 | giveabit | `~/projects/giveabit/docs/KIMI-HANDOFF.md` |
 | satohash | `~/projects/satohash/docs/KIMI-HANDOFF.md` |
-| katoa | `~/projects/katoa/docs/KIMI-HANDOFF.md` |
+| tadbuy | `~/projects/tadbuy/docs/KIMI-HANDOFF.md` |
 | motopass | `~/projects/motopass/docs/KIMI-HANDOFF.md` |
 | sherpacarta | `~/projects/sherpacarta/docs/KIMI-HANDOFF.md` |
-| Stranded | `~/projects/stranded/docs/KIMI-HANDOFF.md` |
-| Tadbuy | `~/projects/tadbuy/docs/KIMI-HANDOFF.md` |
+| katoa | `~/projects/katoa/docs/KIMI-HANDOFF.md` |
 | openstrata | `~/projects/openstrata/docs/KIMI-HANDOFF.md` |
+| camtaylor | `~/projects/camtaylor/docs/KIMI-HANDOFF.md` |
+| lindala | `~/projects/lindala/docs/KIMI-HANDOFF.md` |
+| btcminiscript | `~/projects/btcminiscript/docs/KIMI-HANDOFF.md` |
 
 ---
 
 ## Protocol Purpose
 
-This ensures Kimi sees what you did within 24 hours (via M3 Researcher Scan or directly next session). Without it, Kimi stays blind to M3 work until Cam mentions it. One handoff file = zero dropped context between agents.
+This ensures Kimi sees what you did via handoff files synced via Tailscale. Without it, Kimi stays blind to M3 work.
 
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
