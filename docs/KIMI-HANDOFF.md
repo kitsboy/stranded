@@ -1,5 +1,22 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-07)
+
+**Chat topic:** Fix Stranded Score formula, deploy v2.2.1.
+
+**Finished this session:**
+- Root cause: ECCC geojson has no `distance_to_grid_km` or `internet_type` — v2 used worst-case defaults (max ~78, 0 sites ≥80)
+- Shipped **Stranded Score™ v3** via `lib/scoring-shared.cjs` (shared across app, live-stats, validation)
+- Distribution now: avg ~60, 108 sites ≥80, 32 elite ≥85; Keele Valley Landfill tops at 93
+- Updated methodology, education copy, CHANGELOG; bumped to **v2.2.1**; pushed to main
+
+**Still to do:**
+- CF API token for wrangler fallback; SSH git remote; OAuth portfolios
+- Enrich geojson with real grid distance / internet when data source found
+- Kimi: sync this handoff when Cam says go
+
+---
+
 ## Latest Session Summary (from 2026-07-03 goodbye)
 
 **Chat topic:** Confirm deployment, then implement upgrades 101–150.
