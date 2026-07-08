@@ -1,5 +1,42 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-07 goodbye)
+
+**Chat topic:** Stranded Score v3, deploy pipeline, M3/M4 rules correction, portfolio cleanup.
+
+**Finished this session:**
+- Stranded Score™ v3 shipped (v2.2.1 live); shared `lib/scoring-shared.cjs`
+- Kimi fixed E2E smoke tests + `deploy:check`; CI green; CF `strandedbuild` confirmed
+- M3/M4 rules rewritten: `~/projects/TWO-MACHINE-RULES.md` — Goose retired, Grok=M3, Kimi/Hermes=M4 MASTER-BRAIN
+- openstrata + btcminiscript secured on GitHub from M3
+- SSH github.com config on M3 (`id_ed25519_giveabit`)
+- Copy-paste handoff .txt files for Cam
+
+**Still to do:**
+- Kimi: M4 `~/projects/` cleanup (see `~/projects/M3-M4-CLEANUP-HANDOFF.txt`)
+- Kimi: mirror TWO-MACHINE-RULES to `~/MASTER-BRAIN/`
+- CF API token; rotate hermes-agent PAT; UI score tier colors
+
+**Next for Kimi:** Integrate SESSION-SUMMARY-2026-07-07.md into Obsidian/MASTER-BRAIN when Cam says sync.
+
+---
+
+## Handoff to Kimi — 2026-07-07 (session end)
+
+**Machine:** M3 (Grok)  
+**Project:** stranded (+ portfolio rules)
+
+### Done
+- [x] SESSION-SUMMARY-2026-07-07.md written
+- [x] Goodbye handoff complete
+
+### Git State
+- Last commit SHA: `d72765ea26b24d8d65442d603749a5108a629a31`
+- Branch: `main`
+- Unpushed: none
+
+---
+
 ## Latest Session Summary (2026-07-07) — Deploy Pipeline Fixes
 
 **Chat topic:** Fix E2E smoke tests, deploy pipeline corrections, add deploy:check.
