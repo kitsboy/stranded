@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1] — 2026-07-07
+
+### Fixed
+- **Stranded Score™ v3** — ECCC data lacks `distance_to_grid_km` and `internet_type`; v2 penalized all 2,611 sites with worst-case defaults (max score ~78, zero sites ≥80). v3 infers proxies from source type, province, emission tier, confidence, and reporting year. Distribution: avg ~60, 108 sites ≥80, 32 elite ≥85.
+- Shared scoring module (`lib/scoring-shared.cjs`) keeps app, live-stats, and validation in sync
+- Updated methodology and education copy to document v3 formula
+
 ## [2.2.0] — 2026-07-03
 
 ### Added (upgrades 101–150)

@@ -926,8 +926,8 @@ export default function EducationContent() {
       <div className="mb-16 glass p-8 rounded-3xl">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Target className="text-[#5BC0BE]" /> Methodology & Formulas</h2>
         <div className="prose prose-invert text-sm mb-6">
-          <p><strong>Stranded Score</strong> = (Emission Rate / 1000) × (12 / (Grid Distance + 3)) × Internet Factor × Confidence Factor × 28</p>
-          <p className="text-xs">Internet Factor: Fiber 1.35, Starlink 1.15, LTE 1.0, None 0.7. Confidence: High 1.25, Medium 1.0, Low 0.75.</p>
+          <p><strong>Stranded Score™ v3</strong> = log-scaled emission + grid proximity (observed or source-type proxy) + internet proxy + confidence + source deployability + data recency. Scores span ~22–96 across 2,611 sites.</p>
+          <p className="text-xs">When ECCC omits grid/internet fields, we infer from source category and province — never penalize missing data as &quot;no internet.&quot; See <a href="/methodology" className="text-[#5BC0BE]">/methodology</a>.</p>
           <p className="mt-4"><strong>Impact Estimates</strong> use average emission of 1,240 kg/day per site and assume ~0.0009 BTC per kg methane captured at current network difficulty.</p>
         </div>
 

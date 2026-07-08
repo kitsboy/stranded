@@ -73,7 +73,7 @@ npm run verify       # Full pipeline check
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-03T19:00:15.596Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-08T00:28:36.434Z
 
 | Metric | Value |
 |--------|-------|
@@ -81,8 +81,8 @@ npm run verify       # Full pipeline check
 | Provinces | 13 |
 | Daily methane (kg) | 2,053,504 |
 | CH₄ (tonnes/yr) | 749,529 |
-| Avg Stranded Score | 46.9 |
-| High-score sites (≥80) | 0 |
+| Avg Stranded Score | 60.4 |
+| High-score sites (≥80) | 108 |
 | 5% CO₂e avoided/yr | 1,049,340 t |
 | Model annual revenue | $15,090,541,726 (@ $85,000 BTC) |
 

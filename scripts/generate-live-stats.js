@@ -25,20 +25,7 @@ function recommendGenset(emissionKgDay) {
   return 'mobile250'
 }
 
-function computeStrandedScore(props) {
-  const emission = props.emission_rate_kg_day || 0
-  const dist = props.distance_to_grid_km ?? 50
-  const internet = (props.internet_type || 'none').toLowerCase()
-  const conf = (props.confidence || 'medium').toLowerCase()
-  const internetFactor = { fiber: 1.35, starlink: 1.15, lte: 1.0, cable: 1.05, none: 0.7 }[internet] || 0.85
-  const confFactor = { high: 1.25, medium: 1.0, low: 0.75 }[conf] || 1
-  const emissionScore = (Math.log10(Math.max(emission, 10)) / Math.log10(60000)) * 52
-  const proximityScore = Math.min(22, Math.max(4, 24 - dist * 0.25))
-  const infraScore = internetFactor * 9
-  const confScore = confFactor * 7
-  const raw = emissionScore + proximityScore + infraScore + confScore
-  return Math.max(18, Math.min(99.5, Math.round(raw * 10) / 10))
-}
+const { computeStrandedScore } = require('../lib/scoring-shared.cjs')
 
 function computeGeneratorPower(dailyMethaneKg, powerKW = 850, methaneNm3h = 220, derate = 0.9) {
   const dailyM3 = dailyMethaneKg / 0.717

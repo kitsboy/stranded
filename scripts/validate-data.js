@@ -1,8 +1,9 @@
-// Simple validation "test" for critical data + scoring logic
+// Validation for canonical GeoJSON + Stranded Score™ v3 distribution
 // Run with: node scripts/validate-data.js
 
 const fs = require('fs')
 const path = require('path')
+const { computeStrandedScore } = require('../lib/scoring-shared.cjs')
 
 const geo = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'stranded-sites-REAL.geojson')))
 
@@ -14,17 +15,29 @@ if (features.length !== 2611) {
   process.exit(1)
 }
 
-let scoreSum = 0
-features.forEach(f => {
-  const em = f.properties.emission_rate_kg_day || 0
-  const dist = f.properties.distance_to_grid_km || 50
-  const emissionScore = (Math.log10(Math.max(em, 10)) / Math.log10(60000)) * 52
-  const proximityScore = Math.min(22, Math.max(4, 24 - dist * 0.25))
-  const score = Math.max(18, Math.min(99, Math.round((emissionScore + proximityScore + 16) * 10) / 10))
-  scoreSum += score
-})
+const scores = features.map(f => computeStrandedScore(f.properties))
+const avg = scores.reduce((a, b) => a + b, 0) / scores.length
+const max = Math.max(...scores)
+const min = Math.min(...scores)
+const ge80 = scores.filter(s => s >= 80).length
+const ge85 = scores.filter(s => s >= 85).length
 
-console.log(`Average Stranded Score (heuristic): ${(scoreSum / features.length).toFixed(1)}`)
-console.log('Data validation PASSED. 2611 sites. Scoring looks sane.')
-console.log('ROI logic is client-side but sample calc would be similar.')
+console.log(`Average Stranded Score: ${avg.toFixed(1)}`)
+console.log(`Range: ${min.toFixed(1)} – ${max.toFixed(1)}`)
+console.log(`Sites ≥80: ${ge80} · Sites ≥85: ${ge85}`)
+
+if (max < 80) {
+  console.error('ERROR: No site scored ≥80 — scoring formula may be broken')
+  process.exit(1)
+}
+if (ge80 < 20) {
+  console.error('ERROR: Too few high-score sites (expected ≥20 at ≥80)')
+  process.exit(1)
+}
+if (avg < 40 || avg > 75) {
+  console.error('ERROR: Average score out of expected range (40–75)')
+  process.exit(1)
+}
+
+console.log('Data validation PASSED. 2611 sites. Scoring v3 looks sane.')
 process.exit(0)
