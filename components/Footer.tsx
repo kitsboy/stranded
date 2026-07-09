@@ -26,12 +26,13 @@ export default function Footer() {
             <span className="hidden sm:inline text-white/20">•</span>
             <span>2026 • 2,611 sites{statsDate && <> • stats {statsDate}</>}</span>
             <span className="hidden sm:inline text-white/20">•</span>
-            <span className="font-mono text-[#FF8C00]">v2.2</span>
+            <span className="font-mono text-[#FF8C00]">v2.3</span>
             <Link href="/methodology" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Methodology</Link>
+            <Link href="/open-data" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Open Data</Link>
+            <Link href="/roadmap" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Roadmap</Link>
+            <Link href="/privacy" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Privacy</Link>
             <Link href="/about" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">About</Link>
-            <Link href="/global" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Global</Link>
-            <Link href="/partnerships" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Partnerships</Link>
-            <Link href="/funding" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Funding</Link>
+            <Link href="/status" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Status</Link>
           </div>
 
           <div className="flex items-center gap-2 text-[11px]">

@@ -1,8 +1,10 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { X, TrendingUp, Zap, Leaf } from 'lucide-react'
 import { EnrichedSite } from '@/lib/sites'
+import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
+import { downloadBlob } from '@/lib/export-formats'
+import { toast } from 'sonner'
 
 interface MissionPanelProps {
   portfolio: EnrichedSite[]
@@ -10,9 +12,10 @@ interface MissionPanelProps {
   onRemove: (id: string) => void
   onClear: () => void
   onFlyTo: (site: EnrichedSite) => void
+  allSites?: EnrichedSite[]
 }
 
-export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClear, onFlyTo }: MissionPanelProps) {
+export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClear, onFlyTo, allSites = [] }: MissionPanelProps) {
   if (portfolio.length === 0) return null
 
   const totalEmission = portfolio.reduce((sum, s) => sum + s.emission, 0)
@@ -78,6 +81,38 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
       <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-gray-400">
         At current BTC price <span className="font-mono text-white">≈${Math.round(liveBtcPrice).toLocaleString()}</span><br />
         Potential daily BTC ≈ <span className="font-mono text-[#FF8C00]">{dailyBtc.toFixed(4)}</span>
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Bank pack</div>
+        <div className="flex flex-wrap gap-1.5">
+          {([
+            ['md', 'MD'],
+            ['csv', 'CSV'],
+            ['tsv', 'TSV'],
+            ['html', 'PDF'],
+            ['json', 'JSON'],
+          ] as const).map(([fmt, label]) => (
+            <button
+              key={fmt}
+              type="button"
+              className="text-[10px] px-2 py-1 rounded border border-[#FF8C00]/30 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+              onClick={() => {
+                const base = `stranded-mission-bank-pack-${portfolio.length}`
+                if (fmt === 'md') downloadBlob(bankPackMarkdown(portfolio, allSites, { liveBtcUsd: liveBtcPrice, title: 'Mission Bank Pack' }), `${base}.md`, 'text/markdown')
+                else if (fmt === 'csv') downloadBlob(bankPackCsv(portfolio, { liveBtcUsd: liveBtcPrice }), `${base}.csv`, 'text/csv')
+                else if (fmt === 'tsv') downloadBlob(bankPackTsv(portfolio, { liveBtcUsd: liveBtcPrice }), `${base}.tsv`, 'text/tab-separated-values')
+                else if (fmt === 'html') {
+                  const w = window.open('', '_blank')
+                  if (w) { w.document.write(bankPackHtml(portfolio, { liveBtcUsd: liveBtcPrice, title: 'Mission Bank Pack' })); w.document.close(); w.print() }
+                } else downloadBlob(JSON.stringify(bankPackJson(portfolio, { liveBtcUsd: liveBtcPrice }), null, 2), `${base}.json`, 'application/json')
+                toast.success(`Bank pack (${label}) ready`)
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

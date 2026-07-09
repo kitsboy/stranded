@@ -12,7 +12,7 @@
 **Pipeline:** `npm run verify` → `git push origin main` → `npm run deploy:check`
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T16:21:27.557Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T16:32:30.691Z
 
 | Metric | Value |
 |--------|-------|

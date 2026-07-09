@@ -1,9 +1,32 @@
 import { StrandedSite } from '@/types/site'
-import { computeStrandedScore as computeScore } from './scoring-shared.cjs'
+import {
+  computeStrandedScore as computeScore,
+  explainStrandedScore as explainScore,
+} from './scoring-shared.cjs'
 
 /** Stranded Score™ v3 — see lib/scoring-shared.cjs for canonical formula */
 export function computeStrandedScore(site: StrandedSite): number {
   return computeScore(site.properties)
+}
+
+export type ScoreFactor = {
+  id: string
+  label: string
+  points: number
+  detail: string
+  inferred?: boolean
+}
+
+export type ScoreExplanation = {
+  score: number
+  factors: ScoreFactor[]
+  notes: string[]
+}
+
+/** Factor breakdown for UI / bank packs — ships the real v3 formula factors */
+export function explainStrandedScore(site: StrandedSite | { properties: Record<string, unknown> }): ScoreExplanation {
+  const props = 'properties' in site ? site.properties : site
+  return explainScore(props) as ScoreExplanation
 }
 
 export function scorePercentile(score: number, allScores: number[]): number {

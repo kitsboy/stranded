@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.0] — 2026-07-09
+
+### Added (client-only power batch)
+- **Score explainability** — factor breakdown (emission, proximity, infra, confidence, source, recency) with inferred flags
+- **Bank packs** — CSV / Excel TSV / Markdown / HTML print / JSON for site + mission
+- **Peer sites** + emission-similarity helpers
+- **Sensitivity tornado** (BTC, derate, difficulty, carbon)
+- Map **Score v3 legend** + tier quick filters (All / Med+ / High+ / Elite)
+- Pages: `/privacy`, `/roadmap`, `/open-data`
+- Glossary lib; footer links; `npm run test:helpers` (real shipped modules via tsx)
+
 ## [2.2.2] — 2026-07-09
 
 ### Fixed

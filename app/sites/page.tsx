@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, Star, Download } from 'lucide-react'
 import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
+import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
+import { downloadBlob } from '@/lib/export-formats'
+import ScoreLegend from '@/components/ScoreLegend'
 
 export default function AllSitesExplorer() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
@@ -47,6 +50,18 @@ export default function AllSitesExplorer() {
     URL.revokeObjectURL(url)
   }
 
+  const selectedSites = useMemo(
+    () => allSites.filter(s => selectedIds.has(s.id)),
+    [allSites, selectedIds]
+  )
+
+  const exportBankPack = (fmt: 'csv' | 'md' | 'tsv') => {
+    const sites = selectedSites.length ? selectedSites : filtered.slice(0, 50)
+    if (fmt === 'csv') downloadBlob(bankPackCsv(sites), `stranded-bank-${sites.length}.csv`, 'text/csv')
+    else if (fmt === 'tsv') downloadBlob(bankPackTsv(sites), `stranded-bank-${sites.length}.tsv`, 'text/tab-separated-values')
+    else downloadBlob(bankPackMarkdown(sites, allSites, { title: selectedSites.length ? 'Selection Bank Pack' : 'Filtered Bank Pack' }), `stranded-bank-${sites.length}.md`, 'text/markdown')
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-9">
       <div className="flex justify-between items-end mb-6">
@@ -54,15 +69,24 @@ export default function AllSitesExplorer() {
           <h1 className="text-4xl font-bold tracking-tighter">All Sites</h1>
           <p className="text-gray-400 mt-1">Every one of the 2,611. Sorted by Stranded Score by default. Click anything.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 justify-end">
           <button onClick={() => setView(v => v === 'cards' ? 'table' : 'cards')} className="text-sm px-4 py-2 rounded-2xl border border-white/15 hover:bg-white/5">
             {view === 'cards' ? 'TABLE VIEW' : 'CARDS VIEW'}
           </button>
           <button onClick={exportFiltered} className="flex items-center gap-2 text-sm px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10">
-            <Download size={16} /> EXPORT FILTERED
+            <Download size={16} /> JSON
           </button>
+          <button onClick={() => exportBankPack('csv')} className="text-sm px-3 py-2 rounded-2xl border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10" title={selectedSites.length ? `Bank pack ${selectedSites.length} selected` : 'Bank pack top 50 filtered'}>
+            Bank CSV
+          </button>
+          <button onClick={() => exportBankPack('tsv')} className="text-sm px-3 py-2 rounded-2xl border border-white/15 hover:bg-white/5">TSV</button>
+          <button onClick={() => exportBankPack('md')} className="text-sm px-3 py-2 rounded-2xl border border-white/15 hover:bg-white/5">MD brief</button>
           <Link href="/map" className="px-6 py-2 rounded-2xl bg-[#FF8C00] text-black font-semibold text-sm flex items-center">OPEN IN COMMAND CENTER →</Link>
         </div>
+      </div>
+
+      <div className="mb-4 max-w-md">
+        <ScoreLegend />
       </div>
 
       {/* Filters */}
@@ -72,7 +96,10 @@ export default function AllSitesExplorer() {
           <option value="">All Provinces</option>
           {provinces.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
-        <div className="self-center text-xs px-4 text-gray-400 tabular-nums">{filtered.length} / {allSites.length}</div>
+        <div className="self-center text-xs px-4 text-gray-400 tabular-nums">
+          {filtered.length} / {allSites.length}
+          {selectedSites.length > 0 && <span className="text-[#FF8C00]"> · {selectedSites.length} selected</span>}
+        </div>
       </div>
 
       {loading && <div className="text-center py-20 text-gray-400">Loading full enriched dataset…</div>}

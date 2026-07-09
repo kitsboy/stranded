@@ -27,10 +27,21 @@ export default function MethodologyPage() {
       <p className="text-sm text-gray-400">Map markers and badges use the same thresholds everywhere (home, sites browser, command palette, map).</p>
 
       <h2>ROI model</h2>
-      <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs.</p>
+      <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs. Site panel shows a sensitivity tornado and peer cohort when available.</p>
+
+      <h2>Bank packs</h2>
+      <p>Export diligence packages from the map site panel, mission panel, or sites browser: Markdown brief (score factors + peers + sensitivity), CSV, Excel-friendly TSV, printable HTML, and JSON. No account required — files download locally.</p>
+
+      <h2>Glossary (quick)</h2>
+      <ul>
+        <li><strong>Inferred field</strong> — proxy when ECCC omits grid distance or internet type</li>
+        <li><strong>Mission</strong> — local portfolio of selected sites</li>
+        <li><strong>LCOE</strong> — levelized cost of energy for the genset CapEx model</li>
+        <li><strong>Bank pack</strong> — multi-format export for capital diligence</li>
+      </ul>
 
       <h2>Updates</h2>
-      <p>Live metrics: <Link href="/data/live-stats.json">live-stats.json</Link> · API docs: <Link href="/docs/api">/docs/api</Link> · Status: <Link href="/status">/status</Link></p>
+      <p>Live metrics: <Link href="/data/live-stats.json">live-stats.json</Link> · API docs: <Link href="/docs/api">/docs/api</Link> · Status: <Link href="/status">/status</Link> · <Link href="/open-data">Open Data</Link> · <Link href="/roadmap">Roadmap</Link> · <Link href="/privacy">Privacy</Link></p>
     </div>
   )
 }

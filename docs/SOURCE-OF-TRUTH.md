@@ -82,7 +82,7 @@ This file + README.md + the live app + Marketing assets are the primary current 
 **Template Rule:** Every future Give A Bit project must include at least this level of documentation: GitHub source, live URLs (dev + prod), deployment details, key docs list, simple pitch, Git snapshot, mission alignment, gaps, and clean hand-off note.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T16:21:27.557Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T16:32:30.691Z
 
 | Metric | Value |
 |--------|-------|

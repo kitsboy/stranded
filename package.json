@@ -1,6 +1,6 @@
 {
   "name": "stranded",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
@@ -11,7 +11,8 @@
     "preview": "npm run build && npm run start",
     "lint": "next lint",
     "validate": "node scripts/validate-data.js",
-    "test": "npm run validate",
+    "test": "npm run validate && npm run test:helpers",
+    "test:helpers": "node --import tsx scripts/test-helpers.mjs",
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",
@@ -33,6 +34,7 @@
     "sonner": "^2.0.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@types/js-cookie": "^3.0.6",
     "@types/leaflet": "^1.9.12",
     "@types/node": "^20",
@@ -43,7 +45,7 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5",
-    "@playwright/test": "^1.49.0"
+    "tsx": "^4.19.2",
+    "typescript": "^5"
   }
 }

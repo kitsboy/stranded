@@ -20,6 +20,7 @@ import { exportFilteredGeojson, exportSitesKml, downloadBlob } from '@/lib/expor
 import { savePortfolioProfile } from '@/lib/portfolio-profiles'
 import { addSiteAlert } from '@/lib/alerts'
 import KeyboardHelpModal from '@/components/KeyboardHelpModal'
+import ScoreLegend from '@/components/ScoreLegend'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -402,6 +403,23 @@ function StrandedCommandCenter() {
             MIN STRANDED SCORE <span className="font-mono text-white">{minScore}</span> (0 = show all)
           </div>
           <input type="range" min="0" max="98" value={minScore} onChange={e => setMinScore(Number(e.target.value))} className="w-full accent-[#5BC0BE]" />
+          <div className="flex flex-wrap gap-1 mt-2">
+            {[
+              { label: 'All', v: 0 },
+              { label: 'Med+', v: 45 },
+              { label: 'High+', v: 65 },
+              { label: 'Elite', v: 85 },
+            ].map(t => (
+              <button
+                key={t.label}
+                type="button"
+                onClick={() => setMinScore(t.v)}
+                className={`text-[10px] px-2 py-0.5 rounded-full border ${minScore === t.v ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400'}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Province pills - expandable to show all 10 provinces + 3 territories */}
@@ -490,6 +508,7 @@ function StrandedCommandCenter() {
                 onClose={() => setSelectedSite(null)} 
                 onAddToMission={addToPortfolio}
                 liveBtcPrice={liveBtcPrice}
+                allSites={allSites}
               />
             </motion.div>
           )}
@@ -502,6 +521,7 @@ function StrandedCommandCenter() {
           onRemove={removeFromPortfolio} 
           onClear={clearPortfolio}
           onFlyTo={flyToFromPortfolio}
+          allSites={allSites}
         />
 
         {portfolio.length > 0 && (
@@ -536,8 +556,9 @@ function StrandedCommandCenter() {
       </div>
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
 
-      {/* Floating Layer + View controls (enhanced) */}
-      <div className="absolute bottom-5 right-5 z-[60]">
+      {/* Score legend + layer controls */}
+      <div className="absolute bottom-5 right-5 z-[60] flex flex-col items-end gap-2">
+        <ScoreLegend compact />
         <LayerControls 
           layers={layers} 
           onToggle={(l) => setLayers(prev => ({...prev, [l]: !prev[l]}))} 

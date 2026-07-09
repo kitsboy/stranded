@@ -1,12 +1,17 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
+import { GENSET_DATA, computeGeneratorPower, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks, getSiteNote, setSiteNote } from '@/lib/bookmarks'
 import Link from 'next/link'
 import RoiProjectionChart from '@/components/RoiProjectionChart'
 import { integrationUrl } from '@/lib/integrations'
+import { explainStrandedScore, scoreTierClass, scoreTier } from '@/lib/scoring'
+import { findPeerSites, peerSummary } from '@/lib/peers'
+import { sensitivityTornado } from '@/lib/sensitivity'
+import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
+import { downloadBlob } from '@/lib/export-formats'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -36,12 +41,14 @@ export default function SiteDetailsPanel({
   site, 
   onClose, 
   onAddToMission, 
-  liveBtcPrice = 85000 
+  liveBtcPrice = 85000,
+  allSites = [],
 }: { 
   site: any
   onClose: () => void
   onAddToMission?: (site: any) => void
-  liveBtcPrice?: number 
+  liveBtcPrice?: number
+  allSites?: EnrichedSite[]
 }) {
   const p = site?.properties || {}
   const siteEmission = p.emission_rate_kg_day || 0
@@ -229,7 +236,27 @@ export default function SiteDetailsPanel({
     txFeeBtcPerDay: 0.0002,
   }) : null
 
+  const scoreExplain = useMemo(() => (site ? explainStrandedScore(site) : null), [site])
+  const peers = useMemo(() => {
+    if (!site || !allSites.length) return []
+    return findPeerSites(site as EnrichedSite, allSites, 5)
+  }, [site, allSites])
+  const peerMeta = useMemo(() => (site && peers.length ? peerSummary(site as EnrichedSite, peers) : null), [site, peers])
+  const tornado = useMemo(() => (site ? sensitivityTornado(site as EnrichedSite, liveBtcPrice) : []), [site, liveBtcPrice])
+
   if (!site || !calculations) return null
+
+  const downloadBankPack = (fmt: 'md' | 'csv' | 'tsv' | 'html' | 'json') => {
+    const sites = [site as EnrichedSite]
+    const base = `stranded-bank-pack-${(p.name || site.id || 'site').toString().replace(/[^\w-]+/g, '_').slice(0, 40)}`
+    if (fmt === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd: liveBtcPrice }), `${base}.md`, 'text/markdown')
+    else if (fmt === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.csv`, 'text/csv')
+    else if (fmt === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.tsv`, 'text/tab-separated-values')
+    else if (fmt === 'html') {
+      const w = window.open('', '_blank')
+      if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd: liveBtcPrice })); w.document.close() }
+    } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd: liveBtcPrice }), null, 2), `${base}.json`, 'application/json')
+  }
 
   return (
     <div className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative">
@@ -240,10 +267,90 @@ export default function SiteDetailsPanel({
             {p.city || 'Unknown'},{' '}
             {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
           </p>
+          {typeof site.strandedScore === 'number' && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span>
+              <span className="text-[10px] uppercase tracking-wider text-gray-400">{scoreTier(site.strandedScore)}</span>
+              {site.scoreBadge && <span className="text-[10px] text-[#5BC0BE]">{site.scoreBadge}</span>}
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }} className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}>{bookmarked ? '★' : '☆'}</button>
           <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+        </div>
+      </div>
+
+      {scoreExplain && (
+        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3" open>
+          <summary className="text-sm font-semibold text-[#FF8C00] cursor-pointer">Why this score ({scoreExplain.score})</summary>
+          <ul className="mt-2 space-y-1.5 text-xs text-gray-300">
+            {scoreExplain.factors.map(f => (
+              <li key={f.id} className="flex justify-between gap-2">
+                <span>
+                  {f.label}
+                  {f.inferred && <span className="ml-1 text-[9px] text-amber-400/90">inferred</span>}
+                  <span className="block text-[10px] text-gray-500">{f.detail}</span>
+                </span>
+                <span className="font-mono text-[#5BC0BE] shrink-0">+{f.points}</span>
+              </li>
+            ))}
+          </ul>
+          {scoreExplain.notes.length > 0 && (
+            <p className="mt-2 text-[10px] text-gray-500 leading-snug">{scoreExplain.notes[0]}</p>
+          )}
+        </details>
+      )}
+
+      {tornado.length > 0 && (
+        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">
+          <summary className="text-sm font-semibold text-[#5BC0BE] cursor-pointer">Sensitivity tornado</summary>
+          <ul className="mt-2 space-y-1 text-xs">
+            {tornado.map(row => (
+              <li key={row.param} className="flex justify-between gap-2 text-gray-300">
+                <span className="truncate">{row.param}</span>
+                <span className="font-mono text-[10px] shrink-0">{row.lowImpact.toFixed(2)} → {row.highImpact.toFixed(2)}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {peers.length > 0 && (
+        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">
+          <summary className="text-sm font-semibold text-white cursor-pointer">
+            Peers {peerMeta ? `(rank ${peerMeta.rankByScore}/${peers.length + 1} in cohort)` : ''}
+          </summary>
+          <ul className="mt-2 space-y-1 text-xs text-gray-300">
+            {peers.map(peer => (
+              <li key={peer.id} className="flex justify-between gap-2">
+                <span className="truncate">{peer.properties.name}</span>
+                <span className="font-mono text-[#FF8C00] shrink-0">{peer.strandedScore}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      <div className="mb-4">
+        <div className="text-xs font-semibold text-gray-400 mb-1.5">Bank pack export</div>
+        <div className="flex flex-wrap gap-1.5">
+          {([
+            ['md', 'MD'],
+            ['csv', 'CSV'],
+            ['tsv', 'Excel TSV'],
+            ['html', 'Print/PDF'],
+            ['json', 'JSON'],
+          ] as const).map(([fmt, label]) => (
+            <button
+              key={fmt}
+              type="button"
+              onClick={() => downloadBankPack(fmt)}
+              className="text-[10px] px-2 py-1 rounded border border-white/15 hover:border-[#FF8C00]/50 hover:text-[#FF8C00]"
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
       {/* Currency dropdown - BTC always the base/denominator */}
