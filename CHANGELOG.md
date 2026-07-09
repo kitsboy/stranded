@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.4] — 2026-07-09
+
+### Added (P2)
+- Glossary hover tips on methodology (`GlossaryTip`)
+- Nav labels follow language toggle (EN/FR/DE/ES expanded strings)
+- Sites browser: source-type + min-score filters; bulk mission already in P0
+- E2E: privacy/roadmap/open-data, methodology, sites filters
+
 ## [2.3.3] — 2026-07-09
 
 ### Fixed / Enhanced (P1)

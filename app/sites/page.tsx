@@ -16,6 +16,8 @@ export default function AllSitesExplorer() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [provinceFilter, setProvinceFilter] = useState('')
+  const [sourceFilter, setSourceFilter] = useState('')
+  const [minScoreFilter, setMinScoreFilter] = useState(0)
   const [view, setView] = useState<'table' | 'cards'>('cards')
   const [selected, setSelected] = useState<EnrichedSite | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()) // bulk actions for item 12
@@ -37,10 +39,13 @@ export default function AllSitesExplorer() {
       })
     }
     if (provinceFilter) res = res.filter(s => s.properties.province === provinceFilter)
+    if (sourceFilter) res = res.filter(s => s.properties.source_type === sourceFilter)
+    if (minScoreFilter > 0) res = res.filter(s => s.strandedScore >= minScoreFilter)
     return res.sort((a, b) => b.strandedScore - a.strandedScore)
-  }, [allSites, search, provinceFilter])
+  }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter])
 
   const provinces = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.province))).filter(Boolean).sort(), [allSites])
+  const sources = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.source_type))).filter(Boolean).sort(), [allSites])
 
   const exportFiltered = () => {
     const blob = new Blob([JSON.stringify(filtered.map(s => ({...s.properties, strandedScore: s.strandedScore, id: s.id})), null, 2)], {type: 'application/json'})
@@ -106,13 +111,24 @@ export default function AllSitesExplorer() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6 sticky top-14 z-20 bg-[var(--bg-dark)] py-3 -mx-1 px-1">
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, province, company..." className="flex-1 glass border border-white/10 rounded-2xl px-5 py-3 text-sm" />
-        <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} className="glass border border-white/10 rounded-2xl px-5 text-sm min-w-[210px]">
+      <div className="flex flex-wrap gap-3 mb-6 sticky top-14 z-20 bg-[var(--bg-dark)] py-3 -mx-1 px-1">
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, province, company..." className="flex-1 min-w-[180px] glass border border-white/10 rounded-2xl px-5 py-3 text-sm" />
+        <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
           <option value="">All Provinces</option>
           {provinces.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
-        <div className="self-center text-xs px-4 text-gray-400 tabular-nums">
+        <select value={sourceFilter} onChange={e=>setSourceFilter(e.target.value)} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
+          <option value="">All sources</option>
+          {sources.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={minScoreFilter} onChange={e=>setMinScoreFilter(Number(e.target.value))} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[120px]">
+          <option value={0}>Any score</option>
+          <option value={45}>≥45 Med+</option>
+          <option value={65}>≥65 High+</option>
+          <option value={80}>≥80</option>
+          <option value={85}>≥85 Elite</option>
+        </select>
+        <div className="self-center text-xs px-2 text-gray-400 tabular-nums">
           {filtered.length} / {allSites.length}
           {selectedSites.length > 0 && <span className="text-[#FF8C00]"> · {selectedSites.length} selected</span>}
         </div>

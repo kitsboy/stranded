@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import GlossaryTip from '@/components/GlossaryTip'
 
 export const metadata = {
   title: 'Methodology — Stranded Value',
@@ -32,12 +33,13 @@ export default function MethodologyPage() {
       <h2>Bank packs</h2>
       <p>Export diligence packages from the map site panel, mission panel, or sites browser: Markdown brief (score factors + peers + sensitivity), CSV, Excel-friendly TSV, printable HTML, and JSON. No account required — files download locally.</p>
 
-      <h2>Glossary (quick)</h2>
-      <ul>
-        <li><strong>Inferred field</strong> — proxy when ECCC omits grid distance or internet type</li>
-        <li><strong>Mission</strong> — local portfolio of selected sites</li>
-        <li><strong>LCOE</strong> — levelized cost of energy for the genset CapEx model</li>
-        <li><strong>Bank pack</strong> — multi-format export for capital diligence</li>
+      <h2>Glossary (hover tips)</h2>
+      <ul className="not-prose space-y-2 text-sm text-gray-300">
+        <li><GlossaryTip term="Inferred field" /> — proxy when ECCC omits grid distance or internet type</li>
+        <li><GlossaryTip term="Mission" /> — local portfolio of selected sites</li>
+        <li><GlossaryTip term="LCOE" /> — levelized cost of energy for the genset CapEx model</li>
+        <li><GlossaryTip term="Bank pack" /> — multi-format export for capital diligence</li>
+        <li><GlossaryTip term="Stranded Score™" /> · <GlossaryTip term="Genset" /> · <GlossaryTip term="ASIC" /> · <GlossaryTip term="CH₄" /></li>
       </ul>
 
       <h2>Updates</h2>

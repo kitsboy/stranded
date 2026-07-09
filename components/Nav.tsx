@@ -3,14 +3,24 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Search, Command } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
 import ThemeToggle from './ThemeToggle'
 import MobileNav from './MobileNav'
+import { Locale, t } from '@/lib/i18n'
 
 export default function Nav() {
   const pathname = usePathname()
+  const [locale, setLocale] = useState<Locale>('en')
+
+  useEffect(() => {
+    const saved = (localStorage.getItem('stranded-locale') || 'en') as Locale
+    setLocale(saved)
+    const handler = (e: Event) => setLocale((e as CustomEvent).detail as Locale)
+    window.addEventListener('stranded-locale-change', handler)
+    return () => window.removeEventListener('stranded-locale-change', handler)
+  }, [])
 
   const openPalette = () => {
     window.dispatchEvent(new CustomEvent('open-command-palette'))
@@ -56,14 +66,14 @@ export default function Nav() {
         </Link>
 
         <div className="flex items-center gap-0.5 flex-1 justify-center overflow-x-auto">
-          {navLink('/', 'Home')}
-          {navLink('/map', 'Map')}
-          {navLink('/education', 'Education')}
-          {navLink('/sites', 'All Sites')}
-          {navLink('/pitch', 'Pitch')}
-          {navLink('/dashboard', 'Dashboard')}
-          <span className="hidden lg:inline">{navLink('/verticals', 'Verticals')}</span>
-          <span className="hidden xl:inline">{navLink('/bookmarks', 'Saved')}</span>
+          {navLink('/', t(locale, 'home'))}
+          {navLink('/map', t(locale, 'map'))}
+          {navLink('/education', t(locale, 'education'))}
+          {navLink('/sites', t(locale, 'sites'))}
+          {navLink('/pitch', t(locale, 'pitch'))}
+          {navLink('/dashboard', t(locale, 'dashboard'))}
+          <span className="hidden lg:inline">{navLink('/verticals', t(locale, 'verticals'))}</span>
+          <span className="hidden xl:inline">{navLink('/bookmarks', t(locale, 'bookmarks'))}</span>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
@@ -77,11 +87,11 @@ export default function Nav() {
             title="Search sites (⌘K)"
           >
             <Search size={15} />
-            <span className="font-mono">Search</span>
+            <span className="font-mono">{t(locale, 'search')}</span>
             <span className="ml-1 text-[10px] opacity-60 flex items-center gap-px"><Command size={11} />K</span>
           </button>
           <div className="hidden md:flex items-center gap-2 text-gray-400">
-            <span className="font-mono">2,611</span> sites
+            <span className="font-mono">2,611</span> {t(locale, 'sitesCount')}
           </div>
         </div>
       </div>

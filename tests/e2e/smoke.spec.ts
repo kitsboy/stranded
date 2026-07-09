@@ -34,3 +34,22 @@ test('v2.2 routes load', async ({ page }) => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 })
   }
 })
+
+test('v2.3 routes load', async ({ page }) => {
+  for (const path of ['/privacy', '/roadmap', '/open-data']) {
+    await page.goto(path)
+    await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 })
+  }
+})
+
+test('methodology has score tiers and glossary', async ({ page }) => {
+  await page.goto('/methodology')
+  await expect(page.getByText(/Stranded Score/i).first()).toBeVisible()
+  await expect(page.getByText(/Bank pack/i).first()).toBeVisible()
+})
+
+test('sites filters and mission control present', async ({ page }) => {
+  await page.goto('/sites')
+  await expect(page.getByRole('heading', { name: /All Sites/i })).toBeVisible({ timeout: 15000 })
+  await expect(page.getByRole('combobox').first()).toBeVisible()
+})
