@@ -83,7 +83,7 @@ export default function SiteDetailsPanel({
     if (!site) return
     setBookmarked(getBookmarks().includes(site.id))
     setNote(getSiteNote(site.id))
-  }, [site?.id])
+  }, [site])
 
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
   const currencySymbol = currentFiat.symbol
@@ -215,7 +215,7 @@ export default function SiteDetailsPanel({
       effectiveMachineCount: effectiveMachineCount || 0,
       gensetName: GENSET_DATA[selectedGenset].name
     }
-  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, selectedFiat, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission])
+  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, selectedFiat, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission, site])
 
   const fmt = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'

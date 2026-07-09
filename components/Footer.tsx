@@ -10,13 +10,17 @@ export default function Footer() {
   const pathname = usePathname()
   const [showQR, setShowQR] = useState(false)
   const [statsDate, setStatsDate] = useState('')
+  const [version, setVersion] = useState('2.3')
   const btcAddress = 'bc1qhm5ndfjhqxdk3cx0pngyps4f5nnwdckulmge6c8keyf2pk0neqtshjn8ad'
   const hideMobileCtas = pathname === '/map'
 
   useEffect(() => {
     fetch('/data/live-stats.json')
       .then(r => r.json())
-      .then(j => setStatsDate(j.generatedAt ? new Date(j.generatedAt).toLocaleDateString('en-CA') : ''))
+      .then(j => {
+        setStatsDate(j.generatedAt ? new Date(j.generatedAt).toLocaleDateString('en-CA') : '')
+        if (j.version) setVersion(String(j.version))
+      })
       .catch(() => {})
   }, [])
 
@@ -50,7 +54,7 @@ export default function Footer() {
             <span className="hidden sm:inline text-white/20">•</span>
             <span>2026 • 2,611 sites{statsDate && <> • stats {statsDate}</>}</span>
             <span className="hidden sm:inline text-white/20">•</span>
-            <span className="font-mono text-[#FF8C00]">v2.3</span>
+            <span className="font-mono text-[#FF8C00]">v{version}</span>
             <Link href="/methodology" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Methodology</Link>
             <Link href="/open-data" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Open Data</Link>
             <Link href="/roadmap" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Roadmap</Link>

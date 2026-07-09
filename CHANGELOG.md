@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.3] — 2026-07-09
+
+### Fixed / Enhanced (P1)
+- Map deep links: `?province=` alias, robust `site`/`mission` restore, toast on missing site
+- Local **watch-site** banner on map open when score ≥ threshold
+- Light theme: broader glass/input/panel contrast fixes
+- Hook lint cleanups (CommandPalette recent save, SiteDetails site deps, Map terrain note)
+- Footer version reads live-stats
+
 ## [2.3.2] — 2026-07-09
 
 ### Fixed (P0)

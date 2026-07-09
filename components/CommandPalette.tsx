@@ -77,13 +77,15 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
   const handleSelect = useCallback((site: EnrichedSite) => {
     onClose()
     setQuery('')
-    saveRecent(site)
+    const updated = [site, ...recent.filter(r => r.id !== site.id)].slice(0, 5)
+    setRecent(updated)
+    localStorage.setItem('stranded-recent', JSON.stringify(updated))
     if (onSelectSite) {
       onSelectSite(site)
     } else {
       router.push(`/map?site=${encodeURIComponent(site.id)}`)
     }
-  }, [onClose, onSelectSite, router])
+  }, [onClose, onSelectSite, router, recent])
 
   useEffect(() => { setSelectedIdx(0) }, [query, results.length])
 

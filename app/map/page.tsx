@@ -18,7 +18,7 @@ import { parseMapUrl } from '@/lib/map-url'
 import { getFilterPresets, saveFilterPreset, type FilterPreset } from '@/lib/bookmarks'
 import { exportFilteredGeojson, exportSitesKml, downloadBlob } from '@/lib/export-formats'
 import { savePortfolioProfile } from '@/lib/portfolio-profiles'
-import { addSiteAlert } from '@/lib/alerts'
+import { addSiteAlert, evaluateWatchHits } from '@/lib/alerts'
 import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 import ScoreLegend from '@/components/ScoreLegend'
 
@@ -64,19 +64,41 @@ function StrandedCommandCenter() {
       const urlState = parseMapUrl(searchParams)
       if (urlState.minScore != null) setMinScore(urlState.minScore)
       if (urlState.minEmission != null) setMinEmission(urlState.minEmission)
-      if (urlState.provinces?.length) setSelectedProvinces(new Set(urlState.provinces))
-
-      const siteId = searchParams.get('site')
-      if (siteId) {
-        const match = sites.find(s => s.id === siteId)
-        if (match) setTimeout(() => setSelectedSite(match), 420)
+      if (urlState.provinces?.length) {
+        setSelectedProvinces(new Set(urlState.provinces))
+        if (urlState.provinces.length > 6) setShowAllProvinces(true)
       }
 
-      const missionToken = searchParams.get('mission')
+      const siteId = urlState.site || searchParams.get('site')
+      if (siteId) {
+        const match = sites.find(s => s.id === siteId || String(s.properties.ghgrp_id) === siteId)
+        if (match) {
+          setTimeout(() => {
+            setSelectedSite(match)
+            // ensure province of deep-linked site is not filtered out
+            if (match.properties.province) {
+              setSelectedProvinces(prev => {
+                if (prev.size === 0) return prev
+                const next = new Set(prev)
+                next.add(match.properties.province)
+                return next
+              })
+            }
+          }, 420)
+        } else {
+          toast.error('Site not found for this link')
+        }
+      }
+
+      const missionToken = urlState.mission || searchParams.get('mission')
       if (missionToken) {
         const ids = decodePortfolioShare(missionToken)
         const restored = ids.map(id => sites.find(s => s.id === id)).filter(Boolean) as EnrichedSite[]
-        if (restored.length) setPortfolio(restored)
+        if (restored.length) {
+          setPortfolio(restored)
+          savePortfolio(restored)
+          toast.success(`Mission restored (${restored.length} sites)`)
+        }
       } else {
         const savedIds = loadPortfolioIds()
         if (savedIds.length) {
@@ -84,9 +106,27 @@ function StrandedCommandCenter() {
           if (restored.length) setPortfolio(restored)
         }
       }
+
+      // Local watch-site banner when reopening map
+      const hits = evaluateWatchHits(sites)
+      if (hits.length) {
+        const first = hits[0]
+        toast.message(`Watch: ${first.name}`, {
+          description: `Score ${first.currentScore} meets threshold ≥${first.minScore}${hits.length > 1 ? ` · +${hits.length - 1} more` : ''}`,
+          duration: 8000,
+          action: {
+            label: 'Open',
+            onClick: () => {
+              const s = sites.find(x => x.id === first.siteId)
+              if (s) setSelectedSite(s)
+            },
+          },
+        })
+      }
     }).catch(err => {
       console.error(err)
       setLoading(false)
+      toast.error('Failed to load sites dataset')
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

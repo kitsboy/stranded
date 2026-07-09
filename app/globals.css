@@ -189,16 +189,51 @@ html.pitch-embed footer {
 
 html.theme-light {
   --bg-dark: #f1f5f9;
+  --glass: rgba(255, 255, 255, 0.88);
   color-scheme: light;
 }
 html.theme-light body {
   color: #1e293b;
+  background: var(--bg-dark);
 }
 html.theme-light .glass,
+html.theme-light .glass-strong,
 html.theme-light nav,
 html.theme-light footer {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   color: #1e293b;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+html.theme-light .text-white,
+html.theme-light .text-gray-300,
+html.theme-light .text-gray-400 {
+  color: #334155 !important;
+}
+html.theme-light .text-gray-500 {
+  color: #64748b !important;
+}
+html.theme-light input,
+html.theme-light select,
+html.theme-light textarea {
+  background: #fff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+html.theme-light .bg-\[\#0f172a\]\/70,
+html.theme-light .bg-\[\#1e293b\]\/95,
+html.theme-light .bg-slate-800\/50,
+html.theme-light .bg-slate-800\/40,
+html.theme-light .bg-black\/20,
+html.theme-light .bg-black\/30 {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+html.theme-light .border-white\/10,
+html.theme-light .border-white\/15,
+html.theme-light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(15, 23, 42, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {

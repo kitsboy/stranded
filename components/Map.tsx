@@ -180,6 +180,8 @@ export default function Map({
         mapRef.current = null
       }
     }
+  // showTerrain only seeds initial pitch; live updates handled in satellite/terrain effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
