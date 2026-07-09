@@ -1,37 +1,92 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Globe } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Globe, ChevronDown } from 'lucide-react'
 import { Locale, LOCALES, t } from '@/lib/i18n'
+
+function readSavedLocale(): Locale {
+  if (typeof window === 'undefined') return 'en'
+  try {
+    const saved = localStorage.getItem('stranded-locale')
+    if (saved && LOCALES.some(l => l.code === saved)) return saved as Locale
+  } catch { /* ignore */ }
+  return 'en'
+}
 
 export default function LanguageToggle() {
   const [locale, setLocale] = useState<Locale>('en')
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('stranded-locale') as Locale
-    if (saved && LOCALES.some(l => l.code === saved)) setLocale(saved)
+    const next = readSavedLocale()
+    setLocale(next)
+    document.documentElement.lang = next
   }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
 
   const change = (code: Locale) => {
     setLocale(code)
     localStorage.setItem('stranded-locale', code)
     document.documentElement.lang = code
     window.dispatchEvent(new CustomEvent('stranded-locale-change', { detail: code }))
+    setOpen(false)
   }
 
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-1 px-2 py-1 rounded-lg border border-white/15 text-xs text-gray-400 hover:text-white" aria-label="Change language">
+    <div className="relative" ref={rootRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1 px-2 py-1 rounded-lg border border-white/15 text-xs text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#5BC0BE]/50"
+        aria-label="Change language"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
         <Globe size={13} />
-        {locale.toUpperCase()}
+        <span className="font-mono uppercase">{locale}</span>
+        <ChevronDown size={12} className={`opacity-60 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      <div className="absolute right-0 bottom-full mb-1 hidden group-hover:block group-focus-within:block bg-[#1e293b] border border-white/15 rounded-lg py-1 min-w-[100px] z-50">
-        {LOCALES.map(l => (
-          <button key={l.code} onClick={() => change(l.code)} className={`block w-full text-left px-3 py-1.5 text-xs hover:bg-white/10 ${locale === l.code ? 'text-[#FF8C00]' : 'text-gray-300'}`}>
-            {l.label}
-          </button>
-        ))}
-      </div>
+
+      {/* Open DOWNWARD — was bottom-full and flew above the sticky nav off-screen */}
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Languages"
+          className="absolute right-0 top-full mt-1 z-[80] min-w-[140px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
+        >
+          {LOCALES.map(l => (
+            <button
+              key={l.code}
+              type="button"
+              role="option"
+              aria-selected={locale === l.code}
+              onClick={() => change(l.code)}
+              className={`block w-full text-left px-3 py-2 text-xs hover:bg-white/10 ${
+                locale === l.code ? 'text-[#FF8C00] font-semibold' : 'text-gray-300'
+              }`}
+            >
+              <span className="font-mono uppercase mr-2 opacity-70">{l.code}</span>
+              {l.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -39,9 +94,8 @@ export default function LanguageToggle() {
 export function useLocaleString(key: string): string {
   const [locale, setLocale] = useState<Locale>('en')
   useEffect(() => {
-    const saved = (localStorage.getItem('stranded-locale') || 'en') as Locale
-    setLocale(saved)
-    const handler = (e: Event) => setLocale((e as CustomEvent).detail)
+    setLocale(readSavedLocale())
+    const handler = (e: Event) => setLocale((e as CustomEvent).detail as Locale)
     window.addEventListener('stranded-locale-change', handler)
     return () => window.removeEventListener('stranded-locale-change', handler)
   }, [])

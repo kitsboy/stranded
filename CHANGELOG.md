@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.5] — 2026-07-09
+
+### Fixed
+- Language menu opens **downward** under the nav (was `bottom-full` → flew off the top of the screen)
+- Click-to-toggle + outside click / Escape (works on mobile; no hover trap)
+- Default / invalid locale hard-resets to **English**; EN listed first and clearly selectable
+
 ## [2.3.4] — 2026-07-09
 
 ### Added (P2)

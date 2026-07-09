@@ -15,9 +15,20 @@ export default function Nav() {
   const [locale, setLocale] = useState<Locale>('en')
 
   useEffect(() => {
-    const saved = (localStorage.getItem('stranded-locale') || 'en') as Locale
-    setLocale(saved)
-    const handler = (e: Event) => setLocale((e as CustomEvent).detail as Locale)
+    try {
+      const saved = localStorage.getItem('stranded-locale')
+      if (saved === 'en' || saved === 'fr' || saved === 'de' || saved === 'es') setLocale(saved)
+      else {
+        setLocale('en')
+        if (saved) localStorage.setItem('stranded-locale', 'en')
+      }
+    } catch {
+      setLocale('en')
+    }
+    const handler = (e: Event) => {
+      const code = (e as CustomEvent).detail as Locale
+      if (code === 'en' || code === 'fr' || code === 'de' || code === 'es') setLocale(code)
+    }
     window.addEventListener('stranded-locale-change', handler)
     return () => window.removeEventListener('stranded-locale-change', handler)
   }, [])
