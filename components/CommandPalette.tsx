@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { EnrichedSite } from '@/lib/sites'
+import { EnrichedSite, scoreTierClass } from '@/lib/sites'
 import { getBookmarks } from '@/lib/bookmarks'
 
 interface CommandPaletteProps {
@@ -51,7 +51,8 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
 
   // Preset quick actions (power-up for Command Palette)
   const presets = [
-    { label: 'High Score (>70)', filter: (s: EnrichedSite) => s.strandedScore > 70 },
+    { label: 'Elite Score (≥85)', filter: (s: EnrichedSite) => s.strandedScore >= 85 },
+    { label: 'High Score (≥65)', filter: (s: EnrichedSite) => s.strandedScore >= 65 },
     { label: 'Top Emitters', filter: (s: EnrichedSite) => s.emission > 5000 },
     { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => (s.properties.distance_to_grid_km || 999) < 10 },
   ]
@@ -149,7 +150,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
                   </div>
                   <div className="flex items-center gap-3 text-right">
                     <div>
-                      <div className={`stranded-score inline-block ${site.strandedScore > 72 ? 'score-high' : site.strandedScore > 45 ? 'score-med' : 'score-low'}`}>
+                      <div className={`stranded-score inline-block ${scoreTierClass(site.strandedScore)}`}>
                         {site.strandedScore}
                       </div>
                     </div>

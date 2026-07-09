@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { EnrichedSite } from '@/lib/sites'
+import { EnrichedSite, scoreTierColor } from '@/lib/sites'
 
 interface MapProps {
   sites: EnrichedSite[]
@@ -92,12 +92,8 @@ export default function Map({
         const size = Math.min(20, Math.max(8, Math.sqrt(Math.max(emission, 10)) / 11))
         const el = document.createElement('div')
 
-        // Dynamic color: low teal → fire orange/red for high emission
-        let bg = '#14b8a6'
-        if (score > 78) bg = '#f43f5e'
-        else if (score > 62) bg = '#fb923c'
-        else if (score > 45) bg = '#fbbf24'
-        else if (emission > 800) bg = '#f59e0b'
+        // Score v3 tiers: elite purple · high green · med amber · low orange
+        const bg = scoreTierColor(score)
 
         el.style.width = `${size}px`
         el.style.height = `${size}px`

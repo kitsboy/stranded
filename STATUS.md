@@ -1,18 +1,18 @@
 # Stranded Value — Status
 
-**Updated:** 2026-07-03 by Grok  
+**Updated:** 2026-07-09 by Grok  
 **Site:** https://stranded.giveabit.io (Cloudflare Pages)  
 **Build:** Next.js static export — `npm run build` → `dist/`  
 **Dev:** `npm run dev` → `localhost:3003`  
 **Data:** 2,611 ECCC methane sites, live map, education hub, pitch deck, marketing hub  
-**Version:** 2.2.0 · **Routes:** 21 static pages  
-**Status:** Live — deploy confirmed, `live-stats.json` reports v2.2.0
+**Version:** 2.2.2 · **Routes:** 21+ static pages  
+**Status:** Live — deploy pipeline confirmed (`npm run deploy:check`)
 
-**New in v2.2:** heatmap layer, IndexedDB cache, `/bookmarks`, `/methodology`, `/about`, `/global`, `/benchmarks`  
-**Pipeline:** `npm run verify` — validate → docs:sync → lint → build → push dry-run
+**New in v2.2.2:** Score v3 tier colors unified (elite/high/med/low); live homepage stats; richer /status  
+**Pipeline:** `npm run verify` → `git push origin main` → `npm run deploy:check`
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-08T00:57:40.087Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T16:21:27.557Z
 
 | Metric | Value |
 |--------|-------|

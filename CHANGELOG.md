@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.2] — 2026-07-09
+
+### Fixed
+- **Score tier UI alignment** — all badges/markers now use Score v3 thresholds (elite ≥85, high ≥65, medium ≥45, low &lt;45) via shared `scoreTierClass` / `scoreTierColor`
+- Home featured scores, sites browser, command palette, and map markers no longer used legacy cutoffs (72 / 78 / 62)
+- Status page shows live version, site count, avg score, and high-score count from `/status.json` + `live-stats.json`
+
+### Enhanced
+- Homepage stats pull from live-stats (site count, 13 provinces, avg score, sites ≥80)
+- 5% impact calculator uses live impact totals when available
+- Methodology page documents score tier color legend
+- Command palette presets: Elite (≥85) and High (≥65)
+
 ## [2.2.1] — 2026-07-07
 
 ### Fixed

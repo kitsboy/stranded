@@ -18,6 +18,13 @@ export default function MethodologyPage() {
 
       <h2>Stranded Score™ v3</h2>
       <p>Log-scaled emission is the primary driver. When ECCC does not publish grid distance or internet type, we infer proxies from source category (landfill, oil &amp; gas, power, etc.), province infrastructure, emission tier, data confidence, and reporting year. Scores span ~22–96 with meaningful elite (≥85) and high (≥65) tiers. Percentile badges compare each site to the full Canadian dataset.</p>
+      <div className="not-prose flex flex-wrap gap-2 my-4">
+        <span className="stranded-score score-elite">≥85 Elite</span>
+        <span className="stranded-score score-high">≥65 High</span>
+        <span className="stranded-score score-med">≥45 Medium</span>
+        <span className="stranded-score score-low">&lt;45 Low</span>
+      </div>
+      <p className="text-sm text-gray-400">Map markers and badges use the same thresholds everywhere (home, sites browser, command palette, map).</p>
 
       <h2>ROI model</h2>
       <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs.</p>

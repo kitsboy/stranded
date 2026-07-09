@@ -7,6 +7,7 @@
   --glass: rgba(42, 58, 75, 0.85); /* lighter glass base */
   --accent-orange: #FF8C00;
   --accent-teal: #5BC0BE;
+  --score-elite: #a855f7;
   --score-high: #22c55e;
   --score-med: #eab308;
   --score-low: #f97316;
@@ -81,6 +82,8 @@
   box-shadow: 0 0 0 1px rgba(0,0,0,0.3) inset;
 }
 
+/* Score v3: elite ≥85 · high ≥65 · medium ≥45 · low <45 */
+.score-elite { color: var(--score-elite); background: rgba(168, 85, 247, 0.12); }
 .score-high { color: var(--score-high); background: rgba(34, 197, 94, 0.1); }
 .score-med { color: var(--score-med); background: rgba(234, 179, 8, 0.1); }
 .score-low { color: var(--score-low); background: rgba(249, 115, 22, 0.1); }

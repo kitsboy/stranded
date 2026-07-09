@@ -6,30 +6,38 @@ import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Rocket } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
+import { scoreTierClass } from '@/lib/scoring'
 
 type FeaturedSite = { id?: string; name: string; province: string; emission: number; score: number; link: string }
 
 export default function LandingPage() {
   const [btc, setBtc] = useState(85000)
   const [featured, setFeatured] = useState<FeaturedSite[]>([])
+  const [stats, setStats] = useState<LiveStats | null>(null)
 
   useEffect(() => {
     fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
       .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd)).catch(() => {})
     fetch('/data/live-stats.json')
       .then(r => r.json())
-      .then((stats: LiveStats) => {
-        setFeatured(stats.topSites.slice(0, 3).map(s => ({
-          id: s.id,
-          name: s.name,
-          province: s.province,
-          emission: s.emissionKgDay,
-          score: s.score,
-          link: `/map?site=${s.id}`,
+      .then((s: LiveStats) => {
+        setStats(s)
+        setFeatured(s.topSites.slice(0, 3).map(t => ({
+          id: t.id,
+          name: t.name,
+          province: t.province,
+          emission: t.emissionKgDay,
+          score: t.score,
+          link: `/map?site=${t.id}`,
         })))
       })
       .catch(() => {})
   }, [])
+
+  const siteCount = stats?.siteCount ?? 2611
+  const provinceCount = stats?.provinceCount ?? 13
+  const avgScore = stats?.totals?.avgStrandedScore
+  const highScore = stats?.totals?.highScoreSites
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[var(--bg-dark)] text-white overflow-x-hidden">
@@ -49,7 +57,7 @@ export default function LandingPage() {
           <span className="text-[#FF8C00]">Bitcoin Access</span>
         </h1>
         <p className="max-w-2xl mx-auto text-2xl text-gray-300 mb-10">
-          2,611 verified sites across Canada. Capture waste methane. Mine Bitcoin with zero grid impact.
+          {siteCount.toLocaleString()} verified sites across Canada. Capture waste methane. Mine Bitcoin with zero grid impact.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -63,7 +71,7 @@ export default function LandingPage() {
             Live Pitch Deck
           </Link>
           <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
-            Browse All 2,611 Sites
+            Browse All {siteCount.toLocaleString()} Sites
           </Link>
         </div>
         <p className="mt-4 text-xs text-gray-500">Data: Environment and Climate Change Canada (ECCC) • Open dataset</p>
@@ -73,16 +81,16 @@ export default function LandingPage() {
       <div className="border-y border-white/10 bg-black/20">
         <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00]">2,611</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{siteCount.toLocaleString()}</div>
             <div className="text-sm text-gray-400 mt-1">Verified methane sites</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00]">10+</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{provinceCount}</div>
             <div className="text-sm text-gray-400 mt-1">Provinces & territories</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00]">100%</div>
-            <div className="text-sm text-gray-400 mt-1">Public ECCC data</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{avgScore != null ? avgScore.toFixed(1) : '—'}</div>
+            <div className="text-sm text-gray-400 mt-1">Avg Stranded Score{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
           </div>
           <div>
             <div className="text-4xl font-semibold text-[#FF8C00]">0</div>
@@ -137,7 +145,7 @@ export default function LandingPage() {
             <Link key={site.id || i} href={site.link} className="glass p-5 rounded-2xl border border-white/10 hover:border-[#FF8C00]/50 transition block">
               <div className="flex justify-between gap-2">
                 <div className="font-semibold truncate">{site.name}</div>
-                {site.score > 0 && <div className={`stranded-score text-xs ${site.score >= 85 ? 'score-high' : site.score >= 65 ? 'score-med' : 'score-low'}`}>{site.score}</div>}
+                {site.score > 0 && <div className={`stranded-score text-xs ${scoreTierClass(site.score)}`}>{site.score}</div>}
               </div>
               <div className="text-sm text-gray-400 mt-1">{site.province} • {site.emission.toLocaleString()} kg/day • Live from dataset</div>
               <div className="text-xs text-[#5BC0BE] mt-3">View on map → (real CapEx + ROI with gensets)</div>
@@ -216,11 +224,17 @@ export default function LandingPage() {
         <h3 className="text-3xl font-bold tracking-tighter mb-6">What if we captured just 5%?</h3>
         <input type="range" min="1" max="25" defaultValue="5" className="w-full max-w-md accent-[#FF8C00]" onChange={(e)=>{
           const v = parseInt(e.target.value);
+          const n = siteCount;
+          const co2e = stats?.impact?.co2eAvoided5PctTonnes
+            ? Math.round(stats.impact.co2eAvoided5PctTonnes * (v / 5))
+            : Math.round(v * 1240 * 365 * 25 / 1000);
           const el = document.getElementById('quick-impact');
-          if (el) el.innerText = `~${Math.round(2611 * v / 100)} sites • ~${Math.round(v * 1240 * 365 * 25 / 1000 / 1000)}k tonnes CO₂e avoided/yr • serious sats`;
+          if (el) el.innerText = `~${Math.round(n * v / 100).toLocaleString()} sites • ~${co2e.toLocaleString()} t CO₂e avoided/yr • serious sats`;
         }} />
-        <div id="quick-impact" className="mt-4 text-2xl font-mono text-[#FF8C00]">~130 sites • ~1.4M tonnes CO₂e avoided/yr • serious sats</div>
-        <p className="text-xs text-gray-500 mt-1">This is only 5%. The full 2,611 is 20× more powerful.</p>
+        <div id="quick-impact" className="mt-4 text-2xl font-mono text-[#FF8C00]">
+          ~{Math.round(siteCount * 0.05).toLocaleString()} sites • ~{(stats?.impact?.co2eAvoided5PctTonnes ?? 1049340).toLocaleString()} t CO₂e avoided/yr • serious sats
+        </div>
+        <p className="text-xs text-gray-500 mt-1">This is only 5%. The full {siteCount.toLocaleString()} is 20× more powerful.</p>
       </div>
 
       {/* Voices from the Frontier */}

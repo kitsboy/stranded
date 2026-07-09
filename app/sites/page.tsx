@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, Star, Download } from 'lucide-react'
-import { loadSites, EnrichedSite } from '@/lib/sites'
+import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
 
 export default function AllSitesExplorer() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
@@ -100,7 +100,7 @@ export default function AllSitesExplorer() {
                       setSelectedIds(next)
                     }} onClick={e => e.stopPropagation()} className="accent-[#FF8C00]" />
                     <div className="ml-auto text-right">
-                      <div className={`stranded-score ${site.strandedScore > 72 ? 'score-high' : site.strandedScore > 45 ? 'score-med' : 'score-low'}`}>
+                      <div className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>
                         {site.strandedScore}
                       </div>
                       {site.scoreBadge && <div className="text-[9px] text-[#5BC0BE] mt-0.5">{site.scoreBadge}</div>}
@@ -152,7 +152,7 @@ export default function AllSitesExplorer() {
                   <td className="p-4 text-[#5BC0BE]">{site.properties.province}</td>
                   <td className="p-4 text-right font-mono text-[#FF8C00]">{site.emission.toLocaleString()}</td>
                   <td className="p-4 text-right font-mono">{site.maxGeneratorPowerKW || 'N/A'} kW</td>
-                  <td className="p-4 text-right"><span className={`stranded-score ${site.strandedScore>72?'score-high':site.strandedScore>45?'score-med':'score-low'}`}>{site.strandedScore}</span></td>
+                  <td className="p-4 text-right"><span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span></td>
                   <td className="p-4 text-right">
                     <Link href={`/map?site=${site.id}`} className="text-xs px-4 py-1 border border-white/20 rounded-2xl hover:bg-white/5">MAP</Link>
                   </td>

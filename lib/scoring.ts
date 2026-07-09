@@ -13,11 +13,30 @@ export function scorePercentile(score: number, allScores: number[]): number {
   return Math.round((below / sorted.length) * 100)
 }
 
+/** Stranded Score™ v3 tiers — single source of truth for UI colors */
 export function scoreTier(score: number): 'elite' | 'high' | 'medium' | 'low' {
   if (score >= 85) return 'elite'
   if (score >= 65) return 'high'
   if (score >= 45) return 'medium'
   return 'low'
+}
+
+/** CSS class for .stranded-score badges (globals.css) */
+export function scoreTierClass(score: number): string {
+  const tier = scoreTier(score)
+  if (tier === 'elite') return 'score-elite'
+  if (tier === 'high') return 'score-high'
+  if (tier === 'medium') return 'score-med'
+  return 'score-low'
+}
+
+/** Map marker / chart hex colors aligned to v3 tiers */
+export function scoreTierColor(score: number): string {
+  const tier = scoreTier(score)
+  if (tier === 'elite') return '#a855f7' // purple — top tier
+  if (tier === 'high') return '#22c55e'  // green
+  if (tier === 'medium') return '#eab308' // amber
+  return '#f97316' // orange
 }
 
 export function scoreBadgeLabel(percentile: number): string {
