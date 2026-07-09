@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Briefcase } from 'lucide-react'
 
 export default function Footer() {
+  const pathname = usePathname()
   const [showQR, setShowQR] = useState(false)
   const [statsDate, setStatsDate] = useState('')
   const btcAddress = 'bc1qhm5ndfjhqxdk3cx0pngyps4f5nnwdckulmge6c8keyf2pk0neqtshjn8ad'
+  const hideMobileCtas = pathname === '/map'
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -18,10 +21,31 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="sticky bottom-0 z-40 w-full bg-[var(--bg-dark)]/95 backdrop-blur border-t border-white/10 px-4 sm:px-6 py-3 text-[11px] text-gray-300 mt-auto" role="contentinfo">
+    <footer
+      className="sticky bottom-0 z-40 w-full bg-[var(--bg-dark)]/95 backdrop-blur border-t border-white/10 px-4 sm:px-6 py-3 text-[11px] text-gray-300 mt-auto"
+      role="contentinfo"
+    >
       <div className="max-w-7xl mx-auto">
+        {/* Mobile primary CTAs — inside footer (not a separate fixed layer under it). Hidden on map. */}
+        {!hideMobileCtas && (
+          <div className="md:hidden flex gap-2 mb-2.5">
+            <Link
+              href="/map"
+              className="flex-1 text-center py-2.5 rounded-xl bg-[#FF8C00] text-black font-semibold text-sm touch-manipulation active:scale-[0.98]"
+            >
+              Open Map
+            </Link>
+            <Link
+              href="/pitch"
+              className="flex-1 text-center py-2.5 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] font-semibold text-sm touch-manipulation active:scale-[0.98]"
+            >
+              Pitch
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-5">
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-gray-400">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-2.5 gap-y-0.5 text-[10px] text-gray-400">
             <span>Data: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:text-white hover:underline">ECCC Verified</a></span>
             <span className="hidden sm:inline text-white/20">•</span>
             <span>2026 • 2,611 sites{statsDate && <> • stats {statsDate}</>}</span>
@@ -57,7 +81,7 @@ export default function Footer() {
                 <p className="mt-2 text-center text-[10px] text-gray-600 max-w-[140px] break-all">{btcAddress}</p>
               </div>
             )}
-            <Link href="/pitch" className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition">Pitch</Link>
+            <Link href="/pitch" className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition">Pitch</Link>
             <a href="/Marketing-Hub.html" className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#5BC0BE]/40 bg-white/5 hover:bg-white/10 text-[#5BC0BE] hover:text-white transition">
               <Briefcase className="w-3 h-3" /><span>Marketing Hub</span>
             </a>

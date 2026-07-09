@@ -259,15 +259,15 @@ export default function LandingPage() {
         <p className="text-xl text-gray-300 max-w-lg mx-auto">Not another tax. Not another rule. Just the hardest money ever invented, quietly eating one of the dirtiest problems on Earth — one small, profitable, beautiful site at a time.</p>
       </div>
 
-      {/* Multiple delightful CTAs — extra bottom space on mobile so sticky footer + MobileCtaBar do not cover buttons (~1.5cm + chrome) */}
-      <div className="max-w-6xl mx-auto px-6 pb-16 max-md:pb-[calc(1.5cm+9rem+env(safe-area-inset-bottom,0px))] text-center">
+      {/* In-page CTAs (scroll with content). Mobile sticky Open Map / Pitch live in Footer — not a second fixed layer. */}
+      <div className="max-w-6xl mx-auto px-6 pb-16 text-center">
         <div className="text-xs tracking-[3px] text-[#FF8C00] mb-3">THE DATA IS OPEN. THE TOOLS ARE READY.</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/map" className="px-9 py-4 rounded-2xl bg-[#FF8C00] text-[#0b111f] font-semibold text-lg hover:bg-[#ff9d33] active:scale-[0.985] touch-manipulation">Open the Live Command Center</Link>
           <Link href="/education" className="px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/5 text-lg touch-manipulation">Dive deeper in the Education Center</Link>
         </div>
         <p className="mt-4 text-xs text-gray-500 tracking-widest">EVERYTHING IS VERIFIABLE • ⌘K ANYWHERE TO SEARCH THE 2,611</p>
-        <p className="mt-6 text-[10px] text-gray-500 max-md:pb-2">
+        <p className="mt-6 text-[10px] text-gray-500">
           Full professional marketing suite available in the <a href="/Marketing-Hub.html" className="underline hover:text-[#FF8C00]">Marketing Hub</a> (includes all 5 documents + visuals)
         </p>
       </div>

@@ -46,7 +46,8 @@ export default function RootLayout({
           Skip to content
         </a>
         <Nav />
-        <main id="main-content" className="flex-1">{children}</main>
+        {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
+        <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">{children}</main>
         <Footer />
         <Toaster position="top-center" richColors closeButton />
         <GlobalCommand />
