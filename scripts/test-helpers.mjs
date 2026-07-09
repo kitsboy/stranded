@@ -90,13 +90,24 @@ assert.ok(summary.rankByScore >= 1)
 const similar = findSimilarByEmission(seed, all, 3)
 assert.ok(similar.length <= 3)
 
-// sensitivity on real site
+// sensitivity on real site — index must respond to difficulty (not power/carbon-only)
 const tornado = sensitivityTornado(seed, 85000)
 assert.ok(tornado.length >= 3)
 assert.ok(tornado.every(r => r.param && typeof r.swing === 'number'))
 // should be sorted by swing desc
 for (let i = 1; i < tornado.length; i++) {
   assert.ok(tornado[i - 1].swing >= tornado[i].swing - 1e-9)
+}
+const diffRow = tornado.find(r => r.param === 'Network difficulty')
+assert.ok(diffRow, 'Network difficulty row present')
+assert.ok(
+  diffRow.swing > 0,
+  `difficulty swing must be > 0 (got ${diffRow.swing}; low=${diffRow.lowImpact} high=${diffRow.highImpact})`
+)
+assert.notEqual(diffRow.lowImpact, diffRow.highImpact, 'difficulty low/high impacts must differ')
+// every scenario should move something on a real high-emission site
+for (const row of tornado) {
+  assert.ok(row.swing > 0, `${row.param} swing must be > 0, got ${row.swing}`)
 }
 
 // bank pack — real shipped functions

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.3.1] — 2026-07-09
+
+### Fixed
+- **Sensitivity tornado** — index now uses `annualRevenueUsd + carbonRevenueUsd` so Network difficulty (and all levers) produce non-zero swing; previously power+carbon-only made difficulty a no-op
+
 ## [2.3.0] — 2026-07-09
 
 ### Added (client-only power batch)

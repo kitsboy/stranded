@@ -10,16 +10,29 @@ export type TornadoRow = {
 }
 
 /**
- * Relative daily-profit index sensitivity (base = 1.0).
- * Uses advanced ROI carbon + power proxies as a stable index when full profit chain is heavy.
+ * Composite value index that moves with every tornado lever:
+ * - annualRevenueUsd responds to BTC price, difficultyMultiplier, gas derate (via ASICs/power)
+ * - carbonRevenueUsd responds to carbon credit price
+ */
+export function sensitivityIndex(roi: {
+  annualRevenueUsd: number
+  carbonRevenueUsd: number
+}): number {
+  return Math.max(roi.annualRevenueUsd + roi.carbonRevenueUsd, 0.001)
+}
+
+/**
+ * Relative value-index sensitivity (base = 1.0).
+ * Index = mining annual revenue (USD) + carbon credit USD — both from computeAdvancedRoi.
  */
 export function sensitivityTornado(site: EnrichedSite, liveBtcUsd = 85000): TornadoRow[] {
-  const base = computeAdvancedRoi(site, (site.recommendedGenset as any) || 'jenbacher316', {
+  const genset = (site.recommendedGenset as any) || 'jenbacher316'
+  const base = computeAdvancedRoi(site, genset, {
     liveBtcUsd,
     difficultyMultiplier: 1,
     gasTreatmentDerate: 1,
   })
-  const baseIdx = Math.max(base.powerKW * (liveBtcUsd / 85000) + base.carbonRevenueUsd / 1000, 0.001)
+  const baseIdx = sensitivityIndex(base)
 
   type RoiPartial = NonNullable<Parameters<typeof computeAdvancedRoi>[2]>
   const scenarios: { param: string; low: RoiPartial; high: RoiPartial }[] = [
@@ -35,8 +48,9 @@ export function sensitivityTornado(site: EnrichedSite, liveBtcUsd = 85000): Torn
     },
     {
       param: 'Network difficulty',
-      low: { liveBtcUsd, difficultyMultiplier: 1.4 },
-      high: { liveBtcUsd, difficultyMultiplier: 0.85 },
+      // higher difficultyMultiplier = higher modeled hashprice proxy in roi-model (scales dailyBtc)
+      low: { liveBtcUsd, difficultyMultiplier: 0.7 },
+      high: { liveBtcUsd, difficultyMultiplier: 1.3 },
     },
     {
       param: 'Carbon credit price',
@@ -46,12 +60,10 @@ export function sensitivityTornado(site: EnrichedSite, liveBtcUsd = 85000): Torn
   ]
 
   const rows: TornadoRow[] = scenarios.map(sc => {
-    const lowR = computeAdvancedRoi(site, (site.recommendedGenset as any) || 'jenbacher316', sc.low)
-    const highR = computeAdvancedRoi(site, (site.recommendedGenset as any) || 'jenbacher316', sc.high)
-    const lowBtc = sc.low.liveBtcUsd ?? liveBtcUsd
-    const highBtc = sc.high.liveBtcUsd ?? liveBtcUsd
-    const lowIdx = (lowR.powerKW * (lowBtc / 85000) + lowR.carbonRevenueUsd / 1000) / baseIdx
-    const highIdx = (highR.powerKW * (highBtc / 85000) + highR.carbonRevenueUsd / 1000) / baseIdx
+    const lowR = computeAdvancedRoi(site, genset, sc.low)
+    const highR = computeAdvancedRoi(site, genset, sc.high)
+    const lowIdx = sensitivityIndex(lowR) / baseIdx
+    const highIdx = sensitivityIndex(highR) / baseIdx
     return {
       param: sc.param,
       lowImpact: Math.round(lowIdx * 100) / 100,
