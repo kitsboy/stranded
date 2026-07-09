@@ -12,6 +12,7 @@ import { findPeerSites, peerSummary } from '@/lib/peers'
 import { sensitivityTornado } from '@/lib/sensitivity'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
+import { toast } from 'sonner'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -549,8 +550,7 @@ export default function SiteDetailsPanel({
           onClick={() => {
             const summary = `Site: ${p.name} (${p.province})\nDaily Profit: ${fmt(calculations.dailyProfitFiat)}\nMonthly: ${fmt(calculations.monthlyProfitFiat)}\nPayback: ${isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays) + ' days' : 'N/A'}\nBTC Price used: $${Math.round(liveBtcPrice)}`;
             navigator.clipboard.writeText(summary);
-            // Simple toast via alert for now (sonner global)
-            alert('ROI summary copied!');
+            toast.success('ROI summary copied')
           }}
           className="flex-1 py-2 text-xs border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10"
         >

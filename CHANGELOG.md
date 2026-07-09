@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.2] — 2026-07-09
+
+### Fixed (P0)
+- Map grid/internet layers + command palette “Near Grid” use Score v3 **inferred** grid distance / connectivity
+- Education + sites **Add to mission** writes real local portfolio (`addSitesToMission`)
+- Certified lead form honesty: local-only save, export JSON, email draft (no fake “we’ll respond”)
+- Replaced remaining education/site `alert()` with Sonner toasts
+
 ## [2.3.1] — 2026-07-09
 
 ### Fixed

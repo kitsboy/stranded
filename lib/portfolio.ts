@@ -18,6 +18,51 @@ export function loadPortfolioIds(): string[] {
   } catch { return [] }
 }
 
+export type MissionMinimal = {
+  id: string
+  name?: string
+  province?: string
+  score?: number
+  emission?: number
+}
+
+export function loadPortfolioMinimal(): MissionMinimal[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(PORTFOLIO_KEY)
+    if (!raw) return []
+    return JSON.parse(raw)
+  } catch { return [] }
+}
+
+/** Append sites to local mission portfolio. Returns how many were newly added. */
+export function addSitesToMission(sites: EnrichedSite[]): number {
+  if (typeof window === 'undefined' || !sites.length) return 0
+  const existing = loadPortfolioMinimal()
+  const ids = new Set(existing.map(s => s.id))
+  let added = 0
+  for (const s of sites) {
+    if (!s?.id || ids.has(s.id)) continue
+    existing.push({
+      id: s.id,
+      name: s.properties?.name,
+      province: s.properties?.province,
+      score: s.strandedScore,
+      emission: s.emission,
+    })
+    ids.add(s.id)
+    added++
+  }
+  localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(existing))
+  return added
+}
+
+export function addSiteIdsToMission(ids: string[], lookup: EnrichedSite[]): number {
+  const map = new Map(lookup.map(s => [s.id, s]))
+  const sites = ids.map(id => map.get(id)).filter(Boolean) as EnrichedSite[]
+  return addSitesToMission(sites)
+}
+
 export function encodePortfolioShare(sites: EnrichedSite[]): string {
   const ids = sites.map(s => s.id).join(',')
   const payload = btoa(ids).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')

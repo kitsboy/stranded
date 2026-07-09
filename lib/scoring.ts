@@ -2,7 +2,41 @@ import { StrandedSite } from '@/types/site'
 import {
   computeStrandedScore as computeScore,
   explainStrandedScore as explainScore,
+  resolveGridDistanceKm as resolveGridKm,
+  resolveInternetFactor as resolveNet,
 } from './scoring-shared.cjs'
+
+type PropsLike = { properties?: Record<string, unknown> } | Record<string, unknown>
+
+function propsOf(siteOrProps: PropsLike): Record<string, unknown> {
+  if (siteOrProps && typeof siteOrProps === 'object' && 'properties' in siteOrProps && siteOrProps.properties) {
+    return siteOrProps.properties as Record<string, unknown>
+  }
+  return siteOrProps as Record<string, unknown>
+}
+
+/** Same grid distance Score v3 uses (measured or inferred). */
+export function effectiveGridKm(siteOrProps: PropsLike): number {
+  return resolveGridKm(propsOf(siteOrProps)) as number
+}
+
+/** Same internet factor Score v3 uses (measured or inferred). */
+export function effectiveInternetFactor(siteOrProps: PropsLike): number {
+  return resolveNet(propsOf(siteOrProps)) as number
+}
+
+export function hasMeasuredGrid(siteOrProps: PropsLike): boolean {
+  return propsOf(siteOrProps).distance_to_grid_km != null
+}
+
+/** True when connectivity is fiber-class or inferred high-quality (factor ≥ 1.15). */
+export function hasStrongConnectivity(siteOrProps: PropsLike): boolean {
+  const p = propsOf(siteOrProps)
+  const raw = (p.internet_type as string | undefined)?.toLowerCase()
+  if (raw === 'fiber' || raw === 'starlink') return true
+  if (raw) return false
+  return (resolveNet(p) as number) >= 1.15
+}
 
 /** Stranded Score™ v3 — see lib/scoring-shared.cjs for canonical formula */
 export function computeStrandedScore(site: StrandedSite): number {

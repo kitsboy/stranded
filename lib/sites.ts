@@ -1,5 +1,8 @@
 import { StrandedSite } from '@/types/site'
-import { computeStrandedScore, scorePercentile, scoreBadgeLabel, scoreTierClass, scoreTierColor, scoreTier } from './scoring'
+import {
+  computeStrandedScore, scorePercentile, scoreBadgeLabel, scoreTierClass, scoreTierColor, scoreTier,
+  effectiveGridKm, effectiveInternetFactor, hasMeasuredGrid, hasStrongConnectivity,
+} from './scoring'
 
 export type EnrichedSite = StrandedSite & {
   id: string
@@ -12,7 +15,10 @@ export type EnrichedSite = StrandedSite & {
   maxGeneratorPowerKW?: number
 }
 
-export { computeStrandedScore, scorePercentile, scoreBadgeLabel, scoreTierClass, scoreTierColor, scoreTier }
+export {
+  computeStrandedScore, scorePercentile, scoreBadgeLabel, scoreTierClass, scoreTierColor, scoreTier,
+  effectiveGridKm, effectiveInternetFactor, hasMeasuredGrid, hasStrongConnectivity,
+}
 
 export function enrichSite(site: StrandedSite): EnrichedSite {
   const p = site.properties

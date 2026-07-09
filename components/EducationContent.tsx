@@ -12,6 +12,8 @@ import {
 import { loadSites, EnrichedSite, GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 import { USED_ASIC_MARKET } from '@/lib/roi-model'
 import { markEduSection, getEduProgress } from '@/lib/bookmarks'
+import { addSitesToMission } from '@/lib/portfolio'
+import { toast } from 'sonner'
 import GensetComparisonTable from '@/components/GensetComparisonTable'
 
 function QuizSection() {
@@ -50,7 +52,7 @@ function QuizSection() {
     const text = `I scored ${score}/${questions.length} (${pct}%) on the Stranded Value IQ quiz! ${url}`;
     try {
       if (navigator.share) await navigator.share({ title: 'Stranded Value IQ', text, url });
-      else { await navigator.clipboard.writeText(text); alert('Score link copied!'); }
+      else { await navigator.clipboard.writeText(text); toast.success('Score link copied'); }
     } catch { /* cancelled */ }
   };
 
@@ -253,7 +255,7 @@ export default function EducationContent() {
   const shareSimulator = () => {
     const text = `Stranded Value Impact: Capturing ${currentImpact.captured} sites could unlock ${currentImpact.dailyMethane.toLocaleString()} kg methane/day in value, avoid ${currentImpact.co2e.toLocaleString()} tonnes CO₂e/year, and produce ~${currentImpact.btc} BTC annually.`
     navigator.clipboard.writeText(text + "\n\nExplore: https://localhost:3003/education")
-    alert("Simulator results copied to clipboard!")
+    toast.success('Simulator results copied to clipboard')
   }
 
   return (
@@ -386,7 +388,7 @@ export default function EducationContent() {
             { step: "2. POWER", desc: "On-site generators turn gas into reliable off-grid electricity", action: () => setSelectedSimulator('advanced'), color: "#5BC0BE" },
             { step: "3. MINE", desc: "Bitcoin miners monetize the power — location agnostic & scalable", action: () => window.location.href = '/map', color: "#FF8C00" },
             { step: "4. CAPITAL", desc: "Real BTC + avoided CO₂e + community revenue = bankable Value", action: () => setSelectedSimulator('regional'), color: "#22c55e" },
-            { step: "5. RESTORE", desc: "Landowners, First Nations & provinces capture wealth + remediation", action: () => alert('This closes the loop — explore full portfolio impact on the map!'), color: "#5BC0BE" },
+            { step: "5. RESTORE", desc: "Landowners, First Nations & provinces capture wealth + remediation", action: () => { toast.message('Close the loop on the live map', { description: 'Open /map and build a mission portfolio from real sites.' }); window.location.href = '/map' }, color: "#5BC0BE" },
           ].map((item, i) => (
             <button 
               key={i} 
@@ -501,7 +503,7 @@ export default function EducationContent() {
               <button 
                 onClick={() => { 
                   setSelectedSimulator('advanced'); 
-                  alert(`Selected ${model.name}. In the Advanced Simulator below, this model would improve effective power economics by ~${Math.round((parseFloat(model.eff) / 35) * 100 - 100)}% vs baseline.`);
+                  toast.success(`Selected ${model.name}`, { description: `~${Math.round((parseFloat(model.eff) / 35) * 100 - 100)}% vs baseline efficiency — apply in Advanced Simulator below.` });
                 }}
                 className="mt-4 w-full text-xs py-2 rounded-2xl border border-white/20 hover:bg-white/5 flex items-center justify-center gap-2"
               >
@@ -565,7 +567,7 @@ export default function EducationContent() {
             <div className="flex justify-between py-1 text-xs"><span>Est. LCOE (¢/kWh, 10yr, +treatment)</span> <span className="font-mono">{(( ((GENSET_DATA as any)[selectedGenset].powerKW * numUnits * (GENSET_DATA as any)[selectedGenset].capexPerKW * (1 + treatmentAdder/100) ) / ((GENSET_DATA as any)[selectedGenset].powerKW * numUnits * 8760 * 0.95 * 10) ) * 100).toFixed(1)} ¢/kWh</span></div>
           </div>
 
-          <button onClick={() => { setSelectedSimulator('advanced'); alert('Configuration applied to the Advanced Simulator below. The gas capture % now drives power output from this plant.'); }} className="mt-4 w-full py-2 bg-[#FF8C00] text-black rounded-xl text-sm font-medium">
+          <button onClick={() => { setSelectedSimulator('advanced'); toast.success('Configuration applied', { description: 'Advanced Simulator open below — gas capture % drives plant power.' }); }} className="mt-4 w-full py-2 bg-[#FF8C00] text-black rounded-xl text-sm font-medium">
             Apply this Plant to the Simulator →
           </button>
         </div>
@@ -788,8 +790,17 @@ export default function EducationContent() {
               <div><div className="text-3xl font-semibold">{currentImpact.co2e.toLocaleString()}</div><div className="text-xs">tonnes CO₂e avoided / year</div></div>
               <div><div className="text-3xl font-semibold text-emerald-400">~{currentImpact.btc}</div><div className="text-xs">BTC generated / year</div></div>
             </div>
-            <button onClick={() => alert(`Scenario added to mission! (In full app this would sync to your /map portfolio). Explore live at /map`)} className="mt-6 w-full py-2.5 rounded-2xl border border-[#FF8C00]/40 hover:bg-[#FF8C00]/10 text-sm flex items-center justify-center gap-2">
-              <UsersIcon size={16} /> ADD THIS SCENARIO TO MY MISSION PORTFOLIO
+            <button onClick={() => {
+              if (!realSites.length) { toast.error('Sites still loading…'); return }
+              const n = Math.max(1, Math.round(realSites.length * (basicPct / 100)))
+              const top = [...realSites].sort((a, b) => b.emission - a.emission).slice(0, Math.min(n, 40))
+              const added = addSitesToMission(top)
+              toast.success(added ? `Added ${added} top emitters to mission` : 'Those sites already in mission', {
+                description: 'Open the map to review your portfolio.',
+                action: { label: 'Open map', onClick: () => { window.location.href = '/map' } },
+              })
+            }} className="mt-6 w-full py-2.5 rounded-2xl border border-[#FF8C00]/40 hover:bg-[#FF8C00]/10 text-sm flex items-center justify-center gap-2">
+              <UsersIcon size={16} /> ADD TOP SITES TO MISSION PORTFOLIO
             </button>
           </div>
         )}
@@ -845,7 +856,15 @@ export default function EducationContent() {
               <button onClick={shareSimulator} className="flex-1 flex items-center justify-center gap-2 py-3 border border-white/20 rounded-xl hover:bg-white/5 text-sm">
                 <Share2 size={16} /> Share Results
               </button>
-              <button onClick={() => alert('Added to mission portfolio! Head to /map to see live economics and add real sites.')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#FF8C00] text-black rounded-xl text-sm font-medium">
+              <button onClick={() => {
+                if (!realSites.length) { toast.error('Sites still loading…'); return }
+                const n = Math.max(1, Math.round(realSites.length * (advPct / 100)))
+                const top = [...realSites].sort((a, b) => b.emission - a.emission).slice(0, Math.min(n, 40))
+                const added = addSitesToMission(top)
+                toast.success(added ? `Added ${added} sites to mission` : 'Already in mission', {
+                  action: { label: 'Open map', onClick: () => { window.location.href = '/map' } },
+                })
+              }} className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#FF8C00] text-black rounded-xl text-sm font-medium">
                 + ADD TO MISSION
               </button>
             </div>
@@ -1096,7 +1115,7 @@ export default function EducationContent() {
             const a = document.createElement('a'); a.href = url; a.download = 'stranded-value-brief.txt'; a.click();
           }} className="px-5 py-2 border border-white/20 rounded-xl text-sm flex items-center gap-2 hover:bg-white/5"><Download size={14} /> Download Education Brief (.txt)</button>
 
-          <button onClick={() => alert('In production this would generate a styled PDF via the Marketing Hub or browser print. For now: open /Marketing-Hub.html and use Print/Save as PDF.')} className="px-5 py-2 border border-white/20 rounded-xl text-sm flex items-center gap-2 hover:bg-white/5"><Download size={14} /> Get Full Methodology (via Hub)</button>
+          <button onClick={() => { window.open('/Marketing-Hub.html', '_blank'); toast.message('Marketing Hub opened', { description: 'Use browser Print → Save as PDF.' }) }} className="px-5 py-2 border border-white/20 rounded-xl text-sm flex items-center gap-2 hover:bg-white/5"><Download size={14} /> Get Full Methodology (via Hub)</button>
         </div>
 
         {/* Enhanced Funnel + Map Integration */}

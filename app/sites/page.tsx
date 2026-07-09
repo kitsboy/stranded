@@ -7,6 +7,8 @@ import { MapPin, Star, Download } from 'lucide-react'
 import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
 import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
+import { addSitesToMission } from '@/lib/portfolio'
+import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
 
 export default function AllSitesExplorer() {
@@ -81,6 +83,20 @@ export default function AllSitesExplorer() {
           </button>
           <button onClick={() => exportBankPack('tsv')} className="text-sm px-3 py-2 rounded-2xl border border-white/15 hover:bg-white/5">TSV</button>
           <button onClick={() => exportBankPack('md')} className="text-sm px-3 py-2 rounded-2xl border border-white/15 hover:bg-white/5">MD brief</button>
+          {selectedSites.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const n = addSitesToMission(selectedSites)
+                toast.success(n ? `Added ${n} to mission` : 'All already in mission', {
+                  action: { label: 'Open map', onClick: () => { window.location.href = '/map' } },
+                })
+              }}
+              className="text-sm px-3 py-2 rounded-2xl bg-[#FF8C00] text-black font-semibold"
+            >
+              + Mission ({selectedSites.length})
+            </button>
+          )}
           <Link href="/map" className="px-6 py-2 rounded-2xl bg-[#FF8C00] text-black font-semibold text-sm flex items-center">OPEN IN COMMAND CENTER →</Link>
         </div>
       </div>
@@ -150,7 +166,19 @@ export default function AllSitesExplorer() {
 
                 <div className="mt-4 text-[10px] flex gap-2">
                   <Link href={`/map?site=${site.id}`} className="flex-1 text-center py-2 rounded-2xl border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10">FLY TO MAP</Link>
-                  <button onClick={(e) => { e.stopPropagation(); /* would trigger global portfolio but simplified */ window.location.href = `/map?site=${site.id}` }} className="flex-1 text-center py-2 rounded-2xl bg-white/5 hover:bg-white/10">DETAILS</button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const n = addSitesToMission([site])
+                      toast.success(n ? 'Added to mission' : 'Already in mission', {
+                        action: { label: 'Open map', onClick: () => { window.location.href = `/map?site=${site.id}` } },
+                      })
+                    }}
+                    className="flex-1 text-center py-2 rounded-2xl bg-[#FF8C00]/15 border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/25"
+                  >
+                    + MISSION
+                  </button>
                 </div>
               </motion.div>
             )

@@ -26,7 +26,7 @@ const {
   bankPackTsv,
   bankPackJson,
 } = await import('../lib/bank-pack.ts')
-const { scoreTier, scoreTierClass, scoreTierColor } = await import('../lib/scoring.ts')
+const { scoreTier, scoreTierClass, scoreTierColor, effectiveGridKm, hasStrongConnectivity } = await import('../lib/scoring.ts')
 const { glossaryLookup, GLOSSARY } = await import('../lib/glossary.ts')
 
 // --- score explain (shared cjs is production path) ---
@@ -135,6 +135,16 @@ assert.ok(json.sites[0].sensitivity.length >= 1)
 // glossary
 assert.ok(GLOSSARY.length >= 8)
 assert.ok(glossaryLookup('LCOE')?.def)
+
+// grid inference (Score v3 path) — must not treat missing distance as 999
+const noGrid = { emission_rate_kg_day: 5000, province: 'Alberta', source_type: 'oil_gas_extraction' }
+const withGrid = { ...noGrid, distance_to_grid_km: 5 }
+const kmInf = effectiveGridKm(noGrid)
+const kmMeas = effectiveGridKm(withGrid)
+assert.ok(kmInf < 80 && kmInf > 3, `inferred km sane got ${kmInf}`)
+assert.equal(kmMeas, 5)
+assert.ok(kmInf !== 999)
+assert.ok(typeof hasStrongConnectivity(noGrid) === 'boolean')
 
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

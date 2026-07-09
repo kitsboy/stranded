@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { EnrichedSite, scoreTierClass } from '@/lib/sites'
+import { EnrichedSite, scoreTierClass, effectiveGridKm } from '@/lib/sites'
 import { getBookmarks } from '@/lib/bookmarks'
 
 interface CommandPaletteProps {
@@ -54,7 +54,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
     { label: 'Elite Score (≥85)', filter: (s: EnrichedSite) => s.strandedScore >= 85 },
     { label: 'High Score (≥65)', filter: (s: EnrichedSite) => s.strandedScore >= 65 },
     { label: 'Top Emitters', filter: (s: EnrichedSite) => s.emission > 5000 },
-    { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => (s.properties.distance_to_grid_km || 999) < 10 },
+    { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => effectiveGridKm(s) < 10 },
   ]
 
   const routes = [

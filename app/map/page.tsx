@@ -11,7 +11,7 @@ import SiteDetailsPanel from '@/components/SiteDetailsPanel'
 import LayerControls from '@/components/LayerControls'
 import MissionPanel from '@/components/MissionPanel'
 import CompareSitesModal from '@/components/CompareSitesModal'
-import { loadSites, filterSites, EnrichedSite } from '@/lib/sites'
+import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl } from '@/lib/map-url'
@@ -117,12 +117,12 @@ function StrandedCommandCenter() {
       minScore,
     })
 
-    // Layer "hacks" — wild creative interpretation
+    // Grid / connectivity layers use Score v3 measured-or-inferred distance & internet
     if (layers.grid) {
-      result = result.filter(s => (s.properties.distance_to_grid_km || 999) < 18)
+      result = result.filter(s => effectiveGridKm(s) < 18)
     }
     if (layers.internet) {
-      result = result.filter(s => ['fiber', 'starlink'].includes((s.properties.internet_type || '').toLowerCase()))
+      result = result.filter(s => hasStrongConnectivity(s))
     }
     return result
   }, [allSites, minEmission, maxEmission, selectedProvinces, selectedSources, minScore, layers])
