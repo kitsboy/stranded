@@ -1,7 +1,8 @@
-# Stranded — Status (Historical note)
+# Stranded — Status (pointer)
 
-> **Historical snapshot.** Current status lives in SOURCE-OF-TRUTH.md + active docs + git.
-> Last cleaned (old): Thu 28 May 2026.
-This project is under clean Git management (main branch, no stray .bak/.tmp in active tree).
+> **Canonical status:** root [`STATUS.md`](../STATUS.md)  
+> **Progress snapshot:** [`PROGRESS-SNAPSHOT-2026-07-09.md`](./PROGRESS-SNAPSHOT-2026-07-09.md)  
+> **Deploy:** [`DEPLOYMENT.md`](./DEPLOYMENT.md)  
+> **Live:** https://stranded.giveabit.io · **v2.3.5** (2026-07-09)
 
-Current (2026-06): Next.js static, 2,611 real sites fully wired into generator + Value calcs, Stranded Value branding, lighter design, complete marketing/docs pass done.
+This file is a pointer so older links do not drift.

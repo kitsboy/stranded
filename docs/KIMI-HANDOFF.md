@@ -1,18 +1,54 @@
 # Kimi Handoff — Stranded
 
-## Session — 2026-07-09
+## Session — 2026-07-09 (full day — progress locked)
+
+**Machine:** M3 (Grok) · **Project:** stranded  
+**Production:** https://stranded.giveabit.io · **v2.3.5** · `deploy:check` OK  
+**CF Pages:** `strandedbuild` · **GitHub:** kitsboy/stranded `main`
+
+### Done
+- [x] Client power batch v2.3.0–2.3.5 (score explain, bank packs, peers, sensitivity, pages)
+- [x] P0: inferred grid filters, real mission adds, honest lead form, toast not alert
+- [x] P1: deep links province/site/mission, watch banner, light theme, hook lint
+- [x] P2: glossary tips, i18n nav, sites filters, e2e 9/9
+- [x] Mobile: footer-owned CTAs (fixed ghost bar removed)
+- [x] Language menu: opens downward; EN default; click-to-toggle
+- [x] Docs + SESSION-SUMMARY-2026-07-09 + snapshot tarball under `archive/snapshots/`
+
+### Decisions
+- Client-first; localStorage mission/leads (honest, no fake server)
+- Bank pack = CSV/TSV/MD/HTML/JSON (no heavy xlsx)
+- Wrangler project name **strandedbuild** only
+
+### Still open (Kimi / Cam)
+- [ ] Kimi: M4 MASTER-BRAIN sync of this handoff when Cam says go
+- [ ] Kimi: M4 ~/projects cleanup (stranded copy on HERMES)
+- [ ] Cam: CF API token for wrangler emergency deploy
+- [ ] Cam: optional staging DNS, PAT rotation hygiene
+
+### Git State
+- Feature SHA: `c224735` (language fix v2.3.5)
+- Branch: `main` · Unpushed at handoff write: none (docs commit may follow)
+
+### Knowledge files
+- `SESSION-SUMMARY-2026-07-09.md`
+- `docs/PROGRESS-SNAPSHOT-2026-07-09.md`
+- `archive/snapshots/stranded-docs-handoff-2026-07-09.tgz`
+- `docs/DEPLOYMENT.md` (corrected for strandedbuild)
+
+---
+
+## Session — 2026-07-09 (earlier — v2.3.0 power batch)
 
 **Done:**
-- v2.3.0 client-only power batch: score explain, bank packs (CSV/TSV/MD/HTML/JSON), peers, sensitivity tornado, map legend + tier filters, `/privacy` `/roadmap` `/open-data`
-- Tests: `npm run test:helpers` (real modules via tsx) + validate + e2e 6/6 + build 24 routes
-- Pushed `690670d` to main for CF `strandedbuild`
+- v2.3.0 client-only power batch: score explain, bank packs, peers, sensitivity, `/privacy` `/roadmap` `/open-data`
+- Tests: test:helpers + validate + e2e; CF strandedbuild
 
 **Decisions:**
-- Excel via TSV (no xlsx dep); no SaaS/backend; ~120 list items not all finished — backends deferred honestly
+- Excel via TSV; backends deferred
 
 **Git State:**
-- SHA: `690670d744c8ab544863b9bee25385e92ea4b0c3`
-- Unpushed: none
+- SHA: `690670d` (superseded by later 2.3.x commits)
 
 ---
 

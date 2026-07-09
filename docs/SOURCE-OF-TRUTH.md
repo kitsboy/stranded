@@ -8,24 +8,25 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-06 (major rebrand to Stranded Value, education enhancements, generator integration, per-site Value calculator wired to real dataset, global 20% lighter backgrounds, business flow + persona sections)
+**Last Major Update:** 2026-07-09 — **v2.3.5** live (Score v3, bank packs, P0–P2 polish, mobile footer CTAs, language menu fix). See `SESSION-SUMMARY-2026-07-09.md` + `docs/PROGRESS-SNAPSHOT-2026-07-09.md`.
 
-**Current (local dev):** http://localhost:3003 (Next.js on port 3003 — see package.json)
-- / : Home with "Stranded Value Flow" (Discover→Learn→Build→Fund) + persona paths (Operators, Capital, Gov, Landowners)
-- /map : Command Center (2,611 sites, province/source filters, generator sizing + per-site Value in details: CapEx, methaneLossDailyBtc, financing payback)
-- /education : Stranded Value Education Center (BTC-sensitive simulators, 6+ real genset models + configurator w/ LCOE/treatment/visuals, per-site Value explorer wired to live geojson emission→power→ASICs→ROI+CapEx+loss+financing, persona, animated chemistry, quiz, risk matrix, timeline, Value Toolkit)
-- /sites : Browse all sites (cards + table with recommendedGenset + maxGeneratorPowerKW)
-- /Marketing-Hub.html : Self-contained professional Marketing & Sales Hub (5 docs + images + charts + taxonomy + print/PDF)
+**Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
+**Local dev:** http://localhost:3003  
+**Deprecated:** https://tools.giveabit.io/stranded/
 
-**Future production:** https://stranded.giveabit.io (Cloudflare Pages, deployed from GitHub main)
-**Deprecated:** https://tools.giveabit.io/stranded/ (no longer works)
+**Key routes:**
+- `/` — Stranded Value Flow + persona paths + live-stats hero
+- `/map` — Command Center (filters, heatmap, mission, score explain, bank packs, deep links)
+- `/education` — Simulators, gensets, quiz, real-site explorer → mission
+- `/sites` — Cards/table, score/source filters, bulk mission, bank export
+- `/pitch` — Live investor deck
+- `/methodology` `/privacy` `/roadmap` `/open-data` `/status` `/dashboard` …
+- `/Marketing-Hub.html` — Professional marketing suite
 
-**Deployment:**
-- Framework: Next.js 14 (app router)
-- Build: `npm run build` (static export to `dist/` — now triggered with `BUILD_STATIC=true`)
-- Preview built site: `npm run preview` or `npx serve -p 3003 dist`
-- Dev: `npm run dev` (now uses normal `.next` — much more stable CSS/HMR). Use `rm -rf .next dist node_modules/.cache` when you hit cache or 404 problems.
-- Target: Cloudflare Pages for stranded.giveabit.io
+**Deployment:** see **`docs/DEPLOYMENT.md`** (canonical).  
+- Framework: Next.js 14 app router · static export `dist/`  
+- Scripts: `validate` · `test:helpers` · `e2e` · `deploy:check`  
+- Git remote: `git@github.com:kitsboy/stranded.git`
 
 **Core Purpose (Marketing Pitch):**
 Stranded turns wasted energy (starting with methane) into verifiable Bitcoin-powered value — environmental restoration + economic returns + community wealth. By mapping 2,611 real Canadian sites, integrating real generator models (Jenbacher, Cat, MAN, Cummins, Capstone, Wärtsilä etc. with powerKW/eff/methaneNm3h/capexPerKW/2026 prices), and computing honest per-site Value/ROI (gas → genset power kW/CapEx → ASIC count + live BTC revenue → opex → total CapEx + methane loss opportunity cost + debt/interest financing → paybacks), we make stranded energy bankable and actionable. "Stranded Value" = climate + capital + sovereign opportunity. Visit giveabit.io to learn more.
@@ -82,7 +83,7 @@ This file + README.md + the live app + Marketing assets are the primary current 
 **Template Rule:** Every future Give A Bit project must include at least this level of documentation: GitHub source, live URLs (dev + prod), deployment details, key docs list, simple pitch, Git snapshot, mission alignment, gaps, and clean hand-off note.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T21:00:26.752Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T21:13:45.828Z
 
 | Metric | Value |
 |--------|-------|

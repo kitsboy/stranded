@@ -46,15 +46,18 @@ Open http://localhost:3003
 
 Hit **⌘K** (or the Search button) anywhere for the global site command palette. It's magical.
 
-## Key Features (Current)
+## Key Features (Current — v2.3.5)
 
-- **Stranded Score + Generator Sizing** — Real emission_rate_kg_day drives recommended genset + max kW. Full per-site Value: generator CapEx + ASIC count/revenue (live BTC) + opex + methane loss (daily BTC if vented) + financing (debt % / interest) → simple + financed payback.
-- **Active Mission Portfolio** — Multi-site selection. Live aggregate yield, CO₂e, generator power totals. Export briefs.
-- **Live BTC + Real Machines** — CoinGecko + 6 methane-to-power gensets (powerKW, eff, methaneNm3h, capexPerKW, opex, 2026 prices). Configurator + LCOE in Education.
-- **Persona + Business Flow** — Home flow + tailored paths for Operators / Investors / Government / Landowners with direct CTAs to map/education/hub.
-- **Education 2.0** — Simulators, per-site explorer (real 2611 data), quiz, viz (province bars, chemistry), risk matrix, Value Toolkit (progress, comparison, downloads).
-- **Design** — Globally ~20% lighter backgrounds (#243447), refined glass, orange/teal, hover lifts, print-friendly Marketing Hub.
-- **Deep-linkable** — ?site=, ?province= etc. Full raw geojson properties exposed.
+- **Stranded Score™ v3** — Shared formula (`lib/scoring-shared.cjs`); factor explain UI; inferred grid/internet when ECCC fields missing; tier colors elite/high/med/low.
+- **Bank packs** — Diligence exports: CSV, Excel-friendly TSV, Markdown, HTML print, JSON (site + mission).
+- **Command Center Map** — Filters, heatmap, score legend, mission portfolio, peers, sensitivity tornado, watch-site local banner, deep links (`site`, `province`, `mission`).
+- **Active Mission Portfolio** — localStorage; add from map, education, or sites browser.
+- **Live BTC + Real Machines** — CoinGecko + genset library + advanced ROI in `lib/roi-model.ts`.
+- **Education** — Simulators, quiz, real-site explorer, glossary tips on methodology.
+- **Mobile** — Primary CTAs live inside sticky footer (no fixed ghost bar).
+- **i18n** — Nav labels EN/FR/DE/ES; language menu opens downward (EN default).
+- **Quality** — `npm run validate` · `test:helpers` · `e2e` (9) · `deploy:check`.
+- **Docs / handoff** — `docs/KIMI-HANDOFF.md`, `SESSION-SUMMARY-2026-07-09.md`, `docs/PROGRESS-SNAPSHOT-2026-07-09.md`.
 
 ## Data
 
@@ -89,7 +92,7 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 Built with love for the orange pill and the blue planet.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T21:00:26.752Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T21:13:45.828Z
 
 | Metric | Value |
 |--------|-------|
