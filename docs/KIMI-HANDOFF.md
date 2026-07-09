@@ -1,5 +1,21 @@
 # Kimi Handoff — Stranded
 
+## Session — 2026-07-09
+
+**Done:**
+- v2.3.0 client-only power batch: score explain, bank packs (CSV/TSV/MD/HTML/JSON), peers, sensitivity tornado, map legend + tier filters, `/privacy` `/roadmap` `/open-data`
+- Tests: `npm run test:helpers` (real modules via tsx) + validate + e2e 6/6 + build 24 routes
+- Pushed `690670d` to main for CF `strandedbuild`
+
+**Decisions:**
+- Excel via TSV (no xlsx dep); no SaaS/backend; ~120 list items not all finished — backends deferred honestly
+
+**Git State:**
+- SHA: `690670d744c8ab544863b9bee25385e92ea4b0c3`
+- Unpushed: none
+
+---
+
 ## Latest Session Summary (from 2026-07-07 goodbye)
 
 **Chat topic:** Stranded Score v3, deploy pipeline, M3/M4 rules correction, portfolio cleanup.
