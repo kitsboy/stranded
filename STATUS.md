@@ -7,7 +7,9 @@
 **Dev:** `npm run dev` → `localhost:3003`  
 **Data:** 2,611 ECCC methane sites  
 **Version:** **2.3.5** · **Routes:** 24 static app pages + Marketing Hub  
-**Status:** Live — `npm run deploy:check` OK (package == production)
+**Status:** Live — `npm run deploy:check` OK (package == production)  
+**Release bookmark:** https://github.com/kitsboy/stranded/releases/tag/v2.3.5  
+**Last goodbye:** 2026-07-09 — full session summary in `SESSION-SUMMARY-2026-07-09.md`
 
 ## Shipped highlights (v2.3.x)
 
@@ -45,9 +47,9 @@ npm run deploy:check
 3. **CoinGecko rate limits** — soft-fail BTC price; offline uses fallbacks  
 4. **Light theme** — improved, not pixel-perfect on every panel  
 5. **i18n** — nav labels only; page bodies still EN  
-6. **M4 sync pending** — Kimi should ingest handoff when Cam says sync  
+6. **M4 sync pending** — Kimi should ingest handoff **when Cam says go** (not yet)  
 7. **Watch alerts** — local toast on map open only (no push/email)  
-8. **Docs drift risk** — always prefer git SHA + live-stats version over prose  
+8. **Docs drift risk** — prefer git tag `v2.3.5` + live-stats version over prose  
 
 <!-- LIVE-STATS:START -->
 > **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-09T21:13:45.828Z

@@ -3,8 +3,9 @@
 **Version:** 2.3.5  
 **Production:** https://stranded.giveabit.io  
 **GitHub:** https://github.com/kitsboy/stranded  
-**Latest feature commit:** `c224735`  
-**Deploy check:** package == production **2.3.5**
+**Release tag:** https://github.com/kitsboy/stranded/releases/tag/v2.3.5 (points at docs+code milestone `5dc9bc0`)  
+**Deploy check:** package == production **2.3.5**  
+**Session closed:** 2026-07-09 goodbye — use whatsup to resume
 
 ## What works (shipped)
 

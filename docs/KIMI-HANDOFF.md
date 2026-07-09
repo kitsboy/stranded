@@ -1,5 +1,31 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-09 goodbye)
+
+**Chat topic:** Stranded full-day ship: power-ups, P0–P2, mobile/language fixes, docs backup, GitHub release tag, clean goodbye.
+
+**Finished this session:**
+- Live **v2.3.5** at https://stranded.giveabit.io (`deploy:check` OK)
+- GitHub release **v2.3.5**: https://github.com/kitsboy/stranded/releases/tag/v2.3.5 (tag → `5dc9bc0`)
+- Score explain, bank packs, mission portfolio, deep links, watch banner
+- Mobile footer CTAs; language menu downward + EN default
+- Docs pack + tarball; DEPLOYMENT truth = CF project **strandedbuild**
+- E2E 9 tests; `npm run test:helpers` + validate
+
+**Still to do:**
+- Kimi: when Cam says sync — ingest `SESSION-SUMMARY-2026-07-09.md` + this file into Obsidian/MASTER-BRAIN
+- Kimi: M4 ~/projects cleanup (stranded/openstrata/btcminiscript if still present)
+- Cam optional: CF API token panic deploy; staging DNS
+
+**Next for Kimi:** Do **not** sync until Cam says go. Then update Stranded Kanban + architecture map; educate Hermes on v2.3.5 release URL and deploy ritual (`push main` → `deploy:check`). No full chat logs.
+
+**Git State (goodbye):**
+- SHA: `5dc9bc0` (+ docs goodbye commit may append)
+- Tag: `v2.3.5`
+- Branch: `main` · Unpushed: none after goodbye push
+
+---
+
 ## Session — 2026-07-09 (full day — progress locked)
 
 **Machine:** M3 (Grok) · **Project:** stranded  
@@ -8,33 +34,29 @@
 
 ### Done
 - [x] Client power batch v2.3.0–2.3.5 (score explain, bank packs, peers, sensitivity, pages)
-- [x] P0: inferred grid filters, real mission adds, honest lead form, toast not alert
-- [x] P1: deep links province/site/mission, watch banner, light theme, hook lint
-- [x] P2: glossary tips, i18n nav, sites filters, e2e 9/9
-- [x] Mobile: footer-owned CTAs (fixed ghost bar removed)
-- [x] Language menu: opens downward; EN default; click-to-toggle
-- [x] Docs + SESSION-SUMMARY-2026-07-09 + snapshot tarball under `archive/snapshots/`
+- [x] P0 / P1 / P2 versioned deploys
+- [x] Mobile footer CTAs; language menu fix
+- [x] Docs + SESSION-SUMMARY + snapshot tarball
+- [x] GitHub release tag **v2.3.5**
+- [x] Goodbye handoff complete
 
 ### Decisions
-- Client-first; localStorage mission/leads (honest, no fake server)
-- Bank pack = CSV/TSV/MD/HTML/JSON (no heavy xlsx)
+- Client-first; localStorage mission/leads (honest)
+- Bank pack multi-format text; no heavy xlsx
 - Wrangler project name **strandedbuild** only
+- Tag is bookmark only (site already live)
 
 ### Still open (Kimi / Cam)
-- [ ] Kimi: M4 MASTER-BRAIN sync of this handoff when Cam says go
-- [ ] Kimi: M4 ~/projects cleanup (stranded copy on HERMES)
+- [ ] Kimi: M4 MASTER-BRAIN sync when Cam says go
+- [ ] Kimi: M4 ~/projects cleanup
 - [ ] Cam: CF API token for wrangler emergency deploy
-- [ ] Cam: optional staging DNS, PAT rotation hygiene
-
-### Git State
-- Feature SHA: `c224735` (language fix v2.3.5)
-- Branch: `main` · Unpushed at handoff write: none (docs commit may follow)
 
 ### Knowledge files
 - `SESSION-SUMMARY-2026-07-09.md`
 - `docs/PROGRESS-SNAPSHOT-2026-07-09.md`
 - `archive/snapshots/stranded-docs-handoff-2026-07-09.tgz`
-- `docs/DEPLOYMENT.md` (corrected for strandedbuild)
+- `docs/DEPLOYMENT.md`
+- Release: https://github.com/kitsboy/stranded/releases/tag/v2.3.5
 
 ---
 
