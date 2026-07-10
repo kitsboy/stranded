@@ -1,5 +1,5 @@
-# stranded — Last Updated 2026-07-09 by Grok
+# stranded — Last Updated 2026-07-10 by Grok (goodbye)
 
-Brief: v2.3.7 live — shared BTC, focus traps, Next 14.2.35; deploy:check OK
-Commit: 930adbb
+Brief: Audit remediations shipped; v2.3.7 live; goodbye complete — use whatsup next
+Commit: e3caf82
 Production: https://stranded.giveabit.io · deploy:check OK 2.3.7

@@ -1,5 +1,30 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-10 goodbye)
+
+**Chat topic:** Comprehensive audit + ship remediations (security, reliability, a11y) → **v2.3.6** and **v2.3.7**.
+
+**Finished this session:**
+- Full audit report (security / race / reliability / a11y / UI)
+- **v2.3.6:** CSP + security headers, HTML-escape exports, PasswordGate removed, SW v4 network-first, map pointer-events fix, mission BTC scaling, error states
+- **v2.3.7:** Shared BtcPriceProvider, FocusTrap dialogs, Next **14.2.35**, drop js-cookie, Chart.js CSP, i18n honesty note
+- Live: https://stranded.giveabit.io · `deploy:check` **OK 2.3.7**
+- SESSION-SUMMARY-2026-07-10.md written
+
+**Still to do:**
+- Kimi: sync only when Cam says go — ingest this summary + SESSION-SUMMARY-2026-07-10.md into Obsidian/MASTER-BRAIN
+- Optional: GitHub release tag v2.3.7; CF API token for wrangler panic deploys
+- Optional later: full i18n; MapLibre native clusters
+
+**Next for Kimi:** Do **not** sync until Cam says go. Update Stranded Kanban + note deploy ritual: `push main` → wait → `npm run deploy:check`. CF project **strandedbuild**. No full chat logs.
+
+**Git State (goodbye):**
+- SHA: `e3caf82`
+- Version: **2.3.7**
+- Branch: `main` · Unpushed: none after goodbye push
+
+---
+
 ## Latest Session Summary (from 2026-07-09 goodbye)
 
 **Chat topic:** Stranded full-day ship: power-ups, P0–P2, mobile/language fixes, docs backup, GitHub release tag, clean goodbye.
