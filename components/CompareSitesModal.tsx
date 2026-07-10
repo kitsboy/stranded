@@ -16,11 +16,17 @@ export default function CompareSitesModal({
   if (sites.length < 2) return null
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[200] bg-black/70 flex items-center justify-center p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="compare-sites-title"
+    >
       <div className="glass-strong rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-auto p-6" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Compare Sites ({sites.length})</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
+          <h2 id="compare-sites-title" className="text-xl font-bold">Compare Sites ({sites.length})</h2>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close compare"><X size={20} /></button>
         </div>
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${sites.length}, minmax(0, 1fr))` }}>
           {sites.map(site => {

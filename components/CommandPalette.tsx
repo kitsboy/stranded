@@ -12,9 +12,12 @@ interface CommandPaletteProps {
   onSelectSite?: (site: EnrichedSite) => void
   open: boolean
   onClose: () => void
+  loading?: boolean
+  error?: string | null
+  onRetry?: () => void
 }
 
-export default function CommandPalette({ sites, onSelectSite, open, onClose }: CommandPaletteProps) {
+export default function CommandPalette({ sites, onSelectSite, open, onClose, loading = false, error = null, onRetry }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState<EnrichedSite[]>([])
   const [selectedIdx, setSelectedIdx] = useState(0)
@@ -100,17 +103,23 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
       if (e.key === 'Escape') onClose()
       if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIdx(i => Math.min(i + 1, results.length - 1)) }
       if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIdx(i => Math.max(i - 1, 0)) }
-      if (e.key === 'Enter' && results[selectedIdx]) handleSelect(results[selectedIdx])
+      if (e.key === 'Enter' && !loading && results[selectedIdx]) handleSelect(results[selectedIdx])
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [open, onClose, results, selectedIdx, handleSelect])
+  }, [open, onClose, results, selectedIdx, handleSelect, loading])
 
   if (!open) return null
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[18vh] bg-black/70 p-4" onClick={onClose}>
+      <div
+        className="fixed inset-0 z-[300] flex items-start justify-center pt-[18vh] bg-black/70 p-4"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="command-palette-title"
+      >
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -120,27 +129,43 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose }: C
           onClick={e => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
-            <Search className="w-5 h-5 text-[#5BC0BE]" />
+            <Search className="w-5 h-5 text-[#5BC0BE]" aria-hidden />
+            <h2 id="command-palette-title" className="sr-only">Search sites</h2>
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search 2,611 sites by name, province, company... (⌘K)"
-              className="flex-1 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none"
+              aria-label="Search sites by name, province, or company"
+              className="flex-1 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none focus:ring-0"
             />
-            <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close search"><X size={20} /></button>
           </div>
 
-          <div className="max-h-[420px] overflow-auto py-2 text-sm">
-            {results.length === 0 && (
+          <div className="max-h-[420px] overflow-auto py-2 text-sm" role="listbox" aria-label="Search results">
+            {loading && (
+              <div className="px-5 py-8 text-center text-gray-400" role="status">Loading sites…</div>
+            )}
+            {error && !loading && (
+              <div className="px-5 py-8 text-center text-red-400 space-y-2" role="alert">
+                <p>{error}</p>
+                {onRetry && (
+                  <button type="button" onClick={onRetry} className="text-sm text-[#FF8C00] underline">Retry</button>
+                )}
+              </div>
+            )}
+            {!loading && !error && results.length === 0 && (
               <div className="px-5 py-8 text-center text-gray-400">No matches. Try a province or company name.</div>
             )}
-            {results.map((site, idx) => {
+            {!loading && !error && results.map((site, idx) => {
               const p = site.properties
               const highlight = query.trim() && (p.name || '').toLowerCase().includes(query.toLowerCase())
               return (
                 <button
                   key={site.id}
+                  type="button"
+                  role="option"
+                  aria-selected={idx === selectedIdx}
                   onClick={() => handleSelect(site)}
                   className={`w-full text-left px-5 py-3 flex items-center gap-4 group ${idx === selectedIdx ? 'bg-[#FF8C00]/15' : 'hover:bg-white/5'}`}
                 >

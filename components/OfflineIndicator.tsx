@@ -20,7 +20,7 @@ export default function OfflineIndicator() {
     }
   }, [])
 
-  if (!offline && !cached) return null
+  if (!offline) return null
 
   return (
     <div
@@ -28,14 +28,8 @@ export default function OfflineIndicator() {
       role="status"
       aria-live="polite"
     >
-      {offline ? (
-        <>
-          <WifiOff size={12} className="text-amber-400" />
-          <span>Offline{cached ? ' — using cached sites' : ''}</span>
-        </>
-      ) : (
-        <span className="text-emerald-400">IndexedDB cache ready</span>
-      )}
+      <WifiOff size={12} className="text-amber-400" />
+      <span>Offline{cached ? ' — using cached sites' : ' — site data may be unavailable'}</span>
     </div>
   )
 }

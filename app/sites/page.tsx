@@ -14,6 +14,7 @@ import ScoreLegend from '@/components/ScoreLegend'
 export default function AllSitesExplorer() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [provinceFilter, setProvinceFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
@@ -22,12 +23,23 @@ export default function AllSitesExplorer() {
   const [selected, setSelected] = useState<EnrichedSite | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()) // bulk actions for item 12
 
-  useEffect(() => {
-    loadSites().then(s => {
-      setAllSites(s)
-      setLoading(false)
-    })
-  }, [])
+  const load = () => {
+    setLoading(true)
+    setLoadError(null)
+    loadSites()
+      .then(s => {
+        setAllSites(s)
+        setLoading(false)
+      })
+      .catch(() => {
+        setAllSites([])
+        setLoading(false)
+        setLoadError('Failed to load sites. Check your connection or try again.')
+        toast.error('Failed to load sites dataset')
+      })
+  }
+
+  useEffect(() => { load() }, [])
 
   const filtered = useMemo(() => {
     let res = allSites
@@ -112,16 +124,22 @@ export default function AllSitesExplorer() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6 sticky top-14 z-20 bg-[var(--bg-dark)] py-3 -mx-1 px-1">
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, province, company..." className="flex-1 min-w-[180px] glass border border-white/10 rounded-2xl px-5 py-3 text-sm" />
-        <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
+        <input
+          value={search}
+          onChange={e=>setSearch(e.target.value)}
+          placeholder="Search name, province, company..."
+          aria-label="Search sites by name, province, or company"
+          className="flex-1 min-w-[180px] glass border border-white/10 rounded-2xl px-5 py-3 text-sm"
+        />
+        <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} aria-label="Filter by province" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
           <option value="">All Provinces</option>
           {provinces.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
-        <select value={sourceFilter} onChange={e=>setSourceFilter(e.target.value)} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
+        <select value={sourceFilter} onChange={e=>setSourceFilter(e.target.value)} aria-label="Filter by source type" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
           <option value="">All sources</option>
           {sources.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={minScoreFilter} onChange={e=>setMinScoreFilter(Number(e.target.value))} className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[120px]">
+        <select value={minScoreFilter} onChange={e=>setMinScoreFilter(Number(e.target.value))} aria-label="Minimum stranded score" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[120px]">
           <option value={0}>Any score</option>
           <option value={45}>≥45 Med+</option>
           <option value={65}>≥65 High+</option>
@@ -134,10 +152,18 @@ export default function AllSitesExplorer() {
         </div>
       </div>
 
-      {loading && <div className="text-center py-20 text-gray-400">Loading full enriched dataset…</div>}
+      {loading && <div className="text-center py-20 text-gray-400" role="status">Loading full enriched dataset…</div>}
+      {loadError && !loading && (
+        <div className="text-center py-16 space-y-3" role="alert">
+          <p className="text-red-400">{loadError}</p>
+          <button type="button" onClick={load} className="px-4 py-2 rounded-xl bg-[#FF8C00] text-black font-semibold text-sm">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* CARDS — wild beautiful mode */}
-      {view === 'cards' && !loading && (
+      {view === 'cards' && !loading && !loadError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.slice(0, 240).map(site => {
             const p = site.properties
@@ -203,7 +229,7 @@ export default function AllSitesExplorer() {
       )}
 
       {/* TABLE (still great) */}
-      {view === 'table' && !loading && (
+      {view === 'table' && !loading && !loadError && (
         <div className="border border-white/10 rounded-3xl overflow-hidden bg-[#0f172a]/70">
           <table className="w-full text-sm">
             <thead className="bg-[var(--bg-dark)] text-gray-400 sticky top-0">

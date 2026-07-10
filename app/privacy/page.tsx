@@ -17,13 +17,17 @@ export default function PrivacyPage() {
       <ul>
         <li>Mission portfolio, bookmarks, notes, filter presets, named profiles</li>
         <li>Site watch alerts (localStorage only)</li>
+        <li>Optional Certified draft applications (localStorage only — not sent to us until you email/export)</li>
+        <li>Optional local analytics event buffer (last ~100 events, not uploaded by default)</li>
         <li>Optional IndexedDB cache of the public GeoJSON for offline use</li>
+        <li>Theme and language preferences</li>
       </ul>
 
       <h2>What we fetch</h2>
       <ul>
         <li>Public site data from this origin (<code>/data/*</code>)</li>
         <li>Optional live BTC prices from CoinGecko (browser → third party; fails soft if blocked)</li>
+        <li>Map basemap tiles (OpenStreetMap / optional satellite imagery)</li>
       </ul>
 
       <h2>What we do not do (today)</h2>

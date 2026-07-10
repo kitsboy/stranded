@@ -42,7 +42,8 @@ export default function Map({
     if (!mapRef.current) return
     clearMarkers()
 
-    const isClusterMode = viewMode === 'clusters' && sitesToRender.length > 180
+    // Auto-cluster large sets even in "precise" preference to keep DOM under control
+    const isClusterMode = sitesToRender.length > 180 && (viewMode === 'clusters' || sitesToRender.length > 400)
 
     if (isClusterMode) {
       // Wild creative clustering using plain object (TS friendly) — still delivers huge perf + visual density
@@ -68,12 +69,18 @@ export default function Map({
         el.style.width = `${size}px`
         el.style.height = `${size}px`
         el.style.color = '#0f172a'
-        el.innerHTML = `<span class="font-mono">${group.length}</span>`
-
-        el.addEventListener('click', (e) => {
+        el.textContent = String(group.length)
+        el.setAttribute('role', 'button')
+        el.tabIndex = 0
+        el.setAttribute('aria-label', `Cluster of ${group.length} sites, average score ${avgScore}`)
+        const openCluster = (e: Event) => {
           e.stopPropagation()
           const best = [...group].sort((a,b) => b.strandedScore - a.strandedScore)[0]
           onSiteClick(best)
+        }
+        el.addEventListener('click', openCluster)
+        el.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCluster(e) }
         })
 
         const marker = new maplibregl.Marker({ element: el })
@@ -106,10 +113,21 @@ export default function Map({
         el.style.cursor = 'pointer'
         el.style.transition = 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms ease'
         if (isSelected) el.style.transform = 'scale(1.4)'
+        el.setAttribute('role', 'button')
+        el.tabIndex = 0
+        el.setAttribute(
+          'aria-label',
+          `${site.properties?.name || 'Site'}, score ${score}, ${Math.round(emission)} kg per day`
+        )
+        el.title = site.properties?.name || site.id
 
-        el.addEventListener('click', (e) => {
+        const openSite = (e: Event) => {
           e.stopPropagation()
           onSiteClick(site)
+        }
+        el.addEventListener('click', openSite)
+        el.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSite(e) }
         })
 
         const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
@@ -168,10 +186,6 @@ export default function Map({
     })
     ;(map as any)._strandedLayers = { satellite: false, terrain: showTerrain }
     mapRef.current = map
-
-    map.on('load', () => {
-      console.log('[Map] Command Center map ready — rendering filtered data only for performance')
-    })
 
     return () => {
       clearMarkers()

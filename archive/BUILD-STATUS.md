@@ -22,7 +22,7 @@ All source files have been written (old state). Install must run on Umbrel host
     ├── layout.tsx            ✅
     ├── page.tsx              ✅ (password gate + map)
     ├── components/
-    │   ├── PasswordGate.tsx  ✅ (password: btcg1ves2026)
+    │   ├── PasswordGate.tsx  (legacy stub — no client password; use edge auth if needed)
     │   └── MapComponent.tsx  ✅ (Leaflet map, layers control)
     └── data/
         └── sites.ts          ✅ (25 demo sites: 10 BC, 10 AB, 2 SK, 2 MB, 1 ON)
@@ -73,7 +73,7 @@ Then: sudo systemctl restart nginx
 
 ## Features
 
-- 🔐 Password gate (btcg1ves2026)
+- 🔐 Password gate removed (public ECCC data; edge auth only if private)
 - 🗺️ Leaflet map centered on Canada
 - 📍 25 demo sites (grey markers, orange border)
 - 🔲 Layer controls (OpenStreetMap + Satellite base layers)
@@ -82,8 +82,8 @@ Then: sudo systemctl restart nginx
 - 📱 Responsive layout
 - 🏷️ GiveAbit branding (orange #FF8C00, teal #5BC0BE)
 
-## Password
-btcg1ves2026
+## Auth note
+Client-side password gate removed. Use Cloudflare Access (or similar) for private previews.
 
 ## What's Left (Phase 2)
 - Power grid overlay layer

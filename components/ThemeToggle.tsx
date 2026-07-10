@@ -19,7 +19,13 @@ export default function ThemeToggle() {
   }
 
   return (
-    <button onClick={toggle} className="p-1.5 rounded-lg border border-white/15 text-gray-400 hover:text-white" aria-label="Toggle theme">
+    <button
+      type="button"
+      onClick={toggle}
+      className="p-1.5 rounded-lg border border-white/15 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#5BC0BE]/50"
+      aria-label={light ? 'Switch to dark theme' : 'Switch to light theme'}
+      aria-pressed={light}
+    >
       {light ? <Moon size={14} /> : <Sun size={14} />}
     </button>
   )

@@ -1,4 +1,5 @@
-const CACHE = 'stranded-v3'
+// Bump on every deploy that must invalidate HTML/data caches
+const CACHE = 'stranded-v4'
 const PRECACHE = [
   '/',
   '/map',
@@ -18,7 +19,11 @@ const PRECACHE = [
 ]
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()))
+  e.waitUntil(
+    caches.open(CACHE).then(c =>
+      Promise.all(PRECACHE.map(url => c.add(url).catch(() => undefined)))
+    ).then(() => self.skipWaiting())
+  )
 })
 
 self.addEventListener('activate', (e) => {
@@ -29,13 +34,46 @@ self.addEventListener('activate', (e) => {
   )
 })
 
+function isHtmlOrData(url) {
+  try {
+    const u = new URL(url)
+    if (u.origin !== self.location.origin) return false
+    if (u.pathname.includes('/data/')) return true
+    if (u.pathname.endsWith('.html')) return true
+    // pretty URLs for static pages
+    if (!u.pathname.includes('.') || u.pathname.endsWith('/')) return true
+    return false
+  } catch {
+    return false
+  }
+}
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return
+  const req = e.request
+
+  // Network-first for HTML + /data so deploys and stats refresh promptly
+  if (isHtmlOrData(req.url)) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res.ok) {
+            const clone = res.clone()
+            caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {})
+          }
+          return res
+        })
+        .catch(() => caches.match(req).then(c => c || caches.match('/')))
+    )
+    return
+  }
+
+  // Cache-first for static assets (chunks, images)
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const fetched = fetch(e.request).then(res => {
-        if (res.ok && (e.request.url.includes('/data/') || e.request.url.endsWith('.html'))) {
-          caches.open(CACHE).then(c => c.put(e.request, res.clone()))
+    caches.match(req).then(cached => {
+      const fetched = fetch(req).then(res => {
+        if (res.ok && req.url.includes('/_next/static/')) {
+          caches.open(CACHE).then(c => c.put(req, res.clone())).catch(() => {})
         }
         return res
       }).catch(() => cached)

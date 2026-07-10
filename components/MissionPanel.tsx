@@ -4,6 +4,7 @@ import { X, TrendingUp, Zap, Leaf } from 'lucide-react'
 import { EnrichedSite } from '@/lib/sites'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
+import { portfolioDailyPotentialCad } from '@/lib/portfolio'
 import { toast } from 'sonner'
 
 interface MissionPanelProps {
@@ -20,7 +21,7 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
 
   const totalEmission = portfolio.reduce((sum, s) => sum + s.emission, 0)
   const totalScore = Math.round(portfolio.reduce((sum, s) => sum + s.strandedScore, 0) / portfolio.length)
-  const totalPotential = portfolio.reduce((sum, s) => sum + s.potentialDailyProfitCAD, 0)
+  const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
   const dailyBtc = (totalPotential / 1.35 / liveBtcPrice) // rough back calc
   const annualCO2 = Math.round(totalEmission * 0.365 * 25) // very rough methane -> CO2e
   // Generator aggregate for mission (CapEx on production side)
@@ -37,7 +38,7 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
             <div className="text-[10px] text-gray-400 -mt-0.5">{portfolio.length} sites selected</div>
           </div>
         </div>
-        <button onClick={onClear} className="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1">
+        <button type="button" onClick={onClear} className="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1" aria-label="Clear mission portfolio">
           <X size={14} /> CLEAR
         </button>
       </div>

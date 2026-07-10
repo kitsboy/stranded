@@ -277,8 +277,14 @@ export default function SiteDetailsPanel({
           )}
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }} className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}>{bookmarked ? '★' : '☆'}</button>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">✕</button>
+          <button
+            type="button"
+            onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }}
+            className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}
+            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark site'}
+            aria-pressed={bookmarked}
+          >{bookmarked ? '★' : '☆'}</button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close site details">✕</button>
         </div>
       </div>
 

@@ -30,18 +30,18 @@ export default function FundingPage() {
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-gray-400">Province</label>
-            <select value={province} onChange={e => setProvince(e.target.value)} className="w-full mt-1 bg-black/30 border border-white/15 rounded-lg px-4 py-2.5">
+            <label htmlFor="funding-province" className="text-xs text-gray-400">Province</label>
+            <select id="funding-province" value={province} onChange={e => setProvince(e.target.value)} className="w-full mt-1 bg-black/30 border border-white/15 rounded-lg px-4 py-2.5">
               {['Alberta', 'Ontario', 'British Columbia', 'Saskatchewan', 'Quebec', 'Manitoba'].map(p => <option key={p}>{p}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-400">Total CapEx (CAD): ${capex.toLocaleString()}</label>
-            <input type="range" min={500000} max={20000000} step={100000} value={capex} onChange={e => setCapex(+e.target.value)} className="w-full accent-[#FF8C00] mt-2" />
+            <label htmlFor="funding-capex" className="text-xs text-gray-400">Total CapEx (CAD): ${capex.toLocaleString()}</label>
+            <input id="funding-capex" type="range" min={500000} max={20000000} step={100000} value={capex} onChange={e => setCapex(+e.target.value)} className="w-full accent-[#FF8C00] mt-2" />
           </div>
           <div>
-            <label className="text-xs text-gray-400">Sites in portfolio: {sites}</label>
-            <input type="range" min={1} max={20} value={sites} onChange={e => setSites(+e.target.value)} className="w-full accent-[#5BC0BE] mt-2" />
+            <label htmlFor="funding-sites" className="text-xs text-gray-400">Sites in portfolio: {sites}</label>
+            <input id="funding-sites" type="range" min={1} max={20} value={sites} onChange={e => setSites(+e.target.value)} className="w-full accent-[#5BC0BE] mt-2" />
           </div>
         </div>
 

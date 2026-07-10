@@ -7,6 +7,7 @@ import { explainStrandedScore, scoreTier } from './scoring'
 import { computeAdvancedRoi } from './roi-model'
 import { findPeerSites } from './peers'
 import { sensitivityTornado } from './sensitivity'
+import { escapeHtml } from './html-escape'
 
 export type BankPackOptions = {
   liveBtcUsd?: number
@@ -168,8 +169,9 @@ export function bankPackMarkdown(
 
 export function bankPackHtml(sites: EnrichedSite[], opts: BankPackOptions = {}): string {
   const mdish = bankPackMarkdown(sites, [], opts)
-  // Simple HTML shell for print/PDF
-  const body = mdish
+  // Escape first so markdown structure can be applied safely as HTML shell
+  const safe = escapeHtml(mdish)
+  const body = safe
     .replace(/^# (.*)$/gm, '<h1>$1</h1>')
     .replace(/^## (.*)$/gm, '<h2>$1</h2>')
     .replace(/^### (.*)$/gm, '<h3>$1</h3>')

@@ -29,7 +29,14 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
   const roughDailyBtc = (emission / 22000) * 0.0008 // tuned heuristic from real emission -> usable methane energy
   const potentialDailyProfitCAD = Math.round(roughDailyBtc * 85000 * 1.35 * 0.82) // after power/opex
 
-  const ghgrp = p.ghgrp_id || p.id || `site-${Math.random().toString(36).slice(2, 9)}`
+  // Deterministic fallback — never random (breaks bookmarks/mission across reloads)
+  const ghgrp = p.ghgrp_id || p.id || (() => {
+    const [lng, lat] = site.geometry?.coordinates || [0, 0]
+    const key = `${p.name || 'site'}|${p.province || ''}|${lng.toFixed(5)},${lat.toFixed(5)}`
+    let h = 0
+    for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0
+    return `site-${(h >>> 0).toString(36)}`
+  })()
 
   return {
     ...site,

@@ -5,19 +5,26 @@ import { X } from 'lucide-react'
 const SHORTCUTS = [
   { keys: '⌘K', action: 'Open command palette' },
   { keys: '⌘F', action: 'Reset map filters' },
-  { keys: '⌘C', action: 'Add selected site to mission' },
+  { keys: 'Shift+M', action: 'Add selected site to mission' },
   { keys: '↑↓ ⏎', action: 'Navigate & select in palette' },
   { keys: 'ESC', action: 'Close panels / palette' },
+  { keys: '?', action: 'Show this help' },
 ]
 
 export default function KeyboardHelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-[250] bg-black/60 flex items-center justify-center p-4" onClick={onClose} role="dialog" aria-label="Keyboard shortcuts">
+    <div
+      className="fixed inset-0 z-[250] bg-black/60 flex items-center justify-center p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="keyboard-help-title"
+    >
       <div className="glass rounded-2xl p-6 max-w-md w-full border border-white/10" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg">Keyboard shortcuts</h2>
-          <button onClick={onClose} aria-label="Close"><X size={18} /></button>
+          <h2 id="keyboard-help-title" className="font-semibold text-lg">Keyboard shortcuts</h2>
+          <button type="button" onClick={onClose} aria-label="Close keyboard shortcuts"><X size={18} /></button>
         </div>
         <ul className="space-y-2 text-sm">
           {SHORTCUTS.map(s => (

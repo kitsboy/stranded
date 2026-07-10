@@ -88,10 +88,7 @@
 .score-med { color: var(--score-med); background: rgba(234, 179, 8, 0.1); }
 .score-low { color: var(--score-low); background: rgba(249, 115, 22, 0.1); }
 
-/* Marker clickability + premium selected state */
-.maplibregl-canvas {
-  pointer-events: none !important;
-}
+/* Marker layering — keep canvas interactive for pan/zoom */
 .maplibregl-marker {
   pointer-events: auto !important;
   z-index: 10 !important;

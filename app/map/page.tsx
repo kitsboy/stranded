@@ -5,14 +5,14 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Filter, Zap, RefreshCw, Target, Download, ChevronDown } from 'lucide-react'
-import { Toaster, toast } from 'sonner'
+import { toast } from 'sonner'
 
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
 import LayerControls from '@/components/LayerControls'
 import MissionPanel from '@/components/MissionPanel'
 import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
-import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml } from '@/lib/portfolio'
+import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialCad, scalePotentialCad } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl } from '@/lib/map-url'
 import { getFilterPresets, saveFilterPreset, type FilterPreset } from '@/lib/bookmarks'
@@ -248,13 +248,13 @@ function StrandedCommandCenter() {
       missionGenerated: new Date().toISOString(),
       btcPriceUsed: liveBtcPrice,
       totalSites: portfolio.length,
-      totalDailyPotentialCAD: portfolio.reduce((s, x) => s + x.potentialDailyProfitCAD, 0),
+      totalDailyPotentialCAD: portfolioDailyPotentialCad(portfolio, liveBtcPrice),
       sites: portfolio.map(s => ({
         name: s.properties.name,
         province: s.properties.province,
         emission_kg_day: s.emission,
         strandedScore: s.strandedScore,
-        potentialDailyCAD: s.potentialDailyProfitCAD,
+        potentialDailyCAD: scalePotentialCad(s.potentialDailyProfitCAD, liveBtcPrice),
       }))
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -324,11 +324,16 @@ function StrandedCommandCenter() {
         resetFilters()
         toast('Filters reset')
       }
-      if (e.key.toLowerCase() === 'c' && (e.metaKey || e.ctrlKey) && selectedSite) {
+      // Shift+M — do not steal browser Cmd/Ctrl+C (copy)
+      if (e.key.toLowerCase() === 'm' && e.shiftKey && !e.metaKey && !e.ctrlKey && selectedSite) {
+        const t = e.target as HTMLElement | null
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
         e.preventDefault()
         addToPortfolio(selectedSite)
       }
       if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        const t = e.target as HTMLElement | null
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
         e.preventDefault()
         setShowKeyboardHelp(true)
       }
@@ -337,7 +342,7 @@ function StrandedCommandCenter() {
     return () => window.removeEventListener('keydown', onKey)
   }, [selectedSite, addToPortfolio])
 
-  const totalPotential = portfolio.reduce((s, x) => s + x.potentialDailyProfitCAD, 0)
+  const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
 
   const applyPreset = (preset: FilterPreset) => {
     setMinScore(preset.minScore)
@@ -379,13 +384,15 @@ function StrandedCommandCenter() {
   }
 
   return (
-    <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-live="polite" aria-label="Stranded command center map">
+    <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-label="Stranded command center map">
       {loading && loadProgress < 100 && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden" role="progressbar" aria-valuenow={loadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Loading sites">
           <div className="h-full bg-[#FF8C00] transition-all" style={{ width: `${loadProgress}%` }} />
         </div>
       )}
-      <Toaster position="top-center" richColors closeButton />
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {loading ? 'Loading sites dataset' : `${filteredSites.length.toLocaleString()} of ${allSites.length.toLocaleString()} sites visible`}
+      </div>
 
       {/* Top mission HUD */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 text-xs">

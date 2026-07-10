@@ -25,7 +25,14 @@ export function getSiteNote(siteId: string): string {
 }
 
 export function setSiteNote(siteId: string, note: string) {
-  const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}')
+  if (typeof window === 'undefined') return
+  let notes: Record<string, string> = {}
+  try {
+    notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}')
+    if (!notes || typeof notes !== 'object') notes = {}
+  } catch {
+    notes = {}
+  }
   notes[siteId] = note
   localStorage.setItem(NOTES_KEY, JSON.stringify(notes))
 }

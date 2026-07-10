@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import CommandPalette from './CommandPalette'
 import { loadSites, EnrichedSite } from '@/lib/sites'
@@ -9,32 +9,44 @@ export default function GlobalCommand() {
   const [open, setOpen] = useState(false)
   const [sites, setSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const sitesLen = useRef(0)
+  const loadingRef = useRef(false)
   const router = useRouter()
 
-  // Listen for the global trigger (from Nav button or Cmd+K)
+  useEffect(() => {
+    sitesLen.current = sites.length
+  }, [sites.length])
+
+  const ensureSites = useCallback(() => {
+    if (sitesLen.current > 0 || loadingRef.current) return
+    loadingRef.current = true
+    setLoading(true)
+    setError(null)
+    loadSites()
+      .then(data => {
+        setSites(data)
+        setLoading(false)
+        loadingRef.current = false
+      })
+      .catch(() => {
+        setLoading(false)
+        loadingRef.current = false
+        setError('Could not load sites')
+      })
+  }, [])
+
   useEffect(() => {
     const handler = () => {
       setOpen(true)
-      // Lazy load the full dataset only when the user actually wants to search
-      if (sites.length === 0 && !loading) {
-        setLoading(true)
-        loadSites()
-          .then(data => {
-            setSites(data)
-            setLoading(false)
-          })
-          .catch(() => setLoading(false))
-      }
+      ensureSites()
     }
-
     window.addEventListener('open-command-palette', handler)
     return () => window.removeEventListener('open-command-palette', handler)
-  }, [sites.length, loading])
+  }, [ensureSites])
 
   const handleSelect = (site: EnrichedSite) => {
     setOpen(false)
-    // Always deep-link to the map with the site pre-selected.
-    // The /map page already listens for ?site= and will fly + select.
     router.push(`/map?site=${encodeURIComponent(site.id)}`)
   }
 
@@ -44,6 +56,9 @@ export default function GlobalCommand() {
       open={open}
       onClose={() => setOpen(false)}
       onSelectSite={handleSelect}
+      loading={loading}
+      error={error}
+      onRetry={ensureSites}
     />
   )
 }

@@ -1,7 +1,18 @@
 import { EnrichedSite } from './sites'
+import { escapeHtml } from './html-escape'
 
 const PORTFOLIO_KEY = 'stranded-mission-portfolio'
 const PORTFOLIO_SHARE_KEY = 'stranded-mission-share'
+
+/** Scale enrichment-time CAD potential (pegged at $85k BTC) to a live price. */
+export function scalePotentialCad(baseCad: number, liveBtc = 85000, baseBtc = 85000): number {
+  if (!baseBtc || !isFinite(liveBtc)) return baseCad
+  return Math.round(baseCad * (liveBtc / baseBtc))
+}
+
+export function portfolioDailyPotentialCad(sites: EnrichedSite[], liveBtc = 85000): number {
+  return sites.reduce((sum, s) => sum + scalePotentialCad(s.potentialDailyProfitCAD, liveBtc), 0)
+}
 
 export function savePortfolio(sites: EnrichedSite[]) {
   if (typeof window === 'undefined') return
@@ -95,7 +106,7 @@ export function exportPortfolioCsv(sites: EnrichedSite[], liveBtc = 85000): stri
     s.emission,
     s.strandedScore,
     s.maxGeneratorPowerKW || 0,
-    s.potentialDailyProfitCAD,
+    scalePotentialCad(s.potentialDailyProfitCAD, liveBtc),
     liveBtc,
   ])
   return [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
@@ -103,12 +114,14 @@ export function exportPortfolioCsv(sites: EnrichedSite[], liveBtc = 85000): stri
 
 export function exportPortfolioPdfHtml(sites: EnrichedSite[], liveBtc: number): string {
   const totalEm = sites.reduce((s, x) => s + x.emission, 0)
-  const totalPot = sites.reduce((s, x) => s + x.potentialDailyProfitCAD, 0)
-  const rows = sites.map(s => `<tr><td>${s.properties.name}</td><td>${s.properties.province}</td><td>${s.emission.toLocaleString()}</td><td>${s.strandedScore}</td></tr>`).join('')
-  return `<!DOCTYPE html><html><head><title>Stranded Mission Brief</title><style>body{font-family:system-ui;padding:40px;color:#1e293b}h1{color:#FF8C00}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}th{background:#243447;color:white}</style></head><body>
+  const totalPot = portfolioDailyPotentialCad(sites, liveBtc)
+  const rows = sites.map(s =>
+    `<tr><td>${escapeHtml(s.properties.name)}</td><td>${escapeHtml(s.properties.province)}</td><td>${escapeHtml(s.emission.toLocaleString())}</td><td>${escapeHtml(s.strandedScore)}</td></tr>`
+  ).join('')
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Stranded Mission Brief</title><style>body{font-family:system-ui;padding:40px;color:#1e293b}h1{color:#FF8C00}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}th{background:#243447;color:white}</style></head><body>
 <h1>Stranded Value — Mission Brief</h1>
-<p>Generated ${new Date().toLocaleString()} · BTC $${liveBtc.toLocaleString()} · ${sites.length} sites</p>
-<p><strong>Total emission:</strong> ${totalEm.toLocaleString()} kg/day · <strong>Daily potential:</strong> C$${totalPot.toLocaleString()}</p>
+<p>Generated ${escapeHtml(new Date().toLocaleString())} · BTC $${escapeHtml(liveBtc.toLocaleString())} · ${sites.length} sites</p>
+<p><strong>Total emission:</strong> ${escapeHtml(totalEm.toLocaleString())} kg/day · <strong>Daily potential:</strong> C$${escapeHtml(totalPot.toLocaleString())}</p>
 <table><thead><tr><th>Site</th><th>Province</th><th>kg/day</th><th>Score</th></tr></thead><tbody>${rows}</tbody></table>
 <p style="margin-top:30px;font-size:11px;color:#666">Not financial advice. Data: ECCC open dataset.</p>
 </body></html>`
