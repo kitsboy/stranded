@@ -45,15 +45,16 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[999] focus:px-4 focus:py-2 focus:bg-[#FF8C00] focus:text-black focus:rounded-lg">
           Skip to content
         </a>
-        <Nav />
-        {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
-        <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">{children}</main>
-        <Footer />
-        <Toaster position="top-center" richColors closeButton />
-        <GlobalCommand />
-        <MobileCtaBar />
-        <OfflineIndicator />
-        <Providers>{null}</Providers>
+        <Providers>
+          <Nav />
+          {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
+          <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">{children}</main>
+          <Footer />
+          <Toaster position="top-center" richColors closeButton />
+          <GlobalCommand />
+          <MobileCtaBar />
+          <OfflineIndicator />
+        </Providers>
       </body>
     </html>
   )

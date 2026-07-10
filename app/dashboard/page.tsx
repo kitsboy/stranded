@@ -4,23 +4,37 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import type { LiveStats } from '@/types/live-stats'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<LiveStats | null>(null)
-  const [btc, setBtc] = useState(85000)
+  const [loadError, setLoadError] = useState(false)
+  const btc = useBtcUsd()
 
   useEffect(() => {
     const refresh = () => {
-      fetch('/data/live-stats.json').then(r => r.json()).then(setStats)
-      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-        .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd))
+      fetch('/data/live-stats.json')
+        .then(r => {
+          if (!r.ok) throw new Error('stats')
+          return r.json()
+        })
+        .then(s => { setStats(s); setLoadError(false) })
+        .catch(() => setLoadError(true))
     }
     refresh()
     const id = setInterval(refresh, 60_000)
     return () => clearInterval(id)
   }, [])
 
-  if (!stats) return <div className="p-12 text-center text-gray-400">Loading command dashboard…</div>
+  if (loadError && !stats) {
+    return (
+      <div className="p-12 text-center space-y-3" role="alert">
+        <p className="text-red-400">Could not load dashboard stats.</p>
+        <button type="button" onClick={() => window.location.reload()} className="px-4 py-2 rounded-xl bg-[#FF8C00] text-black text-sm font-semibold">Retry</button>
+      </div>
+    )
+  }
+  if (!stats) return <div className="p-12 text-center text-gray-400" role="status">Loading command dashboard…</div>
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">

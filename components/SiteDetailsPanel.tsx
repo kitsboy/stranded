@@ -13,6 +13,7 @@ import { sensitivityTornado } from '@/lib/sensitivity'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
 import { toast } from 'sonner'
+import { useBtcPrice } from '@/components/BtcPriceProvider'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -54,6 +55,7 @@ export default function SiteDetailsPanel({
   const p = site?.properties || {}
   const siteEmission = p.emission_rate_kg_day || 0
 
+  const { fiats: sharedFiats } = useBtcPrice()
   const [selectedFiat, setSelectedFiat] = useState<FiatCode>('USD')
   const [btcPrices, setBtcPrices] = useState<BtcPriceMap>({ usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 })
   const [selectedASIC, setSelectedASIC] = useState(ASIC_MACHINES[0])
@@ -88,30 +90,19 @@ export default function SiteDetailsPanel({
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
   const currencySymbol = currentFiat.symbol
 
-  // Fetch live BTC prices for top 5 fiats (BTC always the denominator)
+  // Sync multi-fiat map from shared provider (single CoinGecko poll site-wide)
   useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,jpy,gbp,cad')
-        const data = await res.json()
-        if (data?.bitcoin) {
-          const prices = {
-            usd: data.bitcoin.usd || 85000,
-            eur: data.bitcoin.eur || 78000,
-            jpy: data.bitcoin.jpy || 12500000,
-            gbp: data.bitcoin.gbp || 65000,
-            cad: data.bitcoin.cad || 115000,
-          }
-          setBtcPrices(prices)
-          // Use current selectedFiat at fetch time
-          const key = selectedFiat.toLowerCase() as Lowercase<FiatCode>
-          const live = prices[key] || prices.usd
-          setBtcPrice(live)
-        }
-      } catch (_) {}
+    const prices: BtcPriceMap = {
+      usd: sharedFiats.usd,
+      eur: sharedFiats.eur,
+      jpy: sharedFiats.jpy,
+      gbp: sharedFiats.gbp,
+      cad: sharedFiats.cad,
     }
-    fetchPrices()
-  }, [selectedFiat]) // re-fetch if fiat changes before initial load (rare)
+    setBtcPrices(prices)
+    const key = selectedFiat.toLowerCase() as Lowercase<FiatCode>
+    setBtcPrice(prices[key] || prices.usd)
+  }, [sharedFiats, selectedFiat])
 
   const handleFiatChange = (newFiat: FiatCode) => {
     setSelectedFiat(newFiat)
@@ -215,7 +206,7 @@ export default function SiteDetailsPanel({
       effectiveMachineCount: effectiveMachineCount || 0,
       gensetName: GENSET_DATA[selectedGenset].name
     }
-  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, selectedFiat, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission, site])
+  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission, site])
 
   const fmt = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'

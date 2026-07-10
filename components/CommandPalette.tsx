@@ -6,6 +6,7 @@ import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { EnrichedSite, scoreTierClass, effectiveGridKm } from '@/lib/sites'
 import { getBookmarks } from '@/lib/bookmarks'
+import FocusTrap from './FocusTrap'
 
 interface CommandPaletteProps {
   sites: EnrichedSite[]
@@ -116,10 +117,9 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
       <div
         className="fixed inset-0 z-[300] flex items-start justify-center pt-[18vh] bg-black/70 p-4"
         onClick={onClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="command-palette-title"
+        role="presentation"
       >
+        <FocusTrap active onEscape={onClose} className="w-full max-w-xl">
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -127,12 +127,16 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
           transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
           className="command-palette w-full max-w-xl glass-strong rounded-2xl overflow-hidden shadow-2xl border border-white/10"
           onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="command-palette-title"
         >
           <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
             <Search className="w-5 h-5 text-[#5BC0BE]" aria-hidden />
             <h2 id="command-palette-title" className="sr-only">Search sites</h2>
             <input
               autoFocus
+              data-autofocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search 2,611 sites by name, province, company... (⌘K)"
@@ -249,6 +253,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
             <div>ESC to close</div>
           </div>
         </motion.div>
+        </FocusTrap>
       </div>
     </AnimatePresence>
   )

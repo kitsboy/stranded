@@ -7,17 +7,16 @@ import { useEffect, useState } from 'react'
 import { Rocket } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
 import { scoreTierClass } from '@/lib/scoring'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 type FeaturedSite = { id?: string; name: string; province: string; emission: number; score: number; link: string }
 
 export default function LandingPage() {
-  const [btc, setBtc] = useState(85000)
+  const btc = useBtcUsd()
   const [featured, setFeatured] = useState<FeaturedSite[]>([])
   const [stats, setStats] = useState<LiveStats | null>(null)
 
   useEffect(() => {
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-      .then(r => r.json()).then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd)).catch(() => {})
     fetch('/data/live-stats.json')
       .then(r => r.json())
       .then((s: LiveStats) => {

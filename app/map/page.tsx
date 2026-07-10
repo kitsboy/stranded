@@ -21,6 +21,7 @@ import { savePortfolioProfile } from '@/lib/portfolio-profiles'
 import { addSiteAlert, evaluateWatchHits } from '@/lib/alerts'
 import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 import ScoreLegend from '@/components/ScoreLegend'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -31,7 +32,7 @@ function StrandedCommandCenter() {
   const [selectedSite, setSelectedSite] = useState<EnrichedSite | null>(null)
   const [portfolio, setPortfolio] = useState<EnrichedSite[]>([])
   const [viewMode, setViewMode] = useState<'precise' | 'clusters'>('precise')
-  const [liveBtcPrice, setLiveBtcPrice] = useState(85000)
+  const liveBtcPrice = useBtcUsd()
 
   // Sexy advanced filters - start with ALL 2611 visible by default
   const [minEmission, setMinEmission] = useState(0)
@@ -129,22 +130,6 @@ function StrandedCommandCenter() {
       toast.error('Failed to load sites dataset')
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Live BTC price (wild useful)
-  useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-        const json = await res.json()
-        if (json?.bitcoin?.usd) setLiveBtcPrice(json.bitcoin.usd)
-      } catch (_) {
-        // graceful fallback
-      }
-    }
-    fetchPrice()
-    const id = setInterval(fetchPrice, 1000 * 95) // polite polling
-    return () => clearInterval(id)
   }, [])
 
   // Compute filtered (live filtering = sexy + performant)

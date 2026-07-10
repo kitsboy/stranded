@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import type { LiveStats } from '@/types/live-stats'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -107,7 +108,7 @@ function PitchContent() {
   const searchParams = useSearchParams()
   const embed = searchParams.get('embed') === '1'
   const [stats, setStats] = useState<LiveStats | null>(null)
-  const [btc, setBtc] = useState(85000)
+  const btc = useBtcUsd()
   const [error, setError] = useState('')
   const [btcSensitivity, setBtcSensitivity] = useState(100)
 
@@ -121,17 +122,6 @@ function PitchContent() {
       .then(r => { if (!r.ok) throw new Error('stats missing'); return r.json() })
       .then(setStats)
       .catch(() => setError('Run npm run build to generate live-stats.json'))
-  }, [])
-
-  useEffect(() => {
-    const load = () =>
-      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-        .then(r => r.json())
-        .then(j => j?.bitcoin?.usd && setBtc(j.bitcoin.usd))
-        .catch(() => {})
-    load()
-    const id = setInterval(load, 60_000)
-    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {

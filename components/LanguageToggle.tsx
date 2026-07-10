@@ -67,9 +67,12 @@ export default function LanguageToggle() {
       {open && (
         <div
           role="listbox"
-          aria-label="Languages"
-          className="absolute right-0 top-full mt-1 z-[80] min-w-[140px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
+          aria-label="Languages (navigation only)"
+          className="absolute right-0 top-full mt-1 z-[80] min-w-[160px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
         >
+          <p className="px-3 py-1.5 text-[10px] text-gray-500 border-b border-white/10">
+            Nav labels only — page content is English
+          </p>
           {LOCALES.map(l => (
             <button
               key={l.code}

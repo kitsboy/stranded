@@ -15,6 +15,7 @@ import { markEduSection, getEduProgress } from '@/lib/bookmarks'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import GensetComparisonTable from '@/components/GensetComparisonTable'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 function QuizSection() {
   const questions = [
@@ -96,6 +97,7 @@ function QuizSection() {
 }
 
 export default function EducationContent() {
+  const marketBtc = useBtcUsd()
   // State for interactive elements
   const [glossarySearch, setGlossarySearch] = useState('')
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
@@ -107,7 +109,8 @@ export default function EducationContent() {
   const [advEfficiency, setAdvEfficiency] = useState(78)
   const [advPowerPrice, setAdvPowerPrice] = useState(0.035)
   const [regionalProvince, setRegionalProvince] = useState('Ontario')
-  const [liveBtc, setLiveBtc] = useState(85000) // live sensitivity for value demos
+  const [liveBtc, setLiveBtc] = useState(85000) // user-adjustable; seeded from market once
+  const [btcSeeded, setBtcSeeded] = useState(false)
   const [selectedGenset, setSelectedGenset] = useState('jenbacher316')
   const [numUnits, setNumUnits] = useState(1) // for configurator demo
   const [treatmentAdder, setTreatmentAdder] = useState(10) // % for gas treatment in configurator
@@ -120,6 +123,13 @@ export default function EducationContent() {
   const [financingDebtPercent, setFinancingDebtPercent] = useState(60)
   const [financingInterestRate, setFinancingInterestRate] = useState(8) // %
   const [eduProgress, setEduProgress] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (!btcSeeded && marketBtc && marketBtc !== 85000) {
+      setLiveBtc(Math.round(marketBtc))
+      setBtcSeeded(true)
+    }
+  }, [marketBtc, btcSeeded])
 
   useEffect(() => {
     setEduProgress(getEduProgress())

@@ -24,6 +24,15 @@ export default function Footer() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (!showQR) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowQR(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [showQR])
+
   return (
     <footer
       className="sticky bottom-0 z-40 w-full bg-[var(--bg-dark)]/95 backdrop-blur border-t border-white/10 px-4 sm:px-6 py-3 text-[11px] text-gray-300 mt-auto"
@@ -80,9 +89,21 @@ export default function Footer() {
               <span className="text-white font-medium">Donate</span>
             </button>
             {showQR && (
-              <div className="absolute bottom-full right-0 mb-2 p-4 bg-white rounded-lg shadow-2xl z-50" role="dialog" aria-label="Bitcoin donation QR">
+              <div
+                className="absolute bottom-full right-0 mb-2 p-4 bg-white rounded-lg shadow-2xl z-50"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Bitcoin donation QR"
+              >
                 <QRCodeSVG value={`bitcoin:${btcAddress}`} size={140} level="M" includeMargin />
                 <p className="mt-2 text-center text-[10px] text-gray-600 max-w-[140px] break-all">{btcAddress}</p>
+                <button
+                  type="button"
+                  className="mt-2 w-full text-[10px] text-gray-500 hover:text-gray-800"
+                  onClick={() => setShowQR(false)}
+                >
+                  Close
+                </button>
               </div>
             )}
             <Link href="/pitch" className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition">Pitch</Link>
