@@ -237,3 +237,20 @@
 - Unpushed: none (pushed main)
 - Production: CF Pages `strandedbuild` auto-deploy from main
 
+
+## Session — 2026-07-09 (v2.3.7 remaining audit fixes)
+
+**Done:**
+- Shared `BtcPriceProvider` + `lib/btc-price.ts` (timeout, multi-fiat, 95s poll)
+- Map/home/dashboard/pitch/site panel/education use shared price
+- `FocusTrap` on command palette, compare, keyboard help
+- Next.js **14.2.35** + eslint-config-next; removed js-cookie
+- CSP allows chart.js CDN; design tokens aligned with CSS vars
+- Language menu discloses nav-only i18n; donate QR Escape/close
+- Dashboard load error state
+
+**Git State:**
+- SHA: `e6f5452`
+- Version: **2.3.7**
+- Pushed main → CF strandedbuild auto-deploy
+

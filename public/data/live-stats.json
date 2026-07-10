@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T06:34:48.975Z",
+  "generatedAt": "2026-07-10T06:42:10.974Z",
   "version": "2.3.7",
   "buildId": "20260710063448",
   "siteCount": 2611,
@@ -332,5 +332,6 @@
     "production": "https://stranded.giveabit.io",
     "github": "https://github.com/kitsboy/stranded",
     "dataSource": "https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
-  }
+  },
+  "deployNote": "force-redeploy-v2.3.7"
 }
