@@ -214,3 +214,26 @@
 ---
 
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
+
+## Session — 2026-07-09 (audit remediations v2.3.6)
+
+**Done:**
+- Comprehensive audit remediations shipped as **v2.3.6**
+- Security headers (CSP, XFO, nosniff, referrer, permissions)
+- HTML escape for mission/bank pack `document.write` exports
+- PasswordGate stubbed; password scrubbed from archive docs
+- SW network-first for HTML + `/data/*` (cache `stranded-v4`)
+- Map canvas pointer-events restored (pan/zoom)
+- Mission yields scale with live BTC; sites + palette error/retry
+- A11y: dialogs, form labels, markers role/button, lead form labels
+- Offline indicator only when offline; deterministic site IDs
+
+**Decisions:**
+- Client-side password gate is dead; edge auth only for private previews
+- Network-first SW prioritizes freshness over aggressive offline HTML cache
+
+**Git State:**
+- SHA: `32bf44d`
+- Unpushed: none (pushed main)
+- Production: CF Pages `strandedbuild` auto-deploy from main
+
