@@ -38,3 +38,6 @@ Nothing herein constitutes legal, financial, or investment advice. Use at your o
 Always consult qualified professionals for legal and financial decisions.
 © Give A Bit — Bitcoin sovereignty first.
 ```
+
+---
+**Diligence pack:** [docs/diligence/](../diligence/) (investor + architecture + ask)

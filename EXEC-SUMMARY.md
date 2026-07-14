@@ -33,3 +33,6 @@ owner: Nova (Product Management & Documentation)
 
 **Safe Harbour:** This document is provided for informational and educational purposes only. It does not constitute financial, legal, or investment advice.
 Part of the [Give A Bit](https://giveabit.io) family.
+
+---
+**Diligence pack:** [docs/diligence/](../diligence/) (investor + architecture + ask)

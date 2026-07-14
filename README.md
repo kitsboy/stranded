@@ -107,3 +107,9 @@ Built with love for the orange pill and the blue planet.
 
 Full breakdown: [docs/LIVE-STATS.md](./LIVE-STATS.md) · Live JSON: `/data/live-stats.json` · Pitch: [https://stranded.giveabit.io/pitch](https://stranded.giveabit.io/pitch)
 <!-- LIVE-STATS:END -->
+
+
+## Diligence / partner pack
+Full disclosure for technical & financial partners: **[docs/diligence/](./docs/diligence/)**  
+Portfolio map: [Family of 8](https://github.com/kitsboy/giveabit/blob/main/docs/diligence/PORTFOLIO-FAMILY-OF-8.md)
+
