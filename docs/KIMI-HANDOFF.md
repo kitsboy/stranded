@@ -342,6 +342,22 @@
 - Production: CF Pages `strandedbuild` auto-deploy from main
 
 
+## Session — 2026-07-15 (v2.6.4 black bar fix)
+
+**Done:**
+- Removed long horizontal black bar on map (empty `map-right-column` scroll-shadow painting `--bg-dark` band beside zoom controls)
+- Hide right column when no site/mission/compare content; softened scroll shadows to radial fades only
+- E2E: `empty right column does not render ghost bar over map`
+- Version **2.6.4** pushed `76dcd83`
+
+**Decisions:**
+- `showRightColumn` gate: `selectedSite || portfolio.length || compareSites.length >= 2`
+- CompareSitesModal moved outside column wrapper so modal still works when column hidden
+
+**Git State:**
+- SHA: `76dcd83`
+- Unpushed: none
+
 ## Session — 2026-07-15 (v2.6.0 map elite round 7)
 
 **Done:**
