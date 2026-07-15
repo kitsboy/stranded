@@ -95,6 +95,8 @@ export default function Footer() {
             </h3>
             <nav className="flex flex-col gap-1" aria-label="Footer navigation">
               {[
+                { href: '/dashboard', label: t('dashboard') },
+                { href: '/pitch', label: t('pitch') },
                 { href: '/methodology', label: t('footerMethodology') },
                 { href: '/open-data', label: t('footerOpenData') },
                 { href: '/roadmap', label: t('footerRoadmap') },

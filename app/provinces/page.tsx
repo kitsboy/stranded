@@ -5,14 +5,36 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { loadSites, EnrichedSite } from '@/lib/sites'
+import type { LiveStats } from '@/types/live-stats'
+
+function fmtUsd(n: number) {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
+  return `$${n.toLocaleString('en-CA')}`
+}
 
 function ProvincesContent() {
   const searchParams = useSearchParams()
   const selected = searchParams.get('name') || ''
   const [sites, setSites] = useState<EnrichedSite[]>([])
+  const [stats, setStats] = useState<LiveStats | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { loadSites().then(s => { setSites(s); setLoading(false) }) }, [])
+  useEffect(() => {
+    loadSites().then(s => { setSites(s); setLoading(false) })
+    fetch('/data/live-stats.json').then(r => r.json()).then(setStats).catch(() => {})
+  }, [])
+
+  const liveByProvince = useMemo(() => {
+    const m = new Map<string, { emissionKgDay?: number; estRevenueUsd?: number }>()
+    stats?.provinces?.forEach(p => {
+      m.set(p.name, { emissionKgDay: p.emissionKgDay, estRevenueUsd: p.estRevenueUsd })
+    })
+    return m
+  }, [stats])
+
+  const hasLiveColumns = stats?.provinces?.some(p => p.emissionKgDay != null || p.estRevenueUsd != null)
 
   const provinces = useMemo(() => {
     const m: Record<string, EnrichedSite[]> = {}
@@ -21,14 +43,19 @@ function ProvincesContent() {
       if (!m[p]) m[p] = []
       m[p].push(s)
     })
-    return Object.entries(m).map(([name, list]) => ({
-      name,
-      count: list.length,
-      totalEmission: list.reduce((a, x) => a + x.emission, 0),
-      avgScore: +(list.reduce((a, x) => a + x.strandedScore, 0) / list.length).toFixed(1),
-      top: [...list].sort((a, b) => b.strandedScore - a.strandedScore)[0],
-    })).sort((a, b) => b.count - a.count)
-  }, [sites])
+    return Object.entries(m).map(([name, list]) => {
+      const live = liveByProvince.get(name)
+      return {
+        name,
+        count: list.length,
+        totalEmission: list.reduce((a, x) => a + x.emission, 0),
+        avgScore: +(list.reduce((a, x) => a + x.strandedScore, 0) / list.length).toFixed(1),
+        emissionKgDay: live?.emissionKgDay,
+        estRevenueUsd: live?.estRevenueUsd,
+        top: [...list].sort((a, b) => b.strandedScore - a.strandedScore)[0],
+      }
+    }).sort((a, b) => b.count - a.count)
+  }, [sites, liveByProvince])
 
   const filtered = selected ? sites.filter(s => s.properties.province === selected).sort((a, b) => b.strandedScore - a.strandedScore).slice(0, 20) : []
 
@@ -40,26 +67,86 @@ function ProvincesContent() {
 
       {loading ? <div className="text-gray-400">Loading…</div> : (
         <>
-          <div className="grid md:grid-cols-3 gap-4 mb-10">
-            {provinces.map(p => (
-              <Link key={p.name} href={`/provinces?name=${encodeURIComponent(p.name)}`} className={`rounded-2xl border p-5 transition hover:border-[#FF8C00]/50 ${selected === p.name ? 'border-[#FF8C00] bg-[#FF8C00]/5' : 'border-white/10 bg-white/[0.03]'}`}>
-                <div className="font-semibold text-lg">{p.name}</div>
-                <div className="text-3xl font-bold text-[#FF8C00] mt-1">{p.count}</div>
-                <div className="text-xs text-gray-400 mt-2">{p.totalEmission.toLocaleString()} kg/day · avg score {p.avgScore}</div>
-              </Link>
-            ))}
-          </div>
+          {hasLiveColumns ? (
+            <div className="overflow-x-auto rounded-2xl border border-white/10 mb-10" data-testid="provinces-table">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+                    <th className="p-3">Province</th>
+                    <th className="p-3 text-right">Sites</th>
+                    <th className="p-3 text-right">Emission kg/d</th>
+                    <th className="p-3 text-right">Est. revenue</th>
+                    <th className="p-3 text-right">Avg score</th>
+                    <th className="p-3">Map</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {provinces.map(p => (
+                    <tr key={p.name} className={`border-b border-white/5 hover:bg-white/[0.02] ${selected === p.name ? 'bg-[#FF8C00]/5' : ''}`}>
+                      <td className="p-3">
+                        <Link href={`/provinces?name=${encodeURIComponent(p.name)}`} className="font-medium hover:text-[#FF8C00]">
+                          {p.name}
+                        </Link>
+                      </td>
+                      <td className="p-3 text-right font-mono text-[#FF8C00]">{p.count}</td>
+                      <td className="p-3 text-right font-mono text-[#5BC0BE]">
+                        {(p.emissionKgDay ?? p.totalEmission).toLocaleString()}
+                      </td>
+                      <td className="p-3 text-right font-mono text-emerald-400">
+                        {p.estRevenueUsd != null ? fmtUsd(p.estRevenueUsd) : '—'}
+                      </td>
+                      <td className="p-3 text-right font-mono">{p.avgScore}</td>
+                      <td className="p-3">
+                        <Link
+                          href={`/map?province=${encodeURIComponent(p.name)}`}
+                          className="text-xs text-[#5BC0BE] hover:underline"
+                        >
+                          Open map →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-4 mb-10">
+              {provinces.map(p => (
+                <div key={p.name} className={`rounded-2xl border p-5 transition hover:border-[#FF8C00]/50 ${selected === p.name ? 'border-[#FF8C00] bg-[#FF8C00]/5' : 'border-white/10 bg-white/[0.03]'}`}>
+                  <Link href={`/provinces?name=${encodeURIComponent(p.name)}`} className="block">
+                    <div className="font-semibold text-lg">{p.name}</div>
+                    <div className="text-3xl font-bold text-[#FF8C00] mt-1">{p.count}</div>
+                    <div className="text-xs text-gray-400 mt-2">{p.totalEmission.toLocaleString()} kg/day · avg score {p.avgScore}</div>
+                  </Link>
+                  <Link
+                    href={`/map?province=${encodeURIComponent(p.name)}`}
+                    className="text-xs text-[#5BC0BE] mt-2 inline-block hover:underline"
+                  >
+                    View on map →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
 
           {selected && (
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 className="text-xl font-semibold">Top sites in {selected}</h2>
-                <Link
-                  href={`/print/province?province=${encodeURIComponent(selected)}`}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10"
-                >
-                  Print executive one-pager →
-                </Link>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/map?province=${encodeURIComponent(selected)}`}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+                  >
+                    Open {selected} on map →
+                  </Link>
+                  <Link
+                    href={`/print/province?province=${encodeURIComponent(selected)}`}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+                  >
+                    Print executive one-pager →
+                  </Link>
+                </div>
               </div>
               <div className="space-y-2">
                 {filtered.map(s => (

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import { resolveProvinceName, provinceCode } from '@/lib/provinces'
 import { useLocale } from '@/lib/useLocale'
+import type { LiveStats } from '@/types/live-stats'
 
 
 function ProvincePrintContent() {
@@ -12,13 +13,19 @@ function ProvincePrintContent() {
   const searchParams = useSearchParams()
   const provinceParam = searchParams.get('province') || searchParams.get('name') || ''
   const [sites, setSites] = useState<EnrichedSite[]>([])
+  const [stats, setStats] = useState<LiveStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   const provinceName = resolveProvinceName(provinceParam) || provinceParam
+  const ecccYear = stats?.ecccReportingYear
 
   useEffect(() => {
-    loadSites().then(all => {
+    Promise.all([
+      loadSites(),
+      fetch('/data/live-stats.json').then(r => r.json()).catch(() => null),
+    ]).then(([all, liveStats]) => {
       setSites(all)
+      if (liveStats) setStats(liveStats)
       setLoading(false)
       setTimeout(() => window.print(), 600)
     })
@@ -60,13 +67,22 @@ function ProvincePrintContent() {
       `}</style>
 
       <header className="border-b-2 border-[#FF8C00] pb-4 mb-6" data-testid="print-province-header">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Stranded Value · Executive One-Pager</div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Stranded Value · Executive One-Pager</div>
+          {ecccYear != null && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE]" data-testid="print-eccc-year">
+              ECCC {ecccYear}
+            </span>
+          )}
+        </div>
         <h1 className="text-3xl font-bold mt-1">{provinceName}</h1>
         <div className="text-sm text-gray-600 mt-1">
           {provinceCode(provinceName)} · {provinceSites.length.toLocaleString()} sites · avg score {avgScore}
         </div>
         <div className="text-[10px] text-gray-500 mt-2" data-testid="print-eccc-line">
-          {t('printEcccLine')}
+          {ecccYear != null
+            ? `ECCC GHGRP ${ecccYear} verified methane reporting · Stranded Score™ model enrichments`
+            : t('printEcccLine')}
         </div>
       </header>
 

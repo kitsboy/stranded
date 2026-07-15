@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import type { LiveStats } from '@/types/live-stats'
 
@@ -49,6 +50,43 @@ export default function BenchmarksPage() {
           </div>
         ))}
       </div>
+
+      {stats?.topSites?.length ? (
+        <>
+          <h2 className="text-xl font-semibold mb-4 text-[#FF8C00]">Top Sites (live-stats)</h2>
+          <p className="text-sm text-gray-400 mb-4">Highest Stranded Score™ sites from prebuild snapshot — compare against your filter results.</p>
+          <div className="overflow-x-auto rounded-xl border border-white/10 mb-10" data-testid="benchmarks-top-sites">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+                  <th className="p-3">#</th>
+                  <th className="p-3">Site</th>
+                  <th className="p-3">Province</th>
+                  <th className="p-3 text-right">Score</th>
+                  <th className="p-3 text-right">kg/day</th>
+                  <th className="p-3">Genset</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.topSites.slice(0, 10).map((s, i) => (
+                  <tr key={s.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                    <td className="p-3 text-gray-500">{i + 1}</td>
+                    <td className="p-3">
+                      <Link href={`/map?site=${s.id}`} className="font-medium hover:text-[#FF8C00]">
+                        {s.name}
+                      </Link>
+                    </td>
+                    <td className="p-3 text-gray-400">{s.province}</td>
+                    <td className="p-3 text-right font-mono text-[#FF8C00]">{s.score}</td>
+                    <td className="p-3 text-right font-mono text-[#5BC0BE]">{s.emissionKgDay.toLocaleString()}</td>
+                    <td className="p-3 text-xs text-gray-500">{s.genset}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : null}
 
       <h2 className="text-xl font-semibold mb-4 text-[#FF8C00]">ASIC Efficiency Reference</h2>
       <p className="text-sm text-gray-400 mb-4">Models used in site panel ROI — lower J/TH is better at fixed power budget.</p>

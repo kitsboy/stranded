@@ -33,7 +33,7 @@ export default function MapHud({
       <div className="map-top-hud__inner glass rounded-2xl flex items-center border border-white/10">
         <div className="flex items-center gap-2 flex-wrap justify-center">
           <Target size={15} className="text-[#FF8C00]" aria-hidden />
-          <span className="font-mono text-[#FF8C00] tabular-nums">{filteredCount.toLocaleString()}</span>
+          <span className="font-mono text-[#FF8C00] tabular-nums" data-testid="map-site-count">{filteredCount.toLocaleString()}</span>
           <span className="text-gray-400">
             / {totalCount.toLocaleString()} {t('mapHudVisibleSuffix')}
           </span>

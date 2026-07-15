@@ -1027,6 +1027,7 @@ function StrandedCommandCenter() {
         onFitBounds={fitToFilteredSites}
         onScreenshot={exportMapScreenshot}
         onPrint={printMap}
+        onShare={shareMapView}
         onKeyboardHelp={() => setShowKeyboardHelp(true)}
       />
 

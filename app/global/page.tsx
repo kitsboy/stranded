@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import GlobalKpiCards from '@/components/GlobalKpiCards'
 import { Globe } from 'lucide-react'
 
 export const metadata = {
@@ -53,7 +54,8 @@ export default function GlobalPage() {
       <h1 className="text-4xl font-bold tracking-tighter mb-2 flex items-center gap-2">
         <Globe className="text-[#5BC0BE]" /> Global Expansion
       </h1>
-      <p className="text-gray-400 mb-8">Canada first — international methane maps on the roadmap.</p>
+      <p className="text-gray-400 mb-4">Canada first — international methane maps on the roadmap.</p>
+      <GlobalKpiCards />
       <div className="grid sm:grid-cols-2 gap-4">
         {REGIONS.map(r => (
           <div
