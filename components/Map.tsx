@@ -4,6 +4,9 @@ import { useEffect, useRef, useCallback } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
+import { emissionChoroplethGeojson } from '@/lib/province-choropleth'
+
+export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 
 interface MapProps {
   sites: EnrichedSite[]
@@ -11,42 +14,215 @@ interface MapProps {
   onSiteClick: (site: EnrichedSite) => void
   selectedId?: string | null
   portfolioIds?: string[]
-  viewMode?: 'precise' | 'clusters'
+  /** @deprecated use native-clusters */
+  viewMode?: MapViewMode | 'clusters'
   showSatellite?: boolean
   showTerrain?: boolean
   showHeatmap?: boolean
+  showChoropleth?: boolean
   liveBtcPrice?: number
+  radiusOverlay?: { lat: number; lng: number; radiusKm: number } | null
 }
 
-export default function Map({ 
-  filteredSites, 
-  onSiteClick, 
-  selectedId, 
-  portfolioIds = [], 
-  viewMode = 'precise',
+const SITES_SOURCE = 'stranded-sites'
+const CLUSTER_LAYER = 'stranded-clusters'
+const CLUSTER_COUNT_LAYER = 'stranded-cluster-count'
+const UNCLUSTERED_LAYER = 'stranded-unclustered'
+
+const TIER_CIRCLE_COLOR: maplibregl.ExpressionSpecification = [
+  'case',
+  ['>=', ['get', 'score'], 85], '#a855f7',
+  ['>=', ['get', 'score'], 65], '#22c55e',
+  ['>=', ['get', 'score'], 45], '#eab308',
+  '#f97316',
+]
+
+function resolveViewMode(
+  viewMode: MapProps['viewMode'],
+  siteCount: number,
+): MapViewMode {
+  if (viewMode === 'precise') {
+    if (siteCount > 400) return 'native-clusters'
+    return 'precise'
+  }
+  if (viewMode === 'dom') return 'dom'
+  if (viewMode === 'native-clusters' || viewMode === 'clusters') return 'native-clusters'
+  return siteCount > 180 ? 'native-clusters' : 'precise'
+}
+
+function sitesToGeoJSON(sites: EnrichedSite[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: sites.map(s => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: s.geometry.coordinates },
+      properties: {
+        id: s.id,
+        score: s.strandedScore,
+        emission: s.emission,
+      },
+    })),
+  }
+}
+
+export default function Map({
+  sites = [],
+  filteredSites,
+  onSiteClick,
+  selectedId,
+  portfolioIds = [],
+  viewMode,
   showSatellite = false,
   showTerrain = false,
   showHeatmap = false,
+  showChoropleth = false,
   liveBtcPrice = 85000,
+  radiusOverlay = null,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<any>(null)
-  const markersRef = useRef<any[]>([])
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const markersRef = useRef<maplibregl.Marker[]>([])
+  const sitesRef = useRef(filteredSites)
+  const onSiteClickRef = useRef(onSiteClick)
+  const nativeHandlersAttached = useRef(false)
+
+  sitesRef.current = filteredSites
+  onSiteClickRef.current = onSiteClick
 
   const clearMarkers = () => {
     markersRef.current.forEach(m => m.remove())
     markersRef.current = []
   }
 
-  const addMarkers = useCallback((sitesToRender: EnrichedSite[]) => {
+  const setNativeVisibility = useCallback((map: maplibregl.Map, visible: boolean) => {
+    const vis = visible ? 'visible' : 'none'
+    for (const id of [CLUSTER_LAYER, CLUSTER_COUNT_LAYER, UNCLUSTERED_LAYER]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', vis)
+    }
+  }, [])
+
+  const attachNativeHandlers = useCallback((map: maplibregl.Map) => {
+    if (nativeHandlersAttached.current) return
+    nativeHandlersAttached.current = true
+
+    map.on('click', CLUSTER_LAYER, (e) => {
+      const feature = e.features?.[0]
+      if (!feature) return
+      const clusterId = feature.properties?.cluster_id
+      const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+      const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource
+      if (clusterId == null) return
+      source.getClusterExpansionZoom(clusterId).then((zoom) => {
+        map.easeTo({ center: coords, zoom })
+      }).catch(() => {})
+    })
+
+    map.on('click', UNCLUSTERED_LAYER, (e) => {
+      const feature = e.features?.[0]
+      const siteId = feature?.properties?.id
+      if (!siteId) return
+      const site = sitesRef.current.find(s => s.id === siteId)
+      if (site) onSiteClickRef.current(site)
+    })
+
+    map.on('mouseenter', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = '' })
+    map.on('mouseenter', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = '' })
+  }, [])
+
+  const ensureNativeLayers = useCallback((map: maplibregl.Map) => {
+    if (!map.getSource(SITES_SOURCE)) {
+      map.addSource(SITES_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50,
+      })
+    }
+
+    if (!map.getLayer(CLUSTER_LAYER)) {
+      map.addLayer({
+        id: CLUSTER_LAYER,
+        type: 'circle',
+        source: SITES_SOURCE,
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step', ['get', 'point_count'],
+            '#5BC0BE', 25, '#22c55e', 100, '#eab308', 500, '#FF8C00',
+          ],
+          'circle-radius': [
+            'step', ['get', 'point_count'],
+            18, 10, 22, 50, 28, 100, 34, 500, 40,
+          ],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': 'rgba(255,255,255,0.85)',
+          'circle-opacity': 0.92,
+        },
+      })
+    }
+
+    if (!map.getLayer(CLUSTER_COUNT_LAYER)) {
+      map.addLayer({
+        id: CLUSTER_COUNT_LAYER,
+        type: 'symbol',
+        source: SITES_SOURCE,
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 11,
+        },
+        paint: {
+          'text-color': '#0f172a',
+        },
+      })
+    }
+
+    if (!map.getLayer(UNCLUSTERED_LAYER)) {
+      map.addLayer({
+        id: UNCLUSTERED_LAYER,
+        type: 'circle',
+        source: SITES_SOURCE,
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': TIER_CIRCLE_COLOR,
+          'circle-radius': [
+            'interpolate', ['linear'], ['get', 'emission'],
+            10, 4, 100, 7, 1000, 10, 10000, 14,
+          ],
+          'circle-stroke-width': 2,
+          'circle-stroke-color': 'rgba(255,255,255,0.85)',
+        },
+      })
+    }
+
+    attachNativeHandlers(map)
+  }, [attachNativeHandlers])
+
+  const syncNativeClusters = useCallback((sitesToRender: EnrichedSite[], visible: boolean) => {
+    const map = mapRef.current
+    if (!map) return
+    if (!map.isStyleLoaded?.()) {
+      map.once('load', () => syncNativeClusters(sitesToRender, visible))
+      return
+    }
+
+    ensureNativeLayers(map)
+    const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource
+    source.setData(sitesToGeoJSON(sitesToRender))
+    setNativeVisibility(map, visible)
+  }, [ensureNativeLayers, setNativeVisibility])
+
+  const addMarkers = useCallback((sitesToRender: EnrichedSite[], mode: MapViewMode) => {
     if (!mapRef.current) return
     clearMarkers()
 
-    // Auto-cluster large sets even in "precise" preference to keep DOM under control
-    const isClusterMode = sitesToRender.length > 180 && (viewMode === 'clusters' || sitesToRender.length > 400)
+    const isClusterMode = mode === 'dom' && sitesToRender.length > 180
 
     if (isClusterMode) {
-      // Wild creative clustering using plain object (TS friendly) — still delivers huge perf + visual density
       const buckets: Record<string, EnrichedSite[]> = {}
       sitesToRender.forEach(site => {
         const [lng, lat] = site.geometry.coordinates
@@ -75,7 +251,7 @@ export default function Map({
         el.setAttribute('aria-label', `Cluster of ${group.length} sites, average score ${avgScore}`)
         const openCluster = (e: Event) => {
           e.stopPropagation()
-          const best = [...group].sort((a,b) => b.strandedScore - a.strandedScore)[0]
+          const best = [...group].sort((a, b) => b.strandedScore - a.strandedScore)[0]
           onSiteClick(best)
         }
         el.addEventListener('click', openCluster)
@@ -85,11 +261,10 @@ export default function Map({
 
         const marker = new maplibregl.Marker({ element: el })
           .setLngLat([avgLng, avgLat])
-          .addTo(mapRef.current)
+          .addTo(mapRef.current!)
         markersRef.current.push(marker)
       })
     } else {
-      // Precise sexy individual markers (performance via filteredSites only)
       sitesToRender.forEach((site) => {
         const emission = site.emission
         const score = site.strandedScore
@@ -98,8 +273,6 @@ export default function Map({
 
         const size = Math.min(20, Math.max(8, Math.sqrt(Math.max(emission, 10)) / 11))
         const el = document.createElement('div')
-
-        // Score v3 tiers: elite purple · high green · med amber · low orange
         const bg = scoreTierColor(score)
 
         el.style.width = `${size}px`
@@ -107,8 +280,8 @@ export default function Map({
         el.style.borderRadius = isPortfolio || isSelected ? '2px' : '999px'
         el.style.background = bg
         el.style.border = isSelected ? '3px solid #fff' : isPortfolio ? '2px solid #67e8f9' : '2px solid rgba(255,255,255,0.85)'
-        el.style.boxShadow = isSelected 
-          ? '0 0 0 6px rgba(255,140,0,0.35), 0 0 14px rgba(0,0,0,0.6)' 
+        el.style.boxShadow = isSelected
+          ? '0 0 0 6px rgba(255,140,0,0.35), 0 0 14px rgba(0,0,0,0.6)'
           : '0 0 5px rgba(0,0,0,0.5)'
         el.style.cursor = 'pointer'
         el.style.transition = 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms ease'
@@ -117,7 +290,7 @@ export default function Map({
         el.tabIndex = 0
         el.setAttribute(
           'aria-label',
-          `${site.properties?.name || 'Site'}, score ${score}, ${Math.round(emission)} kg per day`
+          `${site.properties?.name || 'Site'}, score ${score}, ${Math.round(emission)} kg per day`,
         )
         el.title = site.properties?.name || site.id
 
@@ -132,7 +305,7 @@ export default function Map({
 
         const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
           .setLngLat(site.geometry.coordinates)
-          .addTo(mapRef.current)
+          .addTo(mapRef.current!)
 
         if (isSelected || isPortfolio) {
           el.classList.add(isSelected ? 'selected' : '')
@@ -141,12 +314,12 @@ export default function Map({
         markersRef.current.push(marker)
       })
     }
-  }, [onSiteClick, portfolioIds, selectedId, viewMode, liveBtcPrice])
+  }, [onSiteClick, portfolioIds, selectedId, liveBtcPrice])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !map.isStyleLoaded?.()) return
-    const layers = (map as any)._strandedLayers || {}
+    const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
     if (showSatellite !== layers.satellite) {
       if (showSatellite && !map.getLayer('satellite')) {
         map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } })
@@ -159,10 +332,9 @@ export default function Map({
       map.setPitch(showTerrain ? 50 : 0)
       layers.terrain = showTerrain
     }
-    ;(map as any)._strandedLayers = layers
+    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
   }, [showSatellite, showTerrain])
 
-  // Initialize map once
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
@@ -170,6 +342,7 @@ export default function Map({
       container: mapContainer.current,
       style: {
         version: 8,
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
           'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OSM' },
           'satellite': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 },
@@ -184,7 +357,7 @@ export default function Map({
       touchZoomRotate: true,
       cooperativeGestures: false,
     })
-    ;(map as any)._strandedLayers = { satellite: false, terrain: showTerrain }
+    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain }
     mapRef.current = map
 
     return () => {
@@ -192,11 +365,51 @@ export default function Map({
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null
+        nativeHandlersAttached.current = false
       }
     }
   // showTerrain only seeds initial pitch; live updates handled in satellite/terrain effect
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const syncChoropleth = useCallback(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!map.isStyleLoaded?.()) {
+      map.once('load', () => syncChoropleth())
+      return
+    }
+    const srcId = 'province-choropleth'
+    const layerId = 'province-choropleth-fill'
+    const totals: Record<string, number> = {}
+    sites.forEach(s => {
+      const p = s.properties.province || 'Unknown'
+      totals[p] = (totals[p] || 0) + s.emission
+    })
+    const geojson = emissionChoroplethGeojson(totals)
+    if (map.getSource(srcId)) {
+      (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
+    } else {
+      map.addSource(srcId, { type: 'geojson', data: geojson })
+      map.addLayer({
+        id: layerId,
+        type: 'fill',
+        source: srcId,
+        paint: {
+          'fill-color': [
+            'interpolate', ['linear'], ['get', 'intensity'],
+            0, 'rgba(91,192,190,0.12)',
+            0.35, 'rgba(251,191,36,0.28)',
+            1, 'rgba(255,140,0,0.48)',
+          ],
+          'fill-outline-color': 'rgba(255,255,255,0.25)',
+        },
+      })
+    }
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', showChoropleth ? 'visible' : 'none')
+    }
+  }, [sites, showChoropleth])
 
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
     const map = mapRef.current
@@ -242,19 +455,109 @@ export default function Map({
     }
   }, [showHeatmap])
 
-  // React to filtered data + viewMode (core of performance + live filters)
+  useEffect(() => {
+    syncChoropleth()
+  }, [syncChoropleth])
+
   useEffect(() => {
     if (!mapRef.current) return
-    if (showHeatmap) {
-      syncHeatmap(filteredSites)
-      clearMarkers()
-    } else {
-      addMarkers(filteredSites)
-      syncHeatmap(filteredSites)
-    }
-  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap])
+    const mode = resolveViewMode(viewMode, filteredSites.length)
 
-  // Sexy fly-to + highlight when selection changes
+    syncHeatmap(filteredSites)
+
+    if (showHeatmap) {
+      clearMarkers()
+      syncNativeClusters(filteredSites, false)
+      return
+    }
+
+    if (mode === 'native-clusters') {
+      clearMarkers()
+      syncNativeClusters(filteredSites, true)
+    } else {
+      syncNativeClusters(filteredSites, false)
+      addMarkers(filteredSites, mode)
+    }
+  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap, syncNativeClusters])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.getLayer(UNCLUSTERED_LAYER)) return
+
+    const selected = selectedId || ''
+    const portfolio = portfolioIds.length ? portfolioIds : ['']
+
+    map.setPaintProperty(UNCLUSTERED_LAYER, 'circle-stroke-width', [
+      'case',
+      ['==', ['get', 'id'], selected],
+      3,
+      ['in', ['get', 'id'], ['literal', portfolio]],
+      2,
+      1.5,
+    ] as maplibregl.ExpressionSpecification)
+
+    map.setPaintProperty(UNCLUSTERED_LAYER, 'circle-stroke-color', [
+      'case',
+      ['==', ['get', 'id'], selected],
+      '#ffffff',
+      ['in', ['get', 'id'], ['literal', portfolio]],
+      '#67e8f9',
+      'rgba(255,255,255,0.85)',
+    ] as maplibregl.ExpressionSpecification)
+  }, [selectedId, portfolioIds])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const apply = () => {
+      const srcId = 'radius-filter'
+      const layerId = 'radius-filter-layer'
+      const fillId = 'radius-filter-fill'
+      if (!radiusOverlay) {
+        if (map.getLayer(fillId)) map.removeLayer(fillId)
+        if (map.getLayer(layerId)) map.removeLayer(layerId)
+        if (map.getSource(srcId)) map.removeSource(srcId)
+        return
+      }
+      const { lat, lng, radiusKm } = radiusOverlay
+      const points = 64
+      const coords: [number, number][] = []
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * 2 * Math.PI
+        const dx = (radiusKm / 111.32) * Math.cos(angle)
+        const dy = (radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle)
+        coords.push([lng + dy, lat + dx])
+      }
+      const geojson: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [coords] },
+          properties: { radiusKm },
+        }],
+      }
+      if (map.getSource(srcId)) {
+        (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
+      } else {
+        map.addSource(srcId, { type: 'geojson', data: geojson })
+        map.addLayer({
+          id: fillId,
+          type: 'fill',
+          source: srcId,
+          paint: { 'fill-color': '#FF8C00', 'fill-opacity': 0.08 },
+        })
+        map.addLayer({
+          id: layerId,
+          type: 'line',
+          source: srcId,
+          paint: { 'line-color': '#FF8C00', 'line-width': 2, 'line-dasharray': [2, 2] },
+        })
+      }
+    }
+    if (map.isStyleLoaded?.()) apply()
+    else map.once('load', apply)
+  }, [radiusOverlay])
+
   useEffect(() => {
     const map = mapRef.current
     if (!map || !selectedId) return
@@ -272,6 +575,13 @@ export default function Map({
     })
   }, [selectedId, filteredSites])
 
-  return <div ref={mapContainer} className="w-full h-full touch-manipulation" style={{ touchAction: 'pan-x pan-y pinch-zoom' }} role="application" aria-label="Interactive map of stranded methane sites" />
+  return (
+    <div
+      ref={mapContainer}
+      className="w-full h-full touch-manipulation"
+      style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
+      role="application"
+      aria-label="Interactive map of stranded methane sites"
+    />
+  )
 }
-

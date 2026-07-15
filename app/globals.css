@@ -9,10 +9,13 @@
   --glass: rgba(42, 58, 75, 0.85);
   --accent-orange: #FF8C00;
   --accent-teal: #5BC0BE;
-  --score-elite: #a855f7;
-  --score-high: #22c55e;
-  --score-med: #eab308;
-  --score-low: #f97316;
+  --text-primary: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --score-elite: #c084fc;
+  --score-high: #4ade80;
+  --score-med: #facc15;
+  --score-low: #fb923c;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -88,10 +91,13 @@
 }
 
 /* Score v3: elite ≥85 · high ≥65 · medium ≥45 · low <45 */
-.score-elite { color: var(--score-elite); background: rgba(168, 85, 247, 0.12); }
-.score-high { color: var(--score-high); background: rgba(34, 197, 94, 0.1); }
-.score-med { color: var(--score-med); background: rgba(234, 179, 8, 0.1); }
-.score-low { color: var(--score-low); background: rgba(249, 115, 22, 0.1); }
+.score-elite { color: var(--score-elite); background: rgba(192, 132, 252, 0.16); }
+.score-high { color: var(--score-high); background: rgba(74, 222, 128, 0.12); }
+.score-med { color: var(--score-med); background: rgba(250, 204, 21, 0.14); }
+.score-low { color: var(--score-low); background: rgba(251, 146, 60, 0.14); }
+
+.text-muted-token { color: var(--text-muted); }
+.text-subtle-token { color: var(--text-subtle); }
 
 /* Marker layering — keep canvas interactive for pan/zoom */
 .maplibregl-marker {
@@ -187,6 +193,17 @@
 html.pitch-embed nav,
 html.pitch-embed footer {
   display: none !important;
+}
+
+html.pitch-embed-2 .no-print,
+html.pitch-embed-2 .pitch-print ~ section,
+html.pitch-embed-2 section:has(#pitch-province-chart),
+html.pitch-embed-2 section:has(canvas) {
+  display: none !important;
+}
+
+html.pitch-embed-2 main {
+  padding-bottom: 0 !important;
 }
 
 html.theme-light {

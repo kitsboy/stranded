@@ -33,7 +33,42 @@ export default function OpenDataPage() {
         Commercial redistribution of the enriched pack: contact <a href="mailto:hello@giveabit.io">hello@giveabit.io</a>.
       </p>
 
-      <h2>Schema notes</h2>
+      <h2>GeoJSON schema (Feature properties)</h2>
+      <div className="not-prose overflow-x-auto rounded-xl border border-white/10 my-4">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+              <th className="p-3">Field</th>
+              <th className="p-3">Type</th>
+              <th className="p-3">Description</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-300">
+            {[
+              ['ghgrp_id', 'string', 'ECCC facility identifier (primary key)'],
+              ['name', 'string', 'Facility / site name'],
+              ['company', 'string', 'Reporting organization'],
+              ['province', 'string', 'Canadian province or territory'],
+              ['city', 'string', 'Nearest municipality (if reported)'],
+              ['emission_rate_kg_day', 'number', 'Daily methane vent rate (kg CH₄/day)'],
+              ['ch4_tonnes_year', 'number', 'Annual methane (tonnes)'],
+              ['source_type', 'string', 'Industrial category (oil_gas_extraction, landfill_waste, …)'],
+              ['confidence', 'string', 'Data quality: high | medium | low'],
+              ['reference_year', 'number', 'Reporting year from ECCC filing'],
+              ['distance_to_grid_km', 'number?', 'Grid tie distance — often null (inferred in Score v3)'],
+              ['internet_type', 'string?', 'Connectivity class — often null (inferred in Score v3)'],
+              ['geometry.coordinates', '[lng, lat]', 'WGS84 point location'],
+            ].map(([field, type, desc]) => (
+              <tr key={field} className="border-b border-white/5">
+                <td className="p-3 font-mono text-[#5BC0BE] text-xs">{field}</td>
+                <td className="p-3 text-xs text-gray-500">{type}</td>
+                <td className="p-3 text-xs">{desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p>Stranded enrichments (score, genset, ROI) are computed client-side and in <code>live-stats.json</code> aggregates — not in the raw GeoJSON export.</p>
       <p>See <Link href="/docs/api">API docs</Link> and <Link href="/methodology">methodology</Link> for score factors and inferred fields.</p>
     </div>
   )

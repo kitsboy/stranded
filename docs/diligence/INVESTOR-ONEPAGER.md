@@ -3,7 +3,7 @@ title: Investor / Partner One-Pager
 project: Stranded Value
 version: 1.0.0
 audience: investors, partners, grants
-last_updated: 2026-07-13
+last_updated: 2026-07-15
 owner: Kimi (Orchestrator) + Nova (Docs)
 self_evolving: true
 update_rule: >
@@ -14,7 +14,7 @@ tags: [diligence, pitch, mvp, giveabit]
 ---
 # Stranded Value — Investor / Partner One-Pager
 
-**Live:** [https://stranded.giveabit.io](https://stranded.giveabit.io) · **GitHub:** [https://github.com/kitsboy/stranded](https://github.com/kitsboy/stranded) · **Version:** `2.3.7` · **Status:** LIVE
+**Live:** [https://stranded.giveabit.io](https://stranded.giveabit.io) · **GitHub:** [https://github.com/kitsboy/stranded](https://github.com/kitsboy/stranded) · **Version:** `2.4.0` · **Status:** LIVE
 
 ## One sentence
 Turn stranded methane into Bitcoin — 2,611 sites, real economics.
@@ -33,6 +33,13 @@ Live data product + research track
 
 ## Traction (honest)
 Live product; 2,611-site dataset; E2E history; EU funding research notes.
+
+## v2.4.0 feature highlights (2026-07-15)
+- Grant matcher quiz + CETA funding pathway
+- Bookmarks export/import, mission timeline CSV, score sparklines
+- Province choropleth map layer, compare page, province print one-pager
+- Watch alert toasts, offline cache version badge, filter preset URL hash share
+- Tadbuy / Sherpacarta cross-product hooks
 
 ## Model / value flow
 Intelligence + marketplace path later; grants (Horizon Europe research); open methodology.

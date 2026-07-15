@@ -6,6 +6,7 @@ import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { EnrichedSite, scoreTierClass, effectiveGridKm } from '@/lib/sites'
 import { getBookmarks } from '@/lib/bookmarks'
+import { PROVINCE_CODES } from '@/lib/provinces'
 import FocusTrap from './FocusTrap'
 
 interface CommandPaletteProps {
@@ -60,6 +61,11 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
     { label: 'Top Emitters', filter: (s: EnrichedSite) => s.emission > 5000 },
     { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => effectiveGridKm(s) < 10 },
   ]
+
+  const provinceJumps = PROVINCE_CODES.map(p => ({
+    label: `${p.code} — ${p.name}`,
+    href: `/map?province=${encodeURIComponent(p.name)}`,
+  }))
 
   const routes = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -201,6 +207,22 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
               {routes.map(r => (
                 <button key={r.href} onClick={() => { onClose(); router.push(r.href) }} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
                   {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-5 py-2 border-t border-white/10">
+            <div className="text-[10px] text-gray-400 mb-2">PROVINCES (13)</div>
+            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-auto">
+              {provinceJumps.map(p => (
+                <button
+                  key={p.href}
+                  type="button"
+                  onClick={() => { onClose(); router.push(p.href) }}
+                  className="text-[10px] px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/25 text-[#5BC0BE]"
+                >
+                  {p.label}
                 </button>
               ))}
             </div>

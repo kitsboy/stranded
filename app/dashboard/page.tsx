@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 
+const DEFAULT_CARBON_USD_PER_T = 25
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<LiveStats | null>(null)
   const [loadError, setLoadError] = useState(false)
+  const [carbonPrice, setCarbonPrice] = useState(DEFAULT_CARBON_USD_PER_T)
   const btc = useBtcUsd()
 
   useEffect(() => {
@@ -25,6 +28,20 @@ export default function DashboardPage() {
     const id = setInterval(refresh, 60_000)
     return () => clearInterval(id)
   }, [])
+
+  const carbonTotals = useMemo(() => {
+    if (!stats) return null
+    const tonnes5 = stats.impact.co2eAvoided5PctTonnes
+    const tonnes100 = stats.impact.co2eAvoided100PctTonnes
+    const scale = carbonPrice / DEFAULT_CARBON_USD_PER_T
+    return {
+      usd5: Math.round(tonnes5 * carbonPrice),
+      usd100: Math.round(tonnes100 * carbonPrice),
+      tonnes5,
+      tonnes100,
+      scale,
+    }
+  }, [stats, carbonPrice])
 
   if (loadError && !stats) {
     return (
@@ -58,6 +75,58 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold mt-1 tabular-nums" style={{ color: k.color }}>{k.value}</div>
           </div>
         ))}
+      </div>
+
+      <div className="rounded-2xl border border-[#34D399]/25 bg-[#34D399]/5 p-5 mb-8">
+        <h2 className="font-semibold mb-2 text-[#34D399]">Carbon Credit Scenario</h2>
+        <label className="text-xs text-gray-400">
+          Price per tonne CO₂e: <span className="font-mono text-white">${carbonPrice}</span>/t
+        </label>
+        <input
+          type="range"
+          min={5}
+          max={120}
+          step={1}
+          value={carbonPrice}
+          onChange={e => setCarbonPrice(+e.target.value)}
+          className="w-full max-w-md accent-[#34D399] mt-2"
+        />
+        {carbonTotals && (
+          <div className="grid sm:grid-cols-2 gap-4 mt-4 text-sm">
+            <div className="rounded-xl border border-white/10 p-4 bg-black/20">
+              <div className="text-[10px] uppercase text-gray-500">5% capture portfolio</div>
+              <div className="text-xl font-bold text-[#34D399] tabular-nums">${carbonTotals.usd5.toLocaleString()}/yr</div>
+              <div className="text-xs text-gray-500">{carbonTotals.tonnes5.toLocaleString()} t CO₂e</div>
+            </div>
+            <div className="rounded-xl border border-white/10 p-4 bg-black/20">
+              <div className="text-[10px] uppercase text-gray-500">100% theoretical max</div>
+              <div className="text-xl font-bold text-[#5BC0BE] tabular-nums">${carbonTotals.usd100.toLocaleString()}/yr</div>
+              <div className="text-xs text-gray-500">{carbonTotals.tonnes100.toLocaleString()} t CO₂e</div>
+            </div>
+          </div>
+        )}
+        <p className="text-[10px] text-gray-500 mt-3">Illustrative only — not a market quote. Default baseline ${DEFAULT_CARBON_USD_PER_T}/t.</p>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 p-5 mb-6">
+        <h2 className="font-semibold mb-4">Top Movers <span className="text-[10px] font-normal text-gray-500">(simulated WoW %)</span></h2>
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
+          {stats.provinces.slice(0, 4).map((p, i) => {
+            const simulatedPct = [12.4, 8.1, -3.2, 5.7][i] ?? ((p.pct % 17) - 4)
+            return (
+              <div key={p.name} className="rounded-xl border border-white/10 p-3 bg-white/[0.02]">
+                <div className="text-xs text-gray-400 truncate">{p.name}</div>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-lg font-bold tabular-nums">{p.count}</span>
+                  <span className={`text-xs font-mono ${simulatedPct >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {simulatedPct >= 0 ? '+' : ''}{simulatedPct.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-[10px] text-gray-500 mt-3">Illustrative momentum labels for demo dashboards — not live market data.</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

@@ -14,7 +14,8 @@ export default function StatusPage() {
     fetch('/data/live-stats.json').then(r => r.json()).then(setStats).catch(() => {})
   }, [])
 
-  const version = (health?.version as string) || stats?.version || '—'
+  const version = stats?.version || (health?.version as string) || '—'
+  const deployBuild = stats?.buildId || (health?.buildId as string) || null
   const siteCount = (health?.siteCount as number) || stats?.siteCount
   const ok = health?.status === 'operational' || health?.status === undefined
 
@@ -33,6 +34,12 @@ export default function StatusPage() {
             <div className="text-gray-500 text-xs">Version</div>
             <div className="font-mono text-[#FF8C00]">v{version}</div>
           </div>
+          {deployBuild && (
+            <div>
+              <div className="text-gray-500 text-xs">Last deploy</div>
+              <div className="font-mono text-xs text-[#5BC0BE]">{deployBuild}</div>
+            </div>
+          )}
           {siteCount != null && (
             <div>
               <div className="text-gray-500 text-xs">Sites</div>

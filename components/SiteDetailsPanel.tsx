@@ -14,6 +14,10 @@ import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson 
 import { downloadBlob } from '@/lib/export-formats'
 import { toast } from 'sonner'
 import { useBtcPrice } from '@/components/BtcPriceProvider'
+import { recordScoreVisit, getScoreHistory } from '@/lib/score-history'
+import ScoreSparkline from '@/components/ScoreSparkline'
+import TadbuyAdHook from '@/components/TadbuyAdHook'
+import { trackCategory } from '@/lib/analytics'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -80,11 +84,16 @@ export default function SiteDetailsPanel({
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
   const [bookmarked, setBookmarked] = useState(false)
   const [note, setNote] = useState('')
+  const [scoreHistory, setScoreHistory] = useState<number[]>([])
 
   useEffect(() => {
     if (!site) return
     setBookmarked(getBookmarks().includes(site.id))
     setNote(getSiteNote(site.id))
+    if (typeof site.strandedScore === 'number') {
+      recordScoreVisit(site.id, site.strandedScore)
+      setScoreHistory(getScoreHistory(site.id))
+    }
   }, [site])
 
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
@@ -260,10 +269,11 @@ export default function SiteDetailsPanel({
             {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
           </p>
           {typeof site.strandedScore === 'number' && (
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span>
               <span className="text-[10px] uppercase tracking-wider text-gray-400">{scoreTier(site.strandedScore)}</span>
               {site.scoreBadge && <span className="text-[10px] text-[#5BC0BE]">{site.scoreBadge}</span>}
+              {scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
             </div>
           )}
         </div>
@@ -409,8 +419,8 @@ export default function SiteDetailsPanel({
       <div className="mb-4 p-3 bg-slate-800/40 rounded-lg">
         <RoiProjectionChart dailyBtc={calculations.effectiveDailyBtc} btcUsd={btcPrice} />
       </div>
+      <TadbuyAdHook siteId={site?.id} />
       <div className="mb-3 flex gap-2 text-[10px]">
-        <a href={integrationUrl('tadbuy', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#FF8C00]/40 text-gray-400 hover:text-[#FF8C00]">ASICs via Tadbuy</a>
         <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
       </div>
       <div className="mb-3">
@@ -552,6 +562,25 @@ export default function SiteDetailsPanel({
           className="flex-1 py-2 text-xs border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10"
         >
           Copy ROI Summary
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const mapUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
+            const note = [
+              `🛢️ Stranded Value — ${p.name || site.id}`,
+              `${p.province} · Score ${site.strandedScore} · ${site.emission.toLocaleString()} kg CH₄/day`,
+              `Stranded methane → Bitcoin. Zero grid.`,
+              mapUrl,
+              '#bitcoin #methane #strandedenergy',
+            ].join('\n')
+            navigator.clipboard.writeText(note)
+            trackCategory('share', 'nostr-draft', { siteId: site.id })
+            toast.success('Nostr note draft copied')
+          }}
+          className="flex-1 py-2 text-xs border border-[#A78BFA]/40 rounded-lg hover:bg-[#A78BFA]/10 text-[#A78BFA]"
+        >
+          Nostr draft
         </button>
       </div>
 

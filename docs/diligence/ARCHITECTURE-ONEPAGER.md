@@ -3,7 +3,7 @@ title: Technical Architecture One-Pager
 project: Stranded Value
 version: 1.0.0
 audience: developers, technical partners
-last_updated: 2026-07-13
+last_updated: 2026-07-15
 owner: Kimi (Orchestrator) + Nova (Docs)
 self_evolving: true
 update_rule: >
@@ -14,10 +14,10 @@ tags: [diligence, pitch, mvp, giveabit]
 ---
 # Stranded Value — Technical Architecture One-Pager
 
-**Live:** https://stranded.giveabit.io · **Repo:** https://github.com/kitsboy/stranded · **Version:** `2.3.7`
+**Live:** https://stranded.giveabit.io · **Repo:** https://github.com/kitsboy/stranded · **Version:** `2.4.0`
 
 ## Stack
-React/Vite · map/data UX · ECCC dataset · generator models · Cloudflare Pages
+Next.js 14 (static export) · MapLibre GL · ECCC GeoJSON · generator/ASIC models · Cloudflare Pages (`strandedbuild`)
 
 ## System map (boxes)
 ```
@@ -46,8 +46,8 @@ git push main → Cloudflare Pages auto
 Prefer client-side and user-held keys. Minimize PII. Bitcoin rails where payments exist. See project privacy/security docs if present.
 
 ## MVP boundary
-- **In MVP now:** Map, education, site economics, marketing hub live.
-- **Explicitly later:** Global datasets, multi-energy verticals, certified program, equipment marketplace.
+- **In MVP now:** Map command center (clusters, choropleth, heatmap), education + halving slider, compare/print pages, funding quiz, bookmarks export, mission timeline CSV, local watch alerts, PWA v5 cache.
+- **Explicitly later:** Cloud sync accounts, email/Telegram alerts, global datasets beyond Canada, certified equipment marketplace.
 
 ## Dependencies
 ECCC data lineage; live BTC price feeds optional

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,24 +14,27 @@ import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialCad, scalePotentialCad } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
-import { parseMapUrl } from '@/lib/map-url'
+import { parseMapUrl, haversineKm } from '@/lib/map-url-state'
 import { getFilterPresets, saveFilterPreset, type FilterPreset } from '@/lib/bookmarks'
 import { exportFilteredGeojson, exportSitesKml, downloadBlob } from '@/lib/export-formats'
 import { savePortfolioProfile } from '@/lib/portfolio-profiles'
-import { addSiteAlert, evaluateWatchHits } from '@/lib/alerts'
+import { addSiteAlert, evaluateWatchHits, markAlertNotified } from '@/lib/alerts'
+import { decodePresetHash, presetShareUrl } from '@/lib/filter-preset-hash'
 import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 import ScoreLegend from '@/components/ScoreLegend'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
+type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 
 function StrandedCommandCenter() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSite, setSelectedSite] = useState<EnrichedSite | null>(null)
   const [portfolio, setPortfolio] = useState<EnrichedSite[]>([])
-  const [viewMode, setViewMode] = useState<'precise' | 'clusters'>('precise')
+  const [viewMode, setViewMode] = useState<MapViewMode>('precise')
+  const didAutoCluster = useRef(false)
   const liveBtcPrice = useBtcUsd()
 
   // Sexy advanced filters - start with ALL 2611 visible by default
@@ -42,7 +45,7 @@ function StrandedCommandCenter() {
   const [minScore, setMinScore] = useState(0)
   const [showAllProvinces, setShowAllProvinces] = useState(false)
 
-  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false })
+  const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
   const [presetName, setPresetName] = useState('')
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
@@ -50,6 +53,7 @@ function StrandedCommandCenter() {
   const [showCompare, setShowCompare] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [loadProgress, setLoadProgress] = useState(0)
+  const [radiusFilter, setRadiusFilter] = useState<{ lat: number; lng: number; radiusKm: number } | null>(null)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -68,6 +72,10 @@ function StrandedCommandCenter() {
       if (urlState.provinces?.length) {
         setSelectedProvinces(new Set(urlState.provinces))
         if (urlState.provinces.length > 6) setShowAllProvinces(true)
+      }
+
+      if (urlState.radius && urlState.lat != null && urlState.lng != null) {
+        setRadiusFilter({ lat: urlState.lat, lng: urlState.lng, radiusKm: urlState.radius })
       }
 
       const siteId = urlState.site || searchParams.get('site')
@@ -108,22 +116,34 @@ function StrandedCommandCenter() {
         }
       }
 
-      // Local watch-site banner when reopening map
-      const hits = evaluateWatchHits(sites)
-      if (hits.length) {
-        const first = hits[0]
-        toast.message(`Watch: ${first.name}`, {
-          description: `Score ${first.currentScore} meets threshold ≥${first.minScore}${hits.length > 1 ? ` · +${hits.length - 1} more` : ''}`,
-          duration: 8000,
+      // Hash preset share: /map#preset=<base64>
+      const hashMatch = typeof window !== 'undefined' ? window.location.hash.match(/^#preset=(.+)$/) : null
+      if (hashMatch) {
+        const preset = decodePresetHash(hashMatch[1])
+        if (preset) {
+          setMinScore(preset.minScore)
+          setMinEmission(preset.minEmission)
+          setSelectedProvinces(new Set(preset.provinces))
+          toast.success(`Loaded shared preset: ${preset.name}`)
+        }
+      }
+
+      // Local watch-site alerts on map open
+      const hits = evaluateWatchHits(sites.map(s => ({ id: s.id, strandedScore: s.strandedScore, emission: s.emission })))
+      hits.forEach(hit => {
+        toast.message(`Watch alert: ${hit.name}`, {
+          description: hit.reasons.join(' · '),
+          duration: 9000,
           action: {
             label: 'Open',
             onClick: () => {
-              const s = sites.find(x => x.id === first.siteId)
+              const s = sites.find(x => x.id === hit.siteId)
               if (s) setSelectedSite(s)
             },
           },
         })
-      }
+        markAlertNotified(hit.siteId)
+      })
     }).catch(err => {
       console.error(err)
       setLoading(false)
@@ -149,8 +169,32 @@ function StrandedCommandCenter() {
     if (layers.internet) {
       result = result.filter(s => hasStrongConnectivity(s))
     }
+    if (radiusFilter) {
+      const { lat, lng, radiusKm } = radiusFilter
+      result = result.filter(s => {
+        const [slng, slat] = s.geometry.coordinates
+        return haversineKm(lat, lng, slat, slng) <= radiusKm
+      })
+    }
     return result
-  }, [allSites, minEmission, maxEmission, selectedProvinces, selectedSources, minScore, layers])
+  }, [allSites, minEmission, maxEmission, selectedProvinces, selectedSources, minScore, layers, radiusFilter])
+
+  useEffect(() => {
+    if (!didAutoCluster.current && filteredSites.length > 180) {
+      setViewMode('native-clusters')
+      didAutoCluster.current = true
+    }
+  }, [filteredSites.length])
+
+  const cycleViewMode = () => {
+    setViewMode(m => (m === 'precise' ? 'native-clusters' : m === 'native-clusters' ? 'dom' : 'precise'))
+  }
+
+  const viewModeLabel: Record<MapViewMode, string> = {
+    precise: 'PRECISE MARKERS',
+    'native-clusters': 'NATIVE CLUSTERS',
+    dom: 'DOM CLUSTERS (legacy)',
+  }
 
   const provinces = useMemo(() => {
     return Array.from(new Set(allSites.map(s => s.properties.province).filter(Boolean))).sort()
@@ -296,8 +340,8 @@ function StrandedCommandCenter() {
     setSelectedProvinces(new Set())
     setSelectedSources(new Set())
     setMinScore(0)
-    setViewMode('precise')
-    setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false })
+    setViewMode(filteredSites.length > 180 ? 'native-clusters' : 'precise')
+    setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
     toast.success('Showing all 2,611 locations')
   }
 
@@ -322,10 +366,24 @@ function StrandedCommandCenter() {
         e.preventDefault()
         setShowKeyboardHelp(true)
       }
+      // j/k — next/prev site in filtered list when a site is selected
+      if ((e.key === 'j' || e.key === 'k') && selectedSite && !e.metaKey && !e.ctrlKey) {
+        const t = e.target as HTMLElement | null
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
+        const sorted = [...filteredSites].sort((a, b) => b.strandedScore - a.strandedScore)
+        const idx = sorted.findIndex(s => s.id === selectedSite.id)
+        if (idx < 0) return
+        const next = e.key === 'j' ? sorted[idx + 1] : sorted[idx - 1]
+        if (next) {
+          e.preventDefault()
+          setSelectedSite(next)
+          toast.message(next.properties.name || next.id, { description: `Score ${next.strandedScore}` })
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedSite, addToPortfolio])
+  }, [selectedSite, addToPortfolio, filteredSites])
 
   const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
 
@@ -341,6 +399,22 @@ function StrandedCommandCenter() {
     saveFilterPreset({ name, minScore, minEmission, provinces: Array.from(selectedProvinces) })
     setPresetName('')
     toast.success(`Saved filter preset: ${name}`)
+  }
+
+  const shareCurrentPreset = async () => {
+    const preset: FilterPreset = {
+      name: presetName.trim() || 'Shared filters',
+      minScore,
+      minEmission,
+      provinces: Array.from(selectedProvinces),
+    }
+    const url = presetShareUrl(preset, window.location.origin)
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Preset share link copied (URL hash)')
+    } catch {
+      toast.info(url)
+    }
   }
 
   const exportKml = () => {
@@ -364,9 +438,31 @@ function StrandedCommandCenter() {
 
   const watchSite = () => {
     if (!selectedSite) return
-    addSiteAlert({ siteId: selectedSite.id, name: selectedSite.properties.name || selectedSite.id, minScore: selectedSite.strandedScore })
-    toast.success('Site alert saved locally')
+    addSiteAlert({
+      siteId: selectedSite.id,
+      name: selectedSite.properties.name || selectedSite.id,
+      minScore: selectedSite.strandedScore,
+      minEmission: Math.round(selectedSite.emission * 0.9),
+    })
+    toast.success('Watch alert saved — toast when score/emission thresholds met')
   }
+
+  // Periodic watch threshold toasts while map is open
+  useEffect(() => {
+    if (!allSites.length) return
+    const tick = () => {
+      const hits = evaluateWatchHits(
+        allSites.map(s => ({ id: s.id, strandedScore: s.strandedScore, emission: s.emission })),
+        { skipRecentlyNotified: true },
+      )
+      hits.slice(0, 2).forEach(hit => {
+        toast.warning(`Threshold: ${hit.name}`, { description: hit.reasons.join(' · '), duration: 7000 })
+        markAlertNotified(hit.siteId)
+      })
+    }
+    const id = setInterval(tick, 120_000)
+    return () => clearInterval(id)
+  }, [allSites])
 
   return (
     <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-label="Stranded command center map">
@@ -378,6 +474,14 @@ function StrandedCommandCenter() {
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {loading ? 'Loading sites dataset' : `${filteredSites.length.toLocaleString()} of ${allSites.length.toLocaleString()} sites visible`}
       </div>
+
+      {radiusFilter && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-[70] glass px-4 py-1.5 rounded-2xl border border-[#FF8C00]/40 text-xs flex items-center gap-3">
+          <span className="text-[#FF8C00]">Radius {radiusFilter.radiusKm} km</span>
+          <span className="text-gray-400">@ {radiusFilter.lat.toFixed(2)}, {radiusFilter.lng.toFixed(2)}</span>
+          <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-500 hover:text-white">✕</button>
+        </div>
+      )}
 
       {/* Top mission HUD */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 text-xs">
@@ -495,6 +599,7 @@ function StrandedCommandCenter() {
           <div className="flex gap-1 mb-2">
             <input value={presetName} onChange={e => setPresetName(e.target.value)} placeholder="Preset name" className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
             <button onClick={saveCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">Save</button>
+            <button onClick={shareCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">Share</button>
           </div>
           <div className="flex flex-wrap gap-1">
             {getFilterPresets().map(p => (
@@ -504,8 +609,8 @@ function StrandedCommandCenter() {
         </div>
 
         <div className="mt-5 pt-4 border-t border-white/10 flex gap-2">
-          <button onClick={() => setViewMode(viewMode === 'precise' ? 'clusters' : 'precise')} className="flex-1 text-xs py-2 rounded-2xl border border-white/20 hover:bg-white/5 flex items-center justify-center gap-2">
-            {viewMode === 'precise' ? 'CLUSTER VIEW (perf)' : 'PRECISE MARKERS'}
+          <button onClick={cycleViewMode} className="flex-1 text-xs py-2 rounded-2xl border border-white/20 hover:bg-white/5 flex items-center justify-center gap-2">
+            {viewModeLabel[viewMode]}
           </button>
           <button onClick={() => setLayers(l => ({...l, grid: !l.grid}))} className={`text-xs px-3 rounded-2xl border ${layers.grid ? 'bg-[#5BC0BE] text-black border-[#5BC0BE]' : 'border-white/20'}`}>GRID</button>
         </div>
@@ -522,7 +627,9 @@ function StrandedCommandCenter() {
         showSatellite={layers.satellite}
         showTerrain={layers.terrain}
         showHeatmap={layers.heatmap}
+        showChoropleth={layers.choropleth}
         liveBtcPrice={liveBtcPrice}
+        radiusOverlay={radiusFilter}
       />
 
       {/* Right side — SiteDetails + Mission (sexy stacked) - mobile friendly, properly constrained above footer */}

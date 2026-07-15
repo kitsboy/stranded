@@ -32,6 +32,25 @@ export default function PartnershipsPage() {
         ))}
       </div>
 
+      <div className="rounded-2xl border border-[#FF8C00]/30 bg-gradient-to-r from-[#FF8C00]/10 to-transparent p-6 mb-10">
+        <h2 className="text-lg font-semibold text-[#FF8C00] mb-2">Miner & Operator Contact</h2>
+        <p className="text-sm text-gray-300 mb-4 max-w-2xl">
+          Deploying mobile Bitcoin mining on Nation lands or remote methane sites? Connect with Stranded Value for site shortlists,
+          partnership MOU templates, and ASIC sourcing via Tadbuy.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <a href="mailto:partnerships@giveabit.io?subject=Stranded%20miner%20partnership" className="px-5 py-2.5 rounded-xl bg-[#FF8C00] text-black text-sm font-semibold hover:bg-[#FF8C00]/90">
+            Email miner partnerships →
+          </a>
+          <Link href="/map" className="px-5 py-2.5 rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] text-sm hover:bg-[#5BC0BE]/10">
+            Build a mission on the map
+          </Link>
+          <a href="https://tadbuy.giveabit.io?ref=stranded&ctx=partnerships" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-xl border border-white/20 text-sm hover:bg-white/5">
+            ASICs via Tadbuy
+          </a>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-xl font-semibold mb-4">Partnership Model</h2>

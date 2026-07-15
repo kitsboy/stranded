@@ -24,4 +24,4 @@ This root file is a pointer. All living documentation lives in `docs/` and auto-
 - Portfolio: `giveabit` → `docs/diligence/PORTFOLIO-FAMILY-OF-8.md`
 
 Update rule: material product changes update diligence in the same change-set.
-Last pack generation: 2026-07-13
+Last pack generation: 2026-07-15 (v2.4.0)

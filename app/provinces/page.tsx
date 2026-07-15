@@ -52,7 +52,15 @@ function ProvincesContent() {
 
           {selected && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Top sites in {selected}</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Top sites in {selected}</h2>
+                <Link
+                  href={`/print/province?province=${encodeURIComponent(selected)}`}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+                >
+                  Print executive one-pager →
+                </Link>
+              </div>
               <div className="space-y-2">
                 {filtered.map(s => (
                   <Link key={s.id} href={`/map?site=${s.id}`} className="flex justify-between items-center p-3 rounded-xl border border-white/10 hover:border-[#5BC0BE]/40 text-sm">

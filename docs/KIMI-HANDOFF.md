@@ -1,6 +1,28 @@
 # Kimi Handoff — Stranded
 
-## Latest Session Summary (from 2026-07-10 goodbye)
+## Latest Session Summary (from 2026-07-15 — v2.4.0 round 5)
+
+**Chat topic:** Ship upgrades 176–200 + v2.4.0 docs pack.
+
+**Finished this session:**
+- Round 5 upgrades 176–200 (grant quiz, choropleth, bookmarks export, watch toasts, halving slider, etc.)
+- `docs/UPGRADES-151-200.md` — 50/50 shipped tracking
+- CHANGELOG [2.4.0], roadmap round 5, diligence bump (2026-07-15)
+- E2E: `/compare`, `/print/province`
+- PWA cache `stranded-v5`
+- `SESSION-SUMMARY-2026-07-15.md` + `KIMI-HANDOFF-STRANDED-2026-07-15.md`
+
+**Still to do:**
+- Kimi: sync when Cam says go — ingest summaries + UPGRADES doc into Obsidian/MASTER-BRAIN
+- Cam optional: GitHub release tag v2.4.0
+
+**Git State:**
+- Version: **2.4.0**
+- Branch: `main`
+
+---
+
+## Session Summary (from 2026-07-10 goodbye)
 
 **Chat topic:** Comprehensive audit + ship remediations (security, reliability, a11y) → **v2.3.6** and **v2.3.7**.
 

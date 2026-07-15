@@ -106,7 +106,9 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
 
 function PitchContent() {
   const searchParams = useSearchParams()
-  const embed = searchParams.get('embed') === '1'
+  const embedParam = searchParams.get('embed')
+  const embed = embedParam === '1' || embedParam === '2'
+  const embedMinimal = embedParam === '2'
   const [stats, setStats] = useState<LiveStats | null>(null)
   const btc = useBtcUsd()
   const [error, setError] = useState('')
@@ -114,8 +116,12 @@ function PitchContent() {
 
   useEffect(() => {
     if (embed) document.documentElement.classList.add('pitch-embed')
-    return () => document.documentElement.classList.remove('pitch-embed')
-  }, [embed])
+    if (embedMinimal) document.documentElement.classList.add('pitch-embed-2')
+    return () => {
+      document.documentElement.classList.remove('pitch-embed')
+      document.documentElement.classList.remove('pitch-embed-2')
+    }
+  }, [embed, embedMinimal])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -377,6 +383,7 @@ function PitchContent() {
         <div className="flex flex-wrap gap-4 justify-center">
           <Link href="/education" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">Education Center</Link>
           <Link href="/sites" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">All Sites</Link>
+          <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">Sherpacarta Legal Templates ↗</a>
           <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">ECCC Dataset ↗</a>
         </div>
         <p className="text-[10px] text-gray-600 mt-10">Stats generated {new Date(stats.generatedAt).toLocaleString('en-CA')} · Not financial advice</p>

@@ -14,8 +14,57 @@ import { USED_ASIC_MARKET } from '@/lib/roi-model'
 import { markEduSection, getEduProgress } from '@/lib/bookmarks'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
+import dynamic from 'next/dynamic'
 import GensetComparisonTable from '@/components/GensetComparisonTable'
+import EducationHalvingTimeline from '@/components/EducationHalvingTimeline'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+
+const EducationCharts = dynamic(() => import('@/components/EducationCharts'), {
+  loading: () => <div className="mb-16 h-48 rounded-2xl border border-white/10 animate-pulse bg-white/5" />,
+})
+
+function GwpCalculatorWidget() {
+  const [kgCh4, setKgCh4] = useState(1000)
+  const [gwp, setGwp] = useState(28)
+  const [timeframe, setTimeframe] = useState<'100yr' | '20yr'>('100yr')
+
+  const gwpFactor = timeframe === '100yr' ? gwp : Math.round(gwp * 2.7)
+  const co2eKg = kgCh4 * gwpFactor
+  const co2eTonnes = co2eKg / 1000
+
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-4 text-sm">
+        <div>
+          <label className="text-xs text-gray-400">Methane vented: {kgCh4.toLocaleString()} kg CH₄/day</label>
+          <input type="range" min={10} max={60000} step={10} value={kgCh4} onChange={e => setKgCh4(+e.target.value)} className="w-full accent-[#FF8C00] mt-1" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-400">GWP (100-yr baseline): {gwp}× vs CO₂</label>
+          <input type="range" min={25} max={84} value={gwp} onChange={e => setGwp(+e.target.value)} className="w-full accent-[#5BC0BE] mt-1" />
+        </div>
+        <div className="flex gap-2">
+          {(['100yr', '20yr'] as const).map(tf => (
+            <button
+              key={tf}
+              type="button"
+              onClick={() => setTimeframe(tf)}
+              className={`text-xs px-3 py-1.5 rounded-full border ${timeframe === tf ? 'border-[#34D399] bg-[#34D399]/15 text-[#34D399]' : 'border-white/15 text-gray-400'}`}
+            >
+              {tf === '100yr' ? '100-year' : '20-year (×2.7 approx)'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-[#34D399]/30 bg-[#34D399]/10 p-6 flex flex-col justify-center text-center">
+        <div className="text-xs uppercase tracking-wider text-gray-400">CO₂-equivalent (annualized)</div>
+        <div className="text-3xl font-bold text-[#34D399] tabular-nums mt-2">{(co2eTonnes * 365).toLocaleString(undefined, { maximumFractionDigits: 0 })} t/yr</div>
+        <div className="text-sm text-gray-400 mt-2">{co2eTonnes.toFixed(1)} t CO₂e per day</div>
+        <p className="text-[10px] text-gray-500 mt-3">AR6 uses GWP₁₀₀ ≈ 27.9 for CH₄; 20-yr GWP is higher — slider lets you explore sensitivity.</p>
+      </div>
+    </div>
+  )
+}
 
 function QuizSection() {
   const questions = [
@@ -329,6 +378,15 @@ export default function EducationContent() {
           ))}
         </div>
         <p className="text-center text-[10px] text-gray-500 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
+      </div>
+
+      {/* Methane GWP calculator widget */}
+      <div className="mb-16 glass p-6 rounded-3xl border border-[#5BC0BE]/25">
+        <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
+          <Leaf className="text-[#34D399]" size={22} /> Methane GWP Calculator
+        </h2>
+        <p className="text-sm text-gray-400 mb-4">Compare CO₂-equivalent impact using IPCC-style global warming potential (GWP) over your chosen timeframe.</p>
+        <GwpCalculatorWidget />
       </div>
 
       {/* Original core content preserved and enhanced */}
@@ -896,41 +954,11 @@ export default function EducationContent() {
         )}
       </div>
 
-      {/* 4. Data Visualizations - upgraded to clickable + value-focused (item 13/14) */}
-      <div className="mb-16 grid md:grid-cols-2 gap-6">
-        <div className="glass p-6 rounded-2xl">
-          <h3 className="font-semibold mb-4">Emissions by Province (click to explore value)</h3>
-          <div className="space-y-3">
-            {provinceData.map((p, i) => (
-              <button key={i} onClick={() => { window.location.href = `/map?province=${encodeURIComponent(p.name)}`; }} className="w-full text-left flex items-center gap-3 hover:bg-white/5 p-1 rounded transition">
-                <div className="w-24 text-sm">{p.name}</div>
-                <div className="flex-1 bg-white/10 h-3 rounded-full overflow-hidden">
-                  <div className="h-3 rounded-full" style={{ width: `${p.pct}%`, backgroundColor: '#FF8C00' }} />
-                </div>
-                <div className="w-12 text-right text-sm font-mono">{p.pct}%</div>
-                <div className="text-[10px] text-emerald-400">~{(p.emission * 0.0009 * 365 * (liveBtc/85000)).toFixed(0)} BTC/yr potential</div>
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 text-[10px] text-gray-500">Click any bar → opens the live map filtered to that province with full Value modeling.</div>
-        </div>
-
-        <div className="glass p-6 rounded-2xl">
-          <h3 className="font-semibold mb-4">Source Type Breakdown (Stranded Value potential)</h3>
-          <div className="space-y-3">
-            {sourceData.map((s, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-36 text-sm">{s.type}</div>
-                <div className="flex-1 bg-white/10 h-3 rounded-full overflow-hidden">
-                  <div className="h-3 rounded-full bg-[#f59e0b]" style={{ width: `${s.pct}%` }} />
-                </div>
-                <div className="w-10 text-right text-sm font-mono">{s.pct}%</div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 text-xs text-gray-400">Industrial facilities and wellheads dominate the Stranded Value opportunity in Canada — billions in BTC + restoration potential.</div>
-        </div>
+      <div className="mb-16">
+        <EducationHalvingTimeline dailyBtc={0.012} btcUsd={liveBtc} />
       </div>
+
+      <EducationCharts provinceData={provinceData} sourceData={sourceData} liveBtc={liveBtc} />
 
       {/* Value in Numbers Dashboard (item 17) */}
       <div className="mb-16">

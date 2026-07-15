@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { WifiOff } from 'lucide-react'
-import { isOfflineReady } from '@/lib/offline-db'
+import { getOfflineCacheMeta } from '@/lib/offline-db'
 
 export default function OfflineIndicator() {
   const [offline, setOffline] = useState(false)
-  const [cached, setCached] = useState(false)
+  const [cacheMeta, setCacheMeta] = useState({ ready: false, featureCount: 0, version: 'stranded-v5' })
 
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine)
     update()
-    isOfflineReady().then(setCached)
+    getOfflineCacheMeta().then(setCacheMeta)
     window.addEventListener('online', update)
     window.addEventListener('offline', update)
     return () => {
@@ -29,7 +29,10 @@ export default function OfflineIndicator() {
       aria-live="polite"
     >
       <WifiOff size={12} className="text-amber-400" />
-      <span>Offline{cached ? ' — using cached sites' : ' — site data may be unavailable'}</span>
+      <span>
+        Offline · cache {cacheMeta.version}
+        {cacheMeta.ready ? ` (${cacheMeta.featureCount.toLocaleString()} sites)` : ' — site data may be unavailable'}
+      </span>
     </div>
   )
 }

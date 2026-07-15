@@ -2,6 +2,9 @@ const DB_NAME = 'stranded-offline'
 const DB_VERSION = 1
 const GEO_STORE = 'geojson'
 
+/** Bump with service worker CACHE id (public/sw.js). */
+export const OFFLINE_CACHE_VERSION = 'stranded-v5'
+
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION)
@@ -45,4 +48,13 @@ export async function setCachedGeojson(data: GeoJSON.FeatureCollection) {
 export async function isOfflineReady(): Promise<boolean> {
   const cached = await getCachedGeojson()
   return !!(cached?.features?.length)
+}
+
+export async function getOfflineCacheMeta(): Promise<{ ready: boolean; featureCount: number; version: string }> {
+  const cached = await getCachedGeojson()
+  return {
+    ready: !!(cached?.features?.length),
+    featureCount: cached?.features?.length ?? 0,
+    version: OFFLINE_CACHE_VERSION,
+  }
 }

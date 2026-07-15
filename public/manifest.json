@@ -20,6 +20,8 @@
   ],
   "shortcuts": [
     {"name": "Open Map", "url": "/map"},
+    {"name": "Compare Sites", "url": "/compare"},
+    {"name": "Provinces", "url": "/provinces"},
     {"name": "Education Center", "url": "/education"},
     {"name": "All Sites", "url": "/sites"},
     {"name": "Pitch Deck", "url": "/pitch"},

@@ -13,6 +13,36 @@ export default function ApiDocsPage() {
       <h1 className="text-3xl font-bold mb-4">Data API & Schema</h1>
       <p className="text-gray-400 mb-8">Static JSON endpoints — no auth required. Updated on every build.</p>
 
+      <h2 className="text-lg font-semibold mt-8 mb-3">Static endpoint table</h2>
+      <div className="not-prose overflow-x-auto rounded-xl border border-white/10 mb-8">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+              <th className="p-3">Route</th>
+              <th className="p-3">Format</th>
+              <th className="p-3">Description</th>
+            </tr>
+          </thead>
+          <tbody className="text-gray-300">
+            {[
+              ['/data/stranded-sites.geojson', 'GeoJSON', '2,611 site FeatureCollection (ECCC + coords)'],
+              ['/data/live-stats.json', 'JSON', 'Build aggregates, top sites, impact, value model, version'],
+              ['/data/sites.json', 'JSON', 'Legacy/summary site list (if present)'],
+              ['/status.json', 'JSON', 'Health, version, site count, build metadata'],
+              ['/manifest.json', 'JSON', 'PWA manifest and shortcuts'],
+              ['/sitemap.xml', 'XML', 'Crawlable route index'],
+              ['/robots.txt', 'text', 'Crawler rules'],
+            ].map(([route, fmt, desc]) => (
+              <tr key={route} className="border-b border-white/5">
+                <td className="p-3"><a href={route} className="font-mono text-xs text-[#5BC0BE] hover:underline">{route}</a></td>
+                <td className="p-3 text-xs text-gray-500">{fmt}</td>
+                <td className="p-3 text-xs">{desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <div className="space-y-6 text-sm">
         <section className="rounded-xl border border-white/10 p-5">
           <h2 className="font-semibold text-[#FF8C00] mb-2">GET /data/stranded-sites.geojson</h2>

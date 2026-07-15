@@ -53,3 +53,15 @@ test('sites filters and mission control present', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /All Sites/i })).toBeVisible({ timeout: 15000 })
   await expect(page.getByRole('combobox').first()).toBeVisible()
 })
+
+test('compare page loads with site pair', async ({ page }) => {
+  await page.goto('/compare?a=G10161&b=G12147')
+  await expect(page.getByRole('heading', { name: /Site Compare/i })).toBeVisible({ timeout: 15000 })
+  await expect(page.locator('table')).toBeVisible({ timeout: 15000 })
+})
+
+test('province print page loads', async ({ page }) => {
+  await page.goto('/print/province?province=Alberta')
+  await expect(page.getByText(/Executive One-Pager|Alberta/i).first()).toBeVisible({ timeout: 15000 })
+  await expect(page.getByRole('button', { name: /Print/i })).toBeVisible()
+})

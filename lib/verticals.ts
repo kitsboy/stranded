@@ -8,6 +8,11 @@ export type EnergyVertical = {
   potentialSites: number
   avgPowerKw: number
   btcFit: string
+  section?: {
+    headline: string
+    bullets: string[]
+    mapHint?: string
+  }
 }
 
 export const ENERGY_VERTICALS: EnergyVertical[] = [
@@ -32,6 +37,15 @@ export const ENERGY_VERTICALS: EnergyVertical[] = [
     potentialSites: 340,
     avgPowerKw: 5000,
     btcFit: 'High — flexible load absorbs spill',
+    section: {
+      headline: 'Curtailed Wind in the Prairies',
+      bullets: [
+        'Alberta & Saskatchewan see recurring negative-price hours — ideal for interruptible mining load',
+        'Containerized ASIC farms can ramp 0→100% in minutes to absorb spill without grid contracts',
+        '~340 candidate wind farms identified via IESO/AESO curtailment reports (beta dataset)',
+      ],
+      mapHint: 'Filter AB/SK power_generation sites on the live map as a methane-adjacent proxy',
+    },
   },
   {
     id: 'solar',
@@ -54,6 +68,15 @@ export const ENERGY_VERTICALS: EnergyVertical[] = [
     potentialSites: 420,
     avgPowerKw: 800,
     btcFit: 'Emerging — ORC + immersion cooling',
+    section: {
+      headline: 'Waste Heat → Hash',
+      bullets: [
+        'Pulp & paper, refineries, and data centres vent megawatts of low-grade heat daily',
+        'Organic Rankine Cycle (ORC) + immersion cooling pairs well with stranded ASIC deployments',
+        'Stacked with methane capture: treat exhaust heat as bonus kW after genset prime power',
+      ],
+      mapHint: 'Explore pulp_paper and refinery source types for heat-adjacent methane sites',
+    },
   },
   {
     id: 'biomass',

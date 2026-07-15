@@ -8,6 +8,7 @@ interface LayerControlsProps {
     satellite?: boolean
     terrain?: boolean
     heatmap?: boolean
+    choropleth?: boolean
   }
   onToggle: (layer: keyof LayerControlsProps['layers']) => void
 }
@@ -73,6 +74,10 @@ export default function LayerControls({ layers, onToggle }: LayerControlsProps) 
         <label className="flex items-center gap-3 cursor-pointer group">
           <input type="checkbox" checked={!!layers.heatmap} onChange={() => onToggle('heatmap')} className="w-4 h-4 accent-rose-400" />
           <span className="text-sm text-gray-300 group-hover:text-white">Emission Heatmap</span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input type="checkbox" checked={!!layers.choropleth} onChange={() => onToggle('choropleth')} className="w-4 h-4 accent-amber-400" />
+          <span className="text-sm text-gray-300 group-hover:text-white">Province Emission Choropleth</span>
         </label>
       </div>
       

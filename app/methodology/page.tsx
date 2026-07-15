@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import GlossaryTip from '@/components/GlossaryTip'
+import MethodologyCalculator from '@/components/MethodologyCalculator'
 
 export const metadata = {
   title: 'Methodology — Stranded Value',
@@ -26,6 +27,8 @@ export default function MethodologyPage() {
         <span className="stranded-score score-low">&lt;45 Low</span>
       </div>
       <p className="text-sm text-gray-400">Map markers and badges use the same thresholds everywhere (home, sites browser, command palette, map).</p>
+
+      <MethodologyCalculator />
 
       <h2>ROI model</h2>
       <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs. Site panel shows a sensitivity tornado and peer cohort when available.</p>

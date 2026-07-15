@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.4.0] — 2026-07-15
+
+### Added (upgrades 151–200, round 5)
+- **151–175** — Compare page, province print one-pager, map URL radius, local analytics categories, province codes, bookmark tags, native MapLibre clusters
+- **176** — Funding grant matcher quiz (5 questions, localStorage result)
+- **177** — Partnerships miner contact CTA block
+- **178** — About page contribution / how-to-help section
+- **179** — Bookmarks export/import JSON (v2 with tags)
+- **180** — Mission portfolio timeline CSV export (halving-adjusted)
+- **181** — Score sparkline in site panel (last 7 visits, localStorage)
+- **182** — Map emission choropleth by province layer
+- **183** — Dashboard top movers section (simulated % labels)
+- **184** — Education halving timeline interactive slider
+- **185** — Design token contrast fixes (`lib/design-tokens.ts`, `globals.css`)
+- **186** — Lazy-loaded Education charts (`EducationCharts` dynamic import)
+- **187** — `og:meta` via layout metadata on routes missing Open Graph
+- **188** — robots.txt sitemap reference verified (`https://stranded.giveabit.io/sitemap.xml`)
+- **189** — Offline indicator shows PWA cache version (`stranded-v5`)
+- **190** — Filter preset share via URL hash (`/map#preset=…`)
+- **191** — Site watch alerts toast on score/emission threshold
+- **192** — Tadbuy ad hook placeholder on site panel
+- **193** — Sherpacarta legal template link on pitch page
+- **194** — E2E test for `/compare` page
+- **195** — E2E test for province print page
+- **196** — `docs/UPGRADES-151-200.md` master list
+- **197–200** — Roadmap, diligence v2.4.0, Kimi handoff, SOURCE-OF-TRUTH bump
+
 ## [2.3.5] — 2026-07-09
 
 ### Fixed
