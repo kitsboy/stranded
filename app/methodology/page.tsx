@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function MethodologyPage() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10 prose prose-invert">
+    <div className="page-container prose prose-invert">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Methodology' }]} />
       <h1 className="text-4xl font-bold tracking-tighter not-prose">Methodology</h1>
       <p className="text-gray-400 not-prose mb-8">Transparent scoring, data lineage, and ROI assumptions.</p>

@@ -26,7 +26,9 @@ const {
   bankPackTsv,
   bankPackJson,
 } = await import('../lib/bank-pack.ts')
-const { scoreTier, scoreTierClass, scoreTierColor, effectiveGridKm, hasStrongConnectivity } = await import('../lib/scoring.ts')
+const { scoreTier, scoreTierClass, scoreTierColor, scorePercentile, scoreBadgeLabel, effectiveGridKm, hasStrongConnectivity } = await import('../lib/scoring.ts')
+const { searchSites, searchSitesSimple, SITE_SEARCH_PRESETS } = await import('../lib/site-search.ts')
+const { MISSION_TEMPLATES, sitesForMissionTemplate, getMissionTemplate } = await import('../lib/mission-templates.ts')
 const { glossaryLookup, GLOSSARY } = await import('../lib/glossary.ts')
 
 // --- score explain (shared cjs is production path) ---
@@ -145,6 +147,30 @@ assert.ok(kmInf < 80 && kmInf > 3, `inferred km sane got ${kmInf}`)
 assert.equal(kmMeas, 5)
 assert.ok(kmInf !== 999)
 assert.ok(typeof hasStrongConnectivity(noGrid) === 'boolean')
+
+// percentile helpers
+const allScores = all.map(s => s.strandedScore)
+const pct = scorePercentile(seed.strandedScore, allScores)
+assert.ok(pct >= 0 && pct <= 100, `percentile ${pct}`)
+assert.ok(scoreBadgeLabel(96) === 'Top 5%')
+assert.ok(scoreBadgeLabel(40) === '')
+
+// site-search
+assert.ok(SITE_SEARCH_PRESETS.length >= 4)
+const searchHits = searchSites(all, seed.properties.name?.split(' ')[0] || 'Alberta', 5)
+assert.ok(searchHits.length >= 1)
+assert.ok(searchHits[0].site.id)
+assert.ok(searchHits[0].matchType)
+const simple = searchSitesSimple(all, seed.properties.province || 'Alberta', 3)
+assert.ok(simple.length >= 1)
+
+// mission-templates
+assert.ok(MISSION_TEMPLATES.length >= 3)
+const tpl = getMissionTemplate('elite-national')
+assert.ok(tpl)
+const missionSites = sitesForMissionTemplate(all, tpl)
+assert.ok(missionSites.length >= 1)
+assert.ok(missionSites.every(s => s.strandedScore >= tpl.minScore))
 
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

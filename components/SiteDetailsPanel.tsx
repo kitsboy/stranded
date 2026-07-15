@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { GENSET_DATA, computeGeneratorPower, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
-import { toggleBookmark, getBookmarks, getSiteNote, setSiteNote } from '@/lib/bookmarks'
+import { toggleBookmark, getBookmarks } from '@/lib/bookmarks'
+import { getSiteNote, setSiteNote } from '@/lib/site-notes'
 import Link from 'next/link'
 import RoiProjectionChart from '@/components/RoiProjectionChart'
 import { integrationUrl } from '@/lib/integrations'
@@ -17,7 +18,12 @@ import { useBtcPrice } from '@/components/BtcPriceProvider'
 import { recordScoreVisit, getScoreHistory } from '@/lib/score-history'
 import ScoreSparkline from '@/components/ScoreSparkline'
 import TadbuyAdHook from '@/components/TadbuyAdHook'
+import GeneratorDerateChart from '@/components/GeneratorDerateChart'
 import { trackCategory } from '@/lib/analytics'
+import { motion } from 'framer-motion'
+import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
+import BankPackPreview from '@/components/BankPackPreview'
+import CopyLinkButton from '@/components/CopyLinkButton'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -85,6 +91,8 @@ export default function SiteDetailsPanel({
   const [bookmarked, setBookmarked] = useState(false)
   const [note, setNote] = useState('')
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
+  const [exportFmt, setExportFmt] = useState<ExportFormat>('md')
+  const [showBankPreview, setShowBankPreview] = useState(false)
 
   useEffect(() => {
     if (!site) return
@@ -259,8 +267,16 @@ export default function SiteDetailsPanel({
     } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd: liveBtcPrice }), null, 2), `${base}.json`, 'application/json')
   }
 
+  const mapDeepLink = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
+
   return (
-    <div className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative">
+    <motion.div
+      initial={{ opacity: 0, x: 32 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 24 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+      className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative"
+    >
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-white">{p.name || 'Unknown'}</h2>
@@ -342,25 +358,25 @@ export default function SiteDetailsPanel({
 
       <div className="mb-4">
         <div className="text-xs font-semibold text-gray-400 mb-1.5">Bank pack export</div>
+        <ExportFormatPicker value={exportFmt} onChange={setExportFmt} className="mb-2" />
         <div className="flex flex-wrap gap-1.5">
-          {([
-            ['md', 'MD'],
-            ['csv', 'CSV'],
-            ['tsv', 'Excel TSV'],
-            ['html', 'Print/PDF'],
-            ['json', 'JSON'],
-          ] as const).map(([fmt, label]) => (
-            <button
-              key={fmt}
-              type="button"
-              onClick={() => downloadBankPack(fmt)}
-              className="text-[10px] px-2 py-1 rounded border border-white/15 hover:border-[#FF8C00]/50 hover:text-[#FF8C00]"
-            >
-              {label}
-            </button>
-          ))}
+          <button type="button" onClick={() => setShowBankPreview(true)} className="text-[10px] px-2 py-1 rounded border border-white/15 hover:border-[#5BC0BE]/50">
+            Preview
+          </button>
+          <button type="button" onClick={() => downloadBankPack(exportFmt)} className="text-[10px] px-2 py-1 rounded border border-[#FF8C00]/40 text-[#FF8C00]">
+            Export {exportFmt.toUpperCase()}
+          </button>
+          <CopyLinkButton url={mapDeepLink} label="Copy link" successMessage="Site deep link copied" />
         </div>
       </div>
+      <BankPackPreview
+        open={showBankPreview}
+        onClose={() => setShowBankPreview(false)}
+        sites={[site as EnrichedSite]}
+        allSites={allSites}
+        liveBtcUsd={liveBtcPrice}
+        title={`Bank pack — ${p.name || site.id}`}
+      />
       {/* Currency dropdown - BTC always the base/denominator */}
       <div className="mb-4">
         <label className="text-sm font-semibold text-[#5BC0BE]">BTC Price in</label>
@@ -426,6 +442,7 @@ export default function SiteDetailsPanel({
       <div className="mb-3">
         <label className="text-xs text-gray-400">Gas treatment derate: {(gasTreatmentDerate * 100).toFixed(0)}%</label>
         <input type="range" min="0.7" max="1" step="0.01" value={gasTreatmentDerate} onChange={e => setGasTreatmentDerate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
+        <GeneratorDerateChart emissionKgDay={siteEmission} gensetId={selectedGenset} className="mt-3" />
       </div>
       <div className="bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4">
         <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary <span className="text-xs font-normal">(BTC first — always the denominator)</span></h3>
@@ -593,6 +610,6 @@ export default function SiteDetailsPanel({
       </div>
 
       <p className="text-xs text-gray-500 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
-    </div>
+    </motion.div>
   )
 }

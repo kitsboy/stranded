@@ -7,7 +7,11 @@ import {
   matchGrants,
   saveGrantQuizResult,
   loadGrantQuizResult,
+  decodeGrantQuizHash,
+  grantQuizShareUrl,
 } from '@/lib/grant-quiz'
+import CopyLinkButton from '@/components/CopyLinkButton'
+import { toast } from 'sonner'
 
 const CETA_PROGRAMS = [
   { id: 'cleantech', name: 'CETA Cleantech SME', max: 5000000, match: 0.5, provinces: ['All'] },
@@ -81,6 +85,19 @@ export default function FundingPage() {
   const [quizMatches, setQuizMatches] = useState<ReturnType<typeof matchGrants>>([])
 
   useEffect(() => {
+    const hashMatch = typeof window !== 'undefined' ? window.location.hash.match(/^#grant=(.+)$/) : null
+    if (hashMatch) {
+      const decoded = decodeGrantQuizHash(hashMatch[1])
+      if (decoded) {
+        const matches = matchGrants(decoded.answers)
+        setQuizAnswers(decoded.answers)
+        setQuizMatches(matches)
+        setQuizDone(true)
+        saveGrantQuizResult(decoded.answers, matches)
+        toast.success('Loaded grant quiz from shared link')
+        return
+      }
+    }
     const saved = loadGrantQuizResult()
     if (saved) {
       setQuizAnswers(saved.answers)
@@ -164,7 +181,14 @@ export default function FundingPage() {
                 </li>
               ))}
             </ul>
-            <button type="button" onClick={resetQuiz} className="text-xs text-gray-400 hover:text-white">Retake quiz</button>
+            <div className="flex flex-wrap items-center gap-2">
+              <CopyLinkButton
+                url={grantQuizShareUrl(quizAnswers, quizMatches)}
+                label="Share results"
+                successMessage="Grant quiz link copied (URL hash)"
+              />
+              <button type="button" onClick={resetQuiz} className="text-xs text-gray-400 hover:text-white">Retake quiz</button>
+            </div>
           </>
         )}
       </section>

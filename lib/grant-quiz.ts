@@ -70,3 +70,29 @@ export function loadGrantQuizResult(): { answers: GrantQuizAnswers; matches: Gra
     return null
   }
 }
+
+/** Compact base64url payload for shareable URL hash (#grant=...) */
+export function encodeGrantQuizHash(answers: GrantQuizAnswers, topMatchId?: string): string {
+  const payload = JSON.stringify({ a: answers, m: topMatchId })
+  if (typeof btoa === 'undefined') return ''
+  return btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+export function decodeGrantQuizHash(token: string): { answers: GrantQuizAnswers; topMatchId?: string } | null {
+  try {
+    const padded = token.replace(/-/g, '+').replace(/_/g, '/')
+    const json = atob(padded)
+    const data = JSON.parse(json) as { a?: GrantQuizAnswers; m?: string }
+    if (!data?.a?.orgType) return null
+    return { answers: data.a, topMatchId: data.m }
+  } catch {
+    return null
+  }
+}
+
+export function grantQuizShareUrl(answers: GrantQuizAnswers, matches: GrantMatch[], origin?: string): string {
+  const top = matches.filter(m => m.score > 0)[0]
+  const hash = encodeGrantQuizHash(answers, top?.id)
+  const base = origin || (typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io')
+  return `${base}/funding#grant=${hash}`
+}

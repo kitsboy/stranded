@@ -12,12 +12,17 @@ import {
 import { loadSites, EnrichedSite, GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
 import { USED_ASIC_MARKET } from '@/lib/roi-model'
 import { markEduSection, getEduProgress } from '@/lib/bookmarks'
+import { loadEduQuizProgress, saveEduQuizProgress, clearEduQuizProgress } from '@/lib/edu-quiz'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import dynamic from 'next/dynamic'
 import GensetComparisonTable from '@/components/GensetComparisonTable'
+import BreakevenCalculator from '@/components/BreakevenCalculator'
+import AsicFleetSizer from '@/components/AsicFleetSizer'
+import { SENSITIVITY_PRESETS, type SensitivityPresetId } from '@/lib/sensitivity-presets'
 import EducationHalvingTimeline from '@/components/EducationHalvingTimeline'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+import { useLocale } from '@/lib/useLocale'
 
 const EducationCharts = dynamic(() => import('@/components/EducationCharts'), {
   loading: () => <div className="mb-16 h-48 rounded-2xl border border-white/10 animate-pulse bg-white/5" />,
@@ -67,6 +72,7 @@ function GwpCalculatorWidget() {
 }
 
 function QuizSection() {
+  const { t } = useLocale()
   const questions = [
     { q: "What makes Bitcoin the perfect offtaker for stranded energy?", opts: ["It needs grid connection", "It is location-agnostic and pays real rates for power no one else wants", "It only works with solar", "It requires subsidies"], ans: 1 },
     { q: "Roughly how much more potent is methane than CO₂ over 100 years?", opts: ["2×", "10×", "25×", "100×"], ans: 2 },
@@ -79,21 +85,39 @@ function QuizSection() {
   const [selected, setSelected] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
 
+  useEffect(() => {
+    const saved = loadEduQuizProgress();
+    if (saved) {
+      setCurrent(saved.current);
+      setScore(saved.score);
+      setFinished(saved.finished);
+    }
+  }, []);
+
+  const persist = (next: { current: number; score: number; finished: boolean }) => {
+    saveEduQuizProgress(next);
+  };
+
   const handleAnswer = (idx: number) => {
     setSelected(idx);
-    if (idx === questions[current].ans) setScore(s => s + 1);
+    const newScore = idx === questions[current].ans ? score + 1 : score;
+    if (idx === questions[current].ans) setScore(newScore);
     setTimeout(() => {
       if (current < questions.length - 1) {
-        setCurrent(c => c + 1);
+        const nextCurrent = current + 1;
+        setCurrent(nextCurrent);
         setSelected(null);
+        persist({ current: nextCurrent, score: newScore, finished: false });
       } else {
         setFinished(true);
+        persist({ current, score: newScore, finished: true });
       }
     }, 900);
   };
 
   const reset = () => {
     setCurrent(0); setScore(0); setSelected(null); setFinished(false);
+    clearEduQuizProgress();
   };
 
   const shareScore = async () => {
@@ -127,7 +151,7 @@ function QuizSection() {
   return (
     <div className="mb-16">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold flex items-center gap-2"><AwardIcon className="text-[#FF8C00]" /> Test Your Stranded Value IQ</h2>
+        <h2 className="text-2xl font-semibold flex items-center gap-2"><AwardIcon className="text-[#FF8C00]" /> {t('eduQuiz')}</h2>
         <div className="text-xs text-gray-400">Question {current + 1} / {questions.length}</div>
       </div>
       <div className="glass p-8 rounded-3xl">
@@ -146,6 +170,7 @@ function QuizSection() {
 }
 
 export default function EducationContent() {
+  const { t } = useLocale()
   const marketBtc = useBtcUsd()
   // State for interactive elements
   const [glossarySearch, setGlossarySearch] = useState('')
@@ -159,6 +184,7 @@ export default function EducationContent() {
   const [advPowerPrice, setAdvPowerPrice] = useState(0.035)
   const [regionalProvince, setRegionalProvince] = useState('Ontario')
   const [liveBtc, setLiveBtc] = useState(85000) // user-adjustable; seeded from market once
+  const [eduPreset, setEduPreset] = useState<SensitivityPresetId>('base')
   const [btcSeeded, setBtcSeeded] = useState(false)
   const [selectedGenset, setSelectedGenset] = useState('jenbacher316')
   const [numUnits, setNumUnits] = useState(1) // for configurator demo
@@ -341,13 +367,13 @@ export default function EducationContent() {
       )}
       {/* 1. Enhanced Hero */}
       <div className="text-center mb-16">
-        <Link href="/" className="text-sm text-[#5BC0BE] hover:underline mb-4 inline-block">← Back to home</Link>
+        <Link href="/" className="text-sm text-[#5BC0BE] hover:underline mb-4 inline-block">{t('eduBackHome')}</Link>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">
-          Stranded Value<br /> 
-          <span className="text-[#FF8C00]">Education Center</span>
+          {t('eduHeroTitle')}<br /> 
+          <span className="text-[#FF8C00]">{t('eduHeroSubtitle')}</span>
         </h1>
         <p className="max-w-2xl mx-auto text-xl text-gray-300">
-          How capturing stranded energy creates massive environmental, economic, and Bitcoin-powered value.
+          {t('eduHeroDesc')}
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-6">
           <div className="px-4 py-1.5 bg-[#0f172a] border border-[#5BC0BE]/30 rounded-full text-sm">2,611 verified sites</div>
@@ -359,8 +385,8 @@ export default function EducationContent() {
       {/* 1b. Prominent "What is Stranded Value?" Explainer Card (high value education) */}
       <div className="mb-16 glass p-8 rounded-3xl border border-[#FF8C00]/20">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF8C00]/10 text-[#FF8C00] rounded-full text-xs tracking-widest mb-3">THE CORE THESIS</div>
-          <h2 className="text-3xl font-semibold tracking-tighter">What is Stranded Value?</h2>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF8C00]/10 text-[#FF8C00] rounded-full text-xs tracking-widest mb-3">{t('eduCoreThesis')}</div>
+          <h2 className="text-3xl font-semibold tracking-tighter">{t('eduWhatIs')}</h2>
           <p className="max-w-2xl mx-auto text-gray-300 mt-2">It&apos;s not just methane — it&apos;s the highest-leverage climate + capital opportunity on Earth. One molecule of stranded gas = avoided emissions + Bitcoin revenue + community wealth + sovereign energy independence.</p>
         </div>
         <div className="grid md:grid-cols-4 gap-4 text-center">
@@ -383,9 +409,9 @@ export default function EducationContent() {
       {/* Methane GWP calculator widget */}
       <div className="mb-16 glass p-6 rounded-3xl border border-[#5BC0BE]/25">
         <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
-          <Leaf className="text-[#34D399]" size={22} /> Methane GWP Calculator
+          <Leaf className="text-[#34D399]" size={22} /> {t('eduGwpCalc')}
         </h2>
-        <p className="text-sm text-gray-400 mb-4">Compare CO₂-equivalent impact using IPCC-style global warming potential (GWP) over your chosen timeframe.</p>
+        <p className="text-sm text-gray-400 mb-4">{t('eduGwpDesc')}</p>
         <GwpCalculatorWidget />
       </div>
 
@@ -397,7 +423,7 @@ export default function EducationContent() {
         </p>
 
         <div className="my-8 bg-[#0f172a] border border-[#5BC0BE]/20 rounded-2xl p-8 not-prose">
-          <h2 className="text-[#5BC0BE] font-semibold text-xl mb-3">The Opportunity</h2>
+          <h2 className="text-[#5BC0BE] font-semibold text-xl mb-3">{t('eduOpportunity')}</h2>
           <p className="text-gray-300">
             Bitcoin mining can transform this waste into value. By placing mobile mining operations at stranded gas sites, we can:
           </p>
@@ -410,7 +436,7 @@ export default function EducationContent() {
         </div>
 
         <div className="my-8 bg-[#0f172a] border border-[#5BC0BE]/20 rounded-2xl p-8 not-prose">
-          <h2 className="text-[#5BC0BE] font-semibold text-xl mb-3">How This Dataset Works</h2>
+          <h2 className="text-[#5BC0BE] font-semibold text-xl mb-3">{t('eduDatasetWorks')}</h2>
           <ul className="space-y-3 text-gray-300">
             <li className="flex gap-3">
               <span className="mt-1.5 h-2 w-2 rounded-full bg-[#FF8C00] flex-shrink-0" />
@@ -431,7 +457,7 @@ export default function EducationContent() {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-white">Data Sources</h2>
+          <h2 className="text-xl font-semibold mb-2 text-white">{t('eduDataSources')}</h2>
           <p>
             Primary: Environment and Climate Change Canada (ECCC) — open data from provincial energy regulators, satellite methane detection, and industry reporting.
             Reference year primarily 2022–2024.
@@ -447,7 +473,7 @@ export default function EducationContent() {
       <div className="mb-16">
         <div className="text-center mb-6">
           <div className="text-[#FF8C00] text-xs tracking-[3px]">THE ELEGANT LOOP</div>
-          <h2 className="text-2xl font-semibold tracking-tighter">The Stranded Value Flywheel</h2>
+          <h2 className="text-2xl font-semibold tracking-tighter">{t('eduFlywheel')}</h2>
           <p className="text-gray-300 max-w-md mx-auto mt-1">Click any step to jump into the matching simulator or map view. This is how waste becomes verifiable sovereign wealth.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -475,7 +501,7 @@ export default function EducationContent() {
       <div className="mb-16">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-1 bg-[#FF8C00]/10 text-[#FF8C00] rounded-full text-xs tracking-[2px] mb-3">FROM GAS TO ELECTRONS</div>
-          <h2 className="text-4xl font-semibold tracking-tighter">Methane-to-Power Generation</h2>
+          <h2 className="text-4xl font-semibold tracking-tighter">{t('eduMethanePower')}</h2>
           <p className="max-w-2xl mx-auto text-gray-300 mt-3">The heart of Stranded Value is turning raw methane into reliable electricity using proven reciprocating engine technology. These are the actual machines that make off-grid Bitcoin mining possible at stranded sites. All specs are approximate 2026 market values for biogas/landfill gas configurations (very close to pure stranded methane applications).</p>
         </div>
 
@@ -665,7 +691,7 @@ export default function EducationContent() {
       {/* All dynamic with liveBtc, toggles. Squeezes every data field possible. */}
       <div className="mb-16">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold flex items-center gap-2"><MapPin className="text-[#FF8C00]" /> Per-Site Stranded Value (Real Data + Generator + Mining ROI)</h2>
+          <h2 className="text-2xl font-semibold flex items-center gap-2"><MapPin className="text-[#FF8C00]" /> {t('eduPerSiteRoi')}</h2>
           <div className="text-xs text-gray-400">Dynamic • Uses live dataset • CapEx + opportunity cost included</div>
         </div>
 
@@ -793,7 +819,7 @@ export default function EducationContent() {
       {/* 3+4. Multiple Simulators - enhanced with live BTC sensitivity & one-click mission builder */}
       <div className="mb-16">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold flex items-center gap-2"><BookOpen className="text-[#5BC0BE]" /> Key Terms Glossary</h2>
+          <h2 className="text-2xl font-semibold flex items-center gap-2"><BookOpen className="text-[#5BC0BE]" /> {t('eduGlossary')}</h2>
           <input 
             type="text" 
             placeholder="Search terms..." 
@@ -815,9 +841,33 @@ export default function EducationContent() {
       </div>
 
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Cpu className="text-[#FF8C00]" /> Genset Comparison Table</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Cpu className="text-[#FF8C00]" /> {t('eduGensetTable')}</h2>
         <p className="text-sm text-gray-400 mb-4">Side-by-side methane-to-power units used in Stranded ROI models.</p>
         <GensetComparisonTable />
+      </div>
+
+      <div className="mb-16">
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Percent className="text-[#34D399]" /> Scenario Presets</h2>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(Object.keys(SENSITIVITY_PRESETS) as SensitivityPresetId[]).map(id => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => {
+                setEduPreset(id)
+                setLiveBtc(Math.round(85000 * SENSITIVITY_PRESETS[id].btcMultiplier))
+              }}
+              className={`text-xs px-3 py-1.5 rounded-full border ${eduPreset === id ? 'border-[#FF8C00] bg-[#FF8C00]/15 text-[#FF8C00]' : 'border-white/15 text-gray-400'}`}
+            >
+              {SENSITIVITY_PRESETS[id].label}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-gray-400 mb-4">{SENSITIVITY_PRESETS[eduPreset].description}</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          <BreakevenCalculator defaultDailyRevenueCad={12000} />
+          <AsicFleetSizer />
+        </div>
       </div>
 
       {/* 6. Stranded Value IQ Quiz (high engagement education tool) */}
@@ -825,7 +875,7 @@ export default function EducationContent() {
 
       {/* 3+4. Multiple Simulators - enhanced with live BTC sensitivity & one-click mission builder */}
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Zap className="text-[#5BC0BE]" /> Interactive Stranded Value Simulators</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Zap className="text-[#5BC0BE]" /> {t('eduSimulatorsTitle')}</h2>
         
         <div className="glass p-4 rounded-2xl mb-6 flex flex-col sm:flex-row items-center gap-4">
           <div className="text-sm text-gray-400">Live BTC Price Sensitivity (affects all revenue projections):</div>
@@ -981,7 +1031,7 @@ export default function EducationContent() {
 
       {/* 5. Methodology Deep Dive - now with interactive sliders (item 18) */}
       <div className="mb-16 glass p-8 rounded-3xl">
-        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Target className="text-[#5BC0BE]" /> Methodology & Formulas</h2>
+        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Target className="text-[#5BC0BE]" /> {t('eduMethodology')}</h2>
         <div className="prose prose-invert text-sm mb-6">
           <p><strong>Stranded Score™ v3</strong> = log-scaled emission + grid proximity (observed or source-type proxy) + internet proxy + confidence + source deployability + data recency. Scores span ~22–96 across 2,611 sites.</p>
           <p className="text-xs">When ECCC omits grid/internet fields, we infer from source category and province — never penalize missing data as &quot;no internet.&quot; See <a href="/methodology" className="text-[#5BC0BE]">/methodology</a>.</p>
@@ -1006,7 +1056,7 @@ export default function EducationContent() {
 
       {/* 6. FAQ Accordion */}
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-semibold mb-6">{t('eduFaq')}</h2>
         {faqs.map((faq, index) => (
           <div key={index} className="border-b border-white/10 py-4">
             <button onClick={() => setFaqOpen(faqOpen === index ? null : index)} className="w-full flex justify-between items-center text-left font-medium">
@@ -1026,7 +1076,7 @@ export default function EducationContent() {
 
       {/* 7. Case Studies */}
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold mb-6">Real-World Style Case Studies</h2>
+        <h2 className="text-2xl font-semibold mb-6">{t('eduCaseStudies')}</h2>
         <div className="grid md:grid-cols-3 gap-4">
           {[
             { title: "Ontario Landfill", desc: "Keele Valley: 56 tonnes/day methane. Mobile deployment paid back in 14 months. 4.2 BTC generated in first year.", score: 92, province: "Ontario" },

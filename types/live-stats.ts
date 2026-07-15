@@ -45,4 +45,7 @@ export type LiveStats = {
     github: string
     dataSource: string
   }
+  /** Max reference_year across ECCC facility records */
+  ecccReportingYear?: number
+  scoreHistogram?: { bucket: string; count: number }[]
 }

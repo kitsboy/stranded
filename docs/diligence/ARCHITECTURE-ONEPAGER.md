@@ -14,7 +14,7 @@ tags: [diligence, pitch, mvp, giveabit]
 ---
 # Stranded Value — Technical Architecture One-Pager
 
-**Live:** https://stranded.giveabit.io · **Repo:** https://github.com/kitsboy/stranded · **Version:** `2.4.0`
+**Live:** https://stranded.giveabit.io · **Repo:** https://github.com/kitsboy/stranded · **Version:** `2.5.0` · **PWA:** `stranded-v6`
 
 ## Stack
 Next.js 14 (static export) · MapLibre GL · ECCC GeoJSON · generator/ASIC models · Cloudflare Pages (`strandedbuild`)

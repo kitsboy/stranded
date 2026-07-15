@@ -11,12 +11,16 @@ import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
+import CountUp from '@/components/CountUp'
+import SectionDivider from '@/components/SectionDivider'
+import { useReducedMotion } from '@/lib/useReducedMotion'
 
 type FeaturedSite = { id?: string; name: string; province: string; emission: number; score: number; link: string }
 
 export default function LandingPage() {
   const { locale, t } = useLocale()
   const btc = useBtcUsd()
+  const reducedMotion = useReducedMotion()
   const [featured, setFeatured] = useState<FeaturedSite[]>([])
   const [stats, setStats] = useState<LiveStats | null>(null)
 
@@ -64,19 +68,24 @@ export default function LandingPage() {
     ],
   }
 
+  const HeroBadge = reducedMotion ? 'div' : motion.div
+  const heroBadgeProps = reducedMotion
+    ? { className: 'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] text-xs tracking-widest mb-6 border border-[#FF8C00]/20' }
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.6 },
+        className: 'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] text-xs tracking-widest mb-6 border border-[#FF8C00]/20',
+      }
+
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[var(--bg-dark)] text-white overflow-x-hidden">
       <JsonLd data={homeJsonLd} />
       {/* Hero */}
-      <div className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] text-xs tracking-widest mb-6 border border-[#FF8C00]/20"
-        >
+      <div className="hero-mesh max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
+        <HeroBadge {...heroBadgeProps}>
           {t('heroBadge')}
-        </motion.div>
+        </HeroBadge>
 
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter mb-6">
           {t('heroTitle1')}<br />
@@ -89,11 +98,12 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/map"
+            prefetch
             className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-[#FF8C00] hover:bg-[#FF8C00]/90 text-[#1e293b] font-semibold text-lg transition"
           >
             {t('heroExploreMap')}
           </Link>
-          <Link href="/pitch" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] hover:bg-[#FF8C00]/10 text-lg transition">
+          <Link href="/pitch" prefetch className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] hover:bg-[#FF8C00]/10 text-lg transition">
             {t('heroLivePitch')}
           </Link>
           <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
@@ -107,23 +117,33 @@ export default function LandingPage() {
       <div className="border-y border-white/10 bg-black/20">
         <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{siteCount.toLocaleString()}</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
+              <CountUp value={siteCount} />
+            </div>
             <div className="text-sm text-gray-400 mt-1">{t('statVerifiedSites')}</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{provinceCount}</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
+              <CountUp value={provinceCount} />
+            </div>
             <div className="text-sm text-gray-400 mt-1">{t('statProvinces')}</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{avgScore != null ? avgScore.toFixed(1) : '—'}</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
+              {avgScore != null ? <CountUp value={avgScore} decimals={1} /> : '—'}
+            </div>
             <div className="text-sm text-gray-400 mt-1">{t('statAvgScore')}{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold text-[#FF8C00]">0</div>
+            <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
+              <CountUp value={0} />
+            </div>
             <div className="text-sm text-gray-400 mt-1">{t('statGridImpact')}</div>
           </div>
           <div>
-            <div className="text-4xl font-semibold tabular-nums text-emerald-400">${btc.toLocaleString()}</div>
+            <div className="text-4xl font-semibold tabular-nums text-emerald-400">
+              <CountUp value={btc} prefix="$" />
+            </div>
             <div className="text-sm text-gray-400 mt-1">{t('statLiveBtc')}</div>
           </div>
         </div>
@@ -157,18 +177,20 @@ export default function LandingPage() {
         </div>
       </div>
 
+      <SectionDivider label="Featured" />
+
       {/* Featured Opportunities */}
-      <div className="max-w-5xl mx-auto px-6 py-12 border-t border-white/10">
+      <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h2 className="text-2xl font-semibold">Featured Opportunities</h2>
             <p className="text-gray-400 text-sm">Top sites by Stranded Score • Highest potential impact</p>
           </div>
-          <Link href="/sites" className="text-sm text-[#5BC0BE] hover:underline">See all →</Link>
+          <Link href="/sites" className="text-sm link-animated">See all →</Link>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {(featured.length ? featured : [{ name: 'Loading top sites…', province: '', emission: 0, score: 0, link: '/map' }]).map((site, i) => (
-            <Link key={site.id || i} href={site.link} className="glass p-5 rounded-2xl border border-white/10 hover:border-[#FF8C00]/50 transition block">
+            <Link key={site.id || i} href={site.link} className="glass glass-card-lift p-5 rounded-2xl border border-white/10 block">
               <div className="flex justify-between gap-2">
                 <div className="font-semibold truncate">{site.name}</div>
                 {site.score > 0 && <div className={`stranded-score text-xs ${scoreTierClass(site.score)}`}>{site.score}</div>}
@@ -238,7 +260,7 @@ export default function LandingPage() {
               <p className="mt-4 text-gray-300 max-w-md">The most elegant climate + capital flywheel available today. One offtaker that actually works for stranded resources.</p>
             </div>
             <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-              <Image src="/images/5.jpg" alt="Energy to Bitcoin Flywheel" width={800} height={500} className="w-full h-auto" />
+              <Image src="/images/5.jpg" alt="Energy to Bitcoin Flywheel" width={800} height={500} loading="lazy" className="w-full h-auto" />
             </div>
           </div>
         </div>

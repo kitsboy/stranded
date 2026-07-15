@@ -40,7 +40,12 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <head><JsonLd data={jsonLd} /></head>
+      <head>
+        <meta name="theme-color" content="#243447" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+        <JsonLd data={jsonLd} />
+      </head>
       <body className="bg-[var(--bg-dark)] text-white antialiased flex flex-col min-h-screen">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[999] focus:px-4 focus:py-2 focus:bg-[#FF8C00] focus:text-black focus:rounded-lg">
           Skip to content
@@ -50,7 +55,20 @@ export default function RootLayout({
           {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
           <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">{children}</main>
           <Footer />
-          <Toaster position="top-center" richColors closeButton />
+          <Toaster
+            position="top-center"
+            richColors
+            closeButton
+            theme="dark"
+            toastOptions={{
+              className: 'stranded-toast',
+              style: {
+                background: 'rgba(36, 52, 71, 0.95)',
+                border: '1px solid rgba(91, 192, 190, 0.3)',
+                color: '#f1f5f9',
+              },
+            }}
+          />
           <GlobalCommand />
           <MobileCtaBar />
           <OfflineIndicator />

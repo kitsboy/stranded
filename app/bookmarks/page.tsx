@@ -7,6 +7,8 @@ import { getBookmarkEntries, getBookmarkTags, setBookmarkTag, exportBookmarksJso
 import { toast } from 'sonner'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import { Star } from 'lucide-react'
+import { bankPackCsv } from '@/lib/bank-pack'
+import { downloadBlob } from '@/lib/export-formats'
 
 export default function BookmarksPage() {
   const [sites, setSites] = useState<(EnrichedSite & { tag?: string })[]>([])
@@ -62,6 +64,17 @@ export default function BookmarksPage() {
           className="text-xs px-3 py-1.5 rounded-lg border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10"
         >
           Export JSON
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (!sites.length) { toast.info('No bookmarks to export'); return }
+            downloadBlob(bankPackCsv(sites), `stranded-watchlist-${sites.length}.csv`, 'text/csv')
+            toast.success(`Exported ${sites.length} sites to CSV`)
+          }}
+          className="text-xs px-3 py-1.5 rounded-lg border border-white/20 text-gray-300 hover:bg-white/5"
+        >
+          Export CSV
         </button>
         <label className="text-xs px-3 py-1.5 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 cursor-pointer">
           Import JSON

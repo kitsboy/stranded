@@ -8,7 +8,9 @@ import { Filter, Zap, RefreshCw, Target, Download, ChevronDown } from 'lucide-re
 import { toast } from 'sonner'
 
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
-import LayerControls from '@/components/LayerControls'
+import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/LayerControls'
+import DualRangeSlider from '@/components/DualRangeSlider'
+import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
 import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
@@ -23,6 +25,12 @@ import { decodePresetHash, presetShareUrl } from '@/lib/filter-preset-hash'
 import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 import ScoreLegend from '@/components/ScoreLegend'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
+import OnboardingTour from '@/components/OnboardingTour'
+import QuickActions, { MapFabIcons } from '@/components/QuickActions'
+import CopyLinkButton from '@/components/CopyLinkButton'
+import { recordRecentSite } from '@/lib/recent-sites'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -36,6 +44,7 @@ function StrandedCommandCenter() {
   const [viewMode, setViewMode] = useState<MapViewMode>('precise')
   const didAutoCluster = useRef(false)
   const liveBtcPrice = useBtcUsd()
+  const { locale, t } = useLocale()
 
   // Sexy advanced filters - start with ALL 2611 visible by default
   const [minEmission, setMinEmission] = useState(0)
@@ -46,6 +55,9 @@ function StrandedCommandCenter() {
   const [showAllProvinces, setShowAllProvinces] = useState(false)
 
   const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
+  const [heatmapOpacity, setHeatmapOpacity] = useState(0.75)
+  const [terrainExaggeration, setTerrainExaggeration] = useState(1)
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
   const [presetName, setPresetName] = useState('')
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
@@ -54,9 +66,18 @@ function StrandedCommandCenter() {
   const [fullscreen, setFullscreen] = useState(false)
   const [loadProgress, setLoadProgress] = useState(0)
   const [radiusFilter, setRadiusFilter] = useState<{ lat: number; lng: number; radiusKm: number } | null>(null)
+  const [centerTarget, setCenterTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null)
+  const [showSearchHint, setShowSearchHint] = useState(false)
 
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  useEffect(() => {
+    fetch('/data/live-stats.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(s => setLiveStats(s))
+      .catch(() => {})
+  }, [])
 
   // Load full 2611 with enrichment (performance + types)
   useEffect(() => {
@@ -82,6 +103,7 @@ function StrandedCommandCenter() {
       if (siteId) {
         const match = sites.find(s => s.id === siteId || String(s.properties.ghgrp_id) === siteId)
         if (match) {
+          recordRecentSite(match)
           setTimeout(() => {
             setSelectedSite(match)
             // ensure province of deep-linked site is not filtered out
@@ -95,7 +117,7 @@ function StrandedCommandCenter() {
             }
           }, 420)
         } else {
-          toast.error('Site not found for this link')
+          toast.error(t('mapSiteNotFound'))
         }
       }
 
@@ -147,9 +169,16 @@ function StrandedCommandCenter() {
     }).catch(err => {
       console.error(err)
       setLoading(false)
-      toast.error('Failed to load sites dataset')
+      toast.error(t('mapLoadFailed'))
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!localStorage.getItem('stranded-map-search-hint-dismissed')) {
+      setShowSearchHint(true)
+    }
   }, [])
 
   // Compute filtered (live filtering = sexy + performant)
@@ -191,9 +220,9 @@ function StrandedCommandCenter() {
   }
 
   const viewModeLabel: Record<MapViewMode, string> = {
-    precise: 'PRECISE MARKERS',
-    'native-clusters': 'NATIVE CLUSTERS',
-    dom: 'DOM CLUSTERS (legacy)',
+    precise: t('mapPreciseMarkers'),
+    'native-clusters': t('mapNativeClusters'),
+    dom: t('mapDomClusters'),
   }
 
   const provinces = useMemo(() => {
@@ -217,6 +246,7 @@ function StrandedCommandCenter() {
 
   const handleSelectSite = (site: EnrichedSite) => {
     setSelectedSite(site)
+    recordRecentSite(site)
     // If user is deep in filters and the site is filtered out, relax filters a little
     if (!filteredSites.some(s => s.id === site.id)) {
       setMinEmission(Math.min(minEmission, site.emission * 0.6))
@@ -263,6 +293,50 @@ function StrandedCommandCenter() {
 
   const removeFromPortfolio = (id: string) => {
     setPortfolio(p => { const n = p.filter(s => s.id !== id); savePortfolio(n); return n })
+  }
+
+  const restoreToPortfolio = useCallback((site: EnrichedSite) => {
+    setPortfolio(prev => {
+      if (prev.some(p => p.id === site.id)) return prev
+      const next = [...prev, site]
+      savePortfolio(next)
+      return next
+    })
+  }, [])
+
+  const applyMissionTemplate = useCallback((sites: EnrichedSite[]) => {
+    setPortfolio(sites)
+    savePortfolio(sites)
+  }, [])
+
+  const nearMe = () => {
+    if (!navigator.geolocation) {
+      toast.error(t('mapGeolocateError'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setCenterTarget({ lat, lng, zoom: 9 })
+        setRadiusFilter({ lat, lng, radiusKm: 50 })
+        toast.success(t('mapGeolocateSuccess'))
+      },
+      () => toast.error(t('mapGeolocateDenied')),
+      { enableHighAccuracy: true, timeout: 12000 },
+    )
+  }
+
+  const shareMapView = async () => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (selectedSite) params.set('site', selectedSite.id)
+    const url = `${window.location.origin}/map?${params.toString()}`
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Map view link copied')
+    } catch {
+      toast.info(url)
+    }
   }
 
   const clearPortfolio = () => { setPortfolio([]); savePortfolio([]) }
@@ -477,7 +551,7 @@ function StrandedCommandCenter() {
 
       {radiusFilter && (
         <div className="absolute top-14 left-1/2 -translate-x-1/2 z-[70] glass px-4 py-1.5 rounded-2xl border border-[#FF8C00]/40 text-xs flex items-center gap-3">
-          <span className="text-[#FF8C00]">Radius {radiusFilter.radiusKm} km</span>
+          <span className="text-[#FF8C00]">{tf(locale, 'mapRadius', { km: radiusFilter.radiusKm })}</span>
           <span className="text-gray-400">@ {radiusFilter.lat.toFixed(2)}, {radiusFilter.lng.toFixed(2)}</span>
           <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-500 hover:text-white">✕</button>
         </div>
@@ -495,10 +569,20 @@ function StrandedCommandCenter() {
                 onClick={resetFilters} 
                 className="ml-2 px-2 py-0.5 text-[10px] rounded bg-[#FF8C00] text-black font-medium hover:bg-orange-400"
               >
-                SHOW ALL 2,611
+                {t('mapShowAll')}
               </button>
             )}
           </div>
+          <div className="h-3 w-px bg-white/20" />
+          <button
+            type="button"
+            data-testid="geolocate-btn"
+            onClick={nearMe}
+            className="text-[10px] px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            aria-label={t('mapGeolocate')}
+          >
+            {t('mapGeolocate')}
+          </button>
           <div className="h-3 w-px bg-white/20" />
           <div>
             BTC <span className="btc-ticker font-semibold text-emerald-400">${liveBtcPrice.toLocaleString()}</span>
@@ -513,13 +597,33 @@ function StrandedCommandCenter() {
       </div>
 
       {/* Left premium filter command center (wild creative) */}
-      <div className="absolute top-16 left-4 z-[65] w-72 glass rounded-3xl p-5 shadow-2xl border border-white/10 hidden xl:block">
+      {showSearchHint && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[72] max-w-md w-[92vw] glass px-4 py-3 rounded-2xl border border-[#5BC0BE]/40 text-xs flex items-start gap-3 shadow-lg">
+          <div className="flex-1">
+            <span className="text-[#5BC0BE] font-semibold">Tip:</span> Press{' '}
+            <kbd className="px-1.5 py-px bg-white/10 rounded font-mono">⌘K</kbd> to fuzzy-search 2,611 sites by name, province, or company.
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem('stranded-map-search-hint-dismissed', '1')
+              setShowSearchHint(false)
+            }}
+            className="text-gray-400 hover:text-white shrink-0"
+            aria-label="Dismiss search hint"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      <div className="absolute top-16 left-4 z-[65] w-72 glass rounded-3xl p-5 shadow-2xl border border-white/10 hidden xl:block" data-tour="map-filters">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-[#FF8C00] font-semibold tracking-widest text-xs">
-            <Filter size={16} /> FILTERS • LIVE
+            <Filter size={16} /> {t('mapFiltersLive')}
           </div>
           <button onClick={resetFilters} className="text-[10px] flex items-center gap-1 text-gray-400 hover:text-white">
-            <RefreshCw size={13} /> RESET
+            <RefreshCw size={13} /> {t('mapReset')}
           </button>
         </div>
 
@@ -529,8 +633,7 @@ function StrandedCommandCenter() {
             <div>EMISSION (kg/day)</div>
             <div className="font-mono text-white">{minEmission.toLocaleString()} — {maxEmission.toLocaleString()}</div>
           </div>
-          <input type="range" min="0" max="65000" step="50" value={minEmission} onChange={e => setMinEmission(Number(e.target.value))} className="w-full accent-[#FF8C00]" />
-          <input type="range" min="0" max="65000" step="50" value={maxEmission} onChange={e => setMaxEmission(Number(e.target.value))} className="w-full accent-[#FF8C00] mt-1" />
+          <DualRangeSlider min={0} max={65000} step={50} valueMin={minEmission} valueMax={maxEmission} onChange={(lo, hi) => { setMinEmission(lo); setMaxEmission(hi) }} />
         </div>
 
         {/* Score threshold */}
@@ -628,28 +731,33 @@ function StrandedCommandCenter() {
         showTerrain={layers.terrain}
         showHeatmap={layers.heatmap}
         showChoropleth={layers.choropleth}
+        heatmapOpacity={heatmapOpacity}
+        terrainExaggeration={terrainExaggeration}
         liveBtcPrice={liveBtcPrice}
         radiusOverlay={radiusFilter}
+        centerTarget={centerTarget}
+      />
+
+      <QuickActions
+        actions={[
+          { id: 'locate', label: 'Near me (50 km)', icon: MapFabIcons.locate, onClick: nearMe },
+          { id: 'share', label: 'Share view', icon: MapFabIcons.share, onClick: shareMapView },
+          { id: 'reset', label: 'Reset filters', icon: MapFabIcons.reset, onClick: resetFilters },
+        ]}
       />
 
       {/* Right side — SiteDetails + Mission (sexy stacked) - mobile friendly, properly constrained above footer */}
       <div className="absolute top-16 right-2 md:right-4 z-[65] flex flex-col gap-3 w-[min(340px,92vw)] max-h-[calc(100%-2rem)] overflow-hidden">
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {selectedSite && (
-            <motion.div 
-              initial={{opacity:0, x:30}} 
-              animate={{opacity:1, x:0}} 
-              exit={{opacity:0, x:20}}
-              className="flex-1 min-h-0 overflow-y-auto pb-2"   // Scrollable details area; leaves room for MissionPanel below it in the column
-            >
-              <SiteDetailsPanel 
-                site={selectedSite} 
-                onClose={() => setSelectedSite(null)} 
-                onAddToMission={addToPortfolio}
-                liveBtcPrice={liveBtcPrice}
-                allSites={allSites}
-              />
-            </motion.div>
+            <SiteDetailsPanel
+              key={selectedSite.id}
+              site={selectedSite}
+              onClose={() => setSelectedSite(null)}
+              onAddToMission={addToPortfolio}
+              liveBtcPrice={liveBtcPrice}
+              allSites={allSites}
+            />
           )}
         </AnimatePresence>
 
@@ -657,9 +765,11 @@ function StrandedCommandCenter() {
         <MissionPanel 
           portfolio={portfolio} 
           liveBtcPrice={liveBtcPrice} 
-          onRemove={removeFromPortfolio} 
+          onRemove={removeFromPortfolio}
+          onRestore={restoreToPortfolio}
           onClear={clearPortfolio}
           onFlyTo={flyToFromPortfolio}
+          onApplyTemplate={applyMissionTemplate}
           allSites={allSites}
         />
 
@@ -694,23 +804,54 @@ function StrandedCommandCenter() {
       {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       </div>
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
+      <OnboardingTour />
 
       {/* Score legend + layer controls */}
       <div className="absolute bottom-5 right-5 z-[60] flex flex-col items-end gap-2">
         <ScoreLegend compact />
-        <LayerControls 
-          layers={layers} 
-          onToggle={(l) => setLayers(prev => ({...prev, [l]: !prev[l]}))} 
+        <LayerControls
+          layers={layers}
+          onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
+          onApplyPreset={(preset: LayerPresetId) => {
+            const p = LAYER_PRESETS[preset]
+            setLayers(prev => ({ ...prev, ...p.layers }))
+            toast.success(`Applied ${p.label} layer preset`)
+          }}
+          heatmapOpacity={heatmapOpacity}
+          onHeatmapOpacityChange={setHeatmapOpacity}
+          terrainExaggeration={terrainExaggeration}
+          onTerrainExaggerationChange={setTerrainExaggeration}
         />
       </div>
 
+      {liveStats && (
+        <div className="absolute top-14 right-2 md:right-4 z-[62] max-w-[min(340px,92vw)]">
+          <div className="glass text-[10px] px-3 py-1.5 rounded-xl border border-[#5BC0BE]/30 text-gray-300">
+            ECCC reporting year <span className="font-mono text-[#5BC0BE]">{liveStats.ecccReportingYear ?? '2023'}</span>
+            {' · '}synced {new Date(liveStats.generatedAt).toLocaleDateString()}
+          </div>
+        </div>
+      )}
+
+      <div className="absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-[10px] text-gray-500 flex flex-wrap items-center justify-between gap-2">
+        <span>Data: Environment and Climate Change Canada (ECCC) GHGRP · Open Government of Canada</span>
+        <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:underline shrink-0">ECCC dataset ↗</a>
+      </div>
+
       {/* Bottom status + view toggle */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
         <div className="glass text-xs px-5 py-1.5 rounded-3xl flex items-center gap-3 border border-white/10">
-          {loading ? 'Loading full dataset…' : `${filteredSites.length.toLocaleString()} sites in view • ${portfolio.length} in active mission`}
+          {loading ? t('mapLoadingDataset') : tf(locale, 'mapSitesInView', { count: filteredSites.length.toLocaleString(), mission: String(portfolio.length) })}
           <button onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))} className="ml-2 text-[#5BC0BE] hover:underline flex items-center gap-1 text-[11px]">
-            <Target size={13}/> COMMAND PALETTE (⌘K)
+            <Target size={13}/> {t('mapCommandPalette')}
           </button>
+          {selectedSite && (
+            <CopyLinkButton
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/map?site=${selectedSite.id}`}
+              label="Copy"
+              successMessage="Site deep link copied"
+            />
+          )}
         </div>
       </div>
 

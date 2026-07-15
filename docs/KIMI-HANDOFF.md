@@ -1,6 +1,33 @@
 # Kimi Handoff — Stranded
 
-## Latest Session Summary (from 2026-07-15 — v2.4.0 round 5 full ship)
+## Latest Session Summary (from 2026-07-15 — v2.5.0 round 6 elite release)
+
+**Chat topic:** Round 6 upgrades 276–300 → v2.5.0 ship.
+
+**Finished this session:**
+- **i18n 241 keys** × EN/FR/DE/ES — pitch, map, education headings, errors, onboarding, SW toast
+- **HtmlLangSync** — `document.documentElement.lang` follows locale
+- **PWA** `stranded-v6` + improved SW update toast with version label
+- **Layout** theme-color #243447 + apple touch icons; home prefetch /map + /pitch
+- **Libs** `site-search`, `mission-templates`, `performance` timing stub
+- **Onboarding tour** on map (dismissible); geolocate HUD button
+- E2E **+3** (onboarding dismiss, geolocate, recent sites in palette)
+- `docs/UPGRADES-201-300.md`, CHANGELOG [2.5.0], roadmap, diligence v2.5.0
+- `SESSION-SUMMARY-2026-07-15-v2.5.md` + `KIMI-HANDOFF-STRANDED-2026-07-15-v2.5.md`
+
+**Still to do:**
+- Kimi: sync when Cam says go — ingest v2.5.0 summaries + UPGRADES-201-300
+- GitHub release **v2.5.0** after push + deploy:check
+
+**Git State:**
+- SHA: `685e2ad`
+- Version: **2.5.0**
+- Branch: `main` · 1 commit ahead of origin
+- Pipeline: validate ✅ · test:helpers ✅ · build ✅ (26 pages) · e2e **14/14** ✅
+
+---
+
+## Session Summary (from 2026-07-15 — v2.4.0 round 5 full ship)
 
 **Chat topic:** whatsup recovery → all pending items + round 5 upgrades 151–200 → push.
 

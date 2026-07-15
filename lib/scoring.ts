@@ -63,12 +63,7 @@ export function explainStrandedScore(site: StrandedSite | { properties: Record<s
   return explainScore(props) as ScoreExplanation
 }
 
-export function scorePercentile(score: number, allScores: number[]): number {
-  if (!allScores.length) return 50
-  const sorted = [...allScores].sort((a, b) => a - b)
-  const below = sorted.filter(s => s < score).length
-  return Math.round((below / sorted.length) * 100)
-}
+export { scorePercentile, scoreBadgeLabel, scoreBadgeTier } from './percentile'
 
 /** Stranded Score™ v3 tiers — single source of truth for UI colors */
 export function scoreTier(score: number): 'elite' | 'high' | 'medium' | 'low' {
@@ -96,10 +91,3 @@ export function scoreTierColor(score: number): string {
   return '#f97316' // orange
 }
 
-export function scoreBadgeLabel(percentile: number): string {
-  if (percentile >= 95) return 'Top 5%'
-  if (percentile >= 90) return 'Top 10%'
-  if (percentile >= 75) return 'Top 25%'
-  if (percentile >= 50) return 'Top 50%'
-  return ''
-}

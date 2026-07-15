@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { downloadBlob } from '@/lib/export-formats'
+
+const DRAFT_KEY = 'stranded-certified-lead-draft'
 
 const FIELDS = [
   { key: 'name', label: 'Full name', type: 'text', required: true, autoComplete: 'name', placeholder: 'Jane Doe' },
@@ -20,6 +22,26 @@ export default function CertifiedLeadForm() {
   const [form, setForm] = useState<FormState>(empty)
   const [submitted, setSubmitted] = useState(false)
   const [lastLead, setLastLead] = useState<Record<string, string> | null>(null)
+  const [draftSaved, setDraftSaved] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<FormState>
+        setForm({ ...empty, ...parsed })
+        setDraftSaved(true)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    if (submitted) return
+    const hasContent = Object.values(form).some(v => v.trim())
+    if (!hasContent) return
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
+    setDraftSaved(true)
+  }, [form, submitted])
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,6 +56,8 @@ export default function CertifiedLeadForm() {
       localStorage.setItem('stranded-certified-leads', JSON.stringify([lead]))
     }
     setLastLead(lead)
+    localStorage.removeItem(DRAFT_KEY)
+    setDraftSaved(false)
     setSubmitted(true)
     toast.success('Saved on this device only', {
       description: 'Export JSON or open email draft — we are not notified automatically.',
@@ -88,6 +112,7 @@ export default function CertifiedLeadForm() {
       </div>
       <p className="text-xs text-gray-500 -mt-2">
         Submissions stay on your device until you export or email them. No server-side intake yet — this is not a live certified intake form.
+        {draftSaved && <span className="block mt-1 text-[#5BC0BE]">Draft autosaved locally.</span>}
       </p>
       {FIELDS.map(field => (
         <div key={field.key}>

@@ -4,9 +4,13 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, MapPin, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { EnrichedSite, scoreTierClass, effectiveGridKm } from '@/lib/sites'
+import { EnrichedSite, scoreTierClass } from '@/lib/sites'
+import { searchSites, SITE_SEARCH_PRESETS } from '@/lib/site-search'
+import { useLocale } from '@/lib/useLocale'
 import { getBookmarks } from '@/lib/bookmarks'
 import { PROVINCE_CODES } from '@/lib/provinces'
+import { getRecentCommands, recordRecentCommand } from '@/lib/command-history'
+import RecentSites from '@/components/RecentSites'
 import FocusTrap from './FocusTrap'
 
 interface CommandPaletteProps {
@@ -20,8 +24,10 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ sites, onSelectSite, open, onClose, loading = false, error = null, onRetry }: CommandPaletteProps) {
+  const { t } = useLocale()
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState<EnrichedSite[]>([])
+  const [recentCommands, setRecentCommands] = useState<ReturnType<typeof getRecentCommands>>([])
   const [selectedIdx, setSelectedIdx] = useState(0)
   const router = useRouter()
 
@@ -29,7 +35,8 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
   useEffect(() => {
     const saved = localStorage.getItem('stranded-recent')
     if (saved) setRecent(JSON.parse(saved))
-  }, [])
+    setRecentCommands(getRecentCommands())
+  }, [open])
 
   const saveRecent = (site: EnrichedSite) => {
     const updated = [site, ...recent.filter(r => r.id !== site.id)].slice(0, 5)
@@ -37,30 +44,19 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
     localStorage.setItem('stranded-recent', JSON.stringify(updated))
   }
 
-  const results = useMemo(() => {
-    if (!query.trim()) return sites.slice(0, 12)
-    const q = query.toLowerCase()
-    return sites
-      .filter(s => {
-        const p = s.properties
-        return (
-          (p.name || '').toLowerCase().includes(q) ||
-          (p.province || '').toLowerCase().includes(q) ||
-          (p.company || '').toLowerCase().includes(q) ||
-          String(s.id).includes(q)
-        )
-      })
-      .sort((a, b) => b.strandedScore - a.strandedScore)
-      .slice(0, 14)
-  }, [query, sites])
+  const searchMatches = useMemo(() => searchSites(sites, query, 14), [query, sites])
+  const matchTypes = useMemo(() => {
+    const map = new Map<string, string>()
+    searchMatches.forEach(m => map.set(m.site.id, m.matchType))
+    return map
+  }, [searchMatches])
 
-  // Preset quick actions (power-up for Command Palette)
-  const presets = [
-    { label: 'Elite Score (≥85)', filter: (s: EnrichedSite) => s.strandedScore >= 85 },
-    { label: 'High Score (≥65)', filter: (s: EnrichedSite) => s.strandedScore >= 65 },
-    { label: 'Top Emitters', filter: (s: EnrichedSite) => s.emission > 5000 },
-    { label: 'Near Grid (<10km)', filter: (s: EnrichedSite) => effectiveGridKm(s) < 10 },
-  ]
+  const results = useMemo(
+    () => (query.trim() ? searchMatches.map(m => m.site) : sites.slice(0, 12)),
+    [query, sites, searchMatches],
+  )
+
+  const presets = SITE_SEARCH_PRESETS
 
   const provinceJumps = PROVINCE_CODES.map(p => ({
     label: `${p.code} — ${p.name}`,
@@ -90,12 +86,19 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
     const updated = [site, ...recent.filter(r => r.id !== site.id)].slice(0, 5)
     setRecent(updated)
     localStorage.setItem('stranded-recent', JSON.stringify(updated))
+    recordRecentCommand({ id: `site:${site.id}`, label: site.properties.name || site.id, kind: 'site' })
     if (onSelectSite) {
       onSelectSite(site)
     } else {
       router.push(`/map?site=${encodeURIComponent(site.id)}`)
     }
   }, [onClose, onSelectSite, router, recent])
+
+  const runRoute = (href: string, label: string) => {
+    recordRecentCommand({ id: `route:${href}`, label, kind: 'route' })
+    onClose()
+    router.push(href)
+  }
 
   useEffect(() => { setSelectedIdx(0) }, [query, results.length])
 
@@ -145,7 +148,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
               data-autofocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search 2,611 sites by name, province, company... (⌘K)"
+              placeholder="Search by name, GHGRP ID (G12345), NAICS, province… (⌘K)"
               aria-label="Search sites by name, province, or company"
               className="flex-1 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none focus:ring-0"
             />
@@ -165,7 +168,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
               </div>
             )}
             {!loading && !error && results.length === 0 && (
-              <div className="px-5 py-8 text-center text-gray-400">No matches. Try a province or company name.</div>
+              <div className="px-5 py-8 text-center text-gray-400">{t('cmdNoMatches')}</div>
             )}
             {!loading && !error && results.map((site, idx) => {
               const p = site.properties
@@ -183,6 +186,10 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
                     <div className="font-medium text-white group-hover:text-[#FF8C00] truncate">{highlight ? <span>{p.name?.split(new RegExp(`(${query})`, 'i')).map((part, i) => part.toLowerCase() === query.toLowerCase() ? <mark key={i} className="bg-[#FF8C00]/40 text-white">{part}</mark> : part)}</span> : (p.name || 'Unnamed site')}</div>
                     <div className="text-xs text-gray-400 truncate">
                       {p.province} • {p.city || p.region || 'Remote'} • {p.source_type}
+                      {p.ghgrp_id && <span className="ml-1 text-[#5BC0BE]">{p.ghgrp_id}</span>}
+                      {p.naics_code && <span className="ml-1">NAICS {p.naics_code}</span>}
+                      {matchTypes.get(site.id) === 'ghgrp' && <span className="ml-1 text-[#FF8C00]">GHGRP match</span>}
+                      {matchTypes.get(site.id) === 'naics' && <span className="ml-1 text-[#FF8C00]">NAICS match</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-right">
@@ -205,7 +212,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
             <div className="text-[10px] text-gray-400 mb-2">PAGES</div>
             <div className="flex flex-wrap gap-2">
               {routes.map(r => (
-                <button key={r.href} onClick={() => { onClose(); router.push(r.href) }} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
+                <button key={r.href} onClick={() => runRoute(r.href, r.label)} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
                   {r.label}
                 </button>
               ))}
@@ -219,7 +226,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
                 <button
                   key={p.href}
                   type="button"
-                  onClick={() => { onClose(); router.push(p.href) }}
+                  onClick={() => runRoute(p.href, p.label)}
                   className="text-[10px] px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/25 text-[#5BC0BE]"
                 >
                   {p.label}
@@ -255,9 +262,48 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
               </>
             )}
 
+            <div className="mb-3">
+              <RecentSites
+                compact
+                max={8}
+                onSelect={entry => {
+                  const site = sites.find(s => s.id === entry.id)
+                  if (site) handleSelect(site)
+                  else runRoute(`/map?site=${encodeURIComponent(entry.id)}`, entry.name)
+                }}
+              />
+            </div>
+
+            {recentCommands.length > 0 && (
+              <>
+                <div className="text-[10px] text-gray-400 mb-2">RECENT COMMANDS</div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {recentCommands.map(cmd => (
+                    <button
+                      key={cmd.id + cmd.at}
+                      type="button"
+                      onClick={() => {
+                        if (cmd.kind === 'route') {
+                          const href = cmd.id.replace(/^route:/, '')
+                          runRoute(href, cmd.label)
+                        } else if (cmd.kind === 'site') {
+                          const siteId = cmd.id.replace(/^site:/, '')
+                          const site = sites.find(s => s.id === siteId)
+                          if (site) handleSelect(site)
+                        }
+                      }}
+                      className="text-[10px] px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10 truncate max-w-[160px]"
+                    >
+                      {cmd.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
             {recent.length > 0 && (
               <>
-                <div className="text-[10px] text-gray-400 mb-2">RECENT</div>
+                <div className="text-[10px] text-gray-400 mb-2">LEGACY RECENT</div>
                 <div className="flex flex-wrap gap-2">
                   {recent.map((site, i) => (
                     <button key={i} onClick={() => handleSelect(site)} className="text-xs px-2 py-1 bg-white/5 hover:bg-[#FF8C00]/20 rounded border border-white/10 truncate max-w-[140px]">

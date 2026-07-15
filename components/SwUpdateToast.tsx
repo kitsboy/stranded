@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
+import { useLocale } from '@/lib/useLocale'
 
 export default function SwUpdateToast() {
-  const [waiting, setWaiting] = useState<ServiceWorker | null>(null)
+  const { t } = useLocale()
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
+
+    let toastId: string | number | undefined
 
     navigator.serviceWorker.register('/sw.js').then(reg => {
       reg.addEventListener('updatefound', () => {
@@ -15,17 +18,24 @@ export default function SwUpdateToast() {
         if (!worker) return
         worker.addEventListener('statechange', () => {
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            setWaiting(worker)
-            toast('New version available', {
-              description: 'Refresh to get the latest Stranded data.',
-              action: { label: 'Refresh', onClick: () => window.location.reload() },
+            if (toastId != null) toast.dismiss(toastId)
+            toastId = toast(t('swUpdateTitle'), {
+              description: t('swUpdateDesc'),
+              action: {
+                label: t('swUpdateAction'),
+                onClick: () => {
+                  worker.postMessage({ type: 'SKIP_WAITING' })
+                  window.location.reload()
+                },
+              },
               duration: Infinity,
+              id: 'stranded-sw-update',
             })
           }
         })
       })
     }).catch(() => {})
-  }, [])
+  }, [t])
 
   return null
 }

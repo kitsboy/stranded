@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.5.0] — 2026-07-15
+
+### Added (upgrades 276–300, round 6 elite release)
+- **276** — i18n expansion to **241 keys** × EN/FR/DE/ES (education intro, pitch CTAs, map controls, errors, onboarding, SW toast)
+- **277** — `HtmlLangSync` — `document.documentElement.lang` follows locale
+- **278** — Pitch page wired to i18n (hero, stats, charts, CTAs)
+- **279** — Map command center labels + toasts i18n; geolocate HUD button
+- **280** — Education top 20 section headings i18n
+- **281** — `meta theme-color` #243447 in root layout
+- **282** — Apple touch icon link tags (`/logo.png`)
+- **283** — Home hero prefetch `/map` + `/pitch`
+- **284** — PWA cache `stranded-v6`; SW update toast with version + refresh action
+- **285** — Non-hero home flywheel image `loading="lazy"`
+- **286** — Map dynamic import verified (`ssr: false` on `/map`)
+- **287** — `lib/performance.ts` navigation timing marks stub
+- **288–290** — E2E: onboarding tour dismiss, geolocate button, recent sites in palette
+- **291** — `test:helpers` cases: `scorePercentile`, `site-search`, `mission-templates`
+- **292–300** — `UPGRADES-201-300.md`, roadmap round 6, diligence v2.5.0, handoff pack
+
+### New libs
+- `lib/site-search.ts` — ranked site search + presets
+- `lib/mission-templates.ts` — elite/regional mission templates
+- `components/OnboardingTour.tsx` — first-visit map tour (dismissible)
+
 ## [2.4.0] — 2026-07-15
 
 ### Added (upgrades 151–200, round 5)

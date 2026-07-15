@@ -8,7 +8,7 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-07-15 — **v2.4.0** live (round 5 upgrades 151–200: grant quiz, choropleth, compare/print, bookmarks export, watch toasts, halving slider, docs pack). See `SESSION-SUMMARY-2026-07-15.md` + `docs/UPGRADES-151-200.md`.
+**Last Major Update:** 2026-07-15 — **v2.5.0** live (round 6 upgrades 276–300: 241-key i18n, PWA v6, onboarding tour, site-search, mission-templates, E2E + docs pack). See `SESSION-SUMMARY-2026-07-15-v2.5.md` + `docs/UPGRADES-201-300.md`.
 
 **Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
 **Local dev:** http://localhost:3003  
@@ -83,7 +83,7 @@ This file + README.md + the live app + Marketing assets are the primary current 
 **Template Rule:** Every future Give A Bit project must include at least this level of documentation: GitHub source, live URLs (dev + prod), deployment details, key docs list, simple pitch, Git snapshot, mission alignment, gaps, and clean hand-off note.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-15T18:56:42.446Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-15T19:41:25.613Z
 
 | Metric | Value |
 |--------|-------|

@@ -14,7 +14,7 @@ tags: [diligence, pitch, mvp, giveabit]
 ---
 # Stranded Value — Investor / Partner One-Pager
 
-**Live:** [https://stranded.giveabit.io](https://stranded.giveabit.io) · **GitHub:** [https://github.com/kitsboy/stranded](https://github.com/kitsboy/stranded) · **Version:** `2.4.0` · **Status:** LIVE
+**Live:** [https://stranded.giveabit.io](https://stranded.giveabit.io) · **GitHub:** [https://github.com/kitsboy/stranded](https://github.com/kitsboy/stranded) · **Version:** `2.5.0` · **Status:** LIVE
 
 ## One sentence
 Turn stranded methane into Bitcoin — 2,611 sites, real economics.
@@ -33,6 +33,11 @@ Live data product + research track
 
 ## Traction (honest)
 Live product; 2,611-site dataset; E2E history; EU funding research notes.
+
+## v2.5.0 feature highlights (2026-07-15)
+- 241-key i18n (EN/FR/DE/ES) on pitch, map, education headings
+- PWA cache v6, onboarding tour, geolocate HUD, site-search + mission templates
+- theme-color + apple touch icons; home route prefetch
 
 ## v2.4.0 feature highlights (2026-07-15)
 - Grant matcher quiz + CETA funding pathway

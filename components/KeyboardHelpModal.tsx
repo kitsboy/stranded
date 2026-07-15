@@ -4,12 +4,14 @@ import { X } from 'lucide-react'
 import FocusTrap from './FocusTrap'
 
 const SHORTCUTS = [
-  { keys: '⌘K', action: 'Open command palette' },
+  { keys: '⌘K', action: 'Open command palette (fuzzy search)' },
   { keys: '⌘F', action: 'Reset map filters' },
   { keys: 'Shift+M', action: 'Add selected site to mission' },
+  { keys: 'J / K', action: 'Next / previous site in filtered list' },
   { keys: '↑↓ ⏎', action: 'Navigate & select in palette' },
-  { keys: 'ESC', action: 'Close panels / palette' },
+  { keys: 'ESC', action: 'Close panels / palette / modals' },
   { keys: '?', action: 'Show this help' },
+  { keys: 'FAB +', action: 'Map quick actions: Near me, share view, reset' },
 ]
 
 export default function KeyboardHelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -37,7 +39,7 @@ export default function KeyboardHelpModal({ open, onClose }: { open: boolean; on
           <ul className="space-y-2 text-sm">
             {SHORTCUTS.map(s => (
               <li key={s.keys} className="flex justify-between gap-4">
-                <kbd className="px-2 py-0.5 rounded bg-white/10 font-mono text-xs">{s.keys}</kbd>
+                <kbd className="px-2 py-0.5 rounded bg-white/10 font-mono text-xs shrink-0">{s.keys}</kbd>
                 <span className="text-gray-400 text-right">{s.action}</span>
               </li>
             ))}

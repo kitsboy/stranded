@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
@@ -20,8 +20,11 @@ interface MapProps {
   showTerrain?: boolean
   showHeatmap?: boolean
   showChoropleth?: boolean
+  heatmapOpacity?: number
+  terrainExaggeration?: number
   liveBtcPrice?: number
   radiusOverlay?: { lat: number; lng: number; radiusKm: number } | null
+  centerTarget?: { lat: number; lng: number; zoom?: number } | null
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -59,6 +62,7 @@ function sitesToGeoJSON(sites: EnrichedSite[]): GeoJSON.FeatureCollection {
       geometry: { type: 'Point', coordinates: s.geometry.coordinates },
       properties: {
         id: s.id,
+        name: s.properties?.name || s.id,
         score: s.strandedScore,
         emission: s.emission,
       },
@@ -77,15 +81,22 @@ export default function Map({
   showTerrain = false,
   showHeatmap = false,
   showChoropleth = false,
+  heatmapOpacity = 0.75,
+  terrainExaggeration = 1,
   liveBtcPrice = 85000,
   radiusOverlay = null,
+  centerTarget = null,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
+  const minimapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
+  const minimapRef = useRef<maplibregl.Map | null>(null)
   const markersRef = useRef<maplibregl.Marker[]>([])
   const sitesRef = useRef(filteredSites)
   const onSiteClickRef = useRef(onSiteClick)
   const nativeHandlersAttached = useRef(false)
+  const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 55.8, lng: -95.5 })
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
@@ -106,30 +117,46 @@ export default function Map({
     if (nativeHandlersAttached.current) return
     nativeHandlersAttached.current = true
 
-    map.on('click', CLUSTER_LAYER, (e) => {
+    const showHoverPopup = (html: string, coords: [number, number]) => {
+      if (!hoverPopupRef.current) {
+        hoverPopupRef.current = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          className: 'stranded-hover-popup',
+          offset: 12,
+        })
+      }
+      hoverPopupRef.current.setLngLat(coords).setHTML(html).addTo(map)
+    }
+    const hideHoverPopup = () => {
+      hoverPopupRef.current?.remove()
+    }
+
+    map.on('mouseenter', CLUSTER_LAYER, (e) => {
+      map.getCanvas().style.cursor = 'pointer'
       const feature = e.features?.[0]
       if (!feature) return
-      const clusterId = feature.properties?.cluster_id
+      const count = feature.properties?.point_count
       const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
-      const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource
-      if (clusterId == null) return
-      source.getClusterExpansionZoom(clusterId).then((zoom) => {
-        map.easeTo({ center: coords, zoom })
-      }).catch(() => {})
+      showHoverPopup(
+        `<div class="text-xs font-medium">${count} sites</div><div class="text-[10px] text-gray-400">Click to expand cluster</div>`,
+        coords,
+      )
     })
-
-    map.on('click', UNCLUSTERED_LAYER, (e) => {
+    map.on('mouseleave', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
+    map.on('mouseenter', UNCLUSTERED_LAYER, (e) => {
+      map.getCanvas().style.cursor = 'pointer'
       const feature = e.features?.[0]
-      const siteId = feature?.properties?.id
-      if (!siteId) return
-      const site = sitesRef.current.find(s => s.id === siteId)
-      if (site) onSiteClickRef.current(site)
+      if (!feature) return
+      const name = feature.properties?.name || 'Site'
+      const score = feature.properties?.score ?? '—'
+      const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+      showHoverPopup(
+        `<div class="text-xs font-semibold truncate max-w-[180px]">${name}</div><div class="text-[10px]">Score <span class="text-[#FF8C00] font-mono">${score}</span></div>`,
+        coords,
+      )
     })
-
-    map.on('mouseenter', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = 'pointer' })
-    map.on('mouseleave', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = '' })
-    map.on('mouseenter', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = 'pointer' })
-    map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = '' })
+    map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
   }, [])
 
   const ensureNativeLayers = useCallback((map: maplibregl.Map) => {
@@ -331,10 +358,30 @@ export default function Map({
     }
     if (showTerrain !== layers.terrain) {
       map.setPitch(showTerrain ? 50 : 0)
+      if (showTerrain && terrainExaggeration > 0) {
+        if (!map.getSource('terrain')) return
+        map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
+        if (!map.getLayer('hillshade')) {
+          map.addLayer({
+            id: 'hillshade',
+            type: 'hillshade',
+            source: 'terrain',
+            paint: { 'hillshade-exaggeration': 0.4 },
+          }, 'osm')
+        }
+      } else {
+        map.setTerrain(null)
+        if (map.getLayer('hillshade')) map.removeLayer('hillshade')
+      }
       layers.terrain = showTerrain
+    } else if (showTerrain && map.getTerrain()) {
+      map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
+      if (map.getLayer('hillshade')) {
+        map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrainExaggeration * 0.4)
+      }
     }
     ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
-  }, [showSatellite, showTerrain])
+  }, [showSatellite, showTerrain, terrainExaggeration])
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -361,8 +408,28 @@ export default function Map({
     ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain }
     mapRef.current = map
 
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right')
+    map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left')
+
+    map.on('mousemove', (e) => {
+      setMapCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+    })
+    map.on('move', () => {
+      const c = map.getCenter()
+      setMapCenter({ lat: c.lat, lng: c.lng })
+      if (minimapRef.current && !minimapRef.current.isMoving()) {
+        minimapRef.current.setCenter(map.getCenter())
+        minimapRef.current.setZoom(Math.max(map.getZoom() - 4, 0))
+      }
+    })
+
     return () => {
+      hoverPopupRef.current?.remove()
       clearMarkers()
+      if (minimapRef.current) {
+        minimapRef.current.remove()
+        minimapRef.current = null
+      }
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null
@@ -453,8 +520,9 @@ export default function Map({
     }
     if (map.getLayer('emission-heat-layer')) {
       map.setLayoutProperty('emission-heat-layer', 'visibility', showHeatmap ? 'visible' : 'none')
+      map.setPaintProperty('emission-heat-layer', 'heatmap-opacity', heatmapOpacity)
     }
-  }, [showHeatmap])
+  }, [showHeatmap, heatmapOpacity])
 
   useEffect(() => {
     syncChoropleth()
@@ -576,13 +644,88 @@ export default function Map({
     })
   }, [selectedId, filteredSites])
 
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !centerTarget) return
+    map.flyTo({
+      center: [centerTarget.lng, centerTarget.lat],
+      zoom: centerTarget.zoom ?? Math.max(map.getZoom(), 8),
+      speed: 1.2,
+      essential: true,
+    })
+  }, [centerTarget])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.getLayer('emission-heat-layer')) return
+    map.setPaintProperty('emission-heat-layer', 'heatmap-opacity', heatmapOpacity)
+  }, [heatmapOpacity])
+
+  useEffect(() => {
+    if (!minimapContainer.current || minimapRef.current) return
+    const main = mapRef.current
+    if (!main) return
+
+    const mini = new maplibregl.Map({
+      container: minimapContainer.current,
+      style: {
+        version: 8,
+        sources: {
+          osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 },
+        },
+        layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+      },
+      center: main.getCenter(),
+      zoom: Math.max(main.getZoom() - 4, 0),
+      interactive: false,
+      attributionControl: false,
+    })
+    minimapRef.current = mini
+
+    const box = document.createElement('div')
+    box.className = 'absolute border-2 border-[#FF8C00]/80 bg-[#FF8C00]/10 pointer-events-none'
+    const updateBox = () => {
+      if (!minimapRef.current || !mapRef.current) return
+      const b = mapRef.current.getBounds()
+      const sw = minimapRef.current.project(b.getSouthWest())
+      const ne = minimapRef.current.project(b.getNorthEast())
+      box.style.left = `${Math.min(sw.x, ne.x)}px`
+      box.style.top = `${Math.min(sw.y, ne.y)}px`
+      box.style.width = `${Math.abs(ne.x - sw.x)}px`
+      box.style.height = `${Math.abs(ne.y - sw.y)}px`
+    }
+    mini.on('load', () => {
+      minimapContainer.current?.appendChild(box)
+      updateBox()
+    })
+    main.on('move', updateBox)
+
+    return () => {
+      box.remove()
+      mini.remove()
+      minimapRef.current = null
+    }
+  }, [])
+
   return (
-    <div
-      ref={mapContainer}
-      className="w-full h-full touch-manipulation"
-      style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
-      role="application"
-      aria-label="Interactive map of stranded methane sites"
-    />
+    <div className="relative w-full h-full">
+      <div
+        ref={mapContainer}
+        className="w-full h-full touch-manipulation"
+        style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
+        role="application"
+        aria-label="Interactive map of stranded methane sites"
+      />
+      <div className="absolute top-[7.5rem] right-3 z-[12] pointer-events-none">
+        <div className="glass px-2 py-1 rounded-lg border border-white/15 text-[10px] font-mono text-gray-300 tabular-nums">
+          {mapCenter.lat.toFixed(4)}°, {mapCenter.lng.toFixed(4)}°
+        </div>
+      </div>
+      <div
+        ref={minimapContainer}
+        className="absolute bottom-14 left-3 z-[12] w-28 h-20 rounded-lg border border-white/20 overflow-hidden shadow-lg bg-[#1e293b]/90 hidden sm:block"
+        aria-hidden
+      />
+    </div>
   )
 }

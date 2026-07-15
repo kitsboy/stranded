@@ -29,7 +29,7 @@ export default function BenchmarksPage() {
   }, [])
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="page-container page-container--wide">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Benchmarks' }]} />
       <h1 className="text-4xl font-bold tracking-tighter mb-2">Performance Benchmarks</h1>
       <p className="text-gray-400 mb-8">Static export targets — measured on this device.</p>

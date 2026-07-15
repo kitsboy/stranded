@@ -1,8 +1,9 @@
 import { StrandedSite } from '@/types/site'
 import {
-  computeStrandedScore, scorePercentile, scoreBadgeLabel, scoreTierClass, scoreTierColor, scoreTier,
+  computeStrandedScore, scoreTierClass, scoreTierColor, scoreTier,
   effectiveGridKm, effectiveInternetFactor, hasMeasuredGrid, hasStrongConnectivity,
 } from './scoring'
+import { scorePercentile, scoreBadgeLabel } from './percentile'
 
 export type EnrichedSite = StrandedSite & {
   id: string

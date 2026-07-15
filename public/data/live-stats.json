@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-15T18:56:42.446Z",
-  "version": "2.4.0",
-  "buildId": "20260715185642",
+  "generatedAt": "2026-07-15T19:41:25.613Z",
+  "version": "2.5.0",
+  "buildId": "20260715194125",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
@@ -332,5 +332,48 @@
     "production": "https://stranded.giveabit.io",
     "github": "https://github.com/kitsboy/stranded",
     "dataSource": "https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
-  }
+  },
+  "ecccReportingYear": 2023,
+  "scoreHistogram": [
+    {
+      "bucket": "0–9",
+      "count": 0
+    },
+    {
+      "bucket": "10–19",
+      "count": 0
+    },
+    {
+      "bucket": "20–29",
+      "count": 0
+    },
+    {
+      "bucket": "30–39",
+      "count": 0
+    },
+    {
+      "bucket": "40–49",
+      "count": 262
+    },
+    {
+      "bucket": "50–59",
+      "count": 1042
+    },
+    {
+      "bucket": "60–69",
+      "count": 935
+    },
+    {
+      "bucket": "70–79",
+      "count": 264
+    },
+    {
+      "bucket": "80–89",
+      "count": 103
+    },
+    {
+      "bucket": "90–99",
+      "count": 5
+    }
+  ]
 }

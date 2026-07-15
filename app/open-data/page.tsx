@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function OpenDataPage() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10 prose prose-invert">
+    <div className="page-container prose prose-invert">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Open Data' }]} />
       <h1 className="text-4xl font-bold tracking-tighter not-prose">Open Data</h1>
       <p className="text-gray-400 not-prose mb-8">Public static endpoints. No auth. Updated on every production build.</p>

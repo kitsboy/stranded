@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { MapPin, Star, Download } from 'lucide-react'
+import { MapPin, Star, Download, X } from 'lucide-react'
 import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
 import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
@@ -61,6 +61,15 @@ export default function AllSitesExplorer() {
 
   const provinces = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.province))).filter(Boolean).sort(), [allSites])
   const sources = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.source_type))).filter(Boolean).sort(), [allSites])
+
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; clear: () => void }[] = []
+    if (search.trim()) chips.push({ key: 'search', label: `Search: "${search.trim()}"`, clear: () => setSearch('') })
+    if (provinceFilter) chips.push({ key: 'province', label: provinceFilter, clear: () => setProvinceFilter('') })
+    if (sourceFilter) chips.push({ key: 'source', label: sourceFilter, clear: () => setSourceFilter('') })
+    if (minScoreFilter > 0) chips.push({ key: 'score', label: `Score ≥ ${minScoreFilter}`, clear: () => setMinScoreFilter(0) })
+    return chips
+  }, [search, provinceFilter, sourceFilter, minScoreFilter])
 
   const exportFiltered = () => {
     const blob = new Blob([JSON.stringify(filtered.map(s => ({...s.properties, strandedScore: s.strandedScore, id: s.id})), null, 2)], {type: 'application/json'})
@@ -124,6 +133,30 @@ export default function AllSitesExplorer() {
       <div className="mb-4 max-w-md">
         <ScoreLegend />
       </div>
+
+      {activeChips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="text-[10px] uppercase tracking-wider text-gray-500">Active filters</span>
+          {activeChips.map(chip => (
+            <button
+              key={chip.key}
+              type="button"
+              onClick={chip.clear}
+              className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full border border-[#FF8C00]/40 bg-[#FF8C00]/10 text-[#FF8C00] hover:bg-[#FF8C00]/20"
+            >
+              {chip.label}
+              <X size={12} />
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setProvinceFilter(''); setSourceFilter(''); setMinScoreFilter(0) }}
+            className="text-[10px] text-gray-400 hover:text-white underline"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6 sticky top-14 z-20 bg-[var(--bg-dark)] py-3 -mx-1 px-1">

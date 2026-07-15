@@ -65,3 +65,39 @@ test('province print page loads', async ({ page }) => {
   await expect(page.getByText(/Executive One-Pager|Alberta/i).first()).toBeVisible({ timeout: 15000 })
   await expect(page.getByRole('button', { name: /Print/i })).toBeVisible()
 })
+
+test('onboarding tour dismisses', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.removeItem('stranded-onboarding-dismissed'))
+  await page.goto('/map')
+  await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 30000 })
+  const tour = page.getByTestId('onboarding-tour')
+  await expect(tour).toBeVisible({ timeout: 30000 })
+  await page.getByRole('button', { name: /Got it|explorons|los geht|exploremos/i }).click()
+  await expect(tour).not.toBeVisible({ timeout: 5000 })
+})
+
+test('map geolocation button present', async ({ page }) => {
+  await page.goto('/map')
+  await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 15000 })
+})
+
+test('recent sites in command palette', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.goto('/map')
+  await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 45000 })
+  await page.evaluate(() => {
+    localStorage.setItem('stranded-recent-sites-v2', JSON.stringify([{
+      id: 'G10161',
+      name: 'Recent palette site',
+      province: 'Alberta',
+      score: 88,
+      visitedAt: new Date().toISOString(),
+    }]))
+  })
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('open-command-palette')))
+  await expect(page.locator('.command-palette')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByTestId('cmd-recent-sites')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByText('Recent palette site')).toBeVisible()
+})

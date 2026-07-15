@@ -57,6 +57,8 @@ function main() {
   let highScoreCount = 0
 
   const topSites = []
+  let maxReferenceYear = 0
+  const scoreBuckets = Array.from({ length: 10 }, (_, i) => ({ bucket: `${i * 10}–${i * 10 + 9}`, count: 0 }))
 
   for (const f of features) {
     const p = f.properties
@@ -79,6 +81,10 @@ function main() {
     scoreSum += score
     totalGeneratorKW += computeGeneratorPower(emission)
     if (score >= 80) highScoreCount++
+    const refYear = p.reference_year || 0
+    if (refYear > maxReferenceYear) maxReferenceYear = refYear
+    const bucketIdx = Math.min(Math.floor(score / 10), 9)
+    scoreBuckets[bucketIdx].count++
 
     topSites.push({
       id: p.ghgrp_id || p.id,
@@ -165,6 +171,8 @@ function main() {
       github: 'https://github.com/kitsboy/stranded',
       dataSource: 'https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823',
     },
+    ecccReportingYear: maxReferenceYear || 2023,
+    scoreHistogram: scoreBuckets,
   }
 
   fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true })

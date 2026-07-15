@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
+import { SENSITIVITY_PRESETS, type SensitivityPresetId, applyPresetRevenueBand } from '@/lib/sensitivity-presets'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -106,28 +109,33 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
 
 function PitchContent() {
   const searchParams = useSearchParams()
+  const { locale, t } = useLocale()
   const embedParam = searchParams.get('embed')
-  const embed = embedParam === '1' || embedParam === '2'
-  const embedMinimal = embedParam === '2'
+  const present = searchParams.get('present') === '1'
+  const embed = embedParam === '1' || embedParam === '2' || present
+  const embedMinimal = embedParam === '2' || present
   const [stats, setStats] = useState<LiveStats | null>(null)
   const btc = useBtcUsd()
   const [error, setError] = useState('')
   const [btcSensitivity, setBtcSensitivity] = useState(100)
+  const [activePreset, setActivePreset] = useState<SensitivityPresetId>('base')
 
   useEffect(() => {
     if (embed) document.documentElement.classList.add('pitch-embed')
     if (embedMinimal) document.documentElement.classList.add('pitch-embed-2')
+    if (present) document.documentElement.classList.add('pitch-present')
     return () => {
       document.documentElement.classList.remove('pitch-embed')
       document.documentElement.classList.remove('pitch-embed-2')
+      document.documentElement.classList.remove('pitch-present')
     }
-  }, [embed, embedMinimal])
+  }, [embed, embedMinimal, present])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
       .then(r => { if (!r.ok) throw new Error('stats missing'); return r.json() })
       .then(setStats)
-      .catch(() => setError('Run npm run build to generate live-stats.json'))
+      .catch(() => setError(t('pitchStatsError')))
   }, [])
 
   useEffect(() => {
@@ -168,8 +176,18 @@ function PitchContent() {
   const monteCarlo = useMemo(() => {
     if (!stats) return { low: 0, mid: 0, high: 0 }
     const base = stats.valueModel.annualRevenueUsd
-    return { low: Math.round(base * 0.6), mid: base, high: Math.round(base * 1.8) }
+    return {
+      low: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.bear),
+      mid: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.base),
+      high: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.bull),
+    }
   }, [stats])
+
+  const applySensitivityPreset = (id: SensitivityPresetId) => {
+    const preset = SENSITIVITY_PRESETS[id]
+    setActivePreset(id)
+    setBtcSensitivity(Math.round(preset.btcMultiplier * 100))
+  }
 
   const tierItems = useMemo(() => {
     if (!stats) return []
@@ -197,12 +215,12 @@ function PitchContent() {
   if (!stats) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading live platform data…</div>
+        <div className="animate-pulse text-gray-400">{t('pitchLoading')}</div>
       </div>
     )
   }
 
-  const t = stats.totals
+  const totals = stats.totals
   const i = stats.impact
 
   return (
@@ -213,27 +231,27 @@ function PitchContent() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_#5BC0BE18_0%,_transparent_50%)]" />
         <div className="relative max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] text-xs tracking-widest mb-6 border border-[#FF8C00]/25">
-            LIVE PITCH · AUTO-UPDATING · {new Date(stats.generatedAt).toLocaleDateString('en-CA')}
+            {t('pitchLiveBadge')} · {new Date(stats.generatedAt).toLocaleDateString('en-CA')}
           </motion.div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">
-            <span className="text-[#FF8C00]">Stranded Value</span>
+            <span className="text-[#FF8C00]">{t('pitchTitle')}</span>
             <br />
-            <span className="text-3xl md:text-4xl text-gray-300 font-medium">Investor & Partner Pitch</span>
+            <span className="text-3xl md:text-4xl text-gray-300 font-medium">{t('pitchSubtitle')}</span>
           </h1>
           <p className="max-w-2xl mx-auto text-lg text-gray-400 mb-8">
-            {fmt(stats.siteCount)} verified methane sites · {stats.provinceCount} provinces · real ECCC data · honest generator + BTC economics
+            {tf(locale, 'pitchHeroDesc', { count: fmt(stats.siteCount), provinces: String(stats.provinceCount) })}
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/map" className="px-6 py-3 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold hover:bg-[#FF8C00]/90 transition">Open Live Map →</Link>
-            <Link href="/Marketing-Hub.html" className="px-6 py-3 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 transition">Marketing Hub</Link>
-            <button onClick={() => window.print()} className="no-print px-6 py-3 rounded-xl border border-white/25 hover:bg-white/10 transition">Print / PDF</button>
+            <Link href="/map" className="px-6 py-3 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold hover:bg-[#FF8C00]/90 transition">{t('pitchOpenMap')}</Link>
+            <Link href="/Marketing-Hub.html" className="px-6 py-3 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 transition">{t('pitchMarketingHub')}</Link>
+            <button onClick={() => window.print()} className="no-print px-6 py-3 rounded-xl border border-white/25 hover:bg-white/10 transition">{t('pitchPrintPdf')}</button>
           </div>
         </div>
       </section>
 
       {/* Province choropleth (simplified Canada) */}
       <section className="px-6 py-10 max-w-6xl mx-auto pitch-print">
-        <h2 className="text-xl font-bold mb-4">Canada Site Density</h2>
+        <h2 className="text-xl font-bold mb-4">{t('pitchSiteDensity')}</h2>
         <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
           {stats.provinces.map((p, i) => (
             <div key={p.name} className="rounded-xl p-3 text-center border transition hover:scale-105" style={{ backgroundColor: COLORS[i % COLORS.length] + '33', borderColor: COLORS[i % COLORS.length] }}>
@@ -249,26 +267,26 @@ function PitchContent() {
       {/* Headline stats */}
       <section className="border-y border-white/10 bg-black/25 px-6 py-10 pitch-print">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <StatCard label="Verified Sites" value={fmt(stats.siteCount)} accent="#FF8C00" />
-          <StatCard label="Daily Methane" value={`${fmt(t.emissionKgDay)} kg`} sub="aggregate vent rate" accent="#5BC0BE" />
-          <StatCard label="CH₄ / Year" value={`${fmt(t.ch4TonnesYear)} t`} accent="#A78BFA" />
-          <StatCard label="Avg Score" value={String(t.avgStrandedScore)} sub={`${t.highScoreSites} sites ≥80`} accent="#34D399" />
-          <StatCard label="Live BTC" value={fmtUsd(btc)} sub="refreshes every 60s" accent="#FBBF24" />
-          <StatCard label="Model Revenue" value={fmtUsd(liveRevenue)} sub="full portfolio @ live BTC" accent="#F472B6" />
+          <StatCard label={t('pitchVerifiedSites')} value={fmt(stats.siteCount)} accent="#FF8C00" />
+          <StatCard label={t('pitchDailyMethane')} value={`${fmt(totals.emissionKgDay)} kg`} sub="aggregate vent rate" accent="#5BC0BE" />
+          <StatCard label={t('pitchCh4Year')} value={`${fmt(totals.ch4TonnesYear)} t`} accent="#A78BFA" />
+          <StatCard label={t('pitchAvgScore')} value={String(totals.avgStrandedScore)} sub={`${totals.highScoreSites} sites ≥80`} accent="#34D399" />
+          <StatCard label={t('pitchLiveBtc')} value={fmtUsd(btc)} sub="refreshes every 60s" accent="#FBBF24" />
+          <StatCard label={t('pitchModelRevenue')} value={fmtUsd(liveRevenue)} sub="full portfolio @ live BTC" accent="#F472B6" />
         </div>
       </section>
 
       {/* Charts row 1 */}
       <section className="px-6 py-14 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-2">Geography & Scale</h2>
-        <p className="text-gray-500 text-sm mb-8">Province distribution and emission tiers — sourced from live-stats.json on every build</p>
+        <h2 className="text-2xl font-bold mb-2">{t('pitchGeographyScale')}</h2>
+        <p className="text-gray-500 text-sm mb-8">{t('pitchGeoDesc')}</p>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-            <h3 className="text-sm font-semibold text-[#5BC0BE] mb-4 uppercase tracking-wider">Sites by Province</h3>
+            <h3 className="text-sm font-semibold text-[#5BC0BE] mb-4 uppercase tracking-wider">{t('pitchSitesByProvince')}</h3>
             <BarChart items={stats.provinces.map(p => ({ label: p.name, value: p.count, pct: p.pct }))} />
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-            <h3 className="text-sm font-semibold text-[#FF8C00] mb-4 uppercase tracking-wider">Emission Tiers</h3>
+            <h3 className="text-sm font-semibold text-[#FF8C00] mb-4 uppercase tracking-wider">{t('pitchEmissionTiers')}</h3>
             <BarChart items={tierItems} />
           </div>
         </div>
@@ -299,19 +317,32 @@ function PitchContent() {
       {/* BTC Sensitivity + Monte Carlo */}
       <section className="px-6 py-10 max-w-4xl mx-auto pitch-print">
         <h2 className="text-xl font-bold mb-4">Sensitivity Analysis</h2>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(Object.keys(SENSITIVITY_PRESETS) as SensitivityPresetId[]).map(id => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => applySensitivityPreset(id)}
+              className={`text-xs px-3 py-1.5 rounded-full border ${activePreset === id ? 'border-[#FF8C00] bg-[#FF8C00]/15 text-[#FF8C00]' : 'border-white/15 text-gray-400 hover:border-white/30'}`}
+            >
+              {SENSITIVITY_PRESETS[id].label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-gray-500 mb-2">{SENSITIVITY_PRESETS[activePreset].description}</p>
         <label className="text-xs text-gray-400">BTC price scenario: {btcSensitivity}% of live (${adjustedBtc.toLocaleString()})</label>
         <input type="range" min={40} max={200} value={btcSensitivity} onChange={e => setBtcSensitivity(+e.target.value)} className="w-full accent-[#FBBF24] mt-2" />
         <div className="grid grid-cols-3 gap-4 mt-6 text-center text-sm">
-          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4"><div className="text-gray-400">Bear</div><div className="text-xl font-bold text-red-400">{fmtUsd(monteCarlo.low)}</div></div>
-          <div className="rounded-xl border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-4"><div className="text-gray-400">Base</div><div className="text-xl font-bold text-[#FF8C00]">{fmtUsd(monteCarlo.mid)}</div></div>
-          <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4"><div className="text-gray-400">Bull</div><div className="text-xl font-bold text-green-400">{fmtUsd(monteCarlo.high)}</div></div>
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4"><div className="text-gray-400">{t('pitchBear')}</div><div className="text-xl font-bold text-red-400">{fmtUsd(monteCarlo.low)}</div></div>
+          <div className="rounded-xl border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-4"><div className="text-gray-400">{t('pitchBase')}</div><div className="text-xl font-bold text-[#FF8C00]">{fmtUsd(monteCarlo.mid)}</div></div>
+          <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4"><div className="text-gray-400">{t('pitchBull')}</div><div className="text-xl font-bold text-green-400">{fmtUsd(monteCarlo.high)}</div></div>
         </div>
       </section>
 
       {/* Impact + Value */}
       <section className="border-y border-white/10 bg-gradient-to-r from-[#FF8C00]/08 via-transparent to-[#5BC0BE]/08 px-6 py-14 pitch-print">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center">Climate + Capital Impact</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">{t('pitchClimateImpact')}</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-6 text-center">
               <div className="text-4xl font-bold text-[#5BC0BE] tabular-nums">{fmt(i.co2eAvoided5PctTonnes)}</div>
@@ -330,7 +361,7 @@ function PitchContent() {
           </div>
           <div className="mt-8 grid md:grid-cols-2 gap-4 text-sm text-gray-400">
             <div className="rounded-xl border border-white/10 p-4">
-              <span className="text-white font-medium">Generator capacity:</span> {fmt(t.totalGeneratorKW)} kW estimated across portfolio (Jenbacher-class derate model)
+              <span className="text-white font-medium">Generator capacity:</span> {fmt(totals.totalGeneratorKW)} kW estimated across portfolio (Jenbacher-class derate model)
             </div>
             <div className="rounded-xl border border-white/10 p-4">
               <span className="text-white font-medium">Data confidence:</span> High {stats.confidenceCounts.high || 0} · Medium {stats.confidenceCounts.medium || 0} · Low {stats.confidenceCounts.low || 0}
@@ -341,8 +372,8 @@ function PitchContent() {
 
       {/* Top sites table */}
       <section className="px-6 py-14 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-2">Top Opportunities</h2>
-        <p className="text-gray-500 text-sm mb-6">Highest Stranded Score — click through to live map ROI</p>
+        <h2 className="text-2xl font-bold mb-2">{t('pitchTopOpportunities')}</h2>
+        <p className="text-gray-500 text-sm mb-6">{t('pitchTopDesc')}</p>
         <div className="overflow-x-auto rounded-2xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
@@ -375,16 +406,16 @@ function PitchContent() {
 
       {/* CTA */}
       <section className="px-6 pb-20 max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-4">The data is open. The economics work.</h2>
+        <h2 className="text-3xl font-bold mb-4">{t('pitchCtaTitle')}</h2>
         <p className="text-gray-400 mb-8">
-          Every number on this page regenerates from the canonical {fmt(stats.siteCount)}-site ECCC dataset on build.
+          {tf(locale, 'pitchCtaDesc', { count: fmt(stats.siteCount) })}
           Production: <a href={PROD_URL} className="text-[#5BC0BE] hover:underline">{PROD_URL}</a>
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
-          <Link href="/education" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">Education Center</Link>
-          <Link href="/sites" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">All Sites</Link>
-          <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">Sherpacarta Legal Templates ↗</a>
-          <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">ECCC Dataset ↗</a>
+          <Link href="/education" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">{t('pitchEducation')}</Link>
+          <Link href="/sites" className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition">{t('pitchAllSites')}</Link>
+          <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">{t('pitchSherpacarta')}</a>
+          <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="px-6 py-3 rounded-xl text-[#5BC0BE] border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10 transition">{t('pitchEccc')}</a>
         </div>
         <p className="text-[10px] text-gray-600 mt-10">Stats generated {new Date(stats.generatedAt).toLocaleString('en-CA')} · Not financial advice</p>
       </section>

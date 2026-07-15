@@ -1,10 +1,19 @@
 import Link from 'next/link'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import PageHeader from '@/components/PageHeader'
 
 export const metadata = {
   title: 'Roadmap — Stranded Value',
   description: 'Public product roadmap: shipped client features and backend-dependent work.',
 }
+
+const SHIPPED_ROUND6 = [
+  'i18n 241 keys — pitch, map, education headings, errors',
+  'Html lang sync + theme-color + apple touch icons',
+  'PWA stranded-v6 + improved SW update toast',
+  'Onboarding tour + geolocate HUD + site-search lib',
+  'Mission templates + performance timing stub',
+  'E2E onboarding / geolocate / recent sites',
+]
 
 const SHIPPED_ROUND5 = [
   'Grant matcher quiz + funding pathway',
@@ -28,7 +37,7 @@ const SHIPPED_PRIOR = [
 ]
 
 const NEXT_CLIENT = [
-  'Full FR/i18n copy pass',
+  'Full page i18n (home body, site panel, methodology)',
   'Live ECCC refresh webhook (still client cache first)',
   'More vertical models (curtailed wind / waste heat)',
   'Cloud-free portfolio QR at scale',
@@ -44,18 +53,32 @@ const NEEDS_BACKEND = [
 
 export default function RoadmapPage() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Roadmap' }]} />
-      <h1 className="text-4xl font-bold tracking-tighter mb-2">Roadmap</h1>
-      <p className="text-gray-400 mb-2">Transparent plan. Client-first now; backends when Cam configures them.</p>
-      <p className="text-xs text-[#5BC0BE] mb-8">v2.4.0 · Round 5 upgrades 151–200 shipped 2026-07-15</p>
+    <div className="page-container">
+      <PageHeader
+        breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Roadmap' }]}
+        title="Roadmap"
+        subtitle="Transparent plan. Client-first now; backends when Cam configures them."
+        badge={
+          <span className="inline-block text-xs text-[#5BC0BE] px-2 py-0.5 rounded-full border border-[#5BC0BE]/30 bg-[#5BC0BE]/10">
+            v2.5.0 · Round 6 upgrades 276–300 shipped 2026-07-15
+          </span>
+        }
+      />
+
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-[#FF8C00] mb-3">Shipped — Round 6 (v2.5.0)</h2>
+        <ul className="space-y-1.5 text-sm text-gray-300">
+          {SHIPPED_ROUND6.map(i => <li key={i} className="flex gap-2"><span className="text-[#FF8C00]">✓</span>{i}</li>)}
+        </ul>
+        <Link href="/changelog" className="link-animated text-xs mt-2 inline-block">See CHANGELOG [2.5.0] for full list →</Link>
+      </section>
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-[#A78BFA] mb-3">Shipped — Round 5 (v2.4.0)</h2>
         <ul className="space-y-1.5 text-sm text-gray-300">
           {SHIPPED_ROUND5.map(i => <li key={i} className="flex gap-2"><span className="text-[#A78BFA]">✓</span>{i}</li>)}
         </ul>
-        <Link href="/changelog" className="text-xs text-[#5BC0BE] hover:underline mt-2 inline-block">See CHANGELOG [2.4.0] for full list →</Link>
+        <Link href="/changelog" className="link-animated text-xs mt-2 inline-block">See CHANGELOG [2.4.0] for full list →</Link>
       </section>
 
       <section className="mb-8">
@@ -80,9 +103,9 @@ export default function RoadmapPage() {
       </section>
 
       <div className="flex flex-wrap gap-4 text-sm">
-        <Link href="/changelog" className="text-[#5BC0BE] hover:underline">Changelog</Link>
-        <Link href="/status" className="text-[#5BC0BE] hover:underline">Status</Link>
-        <Link href="/methodology" className="text-[#5BC0BE] hover:underline">Methodology</Link>
+        <Link href="/changelog" className="link-animated">Changelog</Link>
+        <Link href="/status" className="link-animated">Status</Link>
+        <Link href="/methodology" className="link-animated">Methodology</Link>
       </div>
     </div>
   )
