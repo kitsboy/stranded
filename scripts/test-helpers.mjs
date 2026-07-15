@@ -30,6 +30,23 @@ const { scoreTier, scoreTierClass, scoreTierColor, scorePercentile, scoreBadgeLa
 const { searchSites, searchSitesSimple, SITE_SEARCH_PRESETS } = await import('../lib/site-search.ts')
 const { MISSION_TEMPLATES, sitesForMissionTemplate, getMissionTemplate } = await import('../lib/mission-templates.ts')
 const { glossaryLookup, GLOSSARY } = await import('../lib/glossary.ts')
+const { parseMapUrl, buildMapUrl, buildMapShareUrl, haversineKm } = await import('../lib/map-url-state.ts')
+const {
+  computeMapFilterStats,
+  siteDensityTier,
+  buildFilterAnnouncement,
+} = await import('../lib/map-stats.ts')
+const {
+  boundsFromSites,
+  boundsAreaKm2,
+  sitesPer1000Km2,
+  expandBounds,
+  padBounds,
+  boundsToFitTuple,
+  boundsCenter,
+  isValidBounds,
+} = await import('../lib/map-bounds.ts')
+
 
 // --- score explain (shared cjs is production path) ---
 const sample = {
@@ -171,6 +188,80 @@ assert.ok(tpl)
 const missionSites = sitesForMissionTemplate(all, tpl)
 assert.ok(missionSites.length >= 1)
 assert.ok(missionSites.every(s => s.strandedScore >= tpl.minScore))
+
+// map-stats
+const mapStats = computeMapFilterStats(all.slice(0, 50))
+assert.equal(mapStats.count, 50)
+assert.ok(mapStats.avgScore > 0)
+assert.ok(mapStats.totalEmissionKgDay > 0)
+assert.ok(mapStats.provinces.length >= 1)
+assert.equal(siteDensityTier(2611, 2611), 'full')
+assert.equal(siteDensityTier(100, 2611), 'sparse')
+const announce = buildFilterAnnouncement(100, 2611, {
+  minScore: 65,
+  minEmission: 0,
+  maxEmission: 100000,
+  provinceCount: 2,
+  sourceCount: 0,
+  hasRadius: false,
+  gridLayer: false,
+  internetLayer: false,
+}, {
+  base: '{shown} of {total} sites visible',
+  score: s => `min score ${s}`,
+  emission: (a, b) => `emission ${a}-${b}`,
+  provinces: c => `${c} provinces`,
+  sources: c => `${c} sources`,
+  radius: 'radius on',
+  grid: 'grid on',
+  internet: 'internet on',
+})
+assert.ok(announce.includes('100'))
+assert.ok(announce.includes('min score 65'))
+
+// map-bounds
+const bounds = boundsFromSites(all.slice(0, 20))
+assert.ok(isValidBounds(bounds))
+assert.ok(boundsAreaKm2(bounds) > 0)
+const padded = padBounds(bounds)
+assert.ok(padded.minLng <= bounds.minLng)
+const tuple = boundsToFitTuple(bounds)
+assert.equal(tuple.length, 2)
+assert.ok(tuple[0][0] < tuple[1][0])
+const center = boundsCenter(bounds)
+assert.ok(center[0] > -140 && center[0] < -50)
+const density = sitesPer1000Km2(20, bounds)
+assert.ok(density != null && density >= 0)
+assert.ok(expandBounds(bounds).minLng <= bounds.minLng)
+assert.ok(!isValidBounds(null))
+
+// map-url-state (#338, #339)
+const params = new URLSearchParams('site=G10001&minScore=65&maxEmission=5000&sources=landfill_waste,oil_gas&provinces=Alberta,BC&radius=50&lat=53.5&lng=-113.5')
+const parsed = parseMapUrl(params)
+assert.equal(parsed.site, 'G10001')
+assert.equal(parsed.minScore, 65)
+assert.equal(parsed.maxEmission, 5000)
+assert.deepEqual(parsed.sources, ['landfill_waste', 'oil_gas'])
+assert.deepEqual(parsed.provinces, ['Alberta', 'BC'])
+assert.equal(parsed.radius, 50)
+const built = buildMapUrl({
+  site: 'G10001',
+  minScore: 65,
+  maxEmission: 5000,
+  sources: ['landfill_waste', 'oil_gas'],
+  provinces: ['Alberta', 'BC'],
+  radius: 50,
+  lat: 53.5,
+  lng: -113.5,
+})
+assert.ok(built.includes('minScore=65'))
+assert.ok(built.includes('maxEmission=5000'))
+assert.ok(built.includes('sources=landfill_waste%2Coil_gas'))
+assert.ok(built.includes('provinces=Alberta%2CBC'))
+const share = buildMapShareUrl({ minEmission: 100, sources: ['landfill_waste'] }, 'https://stranded.test')
+assert.equal(share, 'https://stranded.test/map?minEmission=100&sources=landfill_waste')
+const km = haversineKm(53.5, -113.5, 51.0, -114.0)
+assert.ok(km > 200 && km < 400)
 
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

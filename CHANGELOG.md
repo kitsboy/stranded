@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.6.0] — 2026-07-15
+
+### Fixed (map layout)
+- **Filters + Quick Tour overlap** — stacked left column with `gap-4`; filter panel capped height so tour sits below with tidy buffer
+- **Emissions dual-range slider** — thumbs/track inset so handles stay inside the filter card (no bleed onto map)
+
+### Added (upgrades 301–350, map command center elite)
+- **301–315** — Filter badge, collapse/expand, emission presets, province/source bulk actions, chip summary, sticky header, custom scrollbar, fit-to-results, mission-only toggle, log-scale slider, score custom indicator
+- **316–332** — Map bookmarks, view history, fit bounds, north arrow, style switcher, site labels, province highlight, heat legend, minimap pan, performance mode, WebGL fallback, screenshot/print export, coordinate copy, radius slider, cluster tooltips, loading skeleton
+- **333–342** — Keyboard shortcuts (E/L/[/Esc), mobile filter drawer + swipe, bottom sheet peek, full URL filter sync, recent presets, preset delete, mission ring toggle
+- **343–350** — MapStatsBar, province mini bars, site density indicator, map SEO meta, aria-live filter announcements, focus trap, reduced-motion map, `UPGRADES-301-350.md`
+- PWA cache `stranded-v8` · **333 i18n keys** × EN/FR/DE/ES · **16 E2E tests**
+
 ## [2.5.1] — 2026-07-15
 
 ### Fixed (crash hardening)

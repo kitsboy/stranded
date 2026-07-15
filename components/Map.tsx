@@ -3,10 +3,21 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
 import { emissionChoroplethGeojson } from '@/lib/province-choropleth'
+import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
+import type { MapViewState } from '@/lib/map-view-history'
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
+export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
+
+export type MapHandle = {
+  getView: () => MapViewState | null
+  fitToSites: (sites: EnrichedSite[]) => void
+  exportScreenshot: () => string | null
+  flyTo: (target: { lat: number; lng: number; zoom?: number }) => void
+}
 
 interface MapProps {
   sites: EnrichedSite[]
@@ -14,6 +25,7 @@ interface MapProps {
   onSiteClick: (site: EnrichedSite) => void
   selectedId?: string | null
   portfolioIds?: string[]
+  showMissionRing?: boolean
   /** @deprecated use native-clusters */
   viewMode?: MapViewMode | 'clusters'
   showSatellite?: boolean
@@ -25,6 +37,16 @@ interface MapProps {
   liveBtcPrice?: number
   radiusOverlay?: { lat: number; lng: number; radiusKm: number } | null
   centerTarget?: { lat: number; lng: number; zoom?: number } | null
+  boundsTarget?: { sites: EnrichedSite[]; padding?: number; key?: number } | null
+  mapStyle?: MapStyleMode
+  showSiteLabels?: boolean
+  highlightedProvinces?: string[]
+  performanceMode?: boolean
+  onViewChange?: (view: MapViewState) => void
+  onMapReady?: (api: MapHandle) => void
+  onCoordCopied?: (coords: { lat: number; lng: number }) => void
+  sitesLoading?: boolean
+  coordCopyLabel?: string
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -32,6 +54,17 @@ const SITES_SOURCE = 'stranded-sites'
 const CLUSTER_LAYER = 'stranded-clusters'
 const CLUSTER_COUNT_LAYER = 'stranded-cluster-count'
 const UNCLUSTERED_LAYER = 'stranded-unclustered'
+const SITE_LABELS_LAYER = 'stranded-site-labels'
+
+function isWebGLSupported(): boolean {
+  if (typeof document === 'undefined') return true
+  try {
+    const canvas = document.createElement('canvas')
+    return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+  } catch {
+    return false
+  }
+}
 
 const TIER_CIRCLE_COLOR: maplibregl.ExpressionSpecification = [
   'case',
@@ -76,6 +109,7 @@ export default function Map({
   onSiteClick,
   selectedId,
   portfolioIds = [],
+  showMissionRing = true,
   viewMode,
   showSatellite = false,
   showTerrain = false,
@@ -86,6 +120,16 @@ export default function Map({
   liveBtcPrice = 85000,
   radiusOverlay = null,
   centerTarget = null,
+  boundsTarget = null,
+  mapStyle = 'dark',
+  showSiteLabels = false,
+  highlightedProvinces = [],
+  performanceMode = false,
+  onViewChange,
+  onMapReady,
+  onCoordCopied,
+  sitesLoading = false,
+  coordCopyLabel = 'Click map to copy coordinates',
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const minimapContainer = useRef<HTMLDivElement>(null)
@@ -94,9 +138,21 @@ export default function Map({
   const markersRef = useRef<maplibregl.Marker[]>([])
   const sitesRef = useRef(filteredSites)
   const onSiteClickRef = useRef(onSiteClick)
+  const onViewChangeRef = useRef(onViewChange)
+  const performanceModeRef = useRef(performanceMode)
   const nativeHandlersAttached = useRef(false)
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
+  const skipHistoryRef = useRef(false)
+  const viewChangeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 55.8, lng: -95.5 })
+  const [mapBearing, setMapBearing] = useState(0)
+  const [mapLoaded, setMapLoaded] = useState(false)
+  const [webglUnsupported, setWebglUnsupported] = useState(false)
+  const [clickedCoord, setClickedCoord] = useState<{ lat: number; lng: number } | null>(null)
+  const [copyFlash, setCopyFlash] = useState(false)
+
+  onViewChangeRef.current = onViewChange
+  performanceModeRef.current = performanceMode
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
@@ -138,8 +194,17 @@ export default function Map({
       if (!feature) return
       const count = feature.properties?.point_count
       const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+      const scoreSum = Number(feature.properties?.score_sum ?? 0)
+      const emissionSum = Number(feature.properties?.emission_sum ?? 0)
+      const avgScore = count ? Math.round(scoreSum / count) : '—'
+      const totalEmission = emissionSum >= 1000
+        ? `${(emissionSum / 1000).toFixed(1)}t`
+        : `${Math.round(emissionSum)} kg`
       showHoverPopup(
-        `<div class="text-xs font-medium">${count} sites</div><div class="text-[10px] text-gray-400">Click to expand cluster</div>`,
+        `<div class="text-xs font-semibold">${count} sites</div>`
+        + `<div class="text-[10px] text-gray-300 mt-0.5">Avg score <span class="text-[#FF8C00] font-mono">${avgScore}</span></div>`
+        + `<div class="text-[10px] text-gray-400">Total ~${totalEmission}/day</div>`
+        + `<div class="text-[10px] text-gray-500 mt-0.5">Click to expand cluster</div>`,
         coords,
       )
     })
@@ -166,7 +231,11 @@ export default function Map({
         data: { type: 'FeatureCollection', features: [] },
         cluster: true,
         clusterMaxZoom: 14,
-        clusterRadius: 50,
+        clusterRadius: performanceModeRef.current ? 40 : 50,
+        clusterProperties: {
+          score_sum: ['+', ['get', 'score']],
+          emission_sum: ['+', ['get', 'emission']],
+        },
       })
     }
 
@@ -223,6 +292,29 @@ export default function Map({
           ],
           'circle-stroke-width': 2,
           'circle-stroke-color': 'rgba(255,255,255,0.85)',
+        },
+      })
+    }
+
+    if (!map.getLayer(SITE_LABELS_LAYER)) {
+      map.addLayer({
+        id: SITE_LABELS_LAYER,
+        type: 'symbol',
+        source: SITES_SOURCE,
+        filter: ['!', ['has', 'point_count']],
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 10, 0, 10.5, 9, 14, 11],
+          'text-offset': [0, 1.2],
+          'text-anchor': 'top',
+          'text-max-width': 10,
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': '#e2e8f0',
+          'text-halo-color': 'rgba(15,23,42,0.85)',
+          'text-halo-width': 1.2,
         },
       })
     }
@@ -296,7 +388,7 @@ export default function Map({
       sitesToRender.forEach((site) => {
         const emission = site.emission
         const score = site.strandedScore
-        const isPortfolio = portfolioIds.includes(site.id)
+        const isPortfolio = showMissionRing && portfolioIds.includes(site.id)
         const isSelected = selectedId === site.id
 
         const size = Math.min(20, Math.max(8, Math.sqrt(Math.max(emission, 10)) / 11))
@@ -310,9 +402,13 @@ export default function Map({
         el.style.border = isSelected ? '3px solid #fff' : isPortfolio ? '2px solid #67e8f9' : '2px solid rgba(255,255,255,0.85)'
         el.style.boxShadow = isSelected
           ? '0 0 0 6px rgba(255,140,0,0.35), 0 0 14px rgba(0,0,0,0.6)'
-          : '0 0 5px rgba(0,0,0,0.5)'
+          : isPortfolio
+            ? '0 0 0 3px rgba(103,232,249,0.45), 0 0 5px rgba(0,0,0,0.5)'
+            : '0 0 5px rgba(0,0,0,0.5)'
         el.style.cursor = 'pointer'
-        el.style.transition = 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms ease'
+        el.style.transition = performanceModeRef.current
+          ? 'none'
+          : 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms ease'
         if (isSelected) el.style.transform = 'scale(1.4)'
         el.setAttribute('role', 'button')
         el.tabIndex = 0
@@ -342,23 +438,35 @@ export default function Map({
         markersRef.current.push(marker)
       })
     }
-  }, [onSiteClick, portfolioIds, selectedId, liveBtcPrice])
+  }, [onSiteClick, portfolioIds, selectedId, liveBtcPrice, showMissionRing])
+
+  const effectiveSatellite = mapStyle === 'satellite' || showSatellite
+  const effectiveTerrain = mapStyle === 'terrain' || showTerrain
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !map.isStyleLoaded?.()) return
     const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
-    if (showSatellite !== layers.satellite) {
-      if (showSatellite && !map.getLayer('satellite')) {
+
+    const showDark = mapStyle === 'dark'
+    const showStandard = mapStyle === 'standard'
+    if (map.getLayer('dark')) map.setLayoutProperty('dark', 'visibility', showDark ? 'visible' : 'none')
+    if (map.getLayer('osm')) map.setLayoutProperty('osm', 'visibility', showStandard ? 'visible' : 'none')
+
+    if (effectiveSatellite !== layers.satellite) {
+      if (effectiveSatellite && !map.getLayer('satellite')) {
         map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } })
-      } else if (!showSatellite && map.getLayer('satellite')) {
+      } else if (!effectiveSatellite && map.getLayer('satellite')) {
         map.removeLayer('satellite')
       }
-      layers.satellite = showSatellite
+      layers.satellite = effectiveSatellite
+    } else if (effectiveSatellite && map.getLayer('satellite')) {
+      map.setLayoutProperty('satellite', 'visibility', 'visible')
     }
-    if (showTerrain !== layers.terrain) {
-      map.setPitch(showTerrain ? 50 : 0)
-      if (showTerrain && terrainExaggeration > 0) {
+
+    if (effectiveTerrain !== layers.terrain) {
+      map.setPitch(effectiveTerrain ? 50 : 0)
+      if (effectiveTerrain && terrainExaggeration > 0) {
         if (!map.getSource('terrain')) return
         map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
         if (!map.getLayer('hillshade')) {
@@ -373,18 +481,57 @@ export default function Map({
         map.setTerrain(null)
         if (map.getLayer('hillshade')) map.removeLayer('hillshade')
       }
-      layers.terrain = showTerrain
-    } else if (showTerrain && map.getTerrain()) {
+      layers.terrain = effectiveTerrain
+    } else if (effectiveTerrain && map.getTerrain()) {
       map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
       if (map.getLayer('hillshade')) {
         map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrainExaggeration * 0.4)
       }
     }
     ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
-  }, [showSatellite, showTerrain, terrainExaggeration])
+  }, [effectiveSatellite, effectiveTerrain, terrainExaggeration, mapStyle])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.getLayer(SITE_LABELS_LAYER)) return
+    const zoom = map.getZoom()
+    const visible = showSiteLabels && zoom > 10 && !showHeatmap
+    map.setLayoutProperty(SITE_LABELS_LAYER, 'visibility', visible ? 'visible' : 'none')
+  }, [showSiteLabels, showHeatmap, mapCenter, mapLoaded])
+
+
+
+  const emitViewChange = useCallback((map: maplibregl.Map) => {
+    if (skipHistoryRef.current) return
+    if (viewChangeTimer.current) clearTimeout(viewChangeTimer.current)
+    viewChangeTimer.current = setTimeout(() => {
+      const c = map.getCenter()
+      onViewChangeRef.current?.({
+        lat: c.lat,
+        lng: c.lng,
+        zoom: map.getZoom(),
+        bearing: map.getBearing(),
+        pitch: map.getPitch(),
+      })
+    }, performanceModeRef.current ? 50 : 280)
+  }, [])
+
+  const navigateTo = useCallback((map: maplibregl.Map, opts: { center: [number, number]; zoom: number }) => {
+    if (performanceModeRef.current) {
+      map.jumpTo({ center: opts.center, zoom: opts.zoom })
+    } else {
+      map.flyTo({
+        center: opts.center,
+        zoom: opts.zoom,
+        speed: 1.2,
+        essential: true,
+      })
+    }
+  }, [])
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
+    setWebglUnsupported(!isWebGLSupported())
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -393,10 +540,14 @@ export default function Map({
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
           'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OSM' },
+          'dark': { type: 'raster', tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© CARTO © OSM' },
           'satellite': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 },
           'terrain': { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize: 256, encoding: 'terrarium', maxzoom: 15 },
         },
-        layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+        layers: [
+          { id: 'dark', type: 'raster', source: 'dark' },
+          { id: 'osm', type: 'raster', source: 'osm', layout: { visibility: 'none' } },
+        ],
       },
       center: [-95.5, 55.8],
       zoom: 3.2,
@@ -404,26 +555,80 @@ export default function Map({
       pitch: showTerrain ? 45 : 0,
       touchZoomRotate: true,
       cooperativeGestures: false,
+      fadeDuration: performanceMode ? 0 : 300,
     })
-    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain }
+    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain, dark: true }
     mapRef.current = map
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right')
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left')
 
+    map.on('load', () => {
+      setMapLoaded(true)
+      const api: MapHandle = {
+        getView: () => {
+          const m = mapRef.current
+          if (!m) return null
+          const c = m.getCenter()
+          return { lat: c.lat, lng: c.lng, zoom: m.getZoom(), bearing: m.getBearing(), pitch: m.getPitch() }
+        },
+        fitToSites: (sitesToFit) => {
+          const m = mapRef.current
+          if (!m) return
+          const raw = boundsFromSites(sitesToFit)
+          if (!raw) return
+          const padded = padBounds(raw)
+          skipHistoryRef.current = true
+          m.fitBounds(boundsToFitTuple(padded), { padding: 48, duration: performanceModeRef.current ? 0 : 900 })
+          setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1000)
+        },
+        exportScreenshot: () => {
+          const m = mapRef.current
+          if (!m) return null
+          try {
+            return m.getCanvas().toDataURL('image/png')
+          } catch {
+            return null
+          }
+        },
+        flyTo: (target) => {
+          const m = mapRef.current
+          if (!m) return
+          skipHistoryRef.current = true
+          navigateTo(m, { center: [target.lng, target.lat], zoom: target.zoom ?? m.getZoom() })
+          setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1200)
+        },
+      }
+      onMapReady?.(api)
+    })
+
     map.on('mousemove', (e) => {
       setMapCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
     })
+    map.on('rotate', () => setMapBearing(map.getBearing()))
     map.on('move', () => {
       const c = map.getCenter()
       setMapCenter({ lat: c.lat, lng: c.lng })
+      setMapBearing(map.getBearing())
       if (minimapRef.current && !minimapRef.current.isMoving()) {
         minimapRef.current.setCenter(map.getCenter())
         minimapRef.current.setZoom(Math.max(map.getZoom() - 4, 0))
       }
     })
+    map.on('moveend', () => emitViewChange(map))
+    map.on('click', (e) => {
+      const coords = { lat: e.lngLat.lat, lng: e.lngLat.lng }
+      setClickedCoord(coords)
+      const text = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`
+      navigator.clipboard?.writeText(text).then(() => {
+        setCopyFlash(true)
+        onCoordCopied?.(coords)
+        setTimeout(() => setCopyFlash(false), 1600)
+      }).catch(() => {})
+    })
 
     return () => {
+      if (viewChangeTimer.current) clearTimeout(viewChangeTimer.current)
       hoverPopupRef.current?.remove()
       clearMarkers()
       if (minimapRef.current) {
@@ -449,12 +654,14 @@ export default function Map({
     }
     const srcId = 'province-choropleth'
     const layerId = 'province-choropleth-fill'
+    const outlineId = 'province-choropleth-outline'
     const totals: Record<string, number> = {}
     sites.forEach(s => {
       const p = s.properties.province || 'Unknown'
       totals[p] = (totals[p] || 0) + s.emission
     })
     const geojson = emissionChoroplethGeojson(totals)
+    const highlightList = highlightedProvinces.length ? highlightedProvinces : ['__none__']
     try {
       if (map.getSource(srcId)) {
         (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
@@ -466,22 +673,75 @@ export default function Map({
           source: srcId,
           paint: {
             'fill-color': [
-              'interpolate', ['linear'], ['get', 'intensity'],
-              0, 'rgba(91,192,190,0.12)',
-              0.35, 'rgba(251,191,36,0.28)',
-              1, 'rgba(255,140,0,0.48)',
+              'case',
+              ['in', ['get', 'name'], ['literal', highlightList]],
+              [
+                'interpolate', ['linear'], ['get', 'intensity'],
+                0, 'rgba(255,140,0,0.22)',
+                0.35, 'rgba(255,140,0,0.42)',
+                1, 'rgba(255,140,0,0.62)',
+              ],
+              [
+                'interpolate', ['linear'], ['get', 'intensity'],
+                0, 'rgba(91,192,190,0.12)',
+                0.35, 'rgba(251,191,36,0.28)',
+                1, 'rgba(255,140,0,0.48)',
+              ],
             ],
-            'fill-outline-color': 'rgba(255,255,255,0.25)',
+            'fill-outline-color': [
+              'case',
+              ['in', ['get', 'name'], ['literal', highlightList]],
+              'rgba(255,140,0,0.75)',
+              'rgba(255,255,255,0.25)',
+            ],
+          },
+        })
+        map.addLayer({
+          id: outlineId,
+          type: 'line',
+          source: srcId,
+          paint: {
+            'line-color': [
+              'case',
+              ['in', ['get', 'name'], ['literal', highlightList]],
+              '#FF8C00',
+              'rgba(255,255,255,0.15)',
+            ],
+            'line-width': [
+              'case',
+              ['in', ['get', 'name'], ['literal', highlightList]],
+              2.5,
+              0.5,
+            ],
           },
         })
       }
       if (map.getLayer(layerId)) {
+        map.setPaintProperty(layerId, 'fill-color', [
+          'case',
+          ['in', ['get', 'name'], ['literal', highlightList]],
+          [
+            'interpolate', ['linear'], ['get', 'intensity'],
+            0, 'rgba(255,140,0,0.22)',
+            0.35, 'rgba(255,140,0,0.42)',
+            1, 'rgba(255,140,0,0.62)',
+          ],
+          [
+            'interpolate', ['linear'], ['get', 'intensity'],
+            0, 'rgba(91,192,190,0.12)',
+            0.35, 'rgba(251,191,36,0.28)',
+            1, 'rgba(255,140,0,0.48)',
+          ],
+        ] as maplibregl.ExpressionSpecification)
         map.setLayoutProperty(layerId, 'visibility', showChoropleth ? 'visible' : 'none')
+      }
+      if (map.getLayer(outlineId)) {
+        map.setLayoutProperty(outlineId, 'visibility', showChoropleth ? 'visible' : 'none')
       }
     } catch (err) {
       console.warn('[Map] choropleth sync failed', err)
     }
-  }, [sites, showChoropleth])
+  }, [sites, showChoropleth, highlightedProvinces])
 
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
     const map = mapRef.current
@@ -562,26 +822,30 @@ export default function Map({
     if (!map || !map.getLayer(UNCLUSTERED_LAYER)) return
 
     const selected = selectedId || ''
-    const portfolio = portfolioIds.length ? portfolioIds : ['']
+    const portfolio = showMissionRing && portfolioIds.length ? portfolioIds : ['']
 
     map.setPaintProperty(UNCLUSTERED_LAYER, 'circle-stroke-width', [
       'case',
       ['==', ['get', 'id'], selected],
       3,
-      ['in', ['get', 'id'], ['literal', portfolio]],
-      2,
-      1.5,
+      showMissionRing && portfolioIds.length
+        ? ['case', ['in', ['get', 'id'], ['literal', portfolio]], 2.5, 1.5]
+        : 1.5,
     ] as maplibregl.ExpressionSpecification)
 
     map.setPaintProperty(UNCLUSTERED_LAYER, 'circle-stroke-color', [
       'case',
       ['==', ['get', 'id'], selected],
       '#ffffff',
-      ['in', ['get', 'id'], ['literal', portfolio]],
-      '#67e8f9',
-      'rgba(255,255,255,0.85)',
+      showMissionRing && portfolioIds.length
+        ? ['case', ['in', ['get', 'id'], ['literal', portfolio]], '#67e8f9', 'rgba(255,255,255,0.85)']
+        : 'rgba(255,255,255,0.85)',
     ] as maplibregl.ExpressionSpecification)
-  }, [selectedId, portfolioIds])
+
+    if (map.getLayer(UNCLUSTERED_LAYER)) {
+      map.setPaintProperty(UNCLUSTERED_LAYER, 'circle-opacity', 0.92)
+    }
+  }, [selectedId, portfolioIds, showMissionRing])
 
   useEffect(() => {
     const map = mapRef.current
@@ -643,25 +907,38 @@ export default function Map({
     if (!selected) return
 
     const [lng, lat] = selected.geometry.coordinates
-    map.flyTo({
+    skipHistoryRef.current = true
+    navigateTo(map, {
       center: [lng, lat],
       zoom: Math.max(map.getZoom(), 7.2),
-      speed: 1.35,
-      curve: 1.4,
-      essential: true,
     })
-  }, [selectedId, filteredSites])
+    setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1400)
+  }, [selectedId, filteredSites, navigateTo])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !centerTarget) return
-    map.flyTo({
+    skipHistoryRef.current = true
+    navigateTo(map, {
       center: [centerTarget.lng, centerTarget.lat],
       zoom: centerTarget.zoom ?? Math.max(map.getZoom(), 8),
-      speed: 1.2,
-      essential: true,
     })
-  }, [centerTarget])
+    setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1200)
+  }, [centerTarget, navigateTo])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !boundsTarget?.sites?.length) return
+    const raw = boundsFromSites(boundsTarget.sites)
+    if (!raw) return
+    const padded = padBounds(raw)
+    skipHistoryRef.current = true
+    map.fitBounds(boundsToFitTuple(padded), {
+      padding: boundsTarget.padding ?? 48,
+      duration: performanceModeRef.current ? 0 : 900,
+    })
+    setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1000)
+  }, [boundsTarget?.key, boundsTarget?.sites, boundsTarget?.padding])
 
   useEffect(() => {
     const map = mapRef.current
@@ -690,10 +967,25 @@ export default function Map({
         },
         center: main.getCenter(),
         zoom: Math.max(main.getZoom() - 4, 0),
-        interactive: false,
+        interactive: true,
         attributionControl: false,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
       })
       minimapRef.current = mini
+
+      mini.on('click', (e) => {
+        if (!mapRef.current) return
+        skipHistoryRef.current = true
+        navigateTo(mapRef.current, {
+          center: [e.lngLat.lng, e.lngLat.lat],
+          zoom: Math.max(mapRef.current.getZoom(), 5),
+        })
+        setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1200)
+      })
+      mini.on('mouseenter', () => { if (mini) mini.getCanvas().style.cursor = 'crosshair' })
+      mini.on('mouseleave', () => { if (mini) mini.getCanvas().style.cursor = '' })
 
       const updateBox = () => {
         if (!minimapRef.current || !mapRef.current) return
@@ -726,8 +1018,10 @@ export default function Map({
     }
   }, [])
 
+  const displayCoord = clickedCoord ?? mapCenter
+
   return (
-    <div className="relative w-full h-full">
+    <div className={`relative w-full h-full map-print-target ${performanceMode ? 'map-performance-mode' : ''}`}>
       <div
         ref={mapContainer}
         className="w-full h-full touch-manipulation"
@@ -735,15 +1029,71 @@ export default function Map({
         role="application"
         aria-label="Interactive map of stranded methane sites"
       />
-      <div className="absolute top-[7.5rem] right-3 z-[12] pointer-events-none">
-        <div className="glass px-2 py-1 rounded-lg border border-white/15 text-[10px] font-mono text-gray-300 tabular-nums">
-          {mapCenter.lat.toFixed(4)}°, {mapCenter.lng.toFixed(4)}°
+
+      {(!mapLoaded || sitesLoading) && (
+        <div className="absolute inset-0 z-[15] map-loading-skeleton pointer-events-none" aria-hidden>
+          <div className="absolute inset-0 bg-[#0f172a]/75 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <div className="w-48 h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div className="h-full w-1/3 bg-[#FF8C00]/80 animate-[shimmer_1.4s_ease-in-out_infinite]" />
+            </div>
+            <span className="text-[10px] text-gray-400 tracking-widest uppercase">Loading map…</span>
+          </div>
+        </div>
+      )}
+
+      {webglUnsupported && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[16] glass px-3 py-2 rounded-xl border border-amber-500/40 text-[10px] text-amber-200 flex items-center gap-2 max-w-[90vw]">
+          <AlertTriangle size={14} className="shrink-0" />
+          <span>WebGL is unavailable — map rendering may be limited. Try updating your browser or enabling hardware acceleration.</span>
+        </div>
+      )}
+
+      <div className="absolute top-[7.5rem] right-3 z-[12] pointer-events-none flex flex-col items-end gap-2">
+        <div
+          className={`glass px-2 py-1 rounded-lg border text-[10px] font-mono tabular-nums flex items-center gap-1.5 ${
+            copyFlash ? 'border-[#5BC0BE]/60 text-[#5BC0BE]' : 'border-white/15 text-gray-300'
+          }`}
+          title={coordCopyLabel}
+        >
+          <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-500'} />
+          {displayCoord.lat.toFixed(4)}°, {displayCoord.lng.toFixed(4)}°
         </div>
       </div>
+
+      <div
+        className="absolute top-[10.5rem] right-3 z-[12] pointer-events-none hidden sm:flex flex-col items-center"
+        aria-hidden
+        title="North"
+      >
+        <div
+          className="glass w-9 h-9 rounded-full border border-white/20 flex items-center justify-center shadow-lg"
+          style={{ transform: `rotate(${-mapBearing}deg)` }}
+        >
+          <Compass size={18} className="text-[#FF8C00]" />
+          <span className="absolute -top-0.5 text-[8px] font-bold text-[#FF8C00]">N</span>
+        </div>
+      </div>
+
+      {showHeatmap && (
+        <div className="absolute bottom-36 right-3 z-[12] glass px-2.5 py-2 rounded-lg border border-white/15 pointer-events-none hidden sm:block">
+          <div className="text-[9px] uppercase tracking-wider text-gray-400 mb-1">Emission density</div>
+          <div
+            className="w-28 h-2 rounded-full"
+            style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.2) 0%, #14b8a6 30%, #fbbf24 60%, #f43f5e 100%)' }}
+          />
+          <div className="flex justify-between text-[8px] text-gray-500 mt-0.5 font-mono">
+            <span>low</span>
+            <span>high</span>
+          </div>
+        </div>
+      )}
+
       <div
         ref={minimapContainer}
-        className="absolute bottom-14 left-3 z-[12] w-28 h-20 rounded-lg border border-white/20 overflow-hidden shadow-lg bg-[#1e293b]/90 hidden sm:block"
-        aria-hidden
+        className="absolute bottom-14 left-3 z-[12] w-28 h-20 rounded-lg border border-white/20 overflow-hidden shadow-lg bg-[#1e293b]/90 hidden sm:block cursor-crosshair"
+        title="Click minimap to pan"
+        aria-label="Overview minimap — click to pan main map"
       />
     </div>
   )

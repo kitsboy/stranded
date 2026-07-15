@@ -82,6 +82,34 @@ test('map geolocation button present', async ({ page }) => {
   await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 15000 })
 })
 
+test('map keyboard help shows map-specific shortcuts', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.goto('/map')
+  await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 45000 })
+  await page.keyboard.press('?')
+  await expect(page.getByTestId('keyboard-help-modal')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByTestId('map-shortcuts-section')).toBeVisible()
+  await expect(page.getByTestId('map-shortcut-E')).toBeVisible()
+  await expect(page.getByTestId('map-shortcut-L')).toBeVisible()
+  await expect(page.getByText('Export filtered sites as GeoJSON')).toBeVisible()
+})
+
+test('map share URL includes filter query params', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.goto('/map?minScore=65&maxEmission=5000&sources=landfill_waste')
+  await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 45000 })
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-testid="mission-ring-toggle"]') as HTMLButtonElement | null
+    btn?.click()
+  })
+  await expect(page.getByTestId('mission-ring-toggle')).toHaveAttribute('aria-pressed', 'false')
+  await expect(page).toHaveURL(/minScore=65/)
+  await expect(page).toHaveURL(/maxEmission=5000/)
+  await expect(page).toHaveURL(/sources=landfill_waste/)
+})
+
 test('recent sites in command palette', async ({ page }) => {
   test.setTimeout(60000)
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))

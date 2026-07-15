@@ -84,7 +84,16 @@ export function setSiteNote(siteId: string, note: string) {
   localStorage.setItem(NOTES_KEY, JSON.stringify(notes))
 }
 
-export type FilterPreset = { name: string; minScore: number; minEmission: number; provinces: string[] }
+export type FilterPreset = {
+  name: string
+  minScore: number
+  minEmission: number
+  maxEmission?: number
+  provinces: string[]
+  sources?: string[]
+}
+
+const RECENT_FILTER_PRESETS_KEY = 'stranded-recent-filter-presets'
 
 export function getFilterPresets(): FilterPreset[] {
   try { return JSON.parse(localStorage.getItem(FILTER_PRESETS_KEY) || '[]') } catch { return [] }
@@ -94,6 +103,39 @@ export function saveFilterPreset(preset: FilterPreset) {
   const list = getFilterPresets().filter(p => p.name !== preset.name)
   list.push(preset)
   localStorage.setItem(FILTER_PRESETS_KEY, JSON.stringify(list.slice(-8)))
+  recordRecentFilterPreset(preset.name)
+}
+
+export function deleteFilterPreset(name: string) {
+  const list = getFilterPresets().filter(p => p.name !== name)
+  localStorage.setItem(FILTER_PRESETS_KEY, JSON.stringify(list))
+  const recent = getRecentFilterPresetNames().filter(n => n !== name)
+  localStorage.setItem(RECENT_FILTER_PRESETS_KEY, JSON.stringify(recent))
+}
+
+export function recordRecentFilterPreset(name: string) {
+  if (typeof window === 'undefined' || !name.trim()) return
+  const trimmed = name.trim()
+  const recent = getRecentFilterPresetNames().filter(n => n !== trimmed)
+  recent.unshift(trimmed)
+  localStorage.setItem(RECENT_FILTER_PRESETS_KEY, JSON.stringify(recent.slice(0, 3)))
+}
+
+export function getRecentFilterPresetNames(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_FILTER_PRESETS_KEY) || '[]')
+    return Array.isArray(parsed) ? parsed.filter((n): n is string => typeof n === 'string').slice(0, 3) : []
+  } catch {
+    return []
+  }
+}
+
+/** Resolve last 3 used presets (by name) to full preset objects. */
+export function getRecentFilterPresets(): FilterPreset[] {
+  const names = getRecentFilterPresetNames()
+  const all = getFilterPresets()
+  return names.map(n => all.find(p => p.name === n)).filter((p): p is FilterPreset => !!p)
 }
 
 export function getEduProgress(): Record<string, boolean> {

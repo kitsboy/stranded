@@ -316,6 +316,23 @@
 - Production: CF Pages `strandedbuild` auto-deploy from main
 
 
+## Session — 2026-07-15 (v2.6.0 map elite round 7)
+
+**Done:**
+- Fixed Filters ↔ Quick Tour overlap (stacked left column, gap-4, capped filter height)
+- Fixed emissions dual-range slider bleed outside filter card
+- Shipped upgrades **#301–350** via 4 parallel agents: filter UX, map tools, keyboard/mobile workflow, stats/i18n/docs
+- PWA `stranded-v8`, 333 i18n keys, 16 E2E tests passing
+
+**Decisions:**
+- Single OnboardingTour instance via `isXlViewport` matchMedia (stacked xl / floating mobile)
+- Map page is now primary command center (~1.6k lines); subcomponents extracted (MapStatsBar, MapFilterSummary, MobileFilterDrawer, etc.)
+
+**Git State:**
+- SHA: (see `git log -1` after push)
+- Version: **2.6.0**
+- Push main → CF strandedbuild auto-deploy
+
 ## Session — 2026-07-09 (v2.3.7 remaining audit fixes)
 
 **Done:**

@@ -55,12 +55,17 @@ export default function SiteDetailsPanel({
   onAddToMission, 
   liveBtcPrice = 85000,
   allSites = [],
+  compact = false,
+  onExpand,
 }: { 
   site: any
   onClose: () => void
   onAddToMission?: (site: any) => void
   liveBtcPrice?: number
   allSites?: EnrichedSite[]
+  /** Mobile peek mode — header summary only */
+  compact?: boolean
+  onExpand?: () => void
 }) {
   const p = site?.properties || {}
   const siteEmission = p.emission_rate_kg_day || 0
@@ -271,15 +276,16 @@ export default function SiteDetailsPanel({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 32 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 24 }}
+      initial={{ opacity: 0, x: compact ? 0 : 32, y: compact ? 24 : 0 }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      exit={{ opacity: 0, x: compact ? 0 : 24, y: compact ? 16 : 0 }}
       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-      className="w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-6 shadow-xl max-w-md max-h-full overflow-y-auto relative"
+      className={`w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 shadow-xl max-w-md relative ${compact ? 'rounded-t-2xl p-4' : 'rounded-xl p-6 max-h-full overflow-y-auto'}`}
+      data-testid={compact ? 'mobile-site-peek' : 'site-details-panel'}
     >
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-xl font-bold text-white">{p.name || 'Unknown'}</h2>
+          <h2 className={`font-bold text-white ${compact ? 'text-base' : 'text-xl'}`}>{p.name || 'Unknown'}</h2>
           <p className="text-sm text-gray-400">
             {p.city || 'Unknown'},{' '}
             {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
@@ -289,22 +295,50 @@ export default function SiteDetailsPanel({
               <span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span>
               <span className="text-[10px] uppercase tracking-wider text-gray-400">{scoreTier(site.strandedScore)}</span>
               {site.scoreBadge && <span className="text-[10px] text-[#5BC0BE]">{site.scoreBadge}</span>}
-              {scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
+              {!compact && scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
             </div>
           )}
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }}
-            className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}
-            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark site'}
-            aria-pressed={bookmarked}
-          >{bookmarked ? '★' : '☆'}</button>
+          {!compact && (
+            <button
+              type="button"
+              onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }}
+              className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}
+              aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark site'}
+              aria-pressed={bookmarked}
+            >{bookmarked ? '★' : '☆'}</button>
+          )}
           <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close site details">✕</button>
         </div>
       </div>
 
+      {compact && (
+        <div className="flex items-center gap-2">
+          {onExpand && (
+            <button
+              type="button"
+              onClick={onExpand}
+              className="flex-1 py-2 text-xs rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+              data-testid="mobile-site-expand"
+            >
+              View full details ↑
+            </button>
+          )}
+          {onAddToMission && (
+            <button
+              type="button"
+              onClick={() => onAddToMission(site)}
+              className="flex-1 py-2 text-xs font-semibold rounded-xl bg-[#FF8C00] text-black"
+            >
+              + Mission
+            </button>
+          )}
+        </div>
+      )}
+
+      {!compact && (
+      <>
       {scoreExplain && (
         <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3" open>
           <summary className="text-sm font-semibold text-[#FF8C00] cursor-pointer">Why this score ({scoreExplain.score})</summary>
@@ -610,6 +644,8 @@ export default function SiteDetailsPanel({
       </div>
 
       <p className="text-xs text-gray-500 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
+      </>
+      )}
     </motion.div>
   )
 }

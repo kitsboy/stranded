@@ -23,7 +23,12 @@ export function dismissOnboarding(): void {
   }
 }
 
-export default function OnboardingTour() {
+type OnboardingTourProps = {
+  /** Stacked under map filters on xl; floating on smaller breakpoints */
+  layout?: 'stacked' | 'floating'
+}
+
+export default function OnboardingTour({ layout = 'floating' }: OnboardingTourProps) {
   const { t } = useLocale()
   const [visible, setVisible] = useState(false)
 
@@ -38,10 +43,15 @@ export default function OnboardingTour() {
     setVisible(false)
   }
 
+  const positionClass =
+    layout === 'stacked'
+      ? 'relative w-full shrink-0'
+      : 'absolute bottom-24 left-4 z-[75] w-[min(320px,90vw)] xl:hidden'
+
   return (
     <div
       data-testid="onboarding-tour"
-      className="absolute bottom-24 left-4 z-[75] w-[min(320px,90vw)] glass rounded-2xl border border-[#FF8C00]/40 p-4 shadow-2xl text-sm"
+      className={`${positionClass} glass rounded-2xl border border-[#FF8C00]/40 p-4 shadow-2xl text-sm`}
       role="dialog"
       aria-labelledby="onboarding-tour-title"
     >

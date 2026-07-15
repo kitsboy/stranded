@@ -743,3 +743,68 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
 .maplibregl-popup.stranded-hover-popup .maplibregl-popup-tip {
   border-top-color: rgba(15, 23, 42, 0.92);
 }
+
+/* Map interaction upgrades 316–332 */
+@keyframes shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(360%); }
+}
+
+.map-performance-mode .maplibregl-canvas-container,
+.map-performance-mode .maplibregl-marker {
+  transition: none !important;
+}
+
+.map-loading-skeleton {
+  animation: none;
+}
+
+@media print {
+  .map-container,
+  .map-print-target {
+    position: relative !important;
+    width: 100% !important;
+    height: 72vh !important;
+    min-height: 480px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .map-print-target .maplibregl-ctrl-top-right,
+  .map-print-target .maplibregl-ctrl-bottom-left,
+  .map-loading-skeleton,
+  .map-print-target [aria-hidden='true'] {
+    display: none !important;
+  }
+
+  .map-print-target .maplibregl-canvas {
+    filter: none !important;
+  }
+
+  .map-print-header {
+    display: block !important;
+    color: #111 !important;
+    font-size: 14pt;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Map filter panel scroll (#308) */
+.map-filter-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 140, 0, 0.45) rgba(15, 23, 42, 0.25);
+}
+.map-filter-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.map-filter-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.25);
+  border-radius: 999px;
+}
+.map-filter-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 140, 0, 0.45);
+  border-radius: 999px;
+}
+.map-filter-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 140, 0, 0.65);
+}
