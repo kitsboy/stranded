@@ -391,5 +391,103 @@ assert.equal(cap10.btcYr, 1)
 const capClamped = captureAtPct(dashStats, 150, 80_000)
 assert.equal(capClamped.sites, 100)
 
+// status-health (v2.8.1)
+const {
+  aggregateStatusHealth,
+  EXPECTED_GEOJSON_FEATURE_COUNT,
+} = await import('../lib/status-health.ts')
+
+assert.equal(EXPECTED_GEOJSON_FEATURE_COUNT, 2611)
+
+const healthy = aggregateStatusHealth({
+  liveStats: { ...dashStats, version: '2.8.1', generatedAt: new Date().toISOString() },
+  liveStatsFetchOk: true,
+  geojsonFeatureCount: 2611,
+  expectedVersion: '2.8.1',
+  statusJsonVersion: '2.8.1',
+})
+assert.equal(healthy.overall, 'operational')
+assert.equal(healthy.checks.length, 4)
+assert.ok(healthy.score >= 90)
+assert.equal(healthy.checks.find(c => c.id === 'geojson-size').status, 'pass')
+assert.equal(healthy.checks.find(c => c.id === 'version-match').status, 'pass')
+
+const degraded = aggregateStatusHealth({
+  liveStats: { ...dashStats, version: '2.8.0', generatedAt: new Date().toISOString() },
+  liveStatsFetchOk: true,
+  geojsonFeatureCount: 2611,
+  expectedVersion: '2.8.1',
+  statusJsonVersion: '2.8.0',
+})
+assert.equal(degraded.checks.find(c => c.id === 'version-match').status, 'warn')
+
+const critical = aggregateStatusHealth({
+  liveStatsFetchOk: false,
+  geojsonFeatureCount: 2500,
+})
+assert.equal(critical.overall, 'critical')
+assert.equal(critical.checks.find(c => c.id === 'live-stats-fetch').status, 'fail')
+assert.equal(critical.checks.find(c => c.id === 'geojson-size').status, 'fail')
+
+// compare-export + bookmarks-export (v2.8.2)
+const { exportCompareCsv, buildCompareMetricRows } = await import('../lib/compare-export.ts')
+const { exportBookmarksCsv } = await import('../lib/bookmarks-export.ts')
+
+const emptyCompare = exportCompareCsv({ a: null, b: null, c: null })
+assert.ok(emptyCompare.includes('metric'))
+
+const mockSite = (id, profit) => ({
+  id,
+  strandedScore: 80,
+  potentialDailyProfitCAD: profit,
+  emission: 1000,
+  recommendedGenset: 'jenbacher316',
+  maxGeneratorPowerKW: 500,
+  properties: { name: `Site ${id}`, province: 'Alberta', source_type: 'oil_gas_extraction', confidence: 'high' },
+  geometry: { type: 'Point', coordinates: [-114, 53] },
+})
+
+const compareSites = { a: mockSite('G10161', 5000), b: mockSite('G12147', 3000), c: null }
+const compareCsv = exportCompareCsv(compareSites)
+assert.ok(compareCsv.includes('site_a'))
+assert.ok(compareCsv.includes('Daily profit (CAD)'))
+assert.ok(compareCsv.includes('5000'))
+
+const metricRows = buildCompareMetricRows(compareSites)
+assert.ok(metricRows.some(r => r.label === 'Stranded Score'))
+assert.equal(metricRows.find(r => r.label === 'Daily profit (CAD)')?.values.a, '5000')
+
+const bookmarkCsv = exportBookmarksCsv([
+  { ...mockSite('G10161', 5000), tag: 'diligence' },
+])
+assert.ok(bookmarkCsv.startsWith('id,name,province,tag'))
+assert.ok(bookmarkCsv.includes('diligence'))
+assert.ok(bookmarkCsv.includes('G10161'))
+
+// home-metrics (v2.8.3)
+const {
+  formatEmissionCompact,
+  homeKpiItems,
+  readinessMini,
+  websiteSchemaExtras,
+} = await import('../lib/home-metrics.ts')
+
+assert.equal(formatEmissionCompact(12400), '12.4K kg/day')
+assert.equal(formatEmissionCompact(850), '850 kg/day')
+
+const mini = readinessMini(dashStats)
+assert.ok(mini.score >= 0 && mini.score <= 100)
+assert.ok(mini.label.length > 0)
+
+const kpis = homeKpiItems(dashStats, 100_000)
+assert.equal(kpis.length, 5)
+assert.equal(kpis[0].key, 'sites')
+assert.equal(kpis[0].value, '100')
+assert.ok(kpis.some(k => k.key === 'readiness'))
+
+const schema = websiteSchemaExtras(dashStats)
+assert.equal(schema.numberOfItems, 100)
+assert.ok(schema.about.description.includes('deploy readiness'))
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

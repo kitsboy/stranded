@@ -43,6 +43,7 @@ echo "▸ Build output check"
 test -f dist/index.html && echo "  ✓ dist/index.html"
 test -f dist/map.html && echo "  ✓ dist/map.html"
 test -f dist/pitch.html && echo "  ✓ dist/pitch.html"
+test -f dist/dashboard.html && echo "  ✓ dist/dashboard.html"
 test -f dist/data/live-stats.json && echo "  ✓ dist/data/live-stats.json"
 test -f dist/data/stranded-sites.geojson && echo "  ✓ dist/data/stranded-sites.geojson"
 

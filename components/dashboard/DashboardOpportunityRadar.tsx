@@ -19,6 +19,8 @@ import {
   provinceRevenueLeaders,
 } from '@/lib/dashboard-metrics'
 import { formatCompactNumber } from '@/lib/format-number'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
 
 const COLORS = ['#FF8C00', '#5BC0BE', '#A78BFA', '#34D399', '#F472B6']
 
@@ -29,7 +31,7 @@ function fmtUsd(n: number) {
   return `$${n.toLocaleString('en-CA')}`
 }
 
-function ReadinessGauge({ score, label }: { score: number; label: string }) {
+function ReadinessGauge({ score, label, readinessLabel }: { score: number; label: string; readinessLabel: string }) {
   const r = 54
   const c = 2 * Math.PI * r
   const dash = (score / 100) * c
@@ -65,7 +67,7 @@ function ReadinessGauge({ score, label }: { score: number; label: string }) {
       <p className="mt-3 text-sm font-semibold" style={{ color }}>
         {label}
       </p>
-      <p className="text-[10px] text-gray-500">Deployment readiness</p>
+      <p className="text-[10px] text-gray-500">{readinessLabel}</p>
     </div>
   )
 }
@@ -105,6 +107,7 @@ type Props = {
 }
 
 export default function DashboardOpportunityRadar({ stats }: Props) {
+  const { locale, t } = useLocale()
   const readiness = useMemo(() => deploymentReadiness(stats), [stats])
   const leaders = useMemo(() => provinceRevenueLeaders(stats, 5), [stats])
 
@@ -118,33 +121,33 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
   const factorTiles: FactorTileProps[] = [
     {
       icon: Target,
-      label: 'High-score sites',
+      label: t('dashboardOpportunityRadarHighScore'),
       value: `${highScorePct.toFixed(1)}%`,
-      sub: `${stats.totals.highScoreSites} sites ≥80`,
+      sub: tf(locale, 'dashboardOpportunityRadarHighScoreSub', { count: stats.totals.highScoreSites }),
       accent: '#FF8C00',
       delay: 0.05,
     },
     {
       icon: Factory,
-      label: 'Mega + large',
+      label: t('dashboardOpportunityRadarMegaLarge'),
       value: String(megaLargeCount),
-      sub: `${((megaLargeCount / stats.siteCount) * 100).toFixed(1)}% of portfolio`,
+      sub: tf(locale, 'dashboardOpportunityRadarMegaLargeSub', { pct: ((megaLargeCount / stats.siteCount) * 100).toFixed(1) }),
       accent: '#5BC0BE',
       delay: 0.1,
     },
     {
       icon: ShieldCheck,
-      label: 'High confidence',
+      label: t('dashboardOpportunityRadarHighConfidence'),
       value: `${highConfPct.toFixed(1)}%`,
-      sub: `${stats.confidenceCounts.high || 0} ECCC-verified records`,
+      sub: tf(locale, 'dashboardOpportunityRadarHighConfSub', { count: stats.confidenceCounts.high || 0 }),
       accent: '#34D399',
       delay: 0.15,
     },
     {
       icon: Zap,
-      label: 'Generator capacity',
+      label: t('dashboardOpportunityRadarGenCapacity'),
       value: `${genGw.toFixed(2)} GW`,
-      sub: `${formatCompactNumber(stats.totals.totalGeneratorKW, 1)} kW modeled`,
+      sub: tf(locale, 'dashboardOpportunityRadarGenCapSub', { kw: formatCompactNumber(stats.totals.totalGeneratorKW, 1) }),
       accent: '#A78BFA',
       delay: 0.2,
     },
@@ -156,10 +159,10 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
         <Radar className="h-5 w-5 text-[#FF8C00]" aria-hidden />
         <div>
           <h2 id="opportunity-radar-heading" className="text-xl font-bold">
-            Opportunity Radar
+            {t('dashboardOpportunityRadarTitle')}
           </h2>
           <p className="text-sm text-gray-500">
-            Portfolio deployment signal · revenue-weighted geography
+            {t('dashboardOpportunityRadarSubtitle')}
           </p>
         </div>
       </div>
@@ -172,7 +175,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
           transition={{ duration: 0.45 }}
           className="pitch-panel flex flex-col items-center justify-center rounded-2xl border border-[#FF8C00]/20 bg-gradient-to-br from-[#FF8C00]/08 via-white/[0.02] to-[#5BC0BE]/05 p-6"
         >
-          <ReadinessGauge score={readiness.score} label={readiness.label} />
+          <ReadinessGauge score={readiness.score} label={readiness.label} readinessLabel={t('dashboardOpportunityRadarReadiness')} />
           <div className="mt-6 w-full space-y-2">
             {readiness.factors.map(f => (
               <div key={f.name} className="text-xs">
@@ -205,7 +208,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
             <div className="mb-4 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-[#5BC0BE]" aria-hidden />
               <h3 className="text-sm font-semibold uppercase tracking-wider text-[#5BC0BE]">
-                Top 5 provinces by revenue
+                {t('dashboardOpportunityRadarTopProvinces')}
               </h3>
             </div>
             <div className="space-y-3">
@@ -238,7 +241,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                     </span>
                     <span className="shrink-0 tabular-nums text-gray-400">
                       <span className="font-semibold text-[#F472B6]">{fmtUsd(p.revenueUsd)}</span>
-                      <span className="ml-1 text-gray-500">/yr</span>
+                      <span className="ml-1 text-gray-500">{t('dashboardOpportunityRadarPerYear')}</span>
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-white/5">

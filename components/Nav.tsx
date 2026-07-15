@@ -37,12 +37,13 @@ export default function Nav() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const navLink = (href: string, label: string) => {
+  const navLink = (href: string, label: string, opts?: { liveDot?: boolean }) => {
     const active = pathname === href
+    const showLiveDot = opts?.liveDot && active
     return (
       <Link
         href={href}
-        className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+        className={`px-3 py-1.5 text-sm rounded-lg transition-colors inline-flex items-center gap-1.5 ${
           active
             ? 'bg-white/10 text-white font-medium'
             : 'text-gray-300 hover:text-white hover:bg-white/5'
@@ -50,16 +51,27 @@ export default function Nav() {
         aria-current={active ? 'page' : undefined}
       >
         {label}
+        {showLiveDot && (
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse shrink-0"
+            aria-hidden
+            data-testid="nav-dashboard-live-dot"
+          />
+        )}
       </Link>
     )
   }
 
   return (
-    <nav
-      className={`nav-root sticky top-0 z-50 bg-[#1e293b]/95 backdrop-blur border-b border-[#5BC0BE]/30 ${scrolled ? 'nav-scrolled' : ''}`}
-      role="navigation"
-      aria-label="Main"
-    >
+    <>
+      <a href="#main-content" className="skip-link">
+        {t('skipToMain')}
+      </a>
+      <nav
+        className={`nav-root sticky top-0 z-50 bg-[#1e293b]/95 backdrop-blur border-b border-[#5BC0BE]/30 ${scrolled ? 'nav-scrolled' : ''}`}
+        role="navigation"
+        aria-label="Main"
+      >
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 group flex-shrink-0" aria-label="Stranded Value home">
           <Image
@@ -82,7 +94,7 @@ export default function Nav() {
           {navLink('/education', t('education'))}
           {navLink('/sites', t('sites'))}
           {navLink('/pitch', t('pitch'))}
-          {navLink('/dashboard', t('dashboard'))}
+          {navLink('/dashboard', t('dashboard'), { liveDot: true })}
           <span className="hidden lg:inline">{navLink('/verticals', t('verticals'))}</span>
           <span className="hidden xl:inline">{navLink('/bookmarks', t('bookmarks'))}</span>
         </div>
@@ -107,5 +119,6 @@ export default function Nav() {
         </div>
       </div>
     </nav>
+    </>
   )
 }

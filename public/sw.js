@@ -1,5 +1,5 @@
 // Bump on every deploy that must invalidate HTML/data caches
-const CACHE = 'stranded-v11'
+const CACHE = 'stranded-v13'
 const PRECACHE = [
   '/',
   '/map',

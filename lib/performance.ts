@@ -33,3 +33,17 @@ export function clearNavigationMarks(): void {
     /* ignore */
   }
 }
+
+/** Mark when a data-driven page has finished its primary stats fetch. */
+export function markPageReady(route: string): void {
+  if (typeof performance === 'undefined' || typeof performance.mark !== 'function') return
+  const mark = `stranded:ready:${route}`
+  try {
+    performance.mark(mark)
+    if (typeof performance.measure === 'function') {
+      performance.measure(`stranded:${route}:stats-loaded`, undefined, mark)
+    }
+  } catch {
+    /* quota or unsupported */
+  }
+}

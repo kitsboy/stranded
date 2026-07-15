@@ -26,6 +26,7 @@ import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { downloadBlob } from '@/lib/export-formats'
 import { emissionTierItems } from '@/lib/dashboard-metrics'
 import { scoreTierClass, scorePercentile, scoreBadgeLabel } from '@/lib/scoring'
+import { markPageReady } from '@/lib/performance'
 
 const CARBON_SCENARIOS = [20, 50, 80] as const
 
@@ -50,7 +51,7 @@ export default function DashboardPage() {
           if (!r.ok) throw new Error('stats')
           return r.json()
         })
-        .then(s => { setStats(s); setLoadError(false) })
+        .then(s => { setStats(s); setLoadError(false); markPageReady('dashboard') })
         .catch(() => setLoadError(true))
     }
     refresh()

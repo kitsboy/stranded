@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import pkg from '@/package.json'
 
 export const metadata = {
   title: 'Privacy — Stranded Value',
@@ -11,7 +12,10 @@ export default function PrivacyPage() {
     <div className="page-container prose prose-invert">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Privacy' }]} />
       <h1 className="text-4xl font-bold tracking-tighter not-prose">Privacy</h1>
-      <p className="text-gray-400 not-prose mb-8">Local-first by design. No ads. No third-party trackers in the product default.</p>
+      <p className="text-gray-400 not-prose mb-2">Local-first by design. No ads. No third-party trackers in the product default.</p>
+      <p className="text-gray-500 not-prose text-sm mb-8">
+        Last updated: v{pkg.version} · {new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </p>
 
       <h2>What stays on your device</h2>
       <ul>

@@ -6,6 +6,8 @@ import { Gauge, Leaf, Bitcoin, Zap } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
 import { captureAtPct } from '@/lib/dashboard-metrics'
 import { formatCompactNumber } from '@/lib/format-number'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
 
 function fmtUsd(n: number) {
   if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
@@ -20,6 +22,7 @@ type Props = {
 }
 
 export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
+  const { locale, t } = useLocale()
   const [capturePct, setCapturePct] = useState(5)
 
   const projection = useMemo(
@@ -28,10 +31,10 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
   )
 
   const tiles = [
-    { icon: Gauge, label: 'Sites deployed', value: projection.sites.toLocaleString('en-CA'), accent: '#FF8C00' },
-    { icon: Leaf, label: 'CO₂e avoided', value: `${formatCompactNumber(projection.co2eTonnes, 1)} t/yr`, accent: '#5BC0BE' },
-    { icon: Bitcoin, label: 'BTC mined', value: `${projection.btcYr.toFixed(1)} BTC/yr`, accent: '#FBBF24' },
-    { icon: Zap, label: 'Revenue @ live BTC', value: fmtUsd(projection.revenueUsd), accent: '#F472B6' },
+    { icon: Gauge, label: t('dashboardCaptureSites'), value: projection.sites.toLocaleString('en-CA'), accent: '#FF8C00' },
+    { icon: Leaf, label: t('dashboardCaptureCo2e'), value: `${formatCompactNumber(projection.co2eTonnes, 1)} t/yr`, accent: '#5BC0BE' },
+    { icon: Bitcoin, label: t('dashboardCaptureBtc'), value: `${projection.btcYr.toFixed(1)} BTC/yr`, accent: '#FBBF24' },
+    { icon: Zap, label: t('dashboardCaptureRevenue'), value: fmtUsd(projection.revenueUsd), accent: '#F472B6' },
   ]
 
   return (
@@ -39,20 +42,20 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 id="dashboard-capture-heading" className="text-xl font-bold">
-            Portfolio Capture
+            {t('dashboardCaptureTitle')}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            Mini simulator — sites, CO₂e, and revenue at live BTC price
+            {t('dashboardCaptureSubtitle')}
           </p>
         </div>
         <div className="rounded-full border border-[#FF8C00]/30 bg-[#FF8C00]/10 px-4 py-1.5 text-sm font-semibold tabular-nums text-[#FF8C00]">
-          {capturePct}% · {projection.sites.toLocaleString('en-CA')} sites
+          {tf(locale, 'dashboardCapturePctSites', { pct: capturePct, sites: projection.sites.toLocaleString('en-CA') })}
         </div>
       </div>
 
       <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-5 md:p-6">
         <label className="mb-2 flex items-center justify-between text-xs text-gray-400">
-          <span>Portfolio capture rate</span>
+          <span>{t('dashboardCaptureRate')}</span>
           <span className="font-semibold text-white">{capturePct}%</span>
         </label>
         <input

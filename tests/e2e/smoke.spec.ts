@@ -5,6 +5,15 @@ test('home loads with hero', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Stranded Energy/i })).toBeVisible()
 })
 
+test('home readiness badge links to dashboard', async ({ page }) => {
+  await page.goto('/')
+  const badge = page.getByTestId('home-readiness-badge')
+  await expect(badge).toBeVisible({ timeout: 10000 })
+  await expect(badge).toContainText(/Deploy readiness/i)
+  await expect(badge).toHaveAttribute('href', '/dashboard')
+  await expect(page.getByTestId('home-kpi-strip')).toBeVisible()
+})
+
 test('map loads sites', async ({ page }) => {
   await page.goto('/map')
   await expect(page.locator('#main-content, main').first()).toBeVisible({ timeout: 15000 })
@@ -38,6 +47,8 @@ test('pitch stat cards and capture simulator', async ({ page }) => {
 test('education page loads', async ({ page }) => {
   await page.goto('/education')
   await expect(page.getByText(/Stranded Value/i).first()).toBeVisible()
+  await expect(page.getByTestId('edu-section-nav')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByTestId('edu-section-nav').getByRole('link', { name: 'Simulators' })).toBeVisible()
 })
 
 test('v2.1 routes load', async ({ page }) => {
@@ -47,6 +58,21 @@ test('v2.1 routes load', async ({ page }) => {
   }
 })
 
+test('status page loads with health checks', async ({ page }) => {
+  await page.goto('/status')
+  await expect(page.getByRole('heading', { name: /Platform Status/i })).toBeVisible({ timeout: 10000 })
+  await expect(page.getByTestId('status-health-checks')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByTestId('status-dashboard-link')).toBeVisible()
+  await expect(page.getByTestId('status-pitch-link')).toBeVisible()
+})
+
+test('provinces page loads with table', async ({ page }) => {
+  await page.goto('/provinces')
+  await expect(page.getByRole('heading', { name: /Provincial Intelligence/i })).toBeVisible({ timeout: 15000 })
+  await expect(page.getByTestId('provinces-table')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByText('Alberta').first()).toBeVisible()
+})
+
 test('dashboard opportunity radar visible', async ({ page }) => {
   await page.goto('/dashboard')
   await expect(page.getByTestId('dashboard-opportunity-radar')).toBeVisible({ timeout: 15000 })
@@ -54,10 +80,25 @@ test('dashboard opportunity radar visible', async ({ page }) => {
 })
 
 test('v2.2 routes load', async ({ page }) => {
-  for (const path of ['/bookmarks', '/methodology', '/about', '/global', '/benchmarks']) {
+  for (const path of ['/methodology', '/about', '/global', '/benchmarks']) {
     await page.goto(path)
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 })
   }
+})
+
+test('funding page loads', async ({ page }) => {
+  await page.goto('/funding')
+  await expect(page.getByRole('heading', { name: /CETA Funding Pathway/i })).toBeVisible({ timeout: 10000 })
+})
+
+test('bookmarks page loads', async ({ page }) => {
+  await page.goto('/bookmarks')
+  await expect(page.getByRole('heading', { name: /Saved Sites/i })).toBeVisible({ timeout: 10000 })
+})
+
+test('partnerships page loads', async ({ page }) => {
+  await page.goto('/partnerships')
+  await expect(page.getByRole('heading', { name: /First Nations.*Partnerships/i })).toBeVisible({ timeout: 10000 })
 })
 
 test('v2.3 routes load', async ({ page }) => {
@@ -79,10 +120,17 @@ test('sites filters and mission control present', async ({ page }) => {
   await expect(page.getByRole('combobox').first()).toBeVisible()
 })
 
+test('sites search input visible', async ({ page }) => {
+  await page.goto('/sites')
+  await expect(page.getByTestId('sites-search')).toBeVisible({ timeout: 15000 })
+})
+
 test('compare page loads with site pair', async ({ page }) => {
   await page.goto('/compare?a=G10161&b=G12147')
   await expect(page.getByRole('heading', { name: /Site Compare/i })).toBeVisible({ timeout: 15000 })
   await expect(page.locator('table')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByTestId('compare-daily-profit-row')).toBeVisible()
+  await expect(page.getByTestId('compare-export-csv')).toBeVisible()
 })
 
 test('province print page loads', async ({ page }) => {

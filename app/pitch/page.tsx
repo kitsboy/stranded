@@ -28,6 +28,7 @@ import PitchProvinceRank from '@/components/pitch/PitchProvinceRank'
 import ScoreHistogram from '@/components/ScoreHistogram'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { buildNostrShareUrl } from '@/lib/nostr-share'
+import { markPageReady } from '@/lib/performance'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -158,7 +159,7 @@ function PitchContent() {
   useEffect(() => {
     fetch('/data/live-stats.json')
       .then(r => { if (!r.ok) throw new Error('stats missing'); return r.json() })
-      .then(setStats)
+      .then(s => { setStats(s); markPageReady('pitch') })
       .catch(() => setError(t('pitchStatsError')))
   }, [t])
 

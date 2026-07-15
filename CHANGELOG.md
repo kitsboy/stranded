@@ -1,5 +1,75 @@
 # Changelog
 
+## [2.9.0] — 2026-07-15
+
+### Added — Megabatch upgrades #526–625 (100 items across 4 waves)
+- **Wave 1 (526–550):** status health checks, provinces revenue table, global KPIs, map share URL, benchmarks top sites
+- **Wave 2 (551–575):** sites fuzzy+revenue sort, compare CSV export, bookmarks export, funding capture widget, open-data downloads
+- **Wave 3 (576–600):** HomeKpiStrip, education sticky nav, methodology/about live banners, changelog accordion, verticals tiers
+- **Wave 4 (601–625):** dashboard i18n ×4 langs, skip-to-main, markPageReady, SwUpdateToast version, PWA v13
+- **30 E2E tests** all passing; `docs/UPGRADES-526-625.md` master index
+
+## [2.8.4] — 2026-07-15
+
+### Added (upgrades #601–625 — i18n, a11y, perf, PWA polish)
+- **Dashboard i18n** — `dashboardOpportunityRadar*` + `dashboardCapture*` keys × EN/FR/DE/ES; wired in `DashboardOpportunityRadar` and `DashboardCaptureSlider`
+- **`statusHealthy`** + **`skipToMain`** i18n keys; skip-to-main link as first focusable element in `Nav`
+- **Skip-link CSS** — `.skip-link` focus ring + `.sr-only-focusable` utility in `globals.css`
+- **`markPageReady`** helper in `lib/performance.ts`; called from dashboard + pitch on stats load
+- **CoinGecko preconnect** in `app/layout.tsx` for live BTC fetch
+- **SwUpdateToast** — shows version from `live-stats.json` when available
+- **Privacy** — last updated line from `package.json` version
+- E2E smoke tests for `/funding`, `/bookmarks`, `/partnerships`
+- `verify-pipeline.sh` — `dist/dashboard.html` check
+- **PWA `stranded-v12`** (cache bump reaffirmed)
+- `docs/UPGRADES-601-625.md` + `docs/UPGRADES-526-625.md` master index
+
+## [2.8.3] — 2026-07-15
+
+### Added (marketing pages batch 3, upgrades 576–600)
+- **HomeKpiStrip** — compact live KPI bar below hero (sites, emissions, readiness, revenue, CO₂e)
+- **Home deploy readiness badge** — mini gauge from `dashboard-metrics`, links to `/dashboard`
+- **Featured sites** — emission compact format (`12.4K kg/day`) on home cards
+- **WebSite JSON-LD** — enriched with live-stats site count, avg score, deploy readiness
+- **Education** — sticky section nav jump links; hero links top site from `live-stats.json`
+- **About** — version + build from `live-stats` / `status.json`; changelog link
+- **Methodology** — live avg score + site count banner
+- **Roadmap** — v2.8.x shipped section; v2.9 backlog
+- **Changelog** — accordion sections parsed dynamically from CHANGELOG.md
+- **Verticals** — methane emission tier counts; province proxy cards for beta verticals
+- `lib/home-metrics.ts` helpers; E2E home dashboard link + education nav tests
+- `docs/UPGRADES-576-600.md`; **PWA `stranded-v12`**
+
+## [2.8.2] — 2026-07-15
+
+### Added (satellite pages batch #551–575)
+- **Sites:** province revenue hint from live-stats; sort by revenue; sticky table header; `data-testid="sites-search"`
+- **Compare:** daily profit winner highlight; export compare CSV; map links for all slots + open-all on map
+- **Bookmarks:** bulk open on map; `exportBookmarksCsv`; empty state CTA to map
+- **Funding:** live model revenue @ live BTC; capture rate mini widget from live-stats
+- **Partnerships:** live site count hero stat from live-stats
+- **Site panel:** View on compare link (`/compare?a=id`)
+- **Open data:** direct download links with approximate file sizes for GeoJSON + live-stats
+- `lib/compare-export.ts`, `lib/bookmarks-export.ts`
+- E2E: sites search visible; compare params + profit row
+- `test:helpers` compare/bookmarks export cases
+- `docs/UPGRADES-551-575.md`
+
+## [2.8.1] — 2026-07-15
+
+### Added (platform health + cross-page polish batch #526–550)
+- **`lib/status-health.ts`** — aggregate health checks (live-stats fetch, GeoJSON size, version match, freshness)
+- **Status page** — dashboard/pitch quick links, province count, deployment readiness score, health check panel
+- **Provinces page** — live-stats `emissionKgDay` + `estRevenueUsd` table; deep links to `/map?province=`
+- **Global page** — 4 KPI cards from live-stats (sites, provinces, methane, revenue)
+- **Benchmarks** — topSites comparison table wired from live-stats
+- **Print province** — ECCC reporting year badge in header from live-stats
+- **Nav** — subtle live dot on dashboard link when active
+- **Footer** — Dashboard + Pitch in Explore column
+- **MapToolbar** — share map URL button via `buildMapShareUrl`; `data-testid="map-site-count"` on HUD
+- E2E status + provinces page tests; `test:helpers` status-health cases
+- `docs/UPGRADES-526-550.md` (25 upgrades)
+
 ## [2.8.0] — 2026-07-15
 
 ### Added (dashboard command center elite batch)

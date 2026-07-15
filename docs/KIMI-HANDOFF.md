@@ -1,5 +1,40 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-15 — v2.9.0 megabatch 526–625)
+
+**Chat topic:** 100 upgrades in 4 waves; push each batch; no chat until complete.
+
+**Finished:**
+- Waves 526–550, 551–575, 576–600, 601–625 (see `docs/UPGRADES-526-625.md`)
+- 30/30 E2E · PWA v13 · GitHub release v2.9.0
+
+**Git State:** v2.9.0 · `main`
+
+---
+
+## Latest Session Summary (from 2026-07-15 — v2.8.1 platform health batch)
+
+**Chat topic:** Batch 1 upgrades #526–550 — status health, cross-page live-stats wiring, map share polish.
+
+**Finished this session:**
+- **`lib/status-health.ts`** — aggregate checks (live-stats fetch, GeoJSON size, version match, freshness)
+- **Status page** — dashboard/pitch links, province count, deployment readiness, health panel
+- **Provinces** — live-stats emission + revenue table; `/map?province=` deep links
+- **Global** — 4 KPI cards; **Benchmarks** — topSites table; **Print province** — ECCC year badge
+- **Nav** live dot on dashboard; **Footer** Dashboard + Pitch; **MapToolbar** share button
+- E2E +2 (status, provinces); `test:helpers` status-health cases
+- `docs/UPGRADES-526-550.md` (25/25 shipped)
+
+**Still to do:**
+- GitHub release **v2.8.1**
+- Kimi vault sync when Cam says go
+
+**Git State:**
+- Version: **2.8.2** (526–550 shipped as v2.8.1 batch; repo already advanced)
+- Branch: `main`
+
+---
+
 ## Latest Session Summary (from 2026-07-15 — v2.8.0 dashboard command center)
 
 **Chat topic:** Dashboard elite redesign — capture slider, emission tiers, live ticker, polish.
