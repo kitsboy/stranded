@@ -1,6 +1,6 @@
 # stranded — Last Updated 2026-07-15 by Grok
 
-Brief: v2.6.1 — map CSP fix (CARTO tiles), layout polish, 75 upgrades (#351–425)
-Version: 2.6.1
+Brief: v2.6.2 — light map default, pins restored, layout spacing fixes
+Version: 2.6.2
 Production: https://stranded.giveabit.io
-Commit: ccd5ab7
+Commit: (pending push)

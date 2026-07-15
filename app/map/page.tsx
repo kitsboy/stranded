@@ -128,7 +128,7 @@ function StrandedCommandCenter() {
   const [radiusFilter, setRadiusFilter] = useState<{ lat: number; lng: number; radiusKm: number } | null>(null)
   const [centerTarget, setCenterTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null)
   const [boundsTarget, setBoundsTarget] = useState<{ sites: EnrichedSite[]; padding?: number; key: number } | null>(null)
-  const [mapStyle, setMapStyle] = useState<MapStyleMode>('dark')
+  const [mapStyle, setMapStyle] = useState<MapStyleMode>('standard')
   const [showSiteLabels, setShowSiteLabels] = useState(false)
   const [performanceMode, setPerformanceMode] = useState(false)
   const [mapBookmarks, setMapBookmarks] = useState<MapViewBookmark[]>([])
@@ -1471,7 +1471,7 @@ function StrandedCommandCenter() {
       </AnimatePresence>
 
       {/* Right side — SiteDetails + Mission (desktop) */}
-      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)] max-h-[calc(100%-2rem)]">
+      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)]">
         <AnimatePresence mode="wait">
           {selectedSite && (
             <SiteDetailsPanel
@@ -1545,7 +1545,7 @@ function StrandedCommandCenter() {
       {!isXlViewport && <OnboardingTour layout="floating" />}
 
       {/* Score legend + layer controls */}
-      <div className="map-layer-stack absolute bottom-5 right-5 z-[60] flex flex-col gap-2">
+      <div className="map-layer-stack absolute right-4 z-[60] flex flex-col gap-2">
         <ScoreLegend compact horizontal />
         <div className="map-layer-panel-unified">
           <button
@@ -1606,7 +1606,7 @@ function StrandedCommandCenter() {
       </div>
 
       {/* Bottom status + view toggle */}
-      <div className="map-status-bar absolute bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
+      <div className="map-status-bar absolute left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
         <div className="map-status-bar__inner glass px-5 py-1.5 rounded-3xl flex flex-wrap items-center gap-3 border border-white/10">
           {loading ? t('mapLoadingDataset') : tf(locale, 'mapSitesInView', { count: filteredSites.length.toLocaleString(), mission: String(portfolio.length) })}
           {!loading && allSites.length > 0 && (

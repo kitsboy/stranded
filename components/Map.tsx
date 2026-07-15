@@ -145,7 +145,7 @@ export default function Map({
   radiusOverlay = null,
   centerTarget = null,
   boundsTarget = null,
-  mapStyle = 'dark',
+  mapStyle = 'standard',
   showSiteLabels = false,
   highlightedProvinces = [],
   performanceMode = false,
@@ -583,8 +583,8 @@ export default function Map({
           'terrain': { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize: 256, encoding: 'terrarium', maxzoom: 15 },
         },
         layers: [
-          { id: 'dark', type: 'raster', source: 'dark' },
-          { id: 'osm', type: 'raster', source: 'osm', layout: { visibility: 'none' } },
+          { id: 'osm', type: 'raster', source: 'osm' },
+          { id: 'dark', type: 'raster', source: 'dark', layout: { visibility: 'none' } },
         ],
       },
       center: [-95.5, 55.8],
@@ -595,7 +595,7 @@ export default function Map({
       cooperativeGestures: false,
       fadeDuration: performanceMode ? 0 : 300,
     })
-    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain, dark: true }
+    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = { satellite: false, terrain: showTerrain, dark: false }
     mapRef.current = map
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right')
@@ -662,6 +662,14 @@ export default function Map({
       setMapZoom(map.getZoom())
       setMapPitch(map.getPitch())
       setViewportSiteCount(countSitesInViewport(map, sitesRef.current))
+      // Prime cluster source so pins appear even if sites loaded before style ready
+      try {
+        ensureNativeLayers(map)
+        const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource | undefined
+        source?.setData(sitesToGeoJSON(sitesRef.current))
+      } catch (err) {
+        console.warn('[Map] initial sites sync failed', err)
+      }
     })
 
     map.on('mousemove', (e) => {
@@ -906,7 +914,7 @@ export default function Map({
   }, [filteredSites, mapLoaded, mapZoom, mapCenter])
 
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapRef.current || !mapLoaded) return
     const mode = resolveViewMode(viewMode, filteredSites.length)
 
     syncHeatmap(filteredSites)
@@ -924,7 +932,7 @@ export default function Map({
       syncNativeClusters(filteredSites, false)
       addMarkers(filteredSites, mode)
     }
-  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap, syncNativeClusters])
+  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap, syncNativeClusters, mapLoaded])
 
   useEffect(() => {
     const map = mapRef.current

@@ -69,6 +69,7 @@ export default function LayerControls({
   const { t } = useLocale()
 
   const styleButtons: { id: MapStyleMode; label: string }[] = [
+    { id: 'standard', label: t('mapStyleStandard') },
     { id: 'dark', label: t('mapStyleDark') },
     { id: 'satellite', label: t('mapStyleSatellite') },
     { id: 'terrain', label: t('mapStyleTerrain') },

@@ -18,8 +18,8 @@ export default function EcccFreshnessBadge({ stats, className = '' }: EcccFreshn
 
   return (
     <div
-      className={`absolute z-[62] max-w-[min(280px,42vw)] pointer-events-none hidden sm:block
-        top-[7.25rem] right-[3.75rem] xl:top-[7.25rem] xl:right-[calc(min(340px,92vw)+1.25rem)] ${className}`}
+      className={`absolute z-[62] max-w-[min(260px,38vw)] pointer-events-none hidden md:block
+        top-[4.5rem] left-4 xl:left-[19.5rem] ${className}`}
       data-testid="eccc-freshness-badge"
     >
       <div className="glass text-[10px] px-3 py-1.5 rounded-xl border border-[#5BC0BE]/30 text-gray-300 shadow-lg leading-snug pointer-events-auto flex items-center gap-2">

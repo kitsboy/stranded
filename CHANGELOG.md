@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.2] — 2026-07-15
+
+### Fixed
+- **Missing map pins** — sites sync now waits for `mapLoaded`; cluster source primed on style load
+- **Black basemap** — default restored to **Light** (OpenStreetMap white map); Dark optional in layers
+- **Top-right overlap** — zoom controls pinned `right: 1rem`; ECCC badge moved to left side
+- **Bottom cutoff** — footer/status/layer stack spacing (`--map-safe-bottom`, `--map-footer-offset`); right column scrollable with safe max-height
+
 ## [2.6.1] — 2026-07-15
 
 ### Added (upgrades 351–425, map polish + QA pack)

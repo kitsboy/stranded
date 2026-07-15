@@ -826,7 +826,8 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
   --map-accent-orange: #FF8C00;
   --map-accent-teal: #5BC0BE;
   --map-glass-bg: rgba(36, 52, 71, 0.88);
-  --map-footer-offset: 2.75rem;
+  --map-footer-offset: 5.25rem;
+  --map-safe-bottom: 3.25rem;
   /* Design tokens (#418) — HUD/toolbar/panel rhythm */
   --map-hud-gap: 0.75rem;
   --map-toolbar-gap: 0.25rem;
@@ -838,7 +839,7 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
   --map-z-badge: 62;
 }
 
-/* 351. Map stage vignette overlay */
+/* 351. Map stage vignette overlay — subtle on light basemap */
 .map-command-center [data-testid="map-stage"] {
   isolation: isolate;
 }
@@ -850,21 +851,17 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
   z-index: 11;
   background: radial-gradient(
     ellipse 92% 88% at 50% 48%,
-    transparent 42%,
-    rgba(15, 23, 42, 0.28) 72%,
-    rgba(15, 23, 42, 0.52) 100%
+    transparent 55%,
+    rgba(15, 23, 42, 0.08) 80%,
+    rgba(15, 23, 42, 0.18) 100%
   );
 }
 
-/* 352. MapLibre nav control — glass, rounded, edge spacing */
+/* 352. MapLibre nav control — pinned to right edge with buffer */
 .map-command-center .maplibregl-ctrl-top-right {
-  top: 0.75rem;
-  right: 0.75rem;
-}
-@media (min-width: 1280px) {
-  .map-command-center .maplibregl-ctrl-top-right {
-    right: calc(min(340px, 92vw) + 1rem);
-  }
+  top: 4.25rem;
+  right: 1rem;
+  margin: 0;
 }
 .map-command-center .maplibregl-ctrl-group {
   background: var(--map-glass-bg);
@@ -1132,6 +1129,8 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
 
 /* 365. Mission ring toggle integrated into layer panel */
 .map-command-center .map-layer-stack {
+  bottom: calc(var(--map-footer-offset) + 0.35rem);
+  right: 1rem;
   align-items: stretch;
   min-width: 11.5rem;
 }
@@ -1189,6 +1188,8 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
 
 /* 366. Right column scroll shadow indicators */
 .map-command-center .map-right-column {
+  max-height: calc(100vh - 5.5rem);
+  padding-bottom: 1rem;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
@@ -1242,6 +1243,7 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
 
 /* 369. Bottom status bar typography polish */
 .map-command-center .map-status-bar {
+  bottom: var(--map-safe-bottom);
   font-size: 0.6875rem;
   letter-spacing: 0.01em;
   line-height: 1.45;
