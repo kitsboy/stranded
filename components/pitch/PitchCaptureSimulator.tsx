@@ -61,7 +61,7 @@ export default function PitchCaptureSimulator({
   ]
 
   return (
-    <section className="pitch-capture px-6 py-14">
+    <section data-pitch-section className="pitch-capture px-6 py-14">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>

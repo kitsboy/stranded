@@ -41,6 +41,18 @@ export default function LandingPage() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    const hrefs = ['/map', '/data/live-stats.json']
+    const links = hrefs.map(href => {
+      const link = document.createElement('link')
+      link.rel = 'prefetch'
+      link.href = href
+      document.head.appendChild(link)
+      return link
+    })
+    return () => links.forEach(link => link.remove())
+  }, [])
+
   const siteCount = stats?.siteCount ?? 2611
   const provinceCount = stats?.provinceCount ?? 13
   const avgScore = stats?.totals?.avgStrandedScore

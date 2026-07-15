@@ -15,13 +15,18 @@ export function provinceOpportunities(stats: LiveStats): ProvinceOpportunity[] {
   return stats.provinces
     .map(p => {
       const share = p.pct / 100
+      const estKgDay = p.emissionKgDay ?? Math.round(emissionKgDay * share)
+      const estRevenueUsd = p.estRevenueUsd ?? Math.round(annualRevenueUsd * share)
+      const estBtcYr = estRevenueUsd > 0 && annualRevenueUsd > 0
+        ? annualBtc * (estRevenueUsd / annualRevenueUsd)
+        : annualBtc * share
       return {
         name: p.name,
         sites: p.count,
         pct: p.pct,
-        estKgDay: Math.round(emissionKgDay * share),
-        estRevenueUsd: Math.round(annualRevenueUsd * share),
-        estBtcYr: annualBtc * share,
+        estKgDay,
+        estRevenueUsd,
+        estBtcYr,
       }
     })
     .sort((a, b) => b.estRevenueUsd - a.estRevenueUsd)

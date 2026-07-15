@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
+import { loadSites, EnrichedSite, scoreTierClass, computeSiteValue } from '@/lib/sites'
 import { explainStrandedScore } from '@/lib/scoring'
 import { findPeerSites, findSimilarByEmission } from '@/lib/peers'
 
@@ -49,6 +49,21 @@ function CompareContent() {
       { label: 'Confidence', pick: s => s.properties.confidence || '—' },
       { label: 'Genset', pick: s => s.recommendedGenset || '—' },
       { label: 'Generator kW', pick: s => String(s.maxGeneratorPowerKW) },
+      { label: 'Daily profit (CAD)', pick: s => `C$${s.potentialDailyProfitCAD.toLocaleString()}` },
+      {
+        label: 'Annual BTC (est.)',
+        pick: s => {
+          const roi = computeSiteValue(s)
+          return `${(roi.dailyBtc * 365).toFixed(4)} BTC`
+        },
+      },
+      {
+        label: 'Payback (days)',
+        pick: s => {
+          const roi = computeSiteValue(s)
+          return isFinite(roi.paybackDays) ? `${roi.paybackDays.toLocaleString()} d` : '—'
+        },
+      },
     ]
     for (const f of fields) {
       metricRows.push({

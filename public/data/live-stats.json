@@ -1,74 +1,113 @@
 {
-  "generatedAt": "2026-07-15T23:08:33.459Z",
-  "version": "2.6.5",
-  "buildId": "20260715230833",
+  "generatedAt": "2026-07-15T23:19:52.863Z",
+  "version": "2.7.0",
+  "buildId": "20260715231952",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
     {
       "name": "Alberta",
       "count": 1176,
-      "pct": 45
+      "pct": 45,
+      "emissionKgDay": 702538,
+      "ch4TonnesYear": 256426,
+      "estRevenueUsd": 5162729459
     },
     {
       "name": "Ontario",
       "count": 454,
-      "pct": 17.4
+      "pct": 17.4,
+      "emissionKgDay": 461937,
+      "ch4TonnesYear": 168607,
+      "estRevenueUsd": 3394626659
     },
     {
       "name": "British Columbia",
       "count": 296,
-      "pct": 11.3
+      "pct": 11.3,
+      "emissionKgDay": 284328,
+      "ch4TonnesYear": 103780,
+      "estRevenueUsd": 2089435610
     },
     {
       "name": "Saskatchewan",
       "count": 280,
-      "pct": 10.7
+      "pct": 10.7,
+      "emissionKgDay": 225423,
+      "ch4TonnesYear": 82279,
+      "estRevenueUsd": 1656560120
     },
     {
       "name": "Quebec",
       "count": 243,
-      "pct": 9.3
+      "pct": 9.3,
+      "emissionKgDay": 184166,
+      "ch4TonnesYear": 67221,
+      "estRevenueUsd": 1353380020
     },
     {
       "name": "Manitoba",
       "count": 50,
-      "pct": 1.9
+      "pct": 1.9,
+      "emissionKgDay": 71216,
+      "ch4TonnesYear": 25994,
+      "estRevenueUsd": 523341421
     },
     {
       "name": "Nova Scotia",
       "count": 37,
-      "pct": 1.4
+      "pct": 1.4,
+      "emissionKgDay": 60449,
+      "ch4TonnesYear": 22064,
+      "estRevenueUsd": 444219649
     },
     {
       "name": "New Brunswick",
       "count": 30,
-      "pct": 1.1
+      "pct": 1.1,
+      "emissionKgDay": 50201,
+      "ch4TonnesYear": 18323,
+      "estRevenueUsd": 368911106
     },
     {
       "name": "Newfoundland and Labrador",
       "count": 18,
-      "pct": 0.7
+      "pct": 0.7,
+      "emissionKgDay": 12508,
+      "ch4TonnesYear": 4565,
+      "estRevenueUsd": 91915090
     },
     {
       "name": "Northwest Territories",
       "count": 10,
-      "pct": 0.4
+      "pct": 0.4,
+      "emissionKgDay": 564,
+      "ch4TonnesYear": 206,
+      "estRevenueUsd": 4140981
     },
     {
       "name": "Nunavut",
       "count": 8,
-      "pct": 0.3
+      "pct": 0.3,
+      "emissionKgDay": 70,
+      "ch4TonnesYear": 25,
+      "estRevenueUsd": 511468
     },
     {
       "name": "Prince Edward Island",
       "count": 5,
-      "pct": 0.2
+      "pct": 0.2,
+      "emissionKgDay": 41,
+      "ch4TonnesYear": 15,
+      "estRevenueUsd": 304235
     },
     {
       "name": "Yukon",
       "count": 4,
-      "pct": 0.2
+      "pct": 0.2,
+      "emissionKgDay": 63,
+      "ch4TonnesYear": 23,
+      "estRevenueUsd": 465906
     }
   ],
   "sourceTypes": [

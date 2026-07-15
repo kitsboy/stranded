@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.0] — 2026-07-15
+
+### Added (top-50 autonomous batch)
+- **live-stats** per-province `emissionKgDay`, `ch4TonnesYear`, `estRevenueUsd`
+- **Map:** revenue choropleth toggle; cluster expand on click; unclustered pin → site panel; score-tier cluster colors
+- **Map URL:** `?compare=id1,id2,id3` sync; compare tray link to `/compare`
+- **Sites:** fuzzy `searchSites`; full CSV export
+- **Compare:** ROI rows (daily profit, annual BTC, payback)
+- **Pitch:** province map deep links; present/embed auto-advance; Nostr share
+- **API docs** expanded; **PWA v10**; home prefetch; **high-contrast theme**
+- Toolbar **keyboard help** button; `docs/UPGRADES-426-475.md`
+
 ## [2.6.5] — 2026-07-15
 
 ### Added

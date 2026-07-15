@@ -44,7 +44,7 @@ function main() {
   const geo = JSON.parse(fs.readFileSync(GEO_PATH, 'utf8'))
   const features = geo.features || []
 
-  const provinces = {}
+  const provinces = {} // name -> { count, emissionKgDay, ch4TonnesYear }
   const sourceTypes = {}
   const gensetCounts = { man: 0, cat3520: 0, jenbacher316: 0, mobile250: 0 }
   const emissionTiers = { mega: 0, large: 0, medium: 0, small: 0, micro: 0 }
@@ -70,7 +70,12 @@ function main() {
     const tier = tierLabel(emission)
     const conf = (p.confidence || 'medium').toLowerCase()
 
-    provinces[province] = (provinces[province] || 0) + 1
+    if (!provinces[province]) {
+      provinces[province] = { count: 0, emissionKgDay: 0, ch4TonnesYear: 0 }
+    }
+    provinces[province].count++
+    provinces[province].emissionKgDay += emission
+    provinces[province].ch4TonnesYear += p.ch4_tonnes_year || 0
     sourceTypes[source] = (sourceTypes[source] || 0) + 1
     gensetCounts[genset] = (gensetCounts[genset] || 0) + 1
     emissionTiers[tier] = (emissionTiers[tier] || 0) + 1
@@ -126,7 +131,16 @@ function main() {
     siteCount,
     provinceCount: Object.keys(provinces).length,
     provinces: Object.entries(provinces)
-      .map(([name, count]) => ({ name, count, pct: +(count / siteCount * 100).toFixed(1) }))
+      .map(([name, data]) => ({
+        name,
+        count: data.count,
+        pct: +(data.count / siteCount * 100).toFixed(1),
+        emissionKgDay: Math.round(data.emissionKgDay),
+        ch4TonnesYear: Math.round(data.ch4TonnesYear),
+        estRevenueUsd: totalEmissionKgDay > 0
+          ? Math.round((data.emissionKgDay / totalEmissionKgDay) * annualRevenueUsd)
+          : 0,
+      }))
       .sort((a, b) => b.count - a.count),
     sourceTypes: Object.entries(sourceTypes)
       .map(([name, count]) => ({ name, count, pct: +(count / siteCount * 100).toFixed(1) }))

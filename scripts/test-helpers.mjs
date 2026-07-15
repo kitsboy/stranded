@@ -309,5 +309,17 @@ const cap5 = portfolioCaptureProjection(mockStats, 5)
 assert.equal(cap5.sites, 8)
 assert.equal(cap5.co2eTonnes, 1000)
 
+// map-url compare + sites-export + nostr (v2.7.0)
+const compareUrl = buildMapUrl({ compare: ['G10161', 'G12147'] })
+assert.ok(compareUrl.includes('compare=G10161'))
+assert.deepEqual(parseMapUrl(new URLSearchParams('compare=G10161,G12147')).compare, ['G10161', 'G12147'])
+
+const { exportSitesFullCsv } = await import('../lib/sites-export.ts')
+const fullCsv = exportSitesFullCsv([])
+assert.ok(fullCsv.startsWith('id,name,province'))
+
+const { buildNostrShareUrl } = await import('../lib/nostr-share.ts')
+assert.ok(buildNostrShareUrl('Stranded pitch', 'https://stranded.giveabit.io/pitch').includes('snort.social'))
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

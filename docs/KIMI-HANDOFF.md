@@ -1,5 +1,26 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-15 — v2.7.0 top-50 autonomous batch)
+
+**Chat topic:** Ship everything feasible from top-50 backlog without user input.
+
+**Finished this session:**
+- live-stats per-province emission + revenue; revenue choropleth toggle
+- Map cluster expand + pin click; compare URL sync; score-tier cluster colors; help toolbar btn
+- Sites fuzzy search + full CSV; compare ROI rows; pitch auto-advance + Nostr share
+- API docs expand; PWA v10; home prefetch; high-contrast theme
+- `docs/UPGRADES-426-475.md` (23 shipped, 27 infra-blocked)
+
+**Still to do:**
+- CF API token; staging DNS; server PDF; cloud presets (need user/infra)
+- GitHub release **v2.7.0**
+
+**Git State:**
+- Version: **2.7.0**
+- Branch: `main`
+
+---
+
 ## Latest Session Summary (from 2026-07-15 — v2.6.5 pitch deck elite redesign)
 
 **Chat topic:** Fix pitch stat card overflow + elite polish entire `/pitch` page.

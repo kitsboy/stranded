@@ -5,12 +5,13 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
-import { emissionChoroplethGeojson } from '@/lib/province-choropleth'
+import { emissionChoroplethGeojson, revenueChoroplethGeojson } from '@/lib/province-choropleth'
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
+export type ChoroplethMode = 'emission' | 'revenue'
 
 export type MapHandle = {
   getView: () => MapViewState | null
@@ -33,6 +34,7 @@ interface MapProps {
   showTerrain?: boolean
   showHeatmap?: boolean
   showChoropleth?: boolean
+  choroplethMode?: ChoroplethMode
   heatmapOpacity?: number
   terrainExaggeration?: number
   liveBtcPrice?: number
@@ -81,6 +83,14 @@ const TIER_CIRCLE_COLOR: maplibregl.ExpressionSpecification = [
   ['>=', ['get', 'score'], 85], '#a855f7',
   ['>=', ['get', 'score'], 65], '#22c55e',
   ['>=', ['get', 'score'], 45], '#eab308',
+  '#f97316',
+]
+
+const CLUSTER_AVG_SCORE_COLOR: maplibregl.ExpressionSpecification = [
+  'case',
+  ['>=', ['/', ['get', 'score_sum'], ['get', 'point_count']], 85], '#a855f7',
+  ['>=', ['/', ['get', 'score_sum'], ['get', 'point_count']], 65], '#22c55e',
+  ['>=', ['/', ['get', 'score_sum'], ['get', 'point_count']], 45], '#eab308',
   '#f97316',
 ]
 
@@ -139,6 +149,7 @@ export default function Map({
   showTerrain = false,
   showHeatmap = false,
   showChoropleth = false,
+  choroplethMode = 'emission',
   heatmapOpacity = 0.75,
   terrainExaggeration = 1,
   liveBtcPrice = 85000,
@@ -260,6 +271,31 @@ export default function Map({
       )
     })
     map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
+
+    map.on('click', CLUSTER_LAYER, (e) => {
+      const feature = e.features?.[0]
+      if (!feature) return
+      const clusterId = feature.properties?.cluster_id
+      if (clusterId == null) return
+      const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+      const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource
+      void source.getClusterExpansionZoom(clusterId).then((zoom) => {
+        if (performanceModeRef.current) {
+          map.jumpTo({ center: coords, zoom })
+        } else {
+          map.easeTo({ center: coords, zoom, duration: 420, essential: true })
+        }
+      }).catch(() => { /* cluster gone or source updating */ })
+    })
+
+    map.on('click', UNCLUSTERED_LAYER, (e) => {
+      const feature = e.features?.[0]
+      if (!feature) return
+      const id = feature.properties?.id
+      if (!id) return
+      const site = sitesRef.current.find(s => s.id === id)
+      if (site) onSiteClickRef.current(site)
+    })
   }, [])
 
   const ensureNativeLayers = useCallback((map: maplibregl.Map) => {
@@ -284,10 +320,7 @@ export default function Map({
         source: SITES_SOURCE,
         filter: ['has', 'point_count'],
         paint: {
-          'circle-color': [
-            'step', ['get', 'point_count'],
-            '#5BC0BE', 25, '#22c55e', 100, '#eab308', 500, '#FF8C00',
-          ],
+          'circle-color': CLUSTER_AVG_SCORE_COLOR,
           'circle-radius': [
             'step', ['get', 'point_count'],
             18, 10, 22, 50, 28, 100, 34, 500, 40,
@@ -702,6 +735,8 @@ export default function Map({
       }
     })
     map.on('click', (e) => {
+      const hitLayer = map.queryRenderedFeatures(e.point, { layers: [CLUSTER_LAYER, UNCLUSTERED_LAYER] })
+      if (hitLayer.length) return
       if (e.originalEvent?.shiftKey) {
         const nextZoom = Math.min(map.getZoom() + 1.5, map.getMaxZoom())
         if (performanceModeRef.current) {
@@ -760,9 +795,15 @@ export default function Map({
     const totals: Record<string, number> = {}
     sites.forEach(s => {
       const p = s.properties.province || 'Unknown'
-      totals[p] = (totals[p] || 0) + s.emission
+      if (choroplethMode === 'revenue') {
+        totals[p] = (totals[p] || 0) + s.potentialDailyProfitCAD * 365
+      } else {
+        totals[p] = (totals[p] || 0) + s.emission
+      }
     })
-    const geojson = emissionChoroplethGeojson(totals)
+    const geojson = choroplethMode === 'revenue'
+      ? revenueChoroplethGeojson(totals)
+      : emissionChoroplethGeojson(totals)
     const highlightList = highlightedProvinces.length ? highlightedProvinces : ['__none__']
     try {
       if (map.getSource(srcId)) {
@@ -843,7 +884,7 @@ export default function Map({
     } catch (err) {
       console.warn('[Map] choropleth sync failed', err)
     }
-  }, [sites, showChoropleth, highlightedProvinces])
+  }, [sites, showChoropleth, highlightedProvinces, choroplethMode])
 
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
     const map = mapRef.current

@@ -26,6 +26,8 @@ import PitchStatCard from '@/components/pitch/PitchStatCard'
 import PitchCaptureSimulator from '@/components/pitch/PitchCaptureSimulator'
 import PitchProvinceRank from '@/components/pitch/PitchProvinceRank'
 import ScoreHistogram from '@/components/ScoreHistogram'
+import { useReducedMotion } from '@/lib/useReducedMotion'
+import { buildNostrShareUrl } from '@/lib/nostr-share'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -120,6 +122,8 @@ function PitchContent() {
   const present = searchParams.get('present') === '1'
   const embed = embedParam === '1' || embedParam === '2' || present
   const embedMinimal = embedParam === '2' || present
+  const autoAdvance = present || embedParam === '2'
+  const reducedMotion = useReducedMotion()
   const [stats, setStats] = useState<LiveStats | null>(null)
   const btc = useBtcUsd()
   const [error, setError] = useState('')
@@ -138,6 +142,18 @@ function PitchContent() {
       document.documentElement.classList.remove('pitch-present')
     }
   }, [embed, embedMinimal, present])
+
+  useEffect(() => {
+    if (!autoAdvance || reducedMotion || !stats) return
+    const sections = Array.from(document.querySelectorAll('[data-pitch-section]')) as HTMLElement[]
+    if (sections.length < 2) return
+    let idx = 0
+    const timer = window.setInterval(() => {
+      idx = (idx + 1) % sections.length
+      sections[idx].scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 8000)
+    return () => window.clearInterval(timer)
+  }, [autoAdvance, reducedMotion, stats])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -263,7 +279,7 @@ function PitchContent() {
   return (
     <div className="pitch-page min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
       {/* Hero */}
-      <section className="pitch-hero relative px-6 pb-12 pt-14 text-center">
+      <section data-pitch-section className="pitch-hero relative px-6 pb-12 pt-14 text-center">
         <div className="pitch-hero-mesh pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-5xl">
           <motion.div
@@ -326,7 +342,7 @@ function PitchContent() {
       </div>
 
       {/* Headline stats — fixed grid */}
-      <section className="border-b border-white/10 bg-black/25 px-6 py-10 pitch-print">
+      <section data-pitch-section className="border-b border-white/10 bg-black/25 px-6 py-10 pitch-print">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
           <PitchStatCard label={t('pitchVerifiedSites')} value={fmt(stats.siteCount)} icon={MapPin} accent="#FF8C00" delay={0} />
           <PitchStatCard
@@ -375,7 +391,7 @@ function PitchContent() {
       </section>
 
       {/* Province density */}
-      <section className="pitch-print mx-auto max-w-6xl px-6 py-10">
+      <section data-pitch-section className="pitch-print mx-auto max-w-6xl px-6 py-10">
         <h2 className="mb-4 text-xl font-bold">{t('pitchSiteDensity')}</h2>
         <div className="grid grid-cols-4 gap-2 md:grid-cols-7 md:gap-3">
           {stats.provinces.map((p, idx) => (
@@ -417,7 +433,7 @@ function PitchContent() {
       />
 
       {/* Charts row 1 */}
-      <section className="mx-auto max-w-6xl px-6 py-10">
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-10">
         <h2 className="mb-2 text-2xl font-bold">{t('pitchGeographyScale')}</h2>
         <p className="mb-8 text-sm text-gray-500">{t('pitchGeoDesc')}</p>
         <div className="grid gap-6 md:grid-cols-2">
@@ -433,7 +449,7 @@ function PitchContent() {
       </section>
 
       {/* Score distribution + charts row 2 */}
-      <section className="mx-auto max-w-6xl px-6 pb-14">
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 pb-14">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {histogramScores.length > 0 && (
             <div className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-6 lg:col-span-1">
@@ -461,7 +477,7 @@ function PitchContent() {
       </section>
 
       {/* BTC Sensitivity */}
-      <section className="pitch-print mx-auto max-w-4xl px-6 py-10">
+      <section data-pitch-section className="pitch-print mx-auto max-w-4xl px-6 py-10">
         <h2 className="mb-4 text-xl font-bold">{t('pitchSensitivity')}</h2>
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
           <div className="mb-4 flex flex-wrap gap-2">
@@ -506,7 +522,7 @@ function PitchContent() {
       </section>
 
       {/* Impact + Value */}
-      <section className="pitch-print border-y border-white/10 bg-gradient-to-r from-[#FF8C00]/08 via-transparent to-[#5BC0BE]/08 px-6 py-14">
+      <section data-pitch-section className="pitch-print border-y border-white/10 bg-gradient-to-r from-[#FF8C00]/08 via-transparent to-[#5BC0BE]/08 px-6 py-14">
         <div className="mx-auto max-w-6xl">
           <h2 className="mb-8 text-center text-2xl font-bold">{t('pitchClimateImpact')}</h2>
           <div className="grid gap-6 md:grid-cols-3">
@@ -539,7 +555,7 @@ function PitchContent() {
       </section>
 
       {/* Top sites */}
-      <section className="mx-auto max-w-6xl px-6 py-14">
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-14">
         <h2 className="mb-2 text-2xl font-bold">{t('pitchTopOpportunities')}</h2>
         <p className="mb-6 text-sm text-gray-500">{t('pitchTopDesc')}</p>
         <div className="overflow-x-auto rounded-2xl border border-white/10">
@@ -579,7 +595,7 @@ function PitchContent() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-4xl px-6 pb-20 text-center">
+      <section data-pitch-section className="mx-auto max-w-4xl px-6 pb-20 text-center">
         <h2 className="mb-4 text-3xl font-bold">{t('pitchCtaTitle')}</h2>
         <p className="mb-8 text-gray-400">
           {tf(locale, 'pitchCtaDesc', { count: fmt(stats.siteCount) })}
@@ -588,6 +604,17 @@ function PitchContent() {
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/education" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchEducation')}</Link>
           <Link href="/sites" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchAllSites')}</Link>
+          <a
+            href={buildNostrShareUrl(
+              `Stranded Value — ${fmt(stats.siteCount)} verified methane sites across Canada. Stranded methane → Bitcoin.`,
+              `${PROD_URL}/pitch`,
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl border border-[#A78BFA]/50 px-6 py-3 text-[#A78BFA] transition hover:bg-[#A78BFA]/10"
+          >
+            Share on Nostr
+          </a>
           <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchSherpacarta')}</a>
           <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchEccc')}</a>
         </div>

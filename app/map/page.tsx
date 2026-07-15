@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react'
+import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -61,7 +62,7 @@ import {
   type MapViewBookmark,
 } from '@/lib/map-bookmarks'
 import { createMapViewHistory } from '@/lib/map-view-history'
-import type { MapHandle, MapStyleMode } from '@/components/Map'
+import type { MapHandle, MapStyleMode, ChoroplethMode } from '@/components/Map'
 import MapStatsBar from '@/components/MapStatsBar'
 import MapProvinceBars from '@/components/MapProvinceBars'
 import MobileFilterDrawer from '@/components/MobileFilterDrawer'
@@ -111,6 +112,7 @@ function StrandedCommandCenter() {
   const emissionLabelTapRef = useRef<{ target: 'min' | 'max' | null; at: number }>({ target: null, at: 0 })
 
   const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
+  const [choroplethMode, setChoroplethMode] = useState<ChoroplethMode>('emission')
   const [heatmapOpacity, setHeatmapOpacity] = useState(0.75)
   const [terrainExaggeration, setTerrainExaggeration] = useState(1)
   const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
@@ -197,6 +199,13 @@ function StrandedCommandCenter() {
         } else {
           toast.error(t('mapSiteNotFound'))
         }
+      }
+
+      if (urlState.compare?.length) {
+        const restoredCompare = urlState.compare
+          .map(id => sites.find(s => s.id === id || String(s.properties.ghgrp_id) === id))
+          .filter(Boolean) as EnrichedSite[]
+        if (restoredCompare.length) setCompareSites(restoredCompare.slice(0, 3))
       }
 
       const missionToken = urlState.mission || searchParams.get('mission')
@@ -461,6 +470,7 @@ function StrandedCommandCenter() {
 
   const currentMapUrlState = useMemo((): MapUrlState => ({
     site: selectedSite?.id,
+    compare: compareSites.length ? compareSites.map(s => s.id) : undefined,
     minScore: minScore > 0 ? minScore : undefined,
     minEmission: minEmission > 0 ? minEmission : undefined,
     maxEmission: maxEmission < DEFAULT_MAX_EMISSION ? maxEmission : undefined,
@@ -469,7 +479,7 @@ function StrandedCommandCenter() {
     radius: radiusFilter?.radiusKm,
     lat: radiusFilter?.lat,
     lng: radiusFilter?.lng,
-  }), [selectedSite, minScore, minEmission, maxEmission, selectedProvinces, selectedSources, radiusFilter])
+  }), [selectedSite, compareSites, minScore, minEmission, maxEmission, selectedProvinces, selectedSources, radiusFilter])
 
   useEffect(() => {
     if (!loading) urlSyncReady.current = true
@@ -882,7 +892,10 @@ function StrandedCommandCenter() {
         addToPortfolio(selectedSite)
         return
       }
-      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+      if (
+        (e.key === '?' && !e.metaKey && !e.ctrlKey)
+        || (e.shiftKey && !e.metaKey && !e.ctrlKey && (e.key === '/' || e.code === 'Slash'))
+      ) {
         e.preventDefault()
         setShowKeyboardHelp(true)
         return
@@ -1014,6 +1027,7 @@ function StrandedCommandCenter() {
         onFitBounds={fitToFilteredSites}
         onScreenshot={exportMapScreenshot}
         onPrint={printMap}
+        onKeyboardHelp={() => setShowKeyboardHelp(true)}
       />
 
       <MapHud
@@ -1392,6 +1406,7 @@ function StrandedCommandCenter() {
         showTerrain={layers.terrain}
         showHeatmap={layers.heatmap}
         showChoropleth={layers.choropleth}
+        choroplethMode={choroplethMode}
         heatmapOpacity={heatmapOpacity}
         terrainExaggeration={terrainExaggeration}
         liveBtcPrice={liveBtcPrice}
@@ -1516,15 +1531,23 @@ function StrandedCommandCenter() {
           <button onClick={watchSite} className="text-[10px] self-end text-gray-400 hover:text-[#5BC0BE]">Watch site (local alert)</button>
         )}
         {compareSites.length >= 2 && (
-          <button
-            type="button"
-            onClick={() => setShowCompare(true)}
-            className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black border border-[#FF8C00]/60 shadow-lg shadow-[#FF8C00]/20 hover:brightness-105 transition"
-            data-testid="map-compare-open"
-          >
-            <GitCompareArrows size={16} aria-hidden />
-            {tf(locale, 'mapCompareSites', { count: String(compareSites.length) })}
-          </button>
+          <div className="flex flex-col gap-2 w-full">
+            <button
+              type="button"
+              onClick={() => setShowCompare(true)}
+              className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black border border-[#FF8C00]/60 shadow-lg shadow-[#FF8C00]/20 hover:brightness-105 transition"
+              data-testid="map-compare-open"
+            >
+              <GitCompareArrows size={16} aria-hidden />
+              {tf(locale, 'mapCompareSites', { count: String(compareSites.length) })}
+            </button>
+            <Link
+              href={`/compare?a=${compareSites[0]?.id}&b=${compareSites[1]?.id}${compareSites[2] ? `&c=${compareSites[2].id}` : ''}`}
+              className="text-center text-[10px] text-[#5BC0BE] hover:underline"
+            >
+              Open full compare page →
+            </Link>
+          </div>
         )}
         {selectedSite && (
           <button
@@ -1560,6 +1583,32 @@ function StrandedCommandCenter() {
             <span>{showMissionRing ? t('mapMissionRingOn') : t('mapMissionRingOff')}</span>
             <span className="map-mission-ring-toggle__dot" aria-hidden />
           </button>
+          {layers.choropleth && (
+            <div className="flex gap-1 px-3 py-2 border-t border-white/10" data-testid="choropleth-mode-toggle">
+              <button
+                type="button"
+                onClick={() => setChoroplethMode('emission')}
+                className={`flex-1 text-[10px] px-2 py-1 rounded-lg border transition ${
+                  choroplethMode === 'emission'
+                    ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
+                    : 'border-white/15 text-gray-400 hover:text-white'
+                }`}
+              >
+                Emission
+              </button>
+              <button
+                type="button"
+                onClick={() => setChoroplethMode('revenue')}
+                className={`flex-1 text-[10px] px-2 py-1 rounded-lg border transition ${
+                  choroplethMode === 'revenue'
+                    ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
+                    : 'border-white/15 text-gray-400 hover:text-white'
+                }`}
+              >
+                Revenue
+              </button>
+            </div>
+          )}
           {showLayersPanel ? (
             <LayerControls
               compact

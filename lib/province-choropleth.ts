@@ -42,6 +42,31 @@ export function emissionChoroplethGeojson(
   return { type: 'FeatureCollection', features }
 }
 
+export function revenueChoroplethGeojson(
+  totals: Record<string, number>,
+): GeoJSON.FeatureCollection {
+  const max = Math.max(...Object.values(totals), 1)
+  const features: GeoJSON.Feature[] = PROVINCE_BOXES.map(box => {
+    const revenue = totals[box.name] || 0
+    const intensity = revenue / max
+    return {
+      type: 'Feature',
+      properties: { name: box.name, revenue, intensity },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [box.minLng, box.minLat],
+          [box.maxLng, box.minLat],
+          [box.maxLng, box.maxLat],
+          [box.minLng, box.maxLat],
+          [box.minLng, box.minLat],
+        ]],
+      },
+    }
+  })
+  return { type: 'FeatureCollection', features }
+}
+
 export function emissionFillColor(intensity: number): string {
   const t = Math.min(1, Math.max(0, intensity))
   const r = Math.round(20 + t * 235)

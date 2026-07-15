@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, TrendingUp } from 'lucide-react'
 import type { ProvinceOpportunity } from '@/lib/pitch-metrics'
@@ -24,7 +25,7 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
   const top = slice[0]?.estRevenueUsd || 1
 
   return (
-    <section className="px-6 pb-14">
+    <section data-pitch-section className="px-6 pb-14">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-[#5BC0BE]" />
@@ -49,7 +50,12 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 shrink-0 text-gray-500" />
-                  <span className="truncate font-medium text-gray-200">{p.name}</span>
+                  <Link
+                    href={`/map?province=${encodeURIComponent(p.name)}`}
+                    className="truncate font-medium text-gray-200 hover:text-[#5BC0BE] hover:underline"
+                  >
+                    {p.name}
+                  </Link>
                   <span className="shrink-0 text-xs text-gray-500">{p.sites} sites</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/5">

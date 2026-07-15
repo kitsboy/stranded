@@ -1,5 +1,7 @@
 export type MapUrlState = {
   site?: string
+  /** Comma-separated site IDs for compare tray */
+  compare?: string[]
   mission?: string
   minScore?: number
   minEmission?: number
@@ -18,6 +20,7 @@ const DEFAULT_MAX_EMISSION = 100_000
 export function parseMapUrl(params: URLSearchParams): MapUrlState {
   const state: MapUrlState = {}
   const site = params.get('site')
+  const compare = params.get('compare')
   const mission = params.get('mission')
   const minScore = params.get('minScore')
   const minEmission = params.get('minEmission')
@@ -30,6 +33,10 @@ export function parseMapUrl(params: URLSearchParams): MapUrlState {
   const lng = params.get('lng')
 
   if (site) state.site = site
+  if (compare) {
+    const compareList = compare.split(',').map(s => s.trim()).filter(Boolean)
+    if (compareList.length) state.compare = Array.from(new Set(compareList))
+  }
   if (mission) state.mission = mission
   if (minScore) state.minScore = +minScore
   if (minEmission) state.minEmission = +minEmission
@@ -59,6 +66,7 @@ export function parseMapUrl(params: URLSearchParams): MapUrlState {
 export function buildMapUrl(state: MapUrlState): string {
   const p = new URLSearchParams()
   if (state.site) p.set('site', state.site)
+  if (state.compare?.length) p.set('compare', state.compare.join(','))
   if (state.mission) p.set('mission', state.mission)
   if (state.minScore != null && state.minScore > 0) p.set('minScore', String(state.minScore))
   if (state.minEmission != null && state.minEmission > 0) p.set('minEmission', String(state.minEmission))

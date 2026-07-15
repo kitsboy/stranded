@@ -3,7 +3,7 @@ const DB_VERSION = 1
 const GEO_STORE = 'geojson'
 
 /** Bump with service worker CACHE id (public/sw.js). */
-export const OFFLINE_CACHE_VERSION = 'stranded-v9'
+export const OFFLINE_CACHE_VERSION = 'stranded-v10'
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {

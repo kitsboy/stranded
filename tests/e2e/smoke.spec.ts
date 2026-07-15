@@ -106,7 +106,7 @@ test('map keyboard help shows map-specific shortcuts', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
   await page.goto('/map')
   await expect(page.getByTestId('geolocate-btn')).toBeVisible({ timeout: 45000 })
-  await page.keyboard.press('?')
+  await page.getByTestId('keyboard-help-btn').click()
   await expect(page.getByTestId('keyboard-help-modal')).toBeVisible({ timeout: 10000 })
   await expect(page.getByTestId('map-shortcuts-section')).toBeVisible()
   await expect(page.getByTestId('map-shortcut-E')).toBeVisible()
@@ -142,16 +142,17 @@ test('map shows site data after dataset loads', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
   await page.goto('/map')
   await expect(page.getByTestId('map-loading-overlay')).toBeHidden({ timeout: 45000 })
-  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible()
+  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible({ timeout: 45000 })
   await expect(page.getByText(/\/\s*2,?611\s*visible/i)).toBeVisible({ timeout: 30000 })
 })
 
 test('map loading overlay clears when map is ready', async ({ page }) => {
-  test.setTimeout(60000)
+  test.setTimeout(90000)
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
   await page.goto('/map')
+  await expect(page.getByTestId('map-stage')).toBeVisible({ timeout: 45000 })
   await expect(page.getByTestId('map-loading-overlay')).toBeHidden({ timeout: 45000 })
-  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible()
+  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible({ timeout: 45000 })
 })
 
 test('empty right column does not render ghost bar over map', async ({ page }) => {

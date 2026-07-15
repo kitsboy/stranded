@@ -7,6 +7,8 @@ import { MapPin, Star, Download, X } from 'lucide-react'
 import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
 import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
+import { exportSitesFullCsv } from '@/lib/sites-export'
+import { searchSites } from '@/lib/site-search'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
@@ -46,12 +48,10 @@ export default function AllSitesExplorer() {
 
   const filtered = useMemo(() => {
     let res = allSites
-    const q = search.toLowerCase().trim()
+    const q = search.trim()
     if (q) {
-      res = res.filter(s => {
-        const p = s.properties
-        return [p.name, p.province, p.city, p.company, s.id].some(v => String(v || '').toLowerCase().includes(q))
-      })
+      const matchedIds = new Set(searchSites(allSites, q, allSites.length).map(m => m.site.id))
+      res = res.filter(s => matchedIds.has(s.id))
     }
     if (provinceFilter) res = res.filter(s => s.properties.province === provinceFilter)
     if (sourceFilter) res = res.filter(s => s.properties.source_type === sourceFilter)
@@ -106,6 +106,12 @@ export default function AllSitesExplorer() {
           </button>
           <button onClick={exportFiltered} className="flex items-center gap-2 text-sm px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10">
             <Download size={16} /> JSON
+          </button>
+          <button
+            onClick={() => downloadBlob(exportSitesFullCsv(filtered), `stranded-full-${filtered.length}.csv`, 'text/csv')}
+            className="flex items-center gap-2 text-sm px-4 py-2 rounded-2xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+          >
+            <Download size={16} /> Export Full CSV
           </button>
           <button onClick={() => exportBankPack('csv')} className="text-sm px-3 py-2 rounded-2xl border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10" title={selectedSites.length ? `Bank pack ${selectedSites.length} selected` : 'Bank pack top 50 filtered'}>
             Bank CSV

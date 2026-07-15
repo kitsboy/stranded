@@ -4,7 +4,14 @@ export type LiveStats = {
   buildId?: string
   siteCount: number
   provinceCount: number
-  provinces: { name: string; count: number; pct: number }[]
+  provinces: {
+    name: string
+    count: number
+    pct: number
+    emissionKgDay?: number
+    ch4TonnesYear?: number
+    estRevenueUsd?: number
+  }[]
   sourceTypes: { name: string; count: number; pct: number }[]
   gensetRecommendations: { id: string; count: number; pct: number }[]
   emissionTiers: Record<string, number>

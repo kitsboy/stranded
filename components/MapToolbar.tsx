@@ -1,6 +1,6 @@
 'use client'
 
-import { Camera, ChevronLeft, ChevronRight, Maximize2, Printer } from 'lucide-react'
+import { Camera, ChevronLeft, ChevronRight, HelpCircle, Maximize2, Printer } from 'lucide-react'
 import { useLocale } from '@/lib/useLocale'
 
 type MapToolbarProps = {
@@ -11,6 +11,7 @@ type MapToolbarProps = {
   onFitBounds: () => void
   onScreenshot: () => void
   onPrint: () => void
+  onKeyboardHelp?: () => void
 }
 
 export default function MapToolbar({
@@ -21,6 +22,7 @@ export default function MapToolbar({
   onFitBounds,
   onScreenshot,
   onPrint,
+  onKeyboardHelp,
 }: MapToolbarProps) {
   const { t } = useLocale()
 
@@ -78,6 +80,21 @@ export default function MapToolbar({
         >
           <Printer size={14} />
         </button>
+        {onKeyboardHelp && (
+          <>
+            <span className="map-toolbar-pill__divider" aria-hidden />
+            <button
+              type="button"
+              onClick={onKeyboardHelp}
+              className="map-toolbar-pill__btn"
+              aria-label={t('kbdShowHelp')}
+              title={t('kbdShowHelp')}
+              data-testid="keyboard-help-btn"
+            >
+              <HelpCircle size={14} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
