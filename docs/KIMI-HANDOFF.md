@@ -329,7 +329,7 @@
 - Map page is now primary command center (~1.6k lines); subcomponents extracted (MapStatsBar, MapFilterSummary, MobileFilterDrawer, etc.)
 
 **Git State:**
-- SHA: (see `git log -1` after push)
+- SHA: `f5d46e4`
 - Version: **2.6.0**
 - Push main → CF strandedbuild auto-deploy
 
