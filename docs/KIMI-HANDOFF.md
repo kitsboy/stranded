@@ -348,15 +348,31 @@
 - Removed long horizontal black bar on map (empty `map-right-column` scroll-shadow painting `--bg-dark` band beside zoom controls)
 - Hide right column when no site/mission/compare content; softened scroll shadows to radial fades only
 - E2E: `empty right column does not render ghost bar over map`
-- Version **2.6.4** pushed `76dcd83`
+- Version **2.6.4** pushed `76dcd83` → docs handoff `9c2e950`
+- Production verified: `deploy:check` OK at 2.6.4
 
 **Decisions:**
 - `showRightColumn` gate: `selectedSite || portfolio.length || compareSites.length >= 2`
 - CompareSitesModal moved outside column wrapper so modal still works when column hidden
 
 **Git State:**
-- SHA: `76dcd83`
+- SHA: `9c2e950`
 - Unpushed: none
+
+## Latest Session Summary (from 2026-07-15 goodbye)
+
+**Chat topic:** Map command center polish v2.6.0–v2.6.4; final fix = empty black horizontal bar beside zoom controls.
+
+**Finished in this session:**
+- v2.6.0–v2.6.3 map layout, basemap, pins, tour, footer, mobile polish
+- v2.6.4 ghost bar removed (`map-right-column` conditional + CSS scroll-shadow fix)
+- 21 E2E tests; production live at https://stranded.giveabit.io/map/
+
+**Still to do:**
+- Flaky keyboard-help E2E (`?` shortcut) — optional cleanup
+- Kimi vault sync when Cam says go (M3 hand-off files ready)
+
+**Next for Kimi:** Read `SESSION-SUMMARY-2026-07-15.md`; update MASTER-BRAIN/Kanban; note **v2.6.4** production. Do not sync to M4 until instructed.
 
 ## Session — 2026-07-15 (v2.6.0 map elite round 7)
 

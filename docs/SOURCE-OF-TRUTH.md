@@ -8,7 +8,7 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-07-15 — **v2.5.0** live (round 6 upgrades 276–300: 241-key i18n, PWA v6, onboarding tour, site-search, mission-templates, E2E + docs pack). See `SESSION-SUMMARY-2026-07-15-v2.5.md` + `docs/UPGRADES-201-300.md`.
+**Last Major Update:** 2026-07-15 — **v2.6.4** live (map command center polish rounds 7–8: layout fixes, light basemap, pin sync, mobile safe areas, empty right-column ghost bar removed). See `SESSION-SUMMARY-2026-07-15.md` + `docs/UPGRADES-301-350.md` + `docs/UPGRADES-351-425.md`.
 
 **Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
 **Local dev:** http://localhost:3003  
