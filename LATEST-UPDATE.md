@@ -3,4 +3,4 @@
 Brief: v2.6.1 — map CSP fix (CARTO tiles), layout polish, 75 upgrades (#351–425)
 Version: 2.6.1
 Production: https://stranded.giveabit.io
-Commit: (pending push)
+Commit: ccd5ab7

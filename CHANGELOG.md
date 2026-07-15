@@ -9,8 +9,10 @@
 - **411–425** — E2E map canvas + overlay clear + ECCC badge layout; `test:helpers` CSP/format-number cases; `UPGRADES-351-425.md`; handoff pack
 
 ### Fixed
-- Map page `map-stage` wrapper closing tag (agent merge TS error)
-- Duplicate component imports on map page
+- **Map not showing** — CSP allows CARTO dark tiles + MapLibre glyphs; full-bleed `map-stage` wrapper
+- **Loading overlay** — map tiles visible while sites dataset loads separately
+- **ECCC badge overlap** — repositioned clear of MapLibre zoom controls
+- Map page `map-stage` closing tag + duplicate import merge fixes
 
 ## [2.6.0] — 2026-07-15
 
