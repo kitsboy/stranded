@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.6.5] — 2026-07-15
+
+### Added
+- **Pitch deck elite redesign** — fixed stat card overflow with responsive compact values, icons, and 2→3→6 column grid
+- **Portfolio Capture Simulator** — interactive 1–100% deployment slider with live CO₂e, BTC, revenue, and generator kW
+- **Province Opportunity Rank** — top provinces by modeled annual revenue share
+- **Score distribution** panel on pitch (reuses `ScoreHistogram`)
+- **Present Mode** + **Copy pitch link** CTAs; live metrics ticker strip; hero mesh gradient
+
+### Fixed
+- Stat cards no longer bleed text outside borders on tablet/mobile breakpoints
+
 ## [2.6.4] — 2026-07-15
 
 ### Fixed

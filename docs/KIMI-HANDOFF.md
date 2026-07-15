@@ -1,5 +1,27 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-15 — v2.6.5 pitch deck elite redesign)
+
+**Chat topic:** Fix pitch stat card overflow + elite polish entire `/pitch` page.
+
+**Finished this session:**
+- **Stat cards fixed** — responsive 2→3→6 grid, compact values on tablet, icons, no text bleed
+- **Portfolio Capture Simulator** — 1–100% slider → CO₂e, BTC, revenue, generator kW
+- **Province Opportunity Rank** — top 6 provinces by modeled revenue share
+- **Score distribution** panel, live ticker, hero mesh, Present Mode + copy link CTAs
+- `lib/pitch-metrics.ts`, `components/pitch/*`, pitch CSS, i18n +20 keys × EN/FR/DE/ES
+- E2E +1 pitch stat overflow test; `test:helpers` pitch-metrics cases
+
+**Still to do:**
+- Kimi vault sync when Cam says go
+- Optional: GitHub release **v2.6.5**
+
+**Git State:**
+- Version: **2.6.5**
+- Branch: `main`
+
+---
+
 ## Latest Session Summary (from 2026-07-15 — v2.6.1 round 8 polish + QA pack)
 
 **Chat topic:** Parallel agent merges for upgrades **351–410** → polish/QA batch **411–425**.

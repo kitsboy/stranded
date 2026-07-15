@@ -565,6 +565,73 @@ main#main-content:has(.map-command-center) {
   touch-action: manipulation;
 }
 
+/* Pitch deck — elite investor page */
+.pitch-stat-value {
+  font-size: clamp(1.125rem, 2.4vw, 1.65rem);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pitch-hero-mesh {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 140, 0, 0.18), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(91, 192, 190, 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 10% 80%, rgba(167, 139, 250, 0.08), transparent 50%);
+}
+
+.pitch-live-dot {
+  animation: pitch-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pitch-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.pitch-ticker {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.pitch-ticker-track {
+  animation: pitch-ticker-scroll 40s linear infinite;
+}
+
+@keyframes pitch-ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.pitch-panel {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pitch-panel:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.pitch-range {
+  height: 0.5rem;
+  cursor: pointer;
+}
+
+.pitch-cta-primary {
+  box-shadow: 0 4px 24px rgba(255, 140, 0, 0.25);
+}
+
+.pitch-loading-pulse {
+  animation: pitch-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-ticker-track,
+  .pitch-live-dot,
+  .pitch-loading-pulse {
+    animation: none !important;
+  }
+}
+
 html.pitch-embed nav,
 html.pitch-embed footer {
   display: none !important;

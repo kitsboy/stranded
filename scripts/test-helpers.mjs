@@ -293,5 +293,21 @@ assert.deepEqual(validatePresetName('   '), { ok: false })
 assert.equal(shouldShowFilterToast('dedupe-test'), true)
 assert.equal(shouldShowFilterToast('dedupe-test'), false)
 
+// pitch-metrics (v2.6.5)
+const { provinceOpportunities, portfolioCaptureProjection } = await import('../lib/pitch-metrics.ts')
+const mockStats = {
+  provinces: [{ name: 'Alberta', count: 100, pct: 50 }, { name: 'Ontario', count: 50, pct: 25 }],
+  totals: { emissionKgDay: 1000, totalGeneratorKW: 5000 },
+  valueModel: { annualRevenueUsd: 1_000_000, annualBtc: 10 },
+  siteCount: 150,
+  impact: { co2eAvoided100PctTonnes: 20_000 },
+}
+const ranked = provinceOpportunities(mockStats)
+assert.equal(ranked[0].name, 'Alberta')
+assert.equal(ranked[0].estKgDay, 500)
+const cap5 = portfolioCaptureProjection(mockStats, 5)
+assert.equal(cap5.sites, 8)
+assert.equal(cap5.co2eTonnes, 1000)
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

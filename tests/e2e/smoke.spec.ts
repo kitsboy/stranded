@@ -16,6 +16,25 @@ test('pitch shows live stats', async ({ page }) => {
   await expect(page.getByText('Verified Sites', { exact: true }).first()).toBeVisible({ timeout: 10000 })
 })
 
+test('pitch stat cards and capture simulator', async ({ page }) => {
+  await page.goto('/pitch')
+  await expect(page.getByText('Portfolio Capture Simulator').first()).toBeVisible({ timeout: 10000 })
+  const statCards = page.locator('.pitch-stat-card')
+  await expect(statCards.first()).toBeVisible()
+  const count = await statCards.count()
+  expect(count).toBeGreaterThanOrEqual(6)
+  for (let i = 0; i < Math.min(count, 6); i++) {
+    const box = await statCards.nth(i).boundingBox()
+    expect(box?.width).toBeGreaterThan(80)
+    const overflows = await statCards.nth(i).evaluate(el => {
+      const value = el.querySelector('.pitch-stat-value')
+      if (!value) return false
+      return value.scrollWidth > el.clientWidth + 2
+    })
+    expect(overflows).toBe(false)
+  }
+})
+
 test('education page loads', async ({ page }) => {
   await page.goto('/education')
   await expect(page.getByText(/Stranded Value/i).first()).toBeVisible()
