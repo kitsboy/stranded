@@ -23,6 +23,8 @@ import { SENSITIVITY_PRESETS, type SensitivityPresetId } from '@/lib/sensitivity
 import EducationHalvingTimeline from '@/components/EducationHalvingTimeline'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { useLocale } from '@/lib/useLocale'
+import type { LiveStats } from '@/types/live-stats'
+import { formatEmissionCompact } from '@/lib/home-metrics'
 
 const EducationCharts = dynamic(() => import('@/components/EducationCharts'), {
   loading: () => <div className="mb-16 h-48 rounded-2xl border border-white/10 animate-pulse bg-white/5" />,
@@ -201,6 +203,24 @@ export default function EducationContent() {
   const [financingDebtPercent, setFinancingDebtPercent] = useState(60)
   const [financingInterestRate, setFinancingInterestRate] = useState(8) // %
   const [eduProgress, setEduProgress] = useState<Record<string, boolean>>({})
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
+
+  const eduNavSections = [
+    { id: 'edu-gwp', label: 'GWP Calculator' },
+    { id: 'edu-per-site', label: 'Per-Site ROI' },
+    { id: 'edu-gensets', label: 'Gensets' },
+    { id: 'edu-scenarios', label: 'Scenarios' },
+    { id: 'edu-simulators', label: 'Simulators' },
+    { id: 'edu-halving', label: 'Halving' },
+    { id: 'edu-quiz', label: 'IQ Quiz' },
+  ]
+
+  useEffect(() => {
+    fetch('/data/live-stats.json')
+      .then(r => r.json())
+      .then(setLiveStats)
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!btcSeeded && marketBtc && marketBtc !== 85000) {
@@ -348,6 +368,22 @@ export default function EducationContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 text-white">
+      <nav
+        data-testid="edu-section-nav"
+        className="sticky top-14 z-20 -mx-2 mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-[#0b111f]/95 px-3 py-2 backdrop-blur-md scrollbar-thin"
+        aria-label="Education section navigation"
+      >
+        {eduNavSections.map(s => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="shrink-0 rounded-full border border-white/10 px-3 py-1 text-xs text-gray-300 hover:border-[#5BC0BE]/40 hover:text-[#5BC0BE] transition"
+          >
+            {s.label}
+          </a>
+        ))}
+      </nav>
+
       {/* Persona Path Selector (batch item) */}
       <div className="mb-4 flex flex-wrap gap-2 items-center">
         <span className="text-sm text-gray-400">Tailor for:</span>
@@ -379,10 +415,30 @@ export default function EducationContent() {
           {t('eduHeroDesc')}
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-6">
-          <div className="px-4 py-1.5 bg-[#0f172a] border border-[#5BC0BE]/30 rounded-full text-sm">2,611 verified sites</div>
+          <div className="px-4 py-1.5 bg-[#0f172a] border border-[#5BC0BE]/30 rounded-full text-sm">
+            {(liveStats?.siteCount ?? 2611).toLocaleString()} verified sites
+          </div>
           <div className="px-4 py-1.5 bg-[#0f172a] border border-[#FF8C00]/30 rounded-full text-sm">25× worse than CO₂</div>
           <div className="px-4 py-1.5 bg-[#0f172a] border border-white/20 rounded-full text-sm">Zero grid impact</div>
         </div>
+        {liveStats?.topSites?.[0] && (
+          <p className="mt-4 text-sm text-gray-400">
+            Top site by score:{' '}
+            <Link
+              href={`/map?site=${liveStats.topSites[0].id}`}
+              data-testid="edu-top-site-link"
+              className="text-[#5BC0BE] hover:underline"
+            >
+              {liveStats.topSites[0].name}
+            </Link>
+            {' · '}
+            {liveStats.topSites[0].province}
+            {' · '}
+            {formatEmissionCompact(liveStats.topSites[0].emissionKgDay)}
+            {' · score '}
+            <span className="text-[#FF8C00]">{liveStats.topSites[0].score}</span>
+          </p>
+        )}
       </div>
 
       {/* 1b. Prominent "What is Stranded Value?" Explainer Card (high value education) */}
@@ -410,7 +466,7 @@ export default function EducationContent() {
       </div>
 
       {/* Methane GWP calculator widget */}
-      <div className="mb-16 glass p-6 rounded-3xl border border-[#5BC0BE]/25">
+      <div id="edu-gwp" className="mb-16 glass p-6 rounded-3xl border border-[#5BC0BE]/25 scroll-mt-28">
         <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
           <Leaf className="text-[#34D399]" size={22} /> {t('eduGwpCalc')}
         </h2>
@@ -692,7 +748,7 @@ export default function EducationContent() {
       {/* Uses real emission_rate_kg_day for gas input, province/source_type/confidence for context */}
       {/* Generator (from our models) + ASIC mining ROI + full CapEx (generator + hardware) + Financing + "Methane loss" opportunity cost (the BTC revenue not realized if vented) */}
       {/* All dynamic with liveBtc, toggles. Squeezes every data field possible. */}
-      <div className="mb-16">
+      <div id="edu-per-site" className="mb-16 scroll-mt-28">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold flex items-center gap-2"><MapPin className="text-[#FF8C00]" /> {t('eduPerSiteRoi')}</h2>
           <div className="text-xs text-gray-400">Dynamic • Uses live dataset • CapEx + opportunity cost included</div>
@@ -843,13 +899,13 @@ export default function EducationContent() {
         <p className="text-[10px] text-gray-500 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
       </div>
 
-      <div className="mb-16">
+      <div id="edu-gensets" className="mb-16 scroll-mt-28">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Cpu className="text-[#FF8C00]" /> {t('eduGensetTable')}</h2>
         <p className="text-sm text-gray-400 mb-4">Side-by-side methane-to-power units used in Stranded ROI models.</p>
         <GensetComparisonTable />
       </div>
 
-      <div className="mb-16">
+      <div id="edu-scenarios" className="mb-16 scroll-mt-28">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Percent className="text-[#34D399]" /> Scenario Presets</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {(Object.keys(SENSITIVITY_PRESETS) as SensitivityPresetId[]).map(id => (
@@ -874,10 +930,12 @@ export default function EducationContent() {
       </div>
 
       {/* 6. Stranded Value IQ Quiz (high engagement education tool) */}
-      <QuizSection />
+      <div id="edu-quiz" className="scroll-mt-28">
+        <QuizSection />
+      </div>
 
       {/* 3+4. Multiple Simulators - enhanced with live BTC sensitivity & one-click mission builder */}
-      <div className="mb-16">
+      <div id="edu-simulators" className="mb-16 scroll-mt-28">
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2"><Zap className="text-[#5BC0BE]" /> {t('eduSimulatorsTitle')}</h2>
         
         <div className="glass p-4 rounded-2xl mb-6 flex flex-col sm:flex-row items-center gap-4">
@@ -1007,7 +1065,7 @@ export default function EducationContent() {
         )}
       </div>
 
-      <div className="mb-16">
+      <div id="edu-halving" className="mb-16 scroll-mt-28">
         <EducationHalvingTimeline dailyBtc={0.012} btcUsd={liveBtc} />
       </div>
 

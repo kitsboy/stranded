@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import PageHeader from '@/components/PageHeader'
 import { ButtonLink } from '@/components/ui/Button'
+import AboutLiveMeta from '@/components/AboutLiveMeta'
 
 export const metadata = {
   title: 'About — Stranded Canada',
@@ -25,6 +26,8 @@ export default function AboutPage() {
           </>
         }
       />
+
+      <AboutLiveMeta />
 
       <p className="text-lg text-gray-300 leading-relaxed mb-6">
         Stranded Canada turns wasted methane emissions into Bitcoin-powered environmental remediation.

@@ -6,6 +6,16 @@ export const metadata = {
   description: 'Public product roadmap: shipped client features and backend-dependent work.',
 }
 
+const SHIPPED_V28 = [
+  'Dashboard command center elite batch (readiness gauge, capture slider, emission tiers)',
+  'DashboardLiveTicker + province revenue leaders + confidence breakdown',
+  'Home KPI strip + deploy readiness badge linked to dashboard',
+  'Education sticky section nav + top-site deep link from live-stats',
+  'Methodology / About / Verticals live-stats banners',
+  'Changelog accordion sections parsed from CHANGELOG.md',
+  'PWA stranded-v12',
+]
+
 const SHIPPED_ROUND6 = [
   'i18n 241 keys — pitch, map, education headings, errors',
   'Html lang sync + theme-color + apple touch icons',
@@ -36,8 +46,16 @@ const SHIPPED_PRIOR = [
   'MapLibre native clusters + radius filter URL',
 ]
 
+const V29_BACKLOG = [
+  'Full home + methodology i18n body copy',
+  'Vertical-specific beta datasets (wind curtailment, waste heat ORC)',
+  'Partner embed tokens + rate-limited public API',
+  'Cloud portfolio sync with optional accounts',
+  'Scheduled ECCC refresh webhook + staging deploys',
+  'Email / Telegram score alerts',
+]
+
 const NEXT_CLIENT = [
-  'Full page i18n (home body, site panel, methodology)',
   'Live ECCC refresh webhook (still client cache first)',
   'More vertical models (curtailed wind / waste heat)',
   'Cloud-free portfolio QR at scale',
@@ -60,15 +78,30 @@ export default function RoadmapPage() {
         subtitle="Transparent plan. Client-first now; backends when Cam configures them."
         badge={
           <span className="inline-block text-xs text-[#5BC0BE] px-2 py-0.5 rounded-full border border-[#5BC0BE]/30 bg-[#5BC0BE]/10">
-            v2.5.0 · Round 6 upgrades 276–300 shipped 2026-07-15
+            v2.8.3 · Batch 3 upgrades 576–600 shipped 2026-07-15
           </span>
         }
       />
 
       <section className="mb-8">
-        <h2 className="text-lg font-semibold text-[#FF8C00] mb-3">Shipped — Round 6 (v2.5.0)</h2>
+        <h2 className="text-lg font-semibold text-[#FF8C00] mb-3">Shipped — v2.8.x (dashboard + marketing polish)</h2>
         <ul className="space-y-1.5 text-sm text-gray-300">
-          {SHIPPED_ROUND6.map(i => <li key={i} className="flex gap-2"><span className="text-[#FF8C00]">✓</span>{i}</li>)}
+          {SHIPPED_V28.map(i => <li key={i} className="flex gap-2"><span className="text-[#FF8C00]">✓</span>{i}</li>)}
+        </ul>
+        <Link href="/changelog" className="link-animated text-xs mt-2 inline-block">See CHANGELOG [2.8.0]–[2.8.3] →</Link>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-[#A78BFA] mb-3">v2.9 backlog</h2>
+        <ul className="space-y-1.5 text-sm text-gray-300">
+          {V29_BACKLOG.map(i => <li key={i} className="flex gap-2"><span className="text-[#A78BFA]">→</span>{i}</li>)}
+        </ul>
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-[#34D399] mb-3">Shipped — Round 6 (v2.5.0)</h2>
+        <ul className="space-y-1.5 text-sm text-gray-300">
+          {SHIPPED_ROUND6.map(i => <li key={i} className="flex gap-2"><span className="text-[#34D399]">✓</span>{i}</li>)}
         </ul>
         <Link href="/changelog" className="link-animated text-xs mt-2 inline-block">See CHANGELOG [2.5.0] for full list →</Link>
       </section>

@@ -4,9 +4,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { Rocket } from 'lucide-react'
+import { Rocket, Gauge } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
 import { scoreTierClass } from '@/lib/scoring'
+import { formatEmissionCompact, readinessMini, websiteSchemaExtras } from '@/lib/home-metrics'
+import HomeKpiStrip from '@/components/HomeKpiStrip'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
 import { useLocale } from '@/lib/useLocale'
@@ -58,6 +60,9 @@ export default function LandingPage() {
   const avgScore = stats?.totals?.avgStrandedScore
   const highScore = stats?.totals?.highScoreSites
 
+  const readiness = stats ? readinessMini(stats) : null
+  const schemaExtras = stats ? websiteSchemaExtras(stats) : null
+
   const homeJsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -67,6 +72,7 @@ export default function LandingPage() {
         url: 'https://stranded.giveabit.io',
         description: `${siteCount.toLocaleString()} verified stranded methane sites across Canada with Bitcoin-powered ROI modeling`,
         publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io' },
+        ...(schemaExtras ?? {}),
       },
       {
         '@type': 'Dataset',
@@ -99,6 +105,19 @@ export default function LandingPage() {
           {t('heroBadge')}
         </HeroBadge>
 
+        {readiness && (
+          <Link
+            href="/dashboard"
+            data-testid="home-readiness-badge"
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#34D399]/30 bg-[#34D399]/10 px-3 py-1 text-xs text-[#34D399] hover:border-[#34D399]/50 transition"
+          >
+            <Gauge size={14} aria-hidden />
+            <span>Deploy readiness <strong className="tabular-nums">{readiness.score}</strong>/100</span>
+            <span className="text-[#34D399]/70">· {readiness.label}</span>
+            <span className="text-[#5BC0BE]">Dashboard →</span>
+          </Link>
+        )}
+
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter mb-6">
           {t('heroTitle1')}<br />
           <span className="text-[#FF8C00]">{t('heroTitle2')}</span>
@@ -124,6 +143,8 @@ export default function LandingPage() {
         </div>
         <p className="mt-4 text-xs text-gray-500">{t('heroDataNote')}</p>
       </div>
+
+      <HomeKpiStrip stats={stats} />
 
       {/* Stats */}
       <div className="border-y border-white/10 bg-black/20">
@@ -207,7 +228,9 @@ export default function LandingPage() {
                 <div className="font-semibold truncate">{site.name}</div>
                 {site.score > 0 && <div className={`stranded-score text-xs ${scoreTierClass(site.score)}`}>{site.score}</div>}
               </div>
-              <div className="text-sm text-gray-400 mt-1">{site.province} • {site.emission.toLocaleString()} kg/day • Live from dataset</div>
+              <div className="text-sm text-gray-400 mt-1">
+                {site.province} • {site.emission > 0 ? formatEmissionCompact(site.emission) : '—'} • Live from dataset
+              </div>
               <div className="text-xs text-[#5BC0BE] mt-3">View on map → (real CapEx + ROI with gensets)</div>
             </Link>
           ))}

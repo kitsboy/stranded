@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import GlossaryTip from '@/components/GlossaryTip'
 import MethodologyCalculator from '@/components/MethodologyCalculator'
+import MethodologyLiveBanner from '@/components/MethodologyLiveBanner'
 
 export const metadata = {
   title: 'Methodology — Stranded Value',
@@ -13,7 +14,9 @@ export default function MethodologyPage() {
     <div className="page-container prose prose-invert">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Methodology' }]} />
       <h1 className="text-4xl font-bold tracking-tighter not-prose">Methodology</h1>
-      <p className="text-gray-400 not-prose mb-8">Transparent scoring, data lineage, and ROI assumptions.</p>
+      <p className="text-gray-400 not-prose mb-4">Transparent scoring, data lineage, and ROI assumptions.</p>
+
+      <MethodologyLiveBanner />
 
       <h2>Data source</h2>
       <p>All 2,611 sites come from <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC verified methane reporting</a>. Stats regenerate on every build via <code>generate-live-stats.js</code>.</p>
