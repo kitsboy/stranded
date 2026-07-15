@@ -1,24 +1,28 @@
 # Kimi Handoff — Stranded
 
-## Latest Session Summary (from 2026-07-15 — v2.4.0 round 5)
+## Latest Session Summary (from 2026-07-15 — v2.4.0 round 5 full ship)
 
-**Chat topic:** Ship upgrades 176–200 + v2.4.0 docs pack.
+**Chat topic:** whatsup recovery → all pending items + round 5 upgrades 151–200 → push.
 
 **Finished this session:**
-- Round 5 upgrades 176–200 (grant quiz, choropleth, bookmarks export, watch toasts, halving slider, etc.)
-- `docs/UPGRADES-151-200.md` — 50/50 shipped tracking
-- CHANGELOG [2.4.0], roadmap round 5, diligence bump (2026-07-15)
-- E2E: `/compare`, `/print/province`
+- GitHub release **v2.3.7** tagged (`e6f5452`) — audit remediations bookmark
+- **i18n expansion** — 107 keys × EN/FR/DE/ES; `useLocale` hook; home/footer/sites/mission
+- **MapLibre native clusters** — tier colors, 3-mode toggle, auto-default >180 sites
+- **Upgrades 151–175** — compare, province print, Nostr share, bookmarks tags, GWP calc, methodology calculator, JSON-LD, verticals wind/heat, PWA shortcuts, j/k map nav
+- **Upgrades 176–200** — grant quiz, choropleth, score sparkline, halving slider, watch toasts, Tadbuy/Sherpacarta hooks, lazy education charts
+- `docs/UPGRADES-151-200.md` — 50/50 shipped
+- CHANGELOG [2.4.0], roadmap, diligence v2.4.0, SOURCE-OF-TRUTH bump
+- E2E **11/11** pass (incl. compare + province print)
 - PWA cache `stranded-v5`
 - `SESSION-SUMMARY-2026-07-15.md` + `KIMI-HANDOFF-STRANDED-2026-07-15.md`
 
 **Still to do:**
 - Kimi: sync when Cam says go — ingest summaries + UPGRADES doc into Obsidian/MASTER-BRAIN
-- Cam optional: GitHub release tag v2.4.0
+- GitHub release **v2.4.0** after push + deploy:check
 
 **Git State:**
 - Version: **2.4.0**
-- Branch: `main`
+- Branch: `main` · 4 feature commits ahead of origin
 
 ---
 
