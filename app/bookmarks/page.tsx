@@ -7,8 +7,9 @@ import { getBookmarkEntries, getBookmarkTags, setBookmarkTag, exportBookmarksJso
 import { toast } from 'sonner'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import { Star } from 'lucide-react'
-import { bankPackCsv } from '@/lib/bank-pack'
+import { exportBookmarksCsv } from '@/lib/bookmarks-export'
 import { downloadBlob } from '@/lib/export-formats'
+import { buildMapUrl } from '@/lib/map-url'
 
 export default function BookmarksPage() {
   const [sites, setSites] = useState<(EnrichedSite & { tag?: string })[]>([])
@@ -68,14 +69,24 @@ export default function BookmarksPage() {
         <button
           type="button"
           onClick={() => {
-            if (!sites.length) { toast.info('No bookmarks to export'); return }
-            downloadBlob(bankPackCsv(sites), `stranded-watchlist-${sites.length}.csv`, 'text/csv')
-            toast.success(`Exported ${sites.length} sites to CSV`)
+            if (!filtered.length) { toast.info('No bookmarks to export'); return }
+            downloadBlob(exportBookmarksCsv(filtered), `stranded-bookmarks-${filtered.length}.csv`, 'text/csv')
+            toast.success(`Exported ${filtered.length} bookmarks to CSV`)
           }}
           className="text-xs px-3 py-1.5 rounded-lg border border-white/20 text-gray-300 hover:bg-white/5"
+          data-testid="bookmarks-export-csv"
         >
           Export CSV
         </button>
+        {filtered.length > 0 && (
+          <Link
+            href={buildMapUrl({ compare: filtered.slice(0, 8).map(s => s.id) })}
+            className="text-xs px-3 py-1.5 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            data-testid="bookmarks-open-map"
+          >
+            Open on map ({Math.min(filtered.length, 8)})
+          </Link>
+        )}
         <label className="text-xs px-3 py-1.5 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 cursor-pointer">
           Import JSON
           <input
@@ -112,7 +123,15 @@ export default function BookmarksPage() {
 
       {loading && <p className="text-gray-500">Loading…</p>}
       {!loading && sites.length === 0 && (
-        <p className="text-gray-400">No bookmarks yet. Star sites from the map panel.</p>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 text-center" data-testid="bookmarks-empty">
+          <p className="text-gray-400 mb-4">No bookmarks yet. Star sites from the map panel to build a watchlist.</p>
+          <Link
+            href="/map"
+            className="inline-block px-6 py-3 rounded-xl bg-[#FF8C00] text-black font-semibold text-sm hover:bg-[#FF8C00]/90"
+          >
+            Explore sites on map →
+          </Link>
+        </div>
       )}
       <ul className="space-y-2">
         {filtered.map(s => (

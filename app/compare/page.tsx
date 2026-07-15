@@ -1,12 +1,17 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { loadSites, EnrichedSite, scoreTierClass, computeSiteValue } from '@/lib/sites'
 import { explainStrandedScore } from '@/lib/scoring'
 import { findPeerSites, findSimilarByEmission } from '@/lib/peers'
+import { exportCompareCsv } from '@/lib/compare-export'
+import { downloadBlob } from '@/lib/export-formats'
+import { buildMapUrl } from '@/lib/map-url'
+import { Download } from 'lucide-react'
+import { toast } from 'sonner'
 
 type CompareSlot = 'a' | 'b' | 'c'
 
@@ -79,6 +84,25 @@ function CompareContent() {
 
   const slotColors: Record<CompareSlot, string> = { a: '#FF8C00', b: '#5BC0BE', c: '#A78BFA' }
 
+  const dailyProfitWinner = useMemo(() => {
+    if (active.length < 2) return null
+    let best: CompareSlot | null = null
+    let bestVal = -Infinity
+    for (const { slot, site } of active) {
+      const v = site.potentialDailyProfitCAD
+      if (v > bestVal) {
+        bestVal = v
+        best = slot
+      }
+    }
+    return best
+  }, [active])
+
+  const mapCompareUrl = useMemo(() => {
+    const ids = active.map(({ site }) => site.id)
+    return buildMapUrl({ compare: ids })
+  }, [active])
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Compare' }]} />
@@ -105,6 +129,27 @@ function CompareContent() {
 
       {active.length >= 2 && (
         <>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => {
+                downloadBlob(exportCompareCsv(sites), `stranded-compare-${active.length}.csv`, 'text/csv')
+                toast.success('Compare CSV exported')
+              }}
+              className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+              data-testid="compare-export-csv"
+            >
+              <Download size={16} /> Export compare CSV
+            </button>
+            <Link
+              href={mapCompareUrl}
+              className="text-sm px-4 py-2 rounded-xl border border-[#FF8C00]/40 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+              data-testid="compare-open-all-map"
+            >
+              Open all on map →
+            </Link>
+          </div>
+
           <div className={`grid gap-4 mb-8 ${active.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             {active.map(({ slot, site }) => (
               <div key={site.id} className="rounded-2xl border border-white/10 p-5 bg-white/[0.03]">
@@ -126,20 +171,42 @@ function CompareContent() {
                   <th className="p-4">Metric</th>
                   {active.map(({ slot, site }) => (
                     <th key={slot} className="p-4" style={{ color: slotColors[slot] }}>
-                      {site.properties.name?.slice(0, 20) || slot.toUpperCase()}
+                      <div>{site.properties.name?.slice(0, 20) || slot.toUpperCase()}</div>
+                      <Link href={`/map?site=${site.id}`} className="text-[10px] font-normal text-[#5BC0BE] hover:underline">
+                        Map →
+                      </Link>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {metricRows.map(row => (
-                  <tr key={row.label} className="border-b border-white/5 hover:bg-white/[0.02]">
-                    <td className="p-4 text-gray-400">{row.label}</td>
-                    {active.map(({ slot }) => (
-                      <td key={slot} className="p-4 font-mono tabular-nums">{row.values[slot]}</td>
-                    ))}
-                  </tr>
-                ))}
+                {metricRows.map(row => {
+                  const isProfitRow = row.label === 'Daily profit (CAD)'
+                  return (
+                    <tr
+                      key={row.label}
+                      className={`border-b border-white/5 hover:bg-white/[0.02] ${isProfitRow ? 'bg-[#FF8C00]/5' : ''}`}
+                      data-testid={isProfitRow ? 'compare-daily-profit-row' : undefined}
+                    >
+                      <td className="p-4 text-gray-400">{row.label}</td>
+                      {active.map(({ slot }) => (
+                        <td
+                          key={slot}
+                          className={`p-4 font-mono tabular-nums ${
+                            isProfitRow && dailyProfitWinner === slot
+                              ? 'text-[#FF8C00] font-semibold ring-1 ring-inset ring-[#FF8C00]/40 bg-[#FF8C00]/10'
+                              : ''
+                          }`}
+                        >
+                          {row.values[slot]}
+                          {isProfitRow && dailyProfitWinner === slot && (
+                            <span className="ml-1 text-[10px] uppercase tracking-wider text-[#FF8C00]">winner</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

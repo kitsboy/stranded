@@ -405,6 +405,13 @@ export default function SiteDetailsPanel({
             Export {exportFmt.toUpperCase()}
           </button>
           <CopyLinkButton url={mapDeepLink} label="Copy link" successMessage="Site deep link copied" />
+          <Link
+            href={`/compare?a=${encodeURIComponent(site.id)}`}
+            className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            data-testid="site-view-compare"
+          >
+            View on compare
+          </Link>
         </div>
       </div>
       <BankPackPreview

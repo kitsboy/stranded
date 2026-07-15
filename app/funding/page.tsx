@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
   type GrantQuizAnswers,
@@ -12,6 +12,9 @@ import {
 } from '@/lib/grant-quiz'
 import CopyLinkButton from '@/components/CopyLinkButton'
 import { toast } from 'sonner'
+import type { LiveStats } from '@/types/live-stats'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
+import { liveModelRevenue, captureAtPct } from '@/lib/dashboard-metrics'
 
 const CETA_PROGRAMS = [
   { id: 'cleantech', name: 'CETA Cleantech SME', max: 5000000, match: 0.5, provinces: ['All'] },
@@ -74,15 +77,32 @@ const DEFAULT_ANSWERS: GrantQuizAnswers = {
   timeline: '12to36',
 }
 
+function fmtUsd(n: number) {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
+  return `$${n.toLocaleString('en-CA')}`
+}
+
 export default function FundingPage() {
   const [province, setProvince] = useState('Alberta')
   const [capex, setCapex] = useState(2000000)
   const [sites, setSites] = useState(3)
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
+  const [capturePct, setCapturePct] = useState(5)
+  const btcUsd = useBtcUsd()
 
   const [quizStep, setQuizStep] = useState(0)
   const [quizAnswers, setQuizAnswers] = useState<GrantQuizAnswers>(DEFAULT_ANSWERS)
   const [quizDone, setQuizDone] = useState(false)
   const [quizMatches, setQuizMatches] = useState<ReturnType<typeof matchGrants>>([])
+
+  useEffect(() => {
+    fetch('/data/live-stats.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setLiveStats(data) })
+      .catch(() => { /* optional */ })
+  }, [])
 
   useEffect(() => {
     const hashMatch = typeof window !== 'undefined' ? window.location.hash.match(/^#grant=(.+)$/) : null
@@ -110,6 +130,16 @@ export default function FundingPage() {
     p.provinces.includes('All') || p.provinces.some(pr => province.startsWith(pr) || province.includes(pr))
   )
   const totalGrant = eligible.reduce((sum, p) => sum + Math.min(capex * p.match, p.max), 0)
+
+  const liveRevenue = useMemo(
+    () => (liveStats ? liveModelRevenue(liveStats, btcUsd) : null),
+    [liveStats, btcUsd],
+  )
+
+  const captureProjection = useMemo(
+    () => (liveStats ? captureAtPct(liveStats, capturePct, btcUsd) : null),
+    [liveStats, capturePct, btcUsd],
+  )
 
   const currentQuiz = QUIZ_STEPS[quizStep] ?? QUIZ_STEPS[0]
 
@@ -141,6 +171,50 @@ export default function FundingPage() {
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold tracking-tighter mb-2">CETA Funding Pathway</h1>
       <p className="text-gray-400 mb-8">Interactive wizard for Canadian-EU trade agreement aligned cleantech capital. Estimates only — verify with program officers.</p>
+
+      {liveStats && liveRevenue != null && (
+        <section className="mb-8 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-5" data-testid="funding-live-revenue">
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Portfolio model @ live BTC</div>
+          <div className="text-3xl font-bold text-[#5BC0BE]">{fmtUsd(liveRevenue)}<span className="text-sm font-normal text-gray-400"> /yr</span></div>
+          <p className="text-xs text-gray-500 mt-2">
+            Scaled from live-stats value model (BTC ${btcUsd.toLocaleString('en-CA')}) · {liveStats.siteCount.toLocaleString()} sites
+          </p>
+        </section>
+      )}
+
+      {liveStats && captureProjection && (
+        <section className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-5" data-testid="funding-capture-slider">
+          <h2 className="text-lg font-semibold text-[#FF8C00] mb-1">Capture rate mini widget</h2>
+          <p className="text-xs text-gray-500 mb-4">Portfolio deployment at {capturePct}% — sites, CO₂e, revenue</p>
+          <label className="flex items-center justify-between text-xs text-gray-400 mb-2">
+            <span>Capture rate</span>
+            <span className="font-semibold text-white">{capturePct}%</span>
+          </label>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            value={capturePct}
+            onChange={e => setCapturePct(+e.target.value)}
+            className="w-full accent-[#FF8C00]"
+            aria-label="Portfolio capture percentage"
+          />
+          <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
+            <div className="rounded-xl border border-white/10 p-3">
+              <div className="text-xl font-bold text-[#FF8C00]">{captureProjection.sites}</div>
+              <div className="text-[10px] text-gray-500">sites</div>
+            </div>
+            <div className="rounded-xl border border-white/10 p-3">
+              <div className="text-xl font-bold text-[#5BC0BE]">{captureProjection.co2eTonnes.toLocaleString()}</div>
+              <div className="text-[10px] text-gray-500">t CO₂e/yr</div>
+            </div>
+            <div className="rounded-xl border border-white/10 p-3">
+              <div className="text-xl font-bold text-white">{fmtUsd(captureProjection.revenueUsd)}</div>
+              <div className="text-[10px] text-gray-500">revenue/yr</div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Grant matcher quiz — upgrade 176 */}
       <section className="mb-10 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-6">

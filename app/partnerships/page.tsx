@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import CertifiedLeadForm from '@/components/CertifiedLeadForm'
+import type { LiveStats } from '@/types/live-stats'
 
 const FN_REGIONS = [
   { name: 'Treaty 6 & 8 (Alberta)', sites: 412, potentialMw: 340, communities: 24 },
@@ -12,12 +14,37 @@ const FN_REGIONS = [
 ]
 
 export default function PartnershipsPage() {
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
+
+  useEffect(() => {
+    fetch('/data/live-stats.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setLiveStats(data) })
+      .catch(() => { /* optional */ })
+  }, [])
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold tracking-tighter mb-2">First Nations & Community Partnerships</h1>
-      <p className="text-gray-400 mb-10 max-w-2xl">
+      <p className="text-gray-400 mb-6 max-w-2xl">
         Stranded methane sites overlap significantly with Indigenous territories. Revenue-sharing, remediation funding, and sovereign wealth creation are core to Stranded Value — not an afterthought.
       </p>
+
+      {liveStats && (
+        <div
+          className="mb-10 rounded-2xl border border-[#FF8C00]/30 bg-gradient-to-r from-[#FF8C00]/10 to-transparent p-6 flex flex-wrap items-center gap-6"
+          data-testid="partnerships-hero-stat"
+        >
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500">Verified portfolio (live-stats)</div>
+            <div className="text-5xl font-bold text-[#FF8C00] tabular-nums">{liveStats.siteCount.toLocaleString('en-CA')}</div>
+            <div className="text-sm text-gray-400">stranded methane sites · {liveStats.provinceCount} provinces</div>
+          </div>
+          <div className="text-sm text-gray-300 max-w-md">
+            Every build refreshes site counts from ECCC GeoJSON. Nations can shortlist overlapping facilities on the map and export diligence packs.
+          </div>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4 mb-12">
         {FN_REGIONS.map(r => (

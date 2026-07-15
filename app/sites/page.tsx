@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, Star, Download, X } from 'lucide-react'
 import { loadSites, EnrichedSite, scoreTierClass } from '@/lib/sites'
+import type { LiveStats } from '@/types/live-stats'
 import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
 import { exportSitesFullCsv } from '@/lib/sites-export'
@@ -25,6 +26,8 @@ export default function AllSitesExplorer() {
   const [sourceFilter, setSourceFilter] = useState('')
   const [minScoreFilter, setMinScoreFilter] = useState(0)
   const [view, setView] = useState<'table' | 'cards'>('cards')
+  const [sortBy, setSortBy] = useState<'score' | 'revenue'>('score')
+  const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
   const [selected, setSelected] = useState<EnrichedSite | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()) // bulk actions for item 12
 
@@ -46,6 +49,13 @@ export default function AllSitesExplorer() {
 
   useEffect(() => { load() }, [])
 
+  useEffect(() => {
+    fetch('/data/live-stats.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setLiveStats(data) })
+      .catch(() => { /* optional hint */ })
+  }, [])
+
   const filtered = useMemo(() => {
     let res = allSites
     const q = search.trim()
@@ -56,8 +66,25 @@ export default function AllSitesExplorer() {
     if (provinceFilter) res = res.filter(s => s.properties.province === provinceFilter)
     if (sourceFilter) res = res.filter(s => s.properties.source_type === sourceFilter)
     if (minScoreFilter > 0) res = res.filter(s => s.strandedScore >= minScoreFilter)
-    return res.sort((a, b) => b.strandedScore - a.strandedScore)
-  }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter])
+    return res.sort((a, b) =>
+      sortBy === 'revenue'
+        ? b.potentialDailyProfitCAD - a.potentialDailyProfitCAD
+        : b.strandedScore - a.strandedScore,
+    )
+  }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter, sortBy])
+
+  const provinceRevenueHint = useMemo(() => {
+    if (!provinceFilter || !liveStats) return null
+    const p = liveStats.provinces.find(x => x.name === provinceFilter)
+    if (!p?.estRevenueUsd) return null
+    const usd = p.estRevenueUsd
+    const label = usd >= 1_000_000_000
+      ? `$${(usd / 1_000_000_000).toFixed(2)}B`
+      : usd >= 1_000_000
+        ? `$${(usd / 1_000_000).toFixed(1)}M`
+        : `$${usd.toLocaleString('en-CA')}`
+    return { label, sites: p.count, pct: p.pct }
+  }, [provinceFilter, liveStats])
 
   const provinces = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.province))).filter(Boolean).sort(), [allSites])
   const sources = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.source_type))).filter(Boolean).sort(), [allSites])
@@ -140,6 +167,12 @@ export default function AllSitesExplorer() {
         <ScoreLegend />
       </div>
 
+      {provinceRevenueHint && (
+        <p className="text-xs text-[#5BC0BE] mb-3" data-testid="province-revenue-hint">
+          {provinceFilter}: ~{provinceRevenueHint.label} modeled annual revenue · {provinceRevenueHint.sites} sites ({provinceRevenueHint.pct}% of portfolio) — from live-stats
+        </p>
+      )}
+
       {activeChips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className="text-[10px] uppercase tracking-wider text-gray-500">Active filters</span>
@@ -167,12 +200,22 @@ export default function AllSitesExplorer() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6 sticky top-14 z-20 bg-[var(--bg-dark)] py-3 -mx-1 px-1">
         <input
+          data-testid="sites-search"
           value={search}
           onChange={e=>setSearch(e.target.value)}
           placeholder={t('searchPlaceholder')}
           aria-label={t('searchPlaceholder')}
           className="flex-1 min-w-[180px] glass border border-white/10 rounded-2xl px-5 py-3 text-sm"
         />
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as 'score' | 'revenue')}
+          aria-label="Sort sites"
+          className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[140px]"
+        >
+          <option value="score">Sort: Score</option>
+          <option value="revenue">Sort: Revenue</option>
+        </select>
         <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} aria-label="Filter by province" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
           <option value="">{t('allProvinces')}</option>
           {provinces.map(p => <option key={p} value={p}>{p}</option>)}
@@ -272,16 +315,17 @@ export default function AllSitesExplorer() {
 
       {/* TABLE (still great) */}
       {view === 'table' && !loading && !loadError && (
-        <div className="border border-white/10 rounded-3xl overflow-hidden bg-[#0f172a]/70">
+        <div className="border border-white/10 rounded-3xl overflow-auto max-h-[70vh] bg-[#0f172a]/70">
           <table className="w-full text-sm">
-            <thead className="bg-[var(--bg-dark)] text-gray-400 sticky top-0">
+            <thead className="bg-[var(--bg-dark)] text-gray-400 sticky top-0 z-10 shadow-[0_1px_0_rgba(255,255,255,0.08)]">
               <tr>
-                <th className="p-4 text-left font-normal">Name</th>
-                <th className="p-4 text-left font-normal">Province</th>
-                <th className="p-4 text-right font-normal">Emission</th>
-                <th className="p-4 text-right font-normal">Generator kW</th>
-                <th className="p-4 text-right font-normal">Score</th>
-                <th className="p-4">Actions</th>
+                <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Name</th>
+                <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Province</th>
+                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Emission</th>
+                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Daily CAD</th>
+                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Generator kW</th>
+                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Score</th>
+                <th className="p-4 bg-[var(--bg-dark)]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -290,6 +334,7 @@ export default function AllSitesExplorer() {
                   <td className="p-4 font-medium">{site.properties.name}</td>
                   <td className="p-4 text-[#5BC0BE]">{site.properties.province}</td>
                   <td className="p-4 text-right font-mono text-[#FF8C00]">{site.emission.toLocaleString()}</td>
+                  <td className="p-4 text-right font-mono text-[#5BC0BE]">C${site.potentialDailyProfitCAD.toLocaleString()}</td>
                   <td className="p-4 text-right font-mono">{site.maxGeneratorPowerKW || 'N/A'} kW</td>
                   <td className="p-4 text-right"><span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span></td>
                   <td className="p-4 text-right">

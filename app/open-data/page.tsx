@@ -15,10 +15,19 @@ export default function OpenDataPage() {
 
       <h2>Endpoints</h2>
       <ul>
-        <li><a href="/data/stranded-sites.geojson"><code>/data/stranded-sites.geojson</code></a> — 2,611 FeatureCollection</li>
-        <li><a href="/data/live-stats.json"><code>/data/live-stats.json</code></a> — aggregates, top sites, value model</li>
+        <li>
+          <a href="/data/stranded-sites.geojson" download><code>/data/stranded-sites.geojson</code></a>
+          {' '}— 2,611 FeatureCollection · <span className="text-gray-500">~1.9 MB</span>
+          {' '}(<a href="/data/stranded-sites.geojson" download className="text-[#5BC0BE]">direct download</a>)
+        </li>
+        <li>
+          <a href="/data/live-stats.json" download><code>/data/live-stats.json</code></a>
+          {' '}— aggregates, top sites, value model · <span className="text-gray-500">~8.5 KB</span>
+          {' '}(<a href="/data/live-stats.json" download className="text-[#5BC0BE]">direct download</a>)
+        </li>
         <li><a href="/status.json"><code>/status.json</code></a> — health + version</li>
       </ul>
+      <p className="text-xs text-gray-500 not-prose">File sizes are approximate static build artifacts; re-run <code>npm run build</code> to refresh.</p>
 
       <h2>Source lineage</h2>
       <p>
