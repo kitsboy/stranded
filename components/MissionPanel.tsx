@@ -5,7 +5,10 @@ import { EnrichedSite } from '@/lib/sites'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
 import { portfolioDailyPotentialCad } from '@/lib/portfolio'
+import { projectBtcRevenue } from '@/lib/halving'
 import { toast } from 'sonner'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
 
 interface MissionPanelProps {
   portfolio: EnrichedSite[]
@@ -17,6 +20,8 @@ interface MissionPanelProps {
 }
 
 export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClear, onFlyTo, allSites = [] }: MissionPanelProps) {
+  const { locale, t } = useLocale()
+
   if (portfolio.length === 0) return null
 
   const totalEmission = portfolio.reduce((sum, s) => sum + s.emission, 0)
@@ -34,33 +39,33 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
         <div className="flex items-center gap-2">
           <Zap className="text-[#FF8C00]" size={18} />
           <div>
-            <div className="font-semibold tracking-tight">ACTIVE MISSION</div>
-            <div className="text-[10px] text-gray-400 -mt-0.5">{portfolio.length} sites selected</div>
+            <div className="font-semibold tracking-tight">{t('missionActive')}</div>
+            <div className="text-[10px] text-gray-400 -mt-0.5">{tf(locale, 'missionSitesSelected', { count: portfolio.length })}</div>
           </div>
         </div>
         <button type="button" onClick={onClear} className="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1" aria-label="Clear mission portfolio">
-          <X size={14} /> CLEAR
+          <X size={14} /> {t('missionClear')}
         </button>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400 flex items-center gap-1"><TrendingUp size={13} /> DAILY YIELD</div>
+          <div className="text-[10px] text-gray-400 flex items-center gap-1"><TrendingUp size={13} /> {t('missionDailyYield')}</div>
           <div className="text-2xl font-semibold text-[#FF8C00] tabular-nums mt-0.5">C${totalPotential.toLocaleString()}</div>
         </div>
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400 flex items-center gap-1"><Leaf size={13} /> CO₂e / YR</div>
+          <div className="text-[10px] text-gray-400 flex items-center gap-1"><Leaf size={13} /> {t('missionCo2Year')}</div>
           <div className="text-2xl font-semibold text-[#5BC0BE] tabular-nums mt-0.5">{(annualCO2 / 1000).toFixed(1)}k t</div>
         </div>
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400">AVG STRANDED SCORE</div>
+          <div className="text-[10px] text-gray-400">{t('missionAvgScore')}</div>
           <div className="text-2xl font-semibold tabular-nums mt-0.5">{totalScore}</div>
         </div>
       </div>
-      <div className="text-[10px] text-gray-400 mt-2">Mission Generator Capacity: {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
+      <div className="text-[10px] text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
       <div className="text-[10px] text-gray-500 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
 
-      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Selected sites</div>
+      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">{t('missionSelectedSites')}</div>
       <div className="max-h-[148px] overflow-auto space-y-1 pr-1 text-xs">
         {portfolio.map(site => {
           const p = site.properties
@@ -71,7 +76,7 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
                 <span className="text-gray-500 ml-1.5">• {p.province}</span>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => onFlyTo(site)} className="text-[#5BC0BE] hover:text-white opacity-70 hover:opacity-100">fly</button>
+                <button onClick={() => onFlyTo(site)} className="text-[#5BC0BE] hover:text-white opacity-70 hover:opacity-100">{t('missionFly')}</button>
                 <button onClick={() => onRemove(site.id)} className="text-red-400/70 hover:text-red-400">×</button>
               </div>
             </div>
@@ -80,12 +85,12 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-gray-400">
-        At current BTC price <span className="font-mono text-white">≈${Math.round(liveBtcPrice).toLocaleString()}</span><br />
-        Potential daily BTC ≈ <span className="font-mono text-[#FF8C00]">{dailyBtc.toFixed(4)}</span>
+        {t('missionBtcAtPrice')} <span className="font-mono text-white">≈${Math.round(liveBtcPrice).toLocaleString()}</span><br />
+        {t('missionPotentialBtc')} <span className="font-mono text-[#FF8C00]">{dailyBtc.toFixed(4)}</span>
       </div>
 
       <div className="mt-3 pt-3 border-t border-white/10">
-        <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Bank pack</div>
+        <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">{t('missionBankPack')}</div>
         <div className="flex flex-wrap gap-1.5">
           {([
             ['md', 'MD'],
@@ -113,6 +118,22 @@ export default function MissionPanel({ portfolio, liveBtcPrice, onRemove, onClea
               {label}
             </button>
           ))}
+          <button
+            type="button"
+            className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            onClick={() => {
+              const dailyBtc = totalPotential / 1.35 / liveBtcPrice
+              const rows = projectBtcRevenue(dailyBtc, 10)
+              const header = 'year,daily_btc,annual_btc,halving_factor,sites_in_mission,total_emission_kg_day'
+              const lines = rows.map(r =>
+                [r.year, r.dailyBtc.toFixed(8), r.annualBtc.toFixed(6), r.halvingFactor.toFixed(4), portfolio.length, totalEmission].join(',')
+              )
+              downloadBlob([header, ...lines].join('\n'), `stranded-mission-timeline-${portfolio.length}.csv`, 'text/csv')
+              toast.success('Mission timeline CSV exported')
+            }}
+          >
+            Timeline CSV
+          </button>
         </div>
       </div>
     </div>

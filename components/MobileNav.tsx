@@ -4,26 +4,28 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { useLocale } from '@/lib/useLocale'
 
-const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/map', label: 'Map' },
-  { href: '/pitch', label: 'Pitch' },
-  { href: '/education', label: 'Education' },
-  { href: '/sites', label: 'Sites' },
-  { href: '/verticals', label: 'Verticals' },
-  { href: '/funding', label: 'Funding' },
-  { href: '/partnerships', label: 'Partnerships' },
-  { href: '/bookmarks', label: 'Saved' },
-  { href: '/methodology', label: 'Methodology' },
-  { href: '/global', label: 'Global' },
-  { href: '/benchmarks', label: 'Benchmarks' },
-]
+const LINK_KEYS = [
+  { href: '/', key: 'home' },
+  { href: '/dashboard', key: 'dashboard' },
+  { href: '/map', key: 'map' },
+  { href: '/pitch', key: 'pitch' },
+  { href: '/education', key: 'education' },
+  { href: '/sites', key: 'sites' },
+  { href: '/verticals', key: 'verticals' },
+  { href: '/funding', key: 'funding' },
+  { href: '/partnerships', key: 'partnerships' },
+  { href: '/bookmarks', key: 'bookmarks' },
+  { href: '/methodology', key: 'methodology' },
+  { href: '/global', key: 'global' },
+  { href: '/benchmarks', key: 'benchmarks' },
+] as const
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const { t } = useLocale()
 
   return (
     <div className="md:hidden">
@@ -32,9 +34,9 @@ export default function MobileNav() {
       </button>
       {open && (
         <div className="absolute top-14 left-0 right-0 bg-[#1e293b] border-b border-white/10 z-50 p-4 grid grid-cols-2 gap-2">
-          {LINKS.map(l => (
+          {LINK_KEYS.map(l => (
             <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className={`px-3 py-2 rounded-lg text-sm ${pathname === l.href ? 'bg-[#FF8C00]/20 text-[#FF8C00]' : 'bg-white/5'}`}>
-              {l.label}
+              {t(l.key)}
             </Link>
           ))}
         </div>

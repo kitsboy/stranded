@@ -46,13 +46,13 @@ npm run deploy:check
 2. **Lead form is local-only** — correct honesty; no CRM until backend  
 3. **CoinGecko rate limits** — soft-fail BTC price; offline uses fallbacks  
 4. **Light theme** — improved, not pixel-perfect on every panel  
-5. **i18n** — nav labels only; page bodies still EN  
+5. **i18n** — nav, hero, footer, sites, mission wired; education/map/pitch bodies still EN
 6. **M4 sync pending** — Kimi should ingest handoff **when Cam says go** (not yet)  
 7. **Watch alerts** — local toast on map open only (no push/email)  
 8. **Docs drift risk** — prefer git tag `v2.3.5` + live-stats version over prose  
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-10T06:34:48.975Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-15T18:52:44.436Z
 
 | Metric | Value |
 |--------|-------|

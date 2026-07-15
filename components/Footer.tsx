@@ -5,8 +5,10 @@ import { QRCodeSVG } from 'qrcode.react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Briefcase } from 'lucide-react'
+import { useLocale } from '@/lib/useLocale'
 
 export default function Footer() {
+  const { t } = useLocale()
   const pathname = usePathname()
   const [showQR, setShowQR] = useState(false)
   const [statsDate, setStatsDate] = useState('')
@@ -46,34 +48,34 @@ export default function Footer() {
               href="/map"
               className="flex-1 text-center py-2.5 rounded-xl bg-[#FF8C00] text-black font-semibold text-sm touch-manipulation active:scale-[0.98]"
             >
-              Open Map
+              {t('openMap')}
             </Link>
             <Link
               href="/pitch"
               className="flex-1 text-center py-2.5 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] font-semibold text-sm touch-manipulation active:scale-[0.98]"
             >
-              Pitch
+              {t('pitch')}
             </Link>
           </div>
         )}
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-5">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-2.5 gap-y-0.5 text-[10px] text-gray-400">
-            <span>Data: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:text-white hover:underline">ECCC Verified</a></span>
+            <span>{t('footerData')} <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:text-white hover:underline">{t('footerEccc')}</a></span>
             <span className="hidden sm:inline text-white/20">•</span>
-            <span>2026 • 2,611 sites{statsDate && <> • stats {statsDate}</>}</span>
+            <span>2026 • 2,611 {t('sitesCount')}{statsDate && <> • {t('footerStats')} {statsDate}</>}</span>
             <span className="hidden sm:inline text-white/20">•</span>
             <span className="font-mono text-[#FF8C00]">v{version}</span>
-            <Link href="/methodology" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Methodology</Link>
-            <Link href="/open-data" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Open Data</Link>
-            <Link href="/roadmap" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Roadmap</Link>
-            <Link href="/privacy" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Privacy</Link>
-            <Link href="/about" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">About</Link>
-            <Link href="/status" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">Status</Link>
+            <Link href="/methodology" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerMethodology')}</Link>
+            <Link href="/open-data" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerOpenData')}</Link>
+            <Link href="/roadmap" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerRoadmap')}</Link>
+            <Link href="/privacy" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerPrivacy')}</Link>
+            <Link href="/about" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerAbout')}</Link>
+            <Link href="/status" className="hover:text-[#5BC0BE] hidden md:inline text-[10px]">{t('footerStatus')}</Link>
           </div>
 
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="text-gray-500 hidden sm:inline">by</span>
+            <span className="text-gray-500 hidden sm:inline">{t('footerBy')}</span>
             <a href="https://giveabit.io" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-1.5 text-gray-200 hover:text-white transition-all" aria-label="Visit Give A Bit">
               <span className="font-medium tracking-tight">GiveAbit Intelligence</span>
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#FF8C00] ring-1 ring-offset-1 ring-offset-[var(--bg-dark)] ring-[#FF8C00]/40 group-hover:ring-white/30 group-hover:scale-[1.08] transition">
@@ -86,7 +88,7 @@ export default function Footer() {
           <div className="relative flex items-center gap-2">
             <button onClick={() => setShowQR(!showQR)} className="flex items-center gap-1.5 px-3 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 border border-[#FF8C00]/40 rounded-lg text-xs transition" title="Donate Bitcoin" aria-expanded={showQR}>
               <span className="text-[#FF8C00] text-sm leading-none">₿</span>
-              <span className="text-white font-medium">Donate</span>
+              <span className="text-white font-medium">{t('footerDonate')}</span>
             </button>
             {showQR && (
               <div
@@ -102,13 +104,13 @@ export default function Footer() {
                   className="mt-2 w-full text-[10px] text-gray-500 hover:text-gray-800"
                   onClick={() => setShowQR(false)}
                 >
-                  Close
+                  {t('close')}
                 </button>
               </div>
             )}
-            <Link href="/pitch" className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition">Pitch</Link>
+            <Link href="/pitch" className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#FF8C00]/40 bg-[#FF8C00]/5 hover:bg-[#FF8C00]/15 text-[#FF8C00] hover:text-white transition">{t('footerPitch')}</Link>
             <a href="/Marketing-Hub.html" className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border border-[#5BC0BE]/40 bg-white/5 hover:bg-white/10 text-[#5BC0BE] hover:text-white transition">
-              <Briefcase className="w-3 h-3" /><span>Marketing Hub</span>
+              <Briefcase className="w-3 h-3" /><span>{t('footerMarketingHub')}</span>
             </a>
           </div>
         </div>

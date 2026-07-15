@@ -271,7 +271,7 @@
 - `FocusTrap` on command palette, compare, keyboard help
 - Next.js **14.2.35** + eslint-config-next; removed js-cookie
 - CSP allows chart.js CDN; design tokens aligned with CSS vars
-- Language menu discloses nav-only i18n; donate QR Escape/close
+- Language menu covers nav, home hero, footer, sites & mission; donate QR Escape/close
 - Dashboard load error state
 
 **Git State:**

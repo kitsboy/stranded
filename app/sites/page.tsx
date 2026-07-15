@@ -10,8 +10,11 @@ import { downloadBlob } from '@/lib/export-formats'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
 
 export default function AllSitesExplorer() {
+  const { locale, t } = useLocale()
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -34,7 +37,7 @@ export default function AllSitesExplorer() {
       .catch(() => {
         setAllSites([])
         setLoading(false)
-        setLoadError('Failed to load sites. Check your connection or try again.')
+        setLoadError(t('loadSitesError'))
         toast.error('Failed to load sites dataset')
       })
   }
@@ -85,12 +88,12 @@ export default function AllSitesExplorer() {
     <div className="max-w-7xl mx-auto px-6 py-9">
       <div className="flex justify-between items-end mb-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tighter">All Sites</h1>
-          <p className="text-gray-400 mt-1">Every one of the 2,611. Sorted by Stranded Score by default. Click anything.</p>
+          <h1 className="text-4xl font-bold tracking-tighter">{t('sitesTitle')}</h1>
+          <p className="text-gray-400 mt-1">{t('sitesSubtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2 justify-end">
           <button onClick={() => setView(v => v === 'cards' ? 'table' : 'cards')} className="text-sm px-4 py-2 rounded-2xl border border-white/15 hover:bg-white/5">
-            {view === 'cards' ? 'TABLE VIEW' : 'CARDS VIEW'}
+            {view === 'cards' ? t('tableView') : t('cardsView')}
           </button>
           <button onClick={exportFiltered} className="flex items-center gap-2 text-sm px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10">
             <Download size={16} /> JSON
@@ -114,7 +117,7 @@ export default function AllSitesExplorer() {
               + Mission ({selectedSites.length})
             </button>
           )}
-          <Link href="/map" className="px-6 py-2 rounded-2xl bg-[#FF8C00] text-black font-semibold text-sm flex items-center">OPEN IN COMMAND CENTER →</Link>
+          <Link href="/map" className="px-6 py-2 rounded-2xl bg-[#FF8C00] text-black font-semibold text-sm flex items-center">{t('openCommandCenter')}</Link>
         </div>
       </div>
 
@@ -127,37 +130,37 @@ export default function AllSitesExplorer() {
         <input
           value={search}
           onChange={e=>setSearch(e.target.value)}
-          placeholder="Search name, province, company..."
-          aria-label="Search sites by name, province, or company"
+          placeholder={t('searchPlaceholder')}
+          aria-label={t('searchPlaceholder')}
           className="flex-1 min-w-[180px] glass border border-white/10 rounded-2xl px-5 py-3 text-sm"
         />
         <select value={provinceFilter} onChange={e=>setProvinceFilter(e.target.value)} aria-label="Filter by province" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
-          <option value="">All Provinces</option>
+          <option value="">{t('allProvinces')}</option>
           {provinces.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         <select value={sourceFilter} onChange={e=>setSourceFilter(e.target.value)} aria-label="Filter by source type" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[160px]">
-          <option value="">All sources</option>
+          <option value="">{t('allSources')}</option>
           {sources.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={minScoreFilter} onChange={e=>setMinScoreFilter(Number(e.target.value))} aria-label="Minimum stranded score" className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[120px]">
-          <option value={0}>Any score</option>
-          <option value={45}>≥45 Med+</option>
-          <option value={65}>≥65 High+</option>
-          <option value={80}>≥80</option>
-          <option value={85}>≥85 Elite</option>
+          <option value={0}>{t('anyScore')}</option>
+          <option value={45}>{t('scoreMedPlus')}</option>
+          <option value={65}>{t('scoreHighPlus')}</option>
+          <option value={80}>{t('score80')}</option>
+          <option value={85}>{t('score85')}</option>
         </select>
         <div className="self-center text-xs px-2 text-gray-400 tabular-nums">
-          {filtered.length} / {allSites.length}
-          {selectedSites.length > 0 && <span className="text-[#FF8C00]"> · {selectedSites.length} selected</span>}
+          {tf(locale, 'filterShowing', { shown: filtered.length, total: allSites.length })}
+          {selectedSites.length > 0 && <span className="text-[#FF8C00]"> · {tf(locale, 'selectedCount', { count: selectedSites.length })}</span>}
         </div>
       </div>
 
-      {loading && <div className="text-center py-20 text-gray-400" role="status">Loading full enriched dataset…</div>}
+      {loading && <div className="text-center py-20 text-gray-400" role="status">{t('loadingDataset')}</div>}
       {loadError && !loading && (
         <div className="text-center py-16 space-y-3" role="alert">
           <p className="text-red-400">{loadError}</p>
           <button type="button" onClick={load} className="px-4 py-2 rounded-xl bg-[#FF8C00] text-black font-semibold text-sm">
-            Retry
+            {t('retry')}
           </button>
         </div>
       )}
@@ -207,7 +210,7 @@ export default function AllSitesExplorer() {
                 </div>
 
                 <div className="mt-4 text-[10px] flex gap-2">
-                  <Link href={`/map?site=${site.id}`} className="flex-1 text-center py-2 rounded-2xl border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10">FLY TO MAP</Link>
+                  <Link href={`/map?site=${site.id}`} className="flex-1 text-center py-2 rounded-2xl border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10">{t('flyToMap')}</Link>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -284,7 +287,7 @@ export default function AllSitesExplorer() {
 
               <div className="flex gap-3">
                 <Link href={`/map?site=${selected.id}`} className="flex-1 text-center py-3 rounded-2xl bg-[#FF8C00] text-black font-semibold">OPEN IN COMMAND CENTER</Link>
-                <button onClick={() => setSelected(null)} className="flex-1 text-center py-3 rounded-2xl border border-white/20">Close</button>
+                <button onClick={() => setSelected(null)} className="flex-1 text-center py-3 rounded-2xl border border-white/20">{t('close')}</button>
               </div>
             </div>
           </div>

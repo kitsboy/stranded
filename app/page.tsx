@@ -8,10 +8,14 @@ import { Rocket } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
 import { scoreTierClass } from '@/lib/scoring'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+import JsonLd from '@/components/JsonLd'
+import { useLocale } from '@/lib/useLocale'
+import { tf } from '@/lib/i18n'
 
 type FeaturedSite = { id?: string; name: string; province: string; emission: number; score: number; link: string }
 
 export default function LandingPage() {
+  const { locale, t } = useLocale()
   const btc = useBtcUsd()
   const [featured, setFeatured] = useState<FeaturedSite[]>([])
   const [stats, setStats] = useState<LiveStats | null>(null)
@@ -38,8 +42,31 @@ export default function LandingPage() {
   const avgScore = stats?.totals?.avgStrandedScore
   const highScore = stats?.totals?.highScoreSites
 
+  const homeJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'Stranded Value',
+        url: 'https://stranded.giveabit.io',
+        description: `${siteCount.toLocaleString()} verified stranded methane sites across Canada with Bitcoin-powered ROI modeling`,
+        publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io' },
+      },
+      {
+        '@type': 'Dataset',
+        name: 'Stranded Canadian Methane Sites',
+        description: 'ECCC-verified methane vent sites enriched with Stranded Score™ and generator recommendations',
+        url: 'https://stranded.giveabit.io/data/stranded-sites.geojson',
+        distribution: { '@type': 'DataDownload', contentUrl: 'https://stranded.giveabit.io/data/stranded-sites.geojson', encodingFormat: 'application/geo+json' },
+        creator: { '@type': 'Organization', name: 'Environment and Climate Change Canada' },
+        numberOfItems: siteCount,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-[var(--bg-dark)] text-white overflow-x-hidden">
+      <JsonLd data={homeJsonLd} />
       {/* Hero */}
       <div className="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center">
         <motion.div 
@@ -48,15 +75,15 @@ export default function LandingPage() {
           transition={{ duration: 0.6 }}
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] text-xs tracking-widest mb-6 border border-[#FF8C00]/20"
         >
-          GIVEABIT INTELLIGENCE • 2026
+          {t('heroBadge')}
         </motion.div>
 
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter mb-6">
-          Stranded Energy,<br />
-          <span className="text-[#FF8C00]">Bitcoin Access</span>
+          {t('heroTitle1')}<br />
+          <span className="text-[#FF8C00]">{t('heroTitle2')}</span>
         </h1>
         <p className="max-w-2xl mx-auto text-2xl text-gray-300 mb-10">
-          {siteCount.toLocaleString()} verified sites across Canada. Capture waste methane. Mine Bitcoin with zero grid impact.
+          {tf(locale, 'heroSubtitle', { count: siteCount.toLocaleString() })}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -64,16 +91,16 @@ export default function LandingPage() {
             href="/map"
             className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-[#FF8C00] hover:bg-[#FF8C00]/90 text-[#1e293b] font-semibold text-lg transition"
           >
-            Explore the Full Map →
+            {t('heroExploreMap')}
           </Link>
           <Link href="/pitch" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] hover:bg-[#FF8C00]/10 text-lg transition">
-            Live Pitch Deck
+            {t('heroLivePitch')}
           </Link>
           <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
-            Browse All {siteCount.toLocaleString()} Sites
+            {tf(locale, 'heroBrowseSites', { count: siteCount.toLocaleString() })}
           </Link>
         </div>
-        <p className="mt-4 text-xs text-gray-500">Data: Environment and Climate Change Canada (ECCC) • Open dataset</p>
+        <p className="mt-4 text-xs text-gray-500">{t('heroDataNote')}</p>
       </div>
 
       {/* Stats */}
@@ -81,23 +108,23 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
           <div>
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{siteCount.toLocaleString()}</div>
-            <div className="text-sm text-gray-400 mt-1">Verified methane sites</div>
+            <div className="text-sm text-gray-400 mt-1">{t('statVerifiedSites')}</div>
           </div>
           <div>
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{provinceCount}</div>
-            <div className="text-sm text-gray-400 mt-1">Provinces & territories</div>
+            <div className="text-sm text-gray-400 mt-1">{t('statProvinces')}</div>
           </div>
           <div>
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">{avgScore != null ? avgScore.toFixed(1) : '—'}</div>
-            <div className="text-sm text-gray-400 mt-1">Avg Stranded Score{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
+            <div className="text-sm text-gray-400 mt-1">{t('statAvgScore')}{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
           </div>
           <div>
             <div className="text-4xl font-semibold text-[#FF8C00]">0</div>
-            <div className="text-sm text-gray-400 mt-1">Grid impact when captured</div>
+            <div className="text-sm text-gray-400 mt-1">{t('statGridImpact')}</div>
           </div>
           <div>
             <div className="text-4xl font-semibold tabular-nums text-emerald-400">${btc.toLocaleString()}</div>
-            <div className="text-sm text-gray-400 mt-1">Live BTC (updates on map too)</div>
+            <div className="text-sm text-gray-400 mt-1">{t('statLiveBtc')}</div>
           </div>
         </div>
       </div>

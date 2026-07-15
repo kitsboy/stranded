@@ -55,7 +55,7 @@ Hit **⌘K** (or the Search button) anywhere for the global site command palette
 - **Live BTC + Real Machines** — CoinGecko + genset library + advanced ROI in `lib/roi-model.ts`.
 - **Education** — Simulators, quiz, real-site explorer, glossary tips on methodology.
 - **Mobile** — Primary CTAs live inside sticky footer (no fixed ghost bar).
-- **i18n** — Nav labels EN/FR/DE/ES; language menu opens downward (EN default).
+- **i18n** — Nav, home hero, footer, sites filters, mission panel EN/FR/DE/ES; `useLocale` hook; menu opens downward (EN default).
 - **Quality** — `npm run validate` · `test:helpers` · `e2e` (9) · `deploy:check`.
 - **Docs / handoff** — `docs/KIMI-HANDOFF.md`, `SESSION-SUMMARY-2026-07-09.md`, `docs/PROGRESS-SNAPSHOT-2026-07-09.md`.
 
@@ -92,7 +92,7 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 Built with love for the orange pill and the blue planet.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-10T06:34:48.975Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-07-15T18:52:44.436Z
 
 | Metric | Value |
 |--------|-------|

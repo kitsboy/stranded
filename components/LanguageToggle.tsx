@@ -2,27 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Globe, ChevronDown } from 'lucide-react'
-import { Locale, LOCALES, t } from '@/lib/i18n'
-
-function readSavedLocale(): Locale {
-  if (typeof window === 'undefined') return 'en'
-  try {
-    const saved = localStorage.getItem('stranded-locale')
-    if (saved && LOCALES.some(l => l.code === saved)) return saved as Locale
-  } catch { /* ignore */ }
-  return 'en'
-}
+import { Locale, LOCALES } from '@/lib/i18n'
+import { useLocale } from '@/lib/useLocale'
 
 export default function LanguageToggle() {
-  const [locale, setLocale] = useState<Locale>('en')
+  const { locale, t } = useLocale()
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const next = readSavedLocale()
-    setLocale(next)
-    document.documentElement.lang = next
-  }, [])
+    document.documentElement.lang = locale
+  }, [locale])
 
   useEffect(() => {
     if (!open) return
@@ -41,7 +31,6 @@ export default function LanguageToggle() {
   }, [open])
 
   const change = (code: Locale) => {
-    setLocale(code)
     localStorage.setItem('stranded-locale', code)
     document.documentElement.lang = code
     window.dispatchEvent(new CustomEvent('stranded-locale-change', { detail: code }))
@@ -54,7 +43,7 @@ export default function LanguageToggle() {
         type="button"
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-1 px-2 py-1 rounded-lg border border-white/15 text-xs text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#5BC0BE]/50"
-        aria-label="Change language"
+        aria-label={t('changeLanguage')}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
@@ -63,15 +52,14 @@ export default function LanguageToggle() {
         <ChevronDown size={12} className={`opacity-60 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Open DOWNWARD — was bottom-full and flew above the sticky nav off-screen */}
       {open && (
         <div
           role="listbox"
-          aria-label="Languages (navigation only)"
-          className="absolute right-0 top-full mt-1 z-[80] min-w-[160px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
+          aria-label={t('changeLanguage')}
+          className="absolute right-0 top-full mt-1 z-[80] min-w-[200px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
         >
           <p className="px-3 py-1.5 text-[10px] text-gray-500 border-b border-white/10">
-            Nav labels only — page content is English
+            {t('langMenuNote')}
           </p>
           {LOCALES.map(l => (
             <button
@@ -92,15 +80,4 @@ export default function LanguageToggle() {
       )}
     </div>
   )
-}
-
-export function useLocaleString(key: string): string {
-  const [locale, setLocale] = useState<Locale>('en')
-  useEffect(() => {
-    setLocale(readSavedLocale())
-    const handler = (e: Event) => setLocale((e as CustomEvent).detail as Locale)
-    window.addEventListener('stranded-locale-change', handler)
-    return () => window.removeEventListener('stranded-locale-change', handler)
-  }, [])
-  return t(locale, key)
 }
