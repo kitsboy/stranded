@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.8.0] — 2026-07-15
+
+### Added (dashboard command center elite batch)
+- **DashboardLiveTicker** — scrolling KPI strip (sites, emissions, BTC, revenue)
+- **DashboardCaptureSlider** — mini 1–100% portfolio capture simulator at live BTC
+- **DashboardEmissionTiers** + **DashboardSourceMix** — visual tier and source breakdowns
+- **Dashboard hero** full-bleed layout, export live-stats JSON, score badges on top sites
+- **Emission Tier Leaders** replaces simulated Top Movers; compare link for top 2 sites
+- Quick Actions: Sites, Compare, Education with icons
+- Dashboard CSS (`.dashboard-hero`, `.dashboard-ticker`, `.dashboard-panel`)
+- E2E dashboard Opportunity Radar test; `test:helpers` dashboard-metrics cases
+- `docs/UPGRADES-476-525.md` (50 dashboard upgrades)
+- **PWA `stranded-v11`**
+
 ## [2.7.0] — 2026-07-15
 
 ### Added (top-50 autonomous batch)

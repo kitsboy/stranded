@@ -1,5 +1,28 @@
 # Kimi Handoff — Stranded
 
+## Latest Session Summary (from 2026-07-15 — v2.8.0 dashboard command center)
+
+**Chat topic:** Dashboard elite redesign — capture slider, emission tiers, live ticker, polish.
+
+**Finished this session:**
+- **4 new dashboard components** — `DashboardLiveTicker`, `DashboardCaptureSlider`, `DashboardEmissionTiers`, `DashboardSourceMix`
+- **Dashboard page overhaul** — full-bleed hero, capture slider after Opportunity Radar, tier/source grid
+- **Emission Tier Leaders** replaces simulated Top Movers; score badges + compare top 2 on sites table
+- Quick Actions: Sites, Compare, Education + icons; Export live-stats JSON in hero
+- Dashboard CSS (`.dashboard-hero`, `.dashboard-ticker`, `.dashboard-panel`)
+- E2E +1 Opportunity Radar test; `test:helpers` dashboard-metrics cases
+- `docs/UPGRADES-476-525.md` (50/50 shipped)
+
+**Still to do:**
+- GitHub release **v2.8.0**
+- Kimi vault sync when Cam says go
+
+**Git State:**
+- Version: **2.8.0**
+- Branch: `main`
+
+---
+
 ## Latest Session Summary (from 2026-07-15 — v2.7.0 top-50 autonomous batch)
 
 **Chat topic:** Ship everything feasible from top-50 backlog without user input.

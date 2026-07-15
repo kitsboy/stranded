@@ -6,7 +6,7 @@ import { getOfflineCacheMeta } from '@/lib/offline-db'
 
 export default function OfflineIndicator() {
   const [offline, setOffline] = useState(false)
-  const [cacheMeta, setCacheMeta] = useState({ ready: false, featureCount: 0, version: 'stranded-v10' })
+  const [cacheMeta, setCacheMeta] = useState({ ready: false, featureCount: 0, version: 'stranded-v11' })
 
   useEffect(() => {
     const update = () => setOffline(!navigator.onLine)

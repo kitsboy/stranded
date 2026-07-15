@@ -47,6 +47,12 @@ test('v2.1 routes load', async ({ page }) => {
   }
 })
 
+test('dashboard opportunity radar visible', async ({ page }) => {
+  await page.goto('/dashboard')
+  await expect(page.getByTestId('dashboard-opportunity-radar')).toBeVisible({ timeout: 15000 })
+  await expect(page.getByText('Opportunity Radar').first()).toBeVisible()
+})
+
 test('v2.2 routes load', async ({ page }) => {
   for (const path of ['/bookmarks', '/methodology', '/about', '/global', '/benchmarks']) {
     await page.goto(path)

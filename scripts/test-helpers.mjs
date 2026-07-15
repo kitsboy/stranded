@@ -321,5 +321,75 @@ assert.ok(fullCsv.startsWith('id,name,province'))
 const { buildNostrShareUrl } = await import('../lib/nostr-share.ts')
 assert.ok(buildNostrShareUrl('Stranded pitch', 'https://stranded.giveabit.io/pitch').includes('snort.social'))
 
+// dashboard-metrics (v2.8.0)
+const {
+  deploymentReadiness,
+  provinceRevenueLeaders,
+  emissionTierItems,
+  confidenceBreakdown,
+  liveModelRevenue,
+  captureAtPct,
+} = await import('../lib/dashboard-metrics.ts')
+
+const dashStats = {
+  siteCount: 100,
+  provinceCount: 3,
+  provinces: [
+    { name: 'Alberta', count: 60, pct: 60, estRevenueUsd: 600_000 },
+    { name: 'Ontario', count: 30, pct: 30, estRevenueUsd: 300_000 },
+    { name: 'BC', count: 10, pct: 10, estRevenueUsd: 100_000 },
+  ],
+  sourceTypes: [{ name: 'oil_gas_extraction', count: 50, pct: 50 }],
+  gensetRecommendations: [],
+  emissionTiers: { mega: 5, large: 10, medium: 20, small: 40, micro: 25 },
+  confidenceCounts: { high: 40, medium: 35, low: 25 },
+  totals: {
+    emissionKgDay: 5000,
+    avgEmissionKgDay: 50,
+    ch4TonnesYear: 1800,
+    avgStrandedScore: 62,
+    totalGeneratorKW: 250_000,
+    highScoreSites: 25,
+  },
+  impact: { co2eAvoided5PctTonnes: 500, co2eAvoided100PctTonnes: 10_000, sitesAt5Pct: 5, methaneGwp: 28 },
+  valueModel: { defaultBtcUsd: 80_000, roughDailyBtc: 1, annualBtc: 10, annualRevenueUsd: 800_000, note: 'test' },
+  topSites: [],
+  routes: {},
+  urls: { production: '', github: '', dataSource: '' },
+}
+
+const readiness = deploymentReadiness(dashStats)
+assert.ok(readiness.score >= 0 && readiness.score <= 100)
+assert.ok(readiness.factors.length === 4)
+assert.ok(readiness.label.length > 0)
+
+const revLeaders = provinceRevenueLeaders(dashStats, 2)
+assert.equal(revLeaders.length, 2)
+assert.equal(revLeaders[0].name, 'Alberta')
+assert.equal(revLeaders[0].revenueUsd, 600_000)
+
+const tiers = emissionTierItems(dashStats)
+assert.equal(tiers.length, 5)
+assert.equal(tiers[0].key, 'small')
+assert.equal(tiers[0].count, 40)
+assert.ok(tiers.every(t => t.pct > 0))
+
+const conf = confidenceBreakdown(dashStats)
+assert.equal(conf.length, 3)
+assert.equal(conf.find(c => c.level === 'high').count, 40)
+assert.equal(conf.find(c => c.level === 'high').pct, 40)
+
+const revLive = liveModelRevenue(dashStats, 100_000)
+assert.equal(revLive, 1_000_000)
+
+const cap10 = captureAtPct(dashStats, 10, 80_000)
+assert.equal(cap10.sites, 10)
+assert.equal(cap10.co2eTonnes, 1000)
+assert.equal(cap10.revenueUsd, 80_000)
+assert.equal(cap10.btcYr, 1)
+
+const capClamped = captureAtPct(dashStats, 150, 80_000)
+assert.equal(capClamped.sites, 100)
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)
