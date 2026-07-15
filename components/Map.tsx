@@ -17,6 +17,7 @@ export type MapHandle = {
   fitToSites: (sites: EnrichedSite[]) => void
   exportScreenshot: () => string | null
   flyTo: (target: { lat: number; lng: number; zoom?: number }) => void
+  resize: () => void
 }
 
 interface MapProps {
@@ -46,7 +47,16 @@ interface MapProps {
   onMapReady?: (api: MapHandle) => void
   onCoordCopied?: (coords: { lat: number; lng: number }) => void
   sitesLoading?: boolean
+  loadProgress?: number
   coordCopyLabel?: string
+  resizeTrigger?: number
+  loadingSitesLabel?: string
+  attributionLabel?: string
+  zoomLabel?: string
+  bearingLabel?: string
+  pitchLabel?: string
+  viewportSitesLabel?: string
+  tileFallbackLabel?: string
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -85,6 +95,20 @@ function resolveViewMode(
   if (viewMode === 'dom') return 'dom'
   if (viewMode === 'native-clusters' || viewMode === 'clusters') return 'native-clusters'
   return siteCount > 180 ? 'native-clusters' : 'precise'
+}
+
+function countSitesInViewport(map: maplibregl.Map, sites: EnrichedSite[]): number {
+  try {
+    const bounds = map.getBounds()
+    let count = 0
+    for (const site of sites) {
+      const [lng, lat] = site.geometry.coordinates
+      if (bounds.contains([lng, lat])) count++
+    }
+    return count
+  } catch {
+    return sites.length
+  }
 }
 
 function sitesToGeoJSON(sites: EnrichedSite[]): GeoJSON.FeatureCollection {
@@ -129,7 +153,16 @@ export default function Map({
   onMapReady,
   onCoordCopied,
   sitesLoading = false,
+  loadProgress = 0,
   coordCopyLabel = 'Click map to copy coordinates',
+  resizeTrigger = 0,
+  loadingSitesLabel = 'Loading sites…',
+  attributionLabel = '© CARTO · OSM',
+  zoomLabel = 'Zoom',
+  bearingLabel = 'Bearing',
+  pitchLabel = 'Pitch',
+  viewportSitesLabel = 'in view',
+  tileFallbackLabel = 'Switched to OpenStreetMap tiles',
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const minimapContainer = useRef<HTMLDivElement>(null)
@@ -146,10 +179,15 @@ export default function Map({
   const viewChangeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 55.8, lng: -95.5 })
   const [mapBearing, setMapBearing] = useState(0)
+  const [mapZoom, setMapZoom] = useState(3.2)
+  const [mapPitch, setMapPitch] = useState(0)
+  const [viewportSiteCount, setViewportSiteCount] = useState(0)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [webglUnsupported, setWebglUnsupported] = useState(false)
+  const [tileFallbackActive, setTileFallbackActive] = useState(false)
   const [clickedCoord, setClickedCoord] = useState<{ lat: number; lng: number } | null>(null)
   const [copyFlash, setCopyFlash] = useState(false)
+  const tileFallbackAppliedRef = useRef(false)
 
   onViewChangeRef.current = onViewChange
   performanceModeRef.current = performanceMode
@@ -563,8 +601,26 @@ export default function Map({
     map.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right')
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left')
 
+    const switchToOsmFallback = () => {
+      if (tileFallbackAppliedRef.current) return false
+      tileFallbackAppliedRef.current = true
+      if (map.getLayer('dark')) map.setLayoutProperty('dark', 'visibility', 'none')
+      if (map.getLayer('osm')) map.setLayoutProperty('osm', 'visibility', 'visible')
+      setTileFallbackActive(true)
+      return true
+    }
+
+    map.on('error', (e) => {
+      console.error('[Map] tile/style error', e?.error ?? e)
+      const msg = String((e as { error?: { message?: string } })?.error?.message ?? e?.error ?? '')
+      if (/cartocdn|dark_all|basemaps\.carto/i.test(msg)) {
+        switchToOsmFallback()
+      }
+    })
+
     map.on('load', () => {
       setMapLoaded(true)
+      map.resize()
       const api: MapHandle = {
         getView: () => {
           const m = mapRef.current
@@ -598,25 +654,55 @@ export default function Map({
           navigateTo(m, { center: [target.lng, target.lat], zoom: target.zoom ?? m.getZoom() })
           setTimeout(() => { skipHistoryRef.current = false }, performanceModeRef.current ? 80 : 1200)
         },
+        resize: () => {
+          try { mapRef.current?.resize() } catch { /* mid-teardown */ }
+        },
       }
       onMapReady?.(api)
+      setMapZoom(map.getZoom())
+      setMapPitch(map.getPitch())
+      setViewportSiteCount(countSitesInViewport(map, sitesRef.current))
     })
 
     map.on('mousemove', (e) => {
       setMapCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
     })
-    map.on('rotate', () => setMapBearing(map.getBearing()))
+    map.on('rotate', () => {
+      setMapBearing(map.getBearing())
+      setMapPitch(map.getPitch())
+    })
     map.on('move', () => {
       const c = map.getCenter()
       setMapCenter({ lat: c.lat, lng: c.lng })
       setMapBearing(map.getBearing())
+      setMapZoom(map.getZoom())
+      setMapPitch(map.getPitch())
+      setViewportSiteCount(countSitesInViewport(map, sitesRef.current))
       if (minimapRef.current && !minimapRef.current.isMoving()) {
         minimapRef.current.setCenter(map.getCenter())
         minimapRef.current.setZoom(Math.max(map.getZoom() - 4, 0))
       }
     })
     map.on('moveend', () => emitViewChange(map))
+    map.on('dblclick', (e) => {
+      e.preventDefault()
+      const nextZoom = Math.min(map.getZoom() + 1, map.getMaxZoom())
+      if (performanceModeRef.current) {
+        map.jumpTo({ center: e.lngLat, zoom: nextZoom })
+      } else {
+        map.easeTo({ center: e.lngLat, zoom: nextZoom, duration: 280, essential: true })
+      }
+    })
     map.on('click', (e) => {
+      if (e.originalEvent?.shiftKey) {
+        const nextZoom = Math.min(map.getZoom() + 1.5, map.getMaxZoom())
+        if (performanceModeRef.current) {
+          map.jumpTo({ center: e.lngLat, zoom: nextZoom })
+        } else {
+          map.easeTo({ center: e.lngLat, zoom: nextZoom, duration: 280, essential: true })
+        }
+        return
+      }
       const coords = { lat: e.lngLat.lat, lng: e.lngLat.lng }
       setClickedCoord(coords)
       const text = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`
@@ -627,7 +713,15 @@ export default function Map({
       }).catch(() => {})
     })
 
+    const handleWindowResize = () => {
+      try { map.resize() } catch { /* ignore */ }
+    }
+    window.addEventListener('resize', handleWindowResize)
+    window.addEventListener('orientationchange', handleWindowResize)
+
     return () => {
+      window.removeEventListener('resize', handleWindowResize)
+      window.removeEventListener('orientationchange', handleWindowResize)
       if (viewChangeTimer.current) clearTimeout(viewChangeTimer.current)
       hoverPopupRef.current?.remove()
       clearMarkers()
@@ -795,6 +889,21 @@ export default function Map({
   useEffect(() => {
     syncChoropleth()
   }, [syncChoropleth])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapLoaded) return
+    const id = requestAnimationFrame(() => {
+      try { map.resize() } catch { /* ignore */ }
+    })
+    return () => cancelAnimationFrame(id)
+  }, [resizeTrigger, mapLoaded])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapLoaded) return
+    setViewportSiteCount(countSitesInViewport(map, filteredSites))
+  }, [filteredSites, mapLoaded, mapZoom, mapCenter])
 
   useEffect(() => {
     if (!mapRef.current) return
@@ -1019,9 +1128,12 @@ export default function Map({
   }, [])
 
   const displayCoord = clickedCoord ?? mapCenter
+  const showBearing = Math.abs(mapBearing) > 0.5
+  const showPitch = effectiveTerrain && mapPitch > 0.5
+  const loadingPct = Math.max(0, Math.min(100, Math.round(loadProgress)))
 
   return (
-    <div className={`relative w-full h-full map-print-target ${performanceMode ? 'map-performance-mode' : ''}`}>
+    <div className={`relative w-full h-full map-print-target map-stage-vignette ${performanceMode ? 'map-performance-mode' : ''}`}>
       <div
         ref={mapContainer}
         className="w-full h-full touch-manipulation"
@@ -1030,15 +1142,33 @@ export default function Map({
         aria-label="Interactive map of stranded methane sites"
       />
 
-      {(!mapLoaded || sitesLoading) && (
-        <div className="absolute inset-0 z-[15] map-loading-skeleton pointer-events-none" aria-hidden>
-          <div className="absolute inset-0 bg-[#0f172a]/75 backdrop-blur-[1px]" />
+      {!mapLoaded && (
+        <div className="absolute inset-0 z-[15] map-loading-skeleton pointer-events-none" aria-hidden data-testid="map-loading-overlay">
+          <div className="absolute inset-0 bg-[#0f172a]/60 backdrop-blur-[1px]" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <div className="w-48 h-1.5 rounded-full bg-white/10 overflow-hidden">
               <div className="h-full w-1/3 bg-[#FF8C00]/80 animate-[shimmer_1.4s_ease-in-out_infinite]" />
             </div>
             <span className="text-[10px] text-gray-400 tracking-widest uppercase">Loading map…</span>
           </div>
+        </div>
+      )}
+
+      {mapLoaded && sitesLoading && (
+        <div
+          className="absolute top-3 right-3 z-[14] glass px-2.5 py-1 rounded-lg border border-white/15 text-[10px] text-gray-400 pointer-events-none font-mono tabular-nums"
+          data-testid="map-sites-loading"
+          aria-live="polite"
+        >
+          {loadingPct > 0 && loadingPct < 100
+            ? loadingSitesLabel.replace('{pct}', String(loadingPct))
+            : loadingSitesLabel.replace(' {pct}%', '').replace('{pct}%', '').replace('{pct}', '')}
+        </div>
+      )}
+
+      {tileFallbackActive && (
+        <div className="absolute top-3 left-3 z-[14] glass px-2 py-1 rounded-lg border border-amber-500/35 text-[9px] text-amber-200/90 pointer-events-none max-w-[10rem]" data-testid="map-tile-fallback">
+          {tileFallbackLabel}
         </div>
       )}
 
@@ -1049,49 +1179,71 @@ export default function Map({
         </div>
       )}
 
-      <div className="absolute top-[7.5rem] right-3 z-[12] pointer-events-none flex flex-col items-end gap-2">
+      <div
+        className="absolute bottom-[8.5rem] left-3 z-[12] pointer-events-none hidden sm:flex flex-col items-start gap-1.5 max-w-[calc(100%-10rem)]"
+        data-testid="map-coordinate-strip"
+        aria-label="Map coordinates and view state"
+      >
         <div
-          className={`glass px-2 py-1 rounded-lg border text-[10px] font-mono tabular-nums flex items-center gap-1.5 ${
-            copyFlash ? 'border-[#5BC0BE]/60 text-[#5BC0BE]' : 'border-white/15 text-gray-300'
+          className={`map-coord-readout px-2 py-1 rounded-lg border text-[10px] font-mono tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5 ${
+            copyFlash ? 'map-coord-readout--copied text-[#5BC0BE]' : 'border-white/15 text-gray-300'
           }`}
           title={coordCopyLabel}
         >
-          <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-500'} />
-          {displayCoord.lat.toFixed(4)}°, {displayCoord.lng.toFixed(4)}°
+          <span className="inline-flex items-center gap-1">
+            <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-500'} />
+            {displayCoord.lat.toFixed(4)}°, {displayCoord.lng.toFixed(4)}°
+          </span>
+          <span className="text-gray-500">{zoomLabel.replace('{level}', mapZoom.toFixed(1))}</span>
+          {showBearing && (
+            <span className="text-gray-500">{bearingLabel.replace('{deg}', mapBearing.toFixed(0))}</span>
+          )}
+          {showPitch && (
+            <span className="text-gray-500">{pitchLabel.replace('{deg}', mapPitch.toFixed(0))}</span>
+          )}
+          <span className="text-[#5BC0BE]/80">{viewportSitesLabel.replace('{count}', String(viewportSiteCount))}</span>
         </div>
       </div>
 
+      <a
+        href={tileFallbackActive ? 'https://www.openstreetmap.org/copyright' : 'https://carto.com/attributions'}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-2 left-3 z-[11] text-[8px] text-gray-500/80 hover:text-[#5BC0BE] transition pointer-events-auto sm:bottom-[7.25rem]"
+        data-testid="map-attribution"
+      >
+        {tileFallbackActive ? '© OSM' : attributionLabel}
+      </a>
+
       <div
-        className="absolute top-[10.5rem] right-3 z-[12] pointer-events-none hidden sm:flex flex-col items-center"
+        className="absolute top-[4.5rem] left-3 z-[12] pointer-events-none hidden sm:flex flex-col items-center xl:left-[19.5rem]"
         aria-hidden
         title="North"
       >
         <div
-          className="glass w-9 h-9 rounded-full border border-white/20 flex items-center justify-center shadow-lg"
+          className="map-compass relative w-8 h-8 rounded-full border border-white/20 flex items-center justify-center"
           style={{ transform: `rotate(${-mapBearing}deg)` }}
         >
-          <Compass size={18} className="text-[#FF8C00]" />
-          <span className="absolute -top-0.5 text-[8px] font-bold text-[#FF8C00]">N</span>
+          <Compass size={15} className="text-[#FF8C00]" strokeWidth={2.25} />
+          <span className="absolute -top-0.5 text-[7px] font-bold text-[#FF8C00] leading-none">N</span>
         </div>
       </div>
 
       {showHeatmap && (
-        <div className="absolute bottom-36 right-3 z-[12] glass px-2.5 py-2 rounded-lg border border-white/15 pointer-events-none hidden sm:block">
+        <div className="map-heat-legend absolute bottom-[10.5rem] left-3 z-[12] px-2.5 py-2 rounded-lg border border-white/15 pointer-events-none hidden sm:block w-[7.5rem]">
           <div className="text-[9px] uppercase tracking-wider text-gray-400 mb-1">Emission density</div>
-          <div
-            className="w-28 h-2 rounded-full"
-            style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.2) 0%, #14b8a6 30%, #fbbf24 60%, #f43f5e 100%)' }}
-          />
-          <div className="flex justify-between text-[8px] text-gray-500 mt-0.5 font-mono">
-            <span>low</span>
-            <span>high</span>
+          <div className="map-heat-legend__bar w-full" />
+          <div className="map-heat-legend__labels">
+            <span>Low</span>
+            <span>Med</span>
+            <span>High</span>
           </div>
         </div>
       )}
 
       <div
         ref={minimapContainer}
-        className="absolute bottom-14 left-3 z-[12] w-28 h-20 rounded-lg border border-white/20 overflow-hidden shadow-lg bg-[#1e293b]/90 hidden sm:block cursor-crosshair"
+        className="map-minimap absolute bottom-14 left-3 z-[12] w-28 h-20 rounded-lg border border-white/20 overflow-hidden shadow-lg bg-[#1e293b]/90 hidden sm:block cursor-crosshair"
         title="Click minimap to pan"
         aria-label="Overview minimap — click to pan main map"
       />

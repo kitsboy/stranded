@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Filter, Zap, RefreshCw, Target, Download, ChevronDown, ChevronUp, Maximize2,
-  ChevronLeft, ChevronRight, Bookmark, Camera, Printer, Trash2, Layers, X,
+  ChevronLeft, ChevronRight, Bookmark, Camera, Printer, Trash2, Layers, X, GitCompareArrows,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -51,6 +51,8 @@ import {
   countActiveMapFilters,
   buildMapFilterChips,
   matchScorePresetLabel,
+  shouldShowFilterToast,
+  validatePresetName,
 } from '@/lib/map-filters'
 import {
   getMapViewBookmarks,
@@ -64,6 +66,11 @@ import MapStatsBar from '@/components/MapStatsBar'
 import MapProvinceBars from '@/components/MapProvinceBars'
 import MobileFilterDrawer from '@/components/MobileFilterDrawer'
 import MapFiltersPanel from '@/components/MapFiltersPanel'
+import MapToolbar from '@/components/MapToolbar'
+import MapHud from '@/components/MapHud'
+import EcccFreshnessBadge from '@/components/EcccFreshnessBadge'
+import MapEmptyState from '@/components/MapEmptyState'
+import FilterPanelHeader from '@/components/FilterPanelHeader'
 import { computeMapFilterStats, buildFilterAnnouncement, siteDensityTier } from '@/lib/map-stats'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 
@@ -128,6 +135,7 @@ function StrandedCommandCenter() {
   const [bookmarkName, setBookmarkName] = useState('')
   const [historyTick, setHistoryTick] = useState(0)
   const [showSearchHint, setShowSearchHint] = useState(false)
+  const [mapResizeNonce, setMapResizeNonce] = useState(0)
 
   const mapApiRef = useRef<MapHandle | null>(null)
   const viewHistoryRef = useRef(createMapViewHistory())
@@ -145,8 +153,12 @@ function StrandedCommandCenter() {
 
   // Load full 2611 with enrichment (performance + types)
   useEffect(() => {
-    setLoadProgress(30)
+    setLoadProgress(8)
+    const progressTimer = window.setInterval(() => {
+      setLoadProgress(p => (p < 88 ? p + 4 : p))
+    }, 180)
     loadSites().then(sites => {
+      window.clearInterval(progressTimer)
       setLoadProgress(100)
       setAllSites(sites)
       setLoading(false)
@@ -237,9 +249,11 @@ function StrandedCommandCenter() {
       })
     }).catch(err => {
       console.error(err)
+      window.clearInterval(progressTimer)
       setLoading(false)
       toast.error(t('mapLoadFailed'))
     })
+    return () => window.clearInterval(progressTimer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -262,10 +276,27 @@ function StrandedCommandCenter() {
 
   const setFiltersCollapsedPersisted = useCallback((collapsed: boolean) => {
     setFiltersCollapsed(collapsed)
+    setMapResizeNonce(n => n + 1)
     if (typeof window !== 'undefined') {
       localStorage.setItem(MAP_FILTERS_COLLAPSED_KEY, collapsed ? '1' : '0')
     }
   }, [])
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => mapApiRef.current?.resize())
+    return () => cancelAnimationFrame(id)
+  }, [filtersCollapsed, fullscreen, mapResizeNonce])
+
+  useEffect(() => {
+    const base = t('mapSeoTitle')
+    if (selectedSite) {
+      const name = selectedSite.properties?.name || selectedSite.id
+      document.title = tf(locale, 'mapPageTitleSite', { name })
+    } else {
+      document.title = base
+    }
+    return () => { document.title = base }
+  }, [selectedSite, locale, t])
 
   // Compute filtered (live filtering = sexy + performant)
   const filteredSites = useMemo(() => {
@@ -654,12 +685,16 @@ function StrandedCommandCenter() {
     if (showKeyboardHelp) { setShowKeyboardHelp(false); return }
     if (showCompare) { setShowCompare(false); return }
     if (showMobileFilters) { setShowMobileFilters(false); return }
+    if (!filtersCollapsed && isXlViewport) {
+      setFiltersCollapsedPersisted(true)
+      return
+    }
     if (showLayersPanel) { setShowLayersPanel(false); return }
     if (selectedSite) {
       if (mobileSiteSheet === 'expanded') { setMobileSiteSheet('peek'); return }
       setSelectedSite(null)
     }
-  }, [showKeyboardHelp, showCompare, showMobileFilters, showLayersPanel, selectedSite, mobileSiteSheet])
+  }, [showKeyboardHelp, showCompare, showMobileFilters, showLayersPanel, selectedSite, mobileSiteSheet, filtersCollapsed, isXlViewport, setFiltersCollapsedPersisted])
 
   const isTypingTarget = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement | null
@@ -735,7 +770,7 @@ function StrandedCommandCenter() {
     }
   }
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setMinEmission(0)
     setMaxEmission(DEFAULT_MAX_EMISSION)
     setSelectedProvinces(new Set())
@@ -745,8 +780,10 @@ function StrandedCommandCenter() {
     setViewMode(filteredSites.length > 180 ? 'native-clusters' : 'precise')
     setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
     setRadiusFilter(null)
-    toast.success('Showing all 2,611 locations')
-  }
+    if (shouldShowFilterToast('reset-filters')) {
+      toast.success(t('mapShowAll'))
+    }
+  }, [filteredSites.length, t])
 
   const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
 
@@ -778,7 +815,9 @@ function StrandedCommandCenter() {
     setSelectedSources(new Set(preset.sources ?? []))
     recordRecentFilterPreset(preset.name)
     setFilterPresetsRevision(n => n + 1)
-    toast.success(tf(locale, 'mapPresetApplied', { name: preset.name }))
+    if (shouldShowFilterToast(`preset-applied:${preset.name}`)) {
+      toast.success(tf(locale, 'mapPresetApplied', { name: preset.name }))
+    }
   }
 
   const handleDeletePreset = (name: string) => {
@@ -788,11 +827,18 @@ function StrandedCommandCenter() {
   }
 
   const saveCurrentPreset = () => {
-    const name = presetName.trim() || `Preset ${new Date().toLocaleDateString()}`
+    const validated = validatePresetName(presetName)
+    if (!validated.ok) {
+      toast.error(t('mapPresetNameRequired'))
+      return
+    }
+    const name = validated.trimmed
     saveFilterPreset(buildCurrentFilterPreset(name))
     setPresetName('')
     setFilterPresetsRevision(n => n + 1)
-    toast.success(tf(locale, 'mapPresetSaved', { name }))
+    if (shouldShowFilterToast(`preset-saved:${name}`)) {
+      toast.success(tf(locale, 'mapPresetSaved', { name }))
+    }
   }
 
   const shareCurrentPreset = async () => {
@@ -829,7 +875,6 @@ function StrandedCommandCenter() {
       if (e.key.toLowerCase() === 'f' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         resetFilters()
-        toast('Filters reset')
         return
       }
       if (e.key.toLowerCase() === 'm' && e.shiftKey && !e.metaKey && !e.ctrlKey && selectedSite) {
@@ -872,7 +917,22 @@ function StrandedCommandCenter() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedSite, addToPortfolio, filteredSites, closeAllPanels, exportGeo])
+  }, [selectedSite, addToPortfolio, filteredSites, closeAllPanels, exportGeo, resetFilters])
+
+  const copyViewportJson = useCallback(async () => {
+    const view = mapApiRef.current?.getView()
+    if (!view) {
+      toast.error('Map not ready yet')
+      return
+    }
+    const payload = JSON.stringify(view, null, 2)
+    try {
+      await navigator.clipboard.writeText(payload)
+      toast.success(t('mapViewportCopied'))
+    } catch {
+      toast.info(payload)
+    }
+  }, [t])
 
   const saveMissionProfile = () => {
     if (!portfolio.length) return
@@ -912,7 +972,9 @@ function StrandedCommandCenter() {
 
   return (
     <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-label="Stranded command center map">
-      <div className="map-print-header hidden text-black font-semibold">Stranded Command Center — Map View</div>
+      <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
+        Stranded Command Center — Map View · ECCC GHGRP verified data
+      </div>
       {loading && loadProgress < 100 && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden" role="progressbar" aria-valuenow={loadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Loading sites">
           <div className="h-full bg-[#FF8C00] transition-all" style={{ width: `${loadProgress}%` }} />
@@ -942,101 +1004,25 @@ function StrandedCommandCenter() {
         </div>
       )}
 
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[69] flex items-center gap-1.5 no-print mt-10 sm:mt-0 sm:top-[4.25rem]">
-        <button
-          type="button"
-          onClick={historyBack}
-          disabled={!canHistoryBack}
-          className="glass p-1.5 rounded-lg border border-white/15 disabled:opacity-35 hover:border-[#5BC0BE]/40"
-          aria-label={t('mapHistoryBack')}
-          title={t('mapHistoryBack')}
-        >
-          <ChevronLeft size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={historyForward}
-          disabled={!canHistoryForward}
-          className="glass p-1.5 rounded-lg border border-white/15 disabled:opacity-35 hover:border-[#5BC0BE]/40"
-          aria-label={t('mapHistoryForward')}
-          title={t('mapHistoryForward')}
-        >
-          <ChevronRight size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={fitToFilteredSites}
-          className="glass px-2 py-1 rounded-lg border border-white/15 text-[10px] hover:border-[#FF8C00]/40 flex items-center gap-1"
-          title={t('mapFitBounds')}
-        >
-          <Maximize2 size={12} /> {t('mapFitBounds')}
-        </button>
-        <button
-          type="button"
-          onClick={exportMapScreenshot}
-          className="glass p-1.5 rounded-lg border border-white/15 hover:border-[#5BC0BE]/40"
-          aria-label={t('mapScreenshot')}
-          title={t('mapScreenshot')}
-        >
-          <Camera size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={printMap}
-          className="glass p-1.5 rounded-lg border border-white/15 hover:border-[#5BC0BE]/40 print-show"
-          aria-label={t('mapPrint')}
-          title={t('mapPrint')}
-        >
-          <Printer size={14} />
-        </button>
-      </div>
+      <MapToolbar
+        canHistoryBack={canHistoryBack}
+        canHistoryForward={canHistoryForward}
+        onHistoryBack={historyBack}
+        onHistoryForward={historyForward}
+        onFitBounds={fitToFilteredSites}
+        onScreenshot={exportMapScreenshot}
+        onPrint={printMap}
+      />
 
-      {/* Top mission HUD */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 text-xs">
-        <div className="glass px-4 py-1.5 rounded-2xl flex items-center gap-4 border border-white/10">
-          <div className="flex items-center gap-2">
-            <Target size={15} className="text-[#FF8C00]" />
-            <span className="font-mono text-[#FF8C00]">{filteredSites.length.toLocaleString()}</span>
-            <span className="text-gray-400">/ {allSites.length.toLocaleString()} visible</span>
-            {filteredSites.length < allSites.length && allSites.length > 0 && (
-              <button 
-                onClick={resetFilters} 
-                className="ml-2 px-2 py-0.5 text-[10px] rounded bg-[#FF8C00] text-black font-medium hover:bg-orange-400"
-              >
-                {t('mapShowAll')}
-              </button>
-            )}
-            {activeFilterCount > 0 && (
-              <span
-                className="ml-1 px-2 py-0.5 text-[10px] rounded-full bg-[#5BC0BE]/15 border border-[#5BC0BE]/40 text-[#5BC0BE] font-medium"
-                data-testid="hud-active-filter-count"
-              >
-                {tf(locale, 'mapActiveFilters', { count: String(activeFilterCount) })}
-              </span>
-            )}
-          </div>
-          <div className="h-3 w-px bg-white/20" />
-          <button
-            type="button"
-            data-testid="geolocate-btn"
-            onClick={nearMe}
-            className="text-[10px] px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
-            aria-label={t('mapGeolocate')}
-          >
-            {t('mapGeolocate')}
-          </button>
-          <div className="h-3 w-px bg-white/20" />
-          <div>
-            BTC <span className="btc-ticker font-semibold text-emerald-400">${liveBtcPrice.toLocaleString()}</span>
-          </div>
-          {portfolio.length > 0 && (
-            <>
-              <div className="h-3 w-px bg-white/20" />
-              <div className="text-[#FF8C00] font-medium">MISSION: C${totalPotential.toLocaleString()}/day</div>
-            </>
-          )}
-        </div>
-      </div>
+      <MapHud
+        filteredCount={filteredSites.length}
+        totalCount={allSites.length}
+        activeFilterCount={activeFilterCount}
+        liveBtcPrice={liveBtcPrice}
+        missionDailyCad={portfolio.length > 0 ? totalPotential : undefined}
+        onResetFilters={resetFilters}
+        onGeolocate={nearMe}
+      />
 
       {/* Left premium filter command center (wild creative) */}
       {showSearchHint && (
@@ -1061,55 +1047,29 @@ function StrandedCommandCenter() {
 
       <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-4 items-stretch pointer-events-none [&>*]:pointer-events-auto">
       <div
-        className="glass rounded-3xl shadow-2xl border border-white/10 flex flex-col min-h-0 max-h-[min(58vh,calc(100vh-20rem))] overflow-hidden shrink-0"
+        className={`map-filter-panel glass rounded-3xl shadow-2xl border border-white/10 flex flex-col min-h-0 max-h-[min(58vh,calc(100vh-20rem))] overflow-hidden shrink-0${activeFilterCount > 0 ? ' map-filter-panel--active' : ''}`}
         data-tour="map-filters"
       >
         <div className="map-filter-scroll flex-1 min-h-0 overflow-y-auto">
-          <div className="sticky top-0 z-10 px-5 pt-5 pb-3 bg-[var(--glass)] backdrop-blur-xl border-b border-white/10 rounded-t-3xl">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[#FF8C00] font-semibold tracking-widest text-xs min-w-0">
-                <Filter size={16} className="shrink-0" />
-                <span className="truncate">{t('mapFiltersLive')}</span>
-                {activeFilterCount > 0 && (
-                  <span
-                    className="shrink-0 px-1.5 py-px rounded-full text-[9px] font-bold bg-[#FF8C00] text-black"
-                    data-testid="filter-panel-active-count"
-                  >
-                    {activeFilterCount}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setFiltersCollapsedPersisted(!filtersCollapsed)}
-                  className="text-[10px] flex items-center gap-0.5 text-gray-400 hover:text-white"
-                  aria-expanded={!filtersCollapsed}
-                  aria-label={filtersCollapsed ? t('mapExpandFilters') : t('mapCollapseFilters')}
-                >
-                  {filtersCollapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
-                </button>
-                <button type="button" onClick={resetFilters} className="text-[10px] flex items-center gap-1 text-gray-400 hover:text-white">
-                  <RefreshCw size={13} /> {t('mapReset')}
-                </button>
-              </div>
-            </div>
-            {activeFilterCount > 0 && (
-              <div className="text-[9px] text-gray-500 mt-1">
-                {tf(locale, 'mapFiltersActive', { count: String(activeFilterCount) })}
-              </div>
-            )}
-          </div>
+          <FilterPanelHeader
+            activeFilterCount={activeFilterCount}
+            filtersCollapsed={filtersCollapsed}
+            onToggleCollapse={() => setFiltersCollapsedPersisted(!filtersCollapsed)}
+            onResetFilters={resetFilters}
+          />
 
           {!filtersCollapsed && (
-            <>
-              <div className="px-5 pt-3 space-y-3">
+            <div id="map-filter-panel-body">
+              <div className="map-filter-body space-y-3">
                 <MapStatsBar stats={filterStats} />
-                <MapProvinceBars provinces={filterStats.provinces} />
+                <MapProvinceBars
+                  provinces={filterStats.provinces}
+                  animationKey={`${filterStats.count}-${activeFilterCount}`}
+                />
               </div>
               <MapFilterSummary chips={filterChips} />
 
-              <div className="px-5 pb-5 pt-3 space-y-5">
+              <div className="map-filter-body space-y-4">
                 <label className="flex items-center justify-between gap-2 text-xs cursor-pointer group">
                   <span className="text-gray-300 group-hover:text-white transition">{t('mapOnlyMission')}</span>
                   <input
@@ -1171,8 +1131,8 @@ function StrandedCommandCenter() {
                   />
                 </div>
 
-                <div>
-                  <div className="text-xs text-gray-400 mb-1.5 flex justify-between items-center">
+                <div className="map-filter-section">
+                  <div className="text-xs text-gray-400 flex justify-between items-center">
                     <span>
                       {t('mapMinScore')}{' '}
                       {scoreIsCustom && (
@@ -1181,8 +1141,8 @@ function StrandedCommandCenter() {
                     </span>
                     <span className="font-mono text-white">{minScore}</span>
                   </div>
-                  <input type="range" min="0" max="98" value={minScore} onChange={e => setMinScore(Number(e.target.value))} className="w-full accent-[#5BC0BE]" />
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <input type="range" min="0" max="98" value={minScore} onChange={e => setMinScore(Number(e.target.value))} className="map-score-slider w-full" />
+                  <div className="flex flex-wrap map-filter-chips mt-1">
                     {SCORE_PRESETS.map(preset => (
                       <button
                         key={preset.label}
@@ -1216,9 +1176,9 @@ function StrandedCommandCenter() {
                       </button>
                     </div>
                   </div>
-                  <div className={`flex flex-wrap gap-1.5 pr-1 transition-all duration-200 ${showAllProvinces ? 'max-h-[220px]' : 'max-h-[78px]'} overflow-auto map-filter-scroll`}>
+                  <div className={`map-filter-chips flex flex-wrap pr-1 transition-all duration-200 ${showAllProvinces ? 'max-h-[220px]' : 'max-h-[78px]'} overflow-auto map-filter-scroll`}>
                     {provinces.map(p => (
-                      <button key={p} onClick={() => toggleProvince(p)} className={`filter-chip text-xs px-3 py-px rounded-full border ${selectedProvinces.has(p) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
+                      <button key={p} onClick={() => toggleProvince(p)} className={`filter-chip filter-chip-province text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${selectedProvinces.has(p) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
                         {p}
                       </button>
                     ))}
@@ -1240,9 +1200,9 @@ function StrandedCommandCenter() {
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="map-filter-chips flex flex-wrap">
                     {sourceTypes.map(s => (
-                      <button key={s} onClick={() => toggleSource(s)} className={`filter-chip text-xs px-3 py-px rounded-full border ${selectedSources.has(s) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
+                      <button key={s} onClick={() => toggleSource(s)} className={`filter-chip filter-chip-source text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${selectedSources.has(s) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
                         {s}
                       </button>
                     ))}
@@ -1312,7 +1272,7 @@ function StrandedCommandCenter() {
                   )}
                   <div className="flex gap-1 mb-2">
                     <input value={presetName} onChange={e => setPresetName(e.target.value)} placeholder={t('mapPresetName')} className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
-                    <button type="button" onClick={saveCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">{t('mapSave')}</button>
+                    <button type="button" onClick={saveCurrentPreset} disabled={!presetName.trim()} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
                     <button type="button" onClick={shareCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
                   </div>
                   <div className="flex flex-wrap gap-1">
@@ -1351,7 +1311,7 @@ function StrandedCommandCenter() {
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -1362,7 +1322,7 @@ function StrandedCommandCenter() {
         type="button"
         data-testid="mobile-filters-btn"
         onClick={() => setShowMobileFilters(true)}
-        className="xl:hidden fixed top-[4.5rem] left-3 z-[68] glass px-3 py-2 rounded-2xl border border-white/10 text-xs flex items-center gap-2 touch-manipulation"
+        className="xl:hidden fixed top-[4.5rem] left-3 z-[68] glass px-3 py-2 rounded-2xl border border-white/10 text-xs flex items-center gap-2 touch-manipulation min-h-[44px] min-w-[44px] active:scale-[0.97] active:bg-white/5 transition-transform"
         aria-label={t('mapFilters')}
       >
         <Filter size={14} className="text-[#FF8C00]" />
@@ -1376,7 +1336,11 @@ function StrandedCommandCenter() {
 
       <MobileFilterDrawer open={showMobileFilters} onClose={() => setShowMobileFilters(false)}>
         <MapStatsBar stats={filterStats} className="mb-4" />
-        <MapProvinceBars provinces={filterStats.provinces} className="mb-4" />
+        <MapProvinceBars
+          provinces={filterStats.provinces}
+          animationKey={`${filterStats.count}-${activeFilterCount}`}
+          className="mb-4"
+        />
         <MapFilterSummary chips={filterChips} />
         <MapFiltersPanel
           minEmission={minEmission}
@@ -1412,7 +1376,8 @@ function StrandedCommandCenter() {
         />
       </MobileFilterDrawer>
 
-      {/* THE MAP — heart of the experience */}
+      {/* THE MAP — full-bleed base layer */}
+      <div className="absolute inset-0 z-0 min-h-0" data-testid="map-stage">
       <Map
         sites={allSites}
         filteredSites={filteredSites}
@@ -1436,11 +1401,27 @@ function StrandedCommandCenter() {
         highlightedProvinces={Array.from(selectedProvinces)}
         performanceMode={effectivePerformanceMode}
         sitesLoading={loading}
+        loadProgress={loadProgress}
+        resizeTrigger={mapResizeNonce + (filtersCollapsed ? 0 : 1)}
         onViewChange={handleMapViewChange}
         onMapReady={api => { mapApiRef.current = api }}
         onCoordCopied={() => toast.success(t('mapCoordCopied'))}
         coordCopyLabel={t('mapCoordCopy')}
+        loadingSitesLabel={tf(locale, 'mapLoadingSitesPct', { pct: '{pct}' })}
+        attributionLabel={t('mapAttribution')}
+        zoomLabel={tf(locale, 'mapZoomLevel', { level: '{level}' })}
+        bearingLabel={tf(locale, 'mapBearing', { deg: '{deg}' })}
+        pitchLabel={tf(locale, 'mapPitch', { deg: '{deg}' })}
+        viewportSitesLabel={tf(locale, 'mapViewportSites', { count: '{count}' })}
+        tileFallbackLabel={t('mapTileFallback')}
       />
+
+      <AnimatePresence>
+        {!loading && filteredSites.length === 0 && allSites.length > 0 && (
+          <MapEmptyState key="map-empty" onResetFilters={resetFilters} />
+        )}
+      </AnimatePresence>
+      </div>
 
       <QuickActions
         actions={[
@@ -1458,8 +1439,8 @@ function StrandedCommandCenter() {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 340 }}
-            drag="y"
+            transition={reducedMotion ? { duration: 0 } : { type: 'spring', damping: 30, stiffness: 340 }}
+            drag={reducedMotion ? false : 'y'}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.1}
             onDragEnd={(_, info) => {
@@ -1472,7 +1453,7 @@ function StrandedCommandCenter() {
             }}
             data-testid="mobile-site-sheet"
           >
-            <div className="mx-auto w-full max-w-lg pb-[env(safe-area-inset-bottom)]">
+            <div className="mx-auto w-full max-w-lg pb-[max(1rem,env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top,0px)]">
               <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 mt-2" aria-hidden />
               <SiteDetailsPanel
                 key={selectedSite.id}
@@ -1490,7 +1471,7 @@ function StrandedCommandCenter() {
       </AnimatePresence>
 
       {/* Right side — SiteDetails + Mission (desktop) */}
-      <div className="absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)] max-h-[calc(100%-2rem)] overflow-hidden">
+      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)] max-h-[calc(100%-2rem)]">
         <AnimatePresence mode="wait">
           {selectedSite && (
             <SiteDetailsPanel
@@ -1535,13 +1516,27 @@ function StrandedCommandCenter() {
           {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
         </button>
         {compareSites.length >= 2 && (
-          <button onClick={() => setShowCompare(true)} className="text-xs px-3 py-1 rounded-full bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">
-            Compare {compareSites.length} sites
+          <button
+            type="button"
+            onClick={() => setShowCompare(true)}
+            className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black border border-[#FF8C00]/60 shadow-lg shadow-[#FF8C00]/20 hover:brightness-105 transition"
+            data-testid="map-compare-open"
+          >
+            <GitCompareArrows size={16} aria-hidden />
+            {tf(locale, 'mapCompareSites', { count: String(compareSites.length) })}
           </button>
         )}
         {selectedSite && (
-          <button onClick={() => toggleCompare(selectedSite)} className="text-[10px] text-gray-400 hover:text-white self-end">
-            {compareSites.some(s => s.id === selectedSite.id) ? 'Remove from compare' : 'Add to compare'}
+          <button
+            type="button"
+            onClick={() => toggleCompare(selectedSite)}
+            className={`text-xs self-end px-3 py-1 rounded-full border transition ${
+              compareSites.some(s => s.id === selectedSite.id)
+                ? 'border-[#5BC0BE]/50 text-[#5BC0BE] bg-[#5BC0BE]/10'
+                : 'border-white/20 text-gray-300 hover:border-[#FF8C00]/40 hover:text-[#FF8C00]'
+            }`}
+          >
+            {compareSites.some(s => s.id === selectedSite.id) ? t('mapRemoveFromCompare') : t('mapAddToCompare')}
           </button>
         )}
       {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
@@ -1550,82 +1545,80 @@ function StrandedCommandCenter() {
       {!isXlViewport && <OnboardingTour layout="floating" />}
 
       {/* Score legend + layer controls */}
-      <div className="absolute bottom-5 right-5 z-[60] flex flex-col items-end gap-2">
-        <button
-          type="button"
-          onClick={() => setShowMissionRing(v => !v)}
-          className={`text-[10px] px-2.5 py-1 rounded-full border transition ${showMissionRing ? 'border-[#67e8f9]/50 text-[#67e8f9] bg-[#67e8f9]/10' : 'border-white/15 text-gray-400'}`}
-          data-testid="mission-ring-toggle"
-          aria-pressed={showMissionRing}
-          title={t('mapMissionRingToggle')}
-        >
-          {showMissionRing ? t('mapMissionRingOn') : t('mapMissionRingOff')}
-        </button>
-        <ScoreLegend compact />
-        {showLayersPanel && (
-        <LayerControls
-          layers={layers}
-          onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
-          onApplyPreset={(preset: LayerPresetId) => {
-            const p = LAYER_PRESETS[preset]
-            setLayers(prev => ({ ...prev, ...p.layers }))
-            if (preset === 'satellite') setMapStyle('satellite')
-            else if (preset === 'minimal') setMapStyle('dark')
-            else setMapStyle('dark')
-            toast.success(`Applied ${p.label} layer preset`)
-          }}
-          heatmapOpacity={heatmapOpacity}
-          onHeatmapOpacityChange={setHeatmapOpacity}
-          terrainExaggeration={terrainExaggeration}
-          onTerrainExaggerationChange={setTerrainExaggeration}
-          mapStyle={mapStyle}
-          onMapStyleChange={handleMapStyleChange}
-          showSiteLabels={showSiteLabels}
-          onSiteLabelsChange={setShowSiteLabels}
-          performanceMode={performanceMode}
-          onPerformanceModeChange={setPerformanceMode}
-        />
-        )}
-        {!showLayersPanel && (
+      <div className="map-layer-stack absolute bottom-5 right-5 z-[60] flex flex-col gap-2">
+        <ScoreLegend compact horizontal />
+        <div className="map-layer-panel-unified">
           <button
             type="button"
-            onClick={() => setShowLayersPanel(true)}
-            className="text-[10px] px-2.5 py-1.5 rounded-xl border border-white/15 text-gray-400 hover:text-white flex items-center gap-1"
-            data-testid="layers-panel-reopen"
+            onClick={() => setShowMissionRing(v => !v)}
+            className="map-mission-ring-toggle"
+            data-testid="mission-ring-toggle"
+            aria-pressed={showMissionRing}
+            title={t('mapMissionRingToggle')}
           >
-            <Layers size={12} /> {t('mapLayers')}
+            <span>{showMissionRing ? t('mapMissionRingOn') : t('mapMissionRingOff')}</span>
+            <span className="map-mission-ring-toggle__dot" aria-hidden />
           </button>
-        )}
+          {showLayersPanel ? (
+            <LayerControls
+              compact
+              layers={layers}
+              onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
+              onApplyPreset={(preset: LayerPresetId) => {
+                const p = LAYER_PRESETS[preset]
+                setLayers(prev => ({ ...prev, ...p.layers }))
+                if (preset === 'satellite') setMapStyle('satellite')
+                else if (preset === 'minimal') setMapStyle('dark')
+                else setMapStyle('dark')
+                toast.success(`Applied ${p.label} layer preset`)
+              }}
+              heatmapOpacity={heatmapOpacity}
+              onHeatmapOpacityChange={setHeatmapOpacity}
+              terrainExaggeration={terrainExaggeration}
+              onTerrainExaggerationChange={setTerrainExaggeration}
+              mapStyle={mapStyle}
+              onMapStyleChange={handleMapStyleChange}
+              showSiteLabels={showSiteLabels}
+              onSiteLabelsChange={setShowSiteLabels}
+              performanceMode={performanceMode}
+              onPerformanceModeChange={setPerformanceMode}
+              onCopyViewport={copyViewportJson}
+              copyViewportLabel={t('mapCopyViewport')}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowLayersPanel(true)}
+              className="w-full text-[10px] px-4 py-2.5 text-gray-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 border-t border-white/10"
+              data-testid="layers-panel-reopen"
+            >
+              <Layers size={12} /> {t('mapLayers')}
+            </button>
+          )}
+        </div>
       </div>
 
-      {liveStats && (
-        <div className="absolute top-14 right-2 md:right-4 z-[62] max-w-[min(340px,92vw)]">
-          <div className="glass text-[10px] px-3 py-1.5 rounded-xl border border-[#5BC0BE]/30 text-gray-300">
-            ECCC reporting year <span className="font-mono text-[#5BC0BE]">{liveStats.ecccReportingYear ?? '2023'}</span>
-            {' · '}synced {new Date(liveStats.generatedAt).toLocaleDateString()}
-          </div>
-        </div>
-      )}
+      {liveStats && <EcccFreshnessBadge stats={liveStats} />}
 
-      <div className="absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-[10px] text-gray-500 flex flex-wrap items-center justify-between gap-2">
+      <div className="map-footer-bar absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-gray-500 flex flex-wrap items-center justify-between gap-2">
         <span>Data: Environment and Climate Change Canada (ECCC) GHGRP · Open Government of Canada</span>
-        <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:underline shrink-0">ECCC dataset ↗</a>
+        <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">ECCC dataset ↗</a>
       </div>
 
       {/* Bottom status + view toggle */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
-        <div className="glass text-xs px-5 py-1.5 rounded-3xl flex flex-wrap items-center gap-3 border border-white/10">
+      <div className="map-status-bar absolute bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2">
+        <div className="map-status-bar__inner glass px-5 py-1.5 rounded-3xl flex flex-wrap items-center gap-3 border border-white/10">
           {loading ? t('mapLoadingDataset') : tf(locale, 'mapSitesInView', { count: filteredSites.length.toLocaleString(), mission: String(portfolio.length) })}
           {!loading && allSites.length > 0 && (
             <span
-              className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 text-gray-400"
+              className="map-status-bar__density px-2 py-0.5 rounded-full border border-white/15 text-gray-400"
               data-testid="map-site-density"
               title={tf(locale, 'mapSiteDensity', { tier: densityTierLabel })}
             >
               {tf(locale, 'mapSiteDensity', { tier: densityTierLabel })}
             </span>
           )}
-          <button onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))} className="ml-2 text-[#5BC0BE] hover:underline flex items-center gap-1 text-[11px]">
+          <button onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))} className="map-status-bar__action ml-2 text-[#5BC0BE] hover:underline flex items-center gap-1">
             <Target size={13}/> {t('mapCommandPalette')}
           </button>
           {selectedSite && (

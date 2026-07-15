@@ -1,6 +1,6 @@
 # stranded — Last Updated 2026-07-15 by Grok
 
-Brief: v2.6.0 map command center — layout fixes + 50 elite upgrades (#301–350)
-Version: 2.6.0
+Brief: v2.6.1 — map CSP fix (CARTO tiles), layout polish, 75 upgrades (#351–425)
+Version: 2.6.1
 Production: https://stranded.giveabit.io
-Commit: f5d46e4
+Commit: (pending push)

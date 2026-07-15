@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
@@ -10,11 +11,13 @@ type Props = {
   provinces: ProvinceCount[]
   maxBars?: number
   className?: string
+  /** Changes when filters change — retriggers bar grow animation */
+  animationKey?: string | number
 }
 
 const BAR_COLORS = ['#FF8C00', '#5BC0BE', '#A78BFA', '#34D399', '#F472B6', '#60A5FA', '#FBBF24', '#FB7185']
 
-export default function MapProvinceBars({ provinces, maxBars = 6, className = '' }: Props) {
+export default function MapProvinceBars({ provinces, maxBars = 6, className = '', animationKey }: Props) {
   const { locale, t } = useLocale()
   const [expanded, setExpanded] = useState(false)
 
@@ -56,13 +59,16 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
               {p.province}
             </span>
             <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-300 motion-reduce:transition-none"
-                style={{
+              <motion.div
+                key={`${animationKey ?? 'static'}-${p.province}`}
+                className="h-full rounded-full motion-reduce:!transition-none"
+                initial={{ width: 0, opacity: 0.6 }}
+                animate={{
                   width: `${(p.count / maxCount) * 100}%`,
-                  backgroundColor: BAR_COLORS[i % BAR_COLORS.length],
                   opacity: 1 - i * 0.05,
                 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: i * 0.04 }}
+                style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }}
               />
             </div>
             <span className="text-[9px] text-gray-500 tabular-nums w-6 text-right shrink-0">{p.count}</span>

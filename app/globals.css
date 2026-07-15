@@ -486,7 +486,19 @@ html.theme-transition *::after {
 
 /* Beautiful range + chips */
 .filter-chip {
-  transition: all 0.1s ease;
+  transition: background-color 0.1s ease, border-color 0.1s ease, transform 0.12s ease;
+}
+.filter-chip:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-chip,
+  .map-filter-chips {
+    transition: none !important;
+  }
+  .filter-chip:active {
+    transform: none;
+  }
 }
 .filter-chip.active {
   background: #FF8C00;
@@ -807,4 +819,486 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
 }
 .map-filter-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 140, 0, 0.65);
+}
+
+/* Map command center visual polish — upgrades #351–370 */
+.map-command-center {
+  --map-accent-orange: #FF8C00;
+  --map-accent-teal: #5BC0BE;
+  --map-glass-bg: rgba(36, 52, 71, 0.88);
+  --map-footer-offset: 2.75rem;
+  /* Design tokens (#418) — HUD/toolbar/panel rhythm */
+  --map-hud-gap: 0.75rem;
+  --map-toolbar-gap: 0.25rem;
+  --map-panel-radius: 0.75rem;
+  --map-panel-padding: 1rem;
+  --map-chip-gap: 0.25rem;
+  --map-z-hud: 70;
+  --map-z-toolbar: 69;
+  --map-z-badge: 62;
+}
+
+/* 351. Map stage vignette overlay */
+.map-command-center [data-testid="map-stage"] {
+  isolation: isolate;
+}
+.map-command-center .map-stage-vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 11;
+  background: radial-gradient(
+    ellipse 92% 88% at 50% 48%,
+    transparent 42%,
+    rgba(15, 23, 42, 0.28) 72%,
+    rgba(15, 23, 42, 0.52) 100%
+  );
+}
+
+/* 352. MapLibre nav control — glass, rounded, edge spacing */
+.map-command-center .maplibregl-ctrl-top-right {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+@media (min-width: 1280px) {
+  .map-command-center .maplibregl-ctrl-top-right {
+    right: calc(min(340px, 92vw) + 1rem);
+  }
+}
+.map-command-center .maplibregl-ctrl-group {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(91, 192, 190, 0.22);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+.map-command-center .maplibregl-ctrl-group button {
+  width: 2rem;
+  height: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.map-command-center .maplibregl-ctrl-group button:last-child {
+  border-bottom: none;
+}
+.map-command-center .maplibregl-ctrl-group button:hover {
+  background-color: rgba(255, 140, 0, 0.14);
+}
+.map-command-center .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.88) sepia(0.08) saturate(1.2);
+}
+
+/* 353. Scale bar — above footer */
+.map-command-center .maplibregl-ctrl-bottom-left {
+  bottom: var(--map-footer-offset);
+  left: 0.75rem;
+  z-index: 12;
+}
+.map-command-center .maplibregl-ctrl-scale {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(91, 192, 190, 0.22);
+  border-radius: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  color: #94a3b8;
+  line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 354–355. Coordinate readout + north compass (position via utility classes) */
+.map-command-center .map-coord-readout {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+}
+.map-command-center .map-coord-readout--copied {
+  border-color: rgba(91, 192, 190, 0.55);
+  box-shadow: 0 0 12px rgba(91, 192, 190, 0.2);
+}
+.map-command-center .map-compass {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s ease;
+}
+.map-command-center .map-compass:hover {
+  box-shadow: 0 0 0 1px rgba(255, 140, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+/* 356. Minimap border glow on hover */
+.map-command-center .map-minimap {
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.map-command-center .map-minimap:hover {
+  border-color: rgba(255, 140, 0, 0.65);
+  box-shadow:
+    0 0 0 1px rgba(255, 140, 0, 0.35),
+    0 0 20px rgba(255, 140, 0, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+/* 357. Heat legend gradient polish + labels */
+.map-command-center .map-heat-legend {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+}
+.map-command-center .map-heat-legend__bar {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(91, 192, 190, 0.15) 0%,
+    #5BC0BE 18%,
+    #fbbf24 52%,
+    #FF8C00 78%,
+    #f43f5e 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.map-command-center .map-heat-legend__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  font-size: 0.5625rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.map-command-center .map-heat-legend__labels span:nth-child(2) {
+  color: #94a3b8;
+}
+.map-command-center .map-heat-legend__labels span:last-child {
+  color: var(--map-accent-orange);
+}
+
+/* 358. Map toolbar — unified glass pill */
+.map-command-center .map-toolbar-pill {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(91, 192, 190, 0.2);
+  border-radius: 999px;
+  padding: var(--map-toolbar-gap);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  gap: 0;
+}
+.map-command-center .map-toolbar-pill__btn {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.375rem 0.5rem;
+  color: #cbd5e1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.map-command-center .map-toolbar-pill__btn:hover:not(:disabled) {
+  background: rgba(255, 140, 0, 0.12);
+  color: #fff;
+}
+.map-command-center .map-toolbar-pill__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.map-command-center .map-toolbar-pill__btn--accent:hover:not(:disabled) {
+  background: rgba(255, 140, 0, 0.16);
+  color: var(--map-accent-orange);
+}
+.map-command-center .map-toolbar-pill__divider {
+  width: 1px;
+  height: 1.25rem;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 0.125rem;
+  flex-shrink: 0;
+}
+.map-command-center .map-toolbar-pill__fit {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  font-size: 0.625rem;
+  gap: 0.25rem;
+}
+
+/* 359. Top HUD responsive wrap */
+.map-command-center .map-top-hud {
+  max-width: min(96vw, 52rem);
+  pointer-events: none;
+}
+.map-command-center .map-top-hud__inner {
+  pointer-events: auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: var(--map-hud-gap);
+  column-gap: var(--map-hud-gap);
+  padding: 0.375rem var(--map-panel-padding);
+}
+@media (max-width: 900px) {
+  .map-command-center .map-top-hud {
+    top: 3.25rem;
+    max-width: 94vw;
+  }
+  .map-command-center .map-top-hud__inner {
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.75rem;
+    gap: 0.5rem;
+  }
+  .map-command-center .map-top-hud__inner .map-top-hud__divider {
+    display: none;
+  }
+}
+
+/* 360. Filter panel border glow when filters active */
+.map-command-center .map-filter-panel {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.map-command-center .map-filter-panel--active {
+  border-color: rgba(255, 140, 0, 0.38) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 140, 0, 0.12),
+    0 0 28px -6px rgba(255, 140, 0, 0.28),
+    0 20px 40px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* 361. Filter panel 4px spacing grid */
+.map-command-center .map-filter-panel .map-filter-header {
+  padding: 1rem 1rem 0.75rem;
+}
+.map-command-center .map-filter-panel .map-filter-body {
+  padding: 0.75rem 1rem 1rem;
+}
+.map-command-center .map-filter-panel .map-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.map-command-center .map-filter-panel .map-filter-chips {
+  gap: 0.25rem;
+}
+
+/* 362. Score slider track — match dual-range */
+.map-command-center .map-score-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(91, 192, 190, 0.25), rgba(255, 140, 0, 0.35));
+  outline: none;
+}
+.map-command-center .map-score-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--map-accent-orange);
+  border: 2px solid #fff;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.map-command-center .map-score-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--map-accent-orange);
+  border: 2px solid #fff;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.map-command-center .map-score-slider::-moz-range-track {
+  height: 0.375rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(91, 192, 190, 0.25), rgba(255, 140, 0, 0.35));
+}
+
+/* 363. Province chip hover micro-animation */
+.map-command-center .filter-chip-province {
+  transition: transform 0.14s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+.map-command-center .filter-chip-province:hover:not(.active) {
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(91, 192, 190, 0.45);
+}
+
+/* 364. Source chip active pulse */
+@keyframes mapSourceChipPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
+  50% { box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.18); }
+}
+.map-command-center .filter-chip-source.active {
+  animation: mapSourceChipPulse 2.8s ease-in-out infinite;
+}
+
+/* 365. Mission ring toggle integrated into layer panel */
+.map-command-center .map-layer-stack {
+  align-items: stretch;
+  min-width: 11.5rem;
+}
+.map-command-center .map-layer-panel-unified {
+  background: var(--map-glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(91, 192, 190, 0.28);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+.map-command-center .map-layer-panel-unified > div:last-child {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  margin: 0;
+}
+.map-command-center .map-mission-ring-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.25);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.map-command-center .map-mission-ring-toggle:hover {
+  background: rgba(91, 192, 190, 0.08);
+  color: #e2e8f0;
+}
+.map-command-center .map-mission-ring-toggle[aria-pressed="true"] {
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.08);
+}
+.map-command-center .map-mission-ring-toggle__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.5;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+.map-command-center .map-mission-ring-toggle[aria-pressed="true"] .map-mission-ring-toggle__dot {
+  opacity: 1;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* 366. Right column scroll shadow indicators */
+.map-command-center .map-right-column {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(var(--bg-dark) 28%, transparent) center top / 100% 2.5rem no-repeat local,
+    linear-gradient(transparent, var(--bg-dark) 72%) center bottom / 100% 2.5rem no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.28), transparent) center top / 100% 0.875rem no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.28), transparent) center bottom / 100% 0.875rem no-repeat scroll;
+}
+
+/* 367. Site details panel header gradient accent */
+.map-command-center [data-testid="site-details-panel"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: linear-gradient(90deg, var(--map-accent-orange), var(--map-accent-teal) 48%, var(--map-accent-orange));
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 368. Mission panel card elevation hierarchy */
+.map-command-center [data-tour="mission-panel"] {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.18),
+    0 16px 32px -8px rgba(0, 0, 0, 0.32);
+}
+.map-command-center [data-tour="mission-panel"] .mission-stat {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.map-command-center [data-tour="mission-panel"] .mission-stat:first-child {
+  box-shadow:
+    0 4px 14px rgba(255, 140, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 140, 0, 0.15);
+}
+.map-command-center [data-tour="mission-panel"] .mission-stat:nth-child(2) {
+  border: 1px solid rgba(91, 192, 190, 0.12);
+}
+.map-command-center [data-tour="mission-panel"] .flex.items-center.justify-between.bg-black\/30 {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.map-command-center [data-tour="mission-panel"] .flex.items-center.justify-between.bg-black\/30:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transform: translateX(2px);
+}
+
+/* 369. Bottom status bar typography polish */
+.map-command-center .map-status-bar {
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+}
+.map-command-center .map-status-bar__inner {
+  font-weight: 500;
+  color: #cbd5e1;
+}
+.map-command-center .map-status-bar__density {
+  font-size: 0.625rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.map-command-center .map-status-bar__action {
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+/* 370. Footer ECCC link hover state */
+.map-command-center .map-footer-bar {
+  font-size: 0.625rem;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+.map-command-center .map-footer-eccc-link {
+  color: var(--map-accent-teal);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+  position: relative;
+}
+.map-command-center .map-footer-eccc-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--map-accent-teal), var(--map-accent-orange));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.map-command-center .map-footer-eccc-link:hover {
+  color: #7dd3d1;
+  text-shadow: 0 0 12px rgba(91, 192, 190, 0.35);
+}
+.map-command-center .map-footer-eccc-link:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-command-center .filter-chip-source.active {
+    animation: none;
+  }
+  .map-command-center .map-minimap:hover {
+    transform: none;
+  }
 }

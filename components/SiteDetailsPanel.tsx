@@ -24,6 +24,7 @@ import { motion } from 'framer-motion'
 import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
 import BankPackPreview from '@/components/BankPackPreview'
 import CopyLinkButton from '@/components/CopyLinkButton'
+import { useLocale } from '@/lib/useLocale'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -67,6 +68,7 @@ export default function SiteDetailsPanel({
   compact?: boolean
   onExpand?: () => void
 }) {
+  const { t } = useLocale()
   const p = site?.properties || {}
   const siteEmission = p.emission_rate_kg_day || 0
 
@@ -283,18 +285,20 @@ export default function SiteDetailsPanel({
       className={`w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 shadow-xl max-w-md relative ${compact ? 'rounded-t-2xl p-4' : 'rounded-xl p-6 max-h-full overflow-y-auto'}`}
       data-testid={compact ? 'mobile-site-peek' : 'site-details-panel'}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h2 className={`font-bold text-white ${compact ? 'text-base' : 'text-xl'}`}>{p.name || 'Unknown'}</h2>
-          <p className="text-sm text-gray-400">
+      <div className={`flex items-start justify-between ${compact ? 'mb-3 gap-2' : 'mb-4'}`}>
+        <div className="min-w-0 flex-1">
+          <h2 className={`font-bold text-white truncate ${compact ? 'text-[15px] leading-tight' : 'text-xl'}`}>
+            {p.name || 'Unknown'}
+          </h2>
+          <p className={`text-gray-400 truncate ${compact ? 'text-[11px] mt-0.5' : 'text-sm'}`}>
             {p.city || 'Unknown'},{' '}
             {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
           </p>
           {typeof site.strandedScore === 'number' && (
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span>
-              <span className="text-[10px] uppercase tracking-wider text-gray-400">{scoreTier(site.strandedScore)}</span>
-              {site.scoreBadge && <span className="text-[10px] text-[#5BC0BE]">{site.scoreBadge}</span>}
+            <div className={`flex items-center gap-1.5 flex-wrap ${compact ? 'mt-1.5' : 'mt-2'}`}>
+              <span className={`stranded-score ${scoreTierClass(site.strandedScore)} ${compact ? 'text-sm' : ''}`}>{site.strandedScore}</span>
+              <span className={`uppercase tracking-wider text-gray-400 ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{scoreTier(site.strandedScore)}</span>
+              {site.scoreBadge && <span className={`text-[#5BC0BE] ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{site.scoreBadge}</span>}
               {!compact && scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
             </div>
           )}
@@ -314,24 +318,24 @@ export default function SiteDetailsPanel({
       </div>
 
       {compact && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pt-0.5">
           {onExpand && (
             <button
               type="button"
               onClick={onExpand}
-              className="flex-1 py-2 text-xs rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+              className="flex-1 py-2 text-[11px] font-medium rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
               data-testid="mobile-site-expand"
             >
-              View full details ↑
+              {t('sitePeekExpand')}
             </button>
           )}
           {onAddToMission && (
             <button
               type="button"
               onClick={() => onAddToMission(site)}
-              className="flex-1 py-2 text-xs font-semibold rounded-xl bg-[#FF8C00] text-black"
+              className="flex-1 py-2 text-[11px] font-semibold rounded-xl bg-[#FF8C00] text-black hover:bg-orange-400 transition"
             >
-              + Mission
+              {t('sitePeekMission')}
             </button>
           )}
         </div>

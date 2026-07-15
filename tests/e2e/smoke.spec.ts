@@ -110,6 +110,40 @@ test('map share URL includes filter query params', async ({ page }) => {
   await expect(page).toHaveURL(/sources=landfill_waste/)
 })
 
+test('map canvas is visible after load', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.goto('/map')
+  await expect(page.getByTestId('map-stage')).toBeVisible({ timeout: 45000 })
+  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible({ timeout: 45000 })
+})
+
+test('map loading overlay clears when map is ready', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.goto('/map')
+  await expect(page.getByTestId('map-loading-overlay')).toBeHidden({ timeout: 45000 })
+  await expect(page.locator('.maplibregl-canvas').first()).toBeVisible()
+})
+
+test('ECCC freshness badge does not overlap main nav', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/map')
+  await expect(page.getByTestId('eccc-freshness-badge')).toBeVisible({ timeout: 45000 })
+  const overlap = await page.evaluate(() => {
+    const nav = document.querySelector('nav, header')
+    const badge = document.querySelector('[data-testid="eccc-freshness-badge"]')
+    if (!nav || !badge) return { ok: true, reason: 'elements-missing' }
+    const n = nav.getBoundingClientRect()
+    const b = badge.getBoundingClientRect()
+    const intersects = !(b.right < n.left || b.left > n.right || b.bottom < n.top || b.top > n.bottom)
+    return { ok: !intersects, navBottom: n.bottom, badgeTop: b.top }
+  })
+  expect(overlap.ok).toBe(true)
+})
+
 test('recent sites in command palette', async ({ page }) => {
   test.setTimeout(60000)
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))

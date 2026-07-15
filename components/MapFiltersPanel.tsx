@@ -143,7 +143,7 @@ export default function MapFiltersPanel({
         </div>
         <div className={`flex flex-wrap gap-1.5 pr-1 transition-all duration-200 ${showAllProvinces ? 'max-h-[220px]' : 'max-h-[78px]'} overflow-auto`}>
           {provinces.map(p => (
-            <button key={p} type="button" onClick={() => onToggleProvince(p)} className={`filter-chip text-xs px-3 py-px rounded-full border ${selectedProvinces.has(p) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
+            <button key={p} type="button" onClick={() => onToggleProvince(p)} className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${selectedProvinces.has(p) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
               {p}
             </button>
           ))}
@@ -157,7 +157,7 @@ export default function MapFiltersPanel({
         <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">{t('mapSourceType')}</div>
         <div className="flex flex-wrap gap-1.5">
           {sourceTypes.map(s => (
-            <button key={s} type="button" onClick={() => onToggleSource(s)} className={`filter-chip text-xs px-3 py-px rounded-full border ${selectedSources.has(s) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
+            <button key={s} type="button" onClick={() => onToggleSource(s)} className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${selectedSources.has(s) ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}>
               {s}
             </button>
           ))}
@@ -186,7 +186,7 @@ export default function MapFiltersPanel({
         )}
         <div className="flex gap-1 mb-2">
           <input value={presetName} onChange={e => onPresetNameChange(e.target.value)} placeholder={t('mapPresetName')} className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
-          <button type="button" onClick={onSavePreset} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00]">{t('mapSave')}</button>
+          <button type="button" onClick={onSavePreset} disabled={!presetName.trim()} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
           <button type="button" onClick={onSharePreset} className="text-[10px] px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
         </div>
         <div className="flex flex-wrap gap-1">

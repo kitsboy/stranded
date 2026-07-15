@@ -28,6 +28,12 @@ type OnboardingTourProps = {
   layout?: 'stacked' | 'floating'
 }
 
+const STEPS = [
+  { icon: Filter, color: 'text-[#5BC0BE]', key: 'onboardingFilters' as const },
+  { icon: MapPin, color: 'text-[#FF8C00]', key: 'onboardingPins' as const },
+  { icon: Target, color: 'text-emerald-400', key: 'onboardingMission' as const },
+]
+
 export default function OnboardingTour({ layout = 'floating' }: OnboardingTourProps) {
   const { t } = useLocale()
   const [visible, setVisible] = useState(false)
@@ -55,30 +61,45 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
       role="dialog"
       aria-labelledby="onboarding-tour-title"
     >
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-widest text-[#FF8C00] mb-1">{t('onboardingBadge')}</div>
-          <h3 id="onboarding-tour-title" className="font-semibold text-white">{t('onboardingTitle')}</h3>
+          <h3 id="onboarding-tour-title" className="font-semibold text-white leading-snug">{t('onboardingTitle')}</h3>
         </div>
         <button
           type="button"
           data-testid="onboarding-dismiss"
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-white p-1 rounded-lg"
+          className="text-gray-400 hover:text-white p-1 rounded-lg shrink-0"
           aria-label={t('onboardingDismiss')}
         >
           <X size={18} />
         </button>
       </div>
-      <ul className="space-y-2 text-gray-300 text-xs">
-        <li className="flex gap-2"><Filter size={14} className="text-[#5BC0BE] shrink-0 mt-0.5" />{t('onboardingFilters')}</li>
-        <li className="flex gap-2"><MapPin size={14} className="text-[#FF8C00] shrink-0 mt-0.5" />{t('onboardingPins')}</li>
-        <li className="flex gap-2"><Target size={14} className="text-emerald-400 shrink-0 mt-0.5" />{t('onboardingMission')}</li>
+
+      <div className="flex items-center justify-between gap-2 mb-4 px-1" aria-hidden>
+        {STEPS.map(({ icon: Icon, color }, i) => (
+          <div key={i} className="flex flex-col items-center gap-1 flex-1">
+            <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 ${color}`}>
+              <Icon size={16} />
+            </div>
+            <span className="text-[9px] text-gray-500 uppercase tracking-wider">{i + 1}</span>
+          </div>
+        ))}
+      </div>
+
+      <ul className="space-y-2.5 text-gray-300 text-xs">
+        {STEPS.map(({ icon: Icon, color, key }) => (
+          <li key={key} className="flex gap-2.5 items-start">
+            <Icon size={14} className={`${color} shrink-0 mt-0.5`} aria-hidden />
+            <span className="leading-relaxed">{t(key)}</span>
+          </li>
+        ))}
       </ul>
       <button
         type="button"
         onClick={handleDismiss}
-        className="mt-4 w-full py-2 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold text-xs hover:bg-[#FF8C00]/90"
+        className="mt-4 w-full py-2.5 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold text-xs hover:bg-[#FF8C00]/90 transition"
       >
         {t('onboardingGotIt')}
       </button>

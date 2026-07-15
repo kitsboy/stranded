@@ -4,6 +4,7 @@ import { BarChart3, Droplets, MapPin, Target } from 'lucide-react'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
 import type { MapFilterStats } from '@/lib/map-stats'
+import { formatCompactNumber } from '@/lib/format-number'
 
 type Props = {
   stats: MapFilterStats
@@ -25,10 +26,7 @@ export default function MapStatsBar({ stats, className = '' }: Props) {
     )
   }
 
-  const emissionLabel =
-    stats.totalEmissionKgDay >= 1000
-      ? `${(stats.totalEmissionKgDay / 1000).toFixed(1)}k`
-      : stats.totalEmissionKgDay.toLocaleString()
+  const emissionLabel = formatCompactNumber(stats.totalEmissionKgDay)
 
   return (
     <div

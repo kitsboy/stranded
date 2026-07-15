@@ -42,6 +42,10 @@ interface LayerControlsProps {
   onSiteLabelsChange?: (v: boolean) => void
   performanceMode?: boolean
   onPerformanceModeChange?: (v: boolean) => void
+  /** Tighter spacing for map corner overlay */
+  compact?: boolean
+  onCopyViewport?: () => void
+  copyViewportLabel?: string
 }
 
 export default function LayerControls({
@@ -58,6 +62,9 @@ export default function LayerControls({
   onSiteLabelsChange,
   performanceMode = false,
   onPerformanceModeChange,
+  compact = false,
+  onCopyViewport,
+  copyViewportLabel = 'Copy viewport JSON',
 }: LayerControlsProps) {
   const { t } = useLocale()
 
@@ -68,14 +75,19 @@ export default function LayerControls({
   ]
 
   return (
-    <div className="bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl p-4 shadow-lg text-sm no-print">
-      <h3 className="text-sm font-bold text-[#FF8C00] mb-3 flex items-center gap-2">
-        {t('mapLayers')} <span className="text-[10px] text-gray-500">{t('mapLayersNote')}</span>
+    <div
+      className={`bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl shadow-lg no-print ${
+        compact ? 'p-2.5 text-xs max-w-[220px]' : 'p-4 text-sm'
+      }`}
+      data-compact={compact || undefined}
+    >
+      <h3 className={`font-bold text-[#FF8C00] flex items-center gap-2 ${compact ? 'text-xs mb-2' : 'text-sm mb-3'}`}>
+        {t('mapLayers')} <span className="text-[10px] text-gray-500 font-normal">{t('mapLayersNote')}</span>
       </h3>
 
       {onMapStyleChange && (
-        <div className="mb-3">
-          <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">{t('mapStyleSwitcher')}</div>
+        <div className={compact ? 'mb-2' : 'mb-3'}>
+          <div className={`text-[10px] uppercase tracking-wider text-gray-400 ${compact ? 'mb-1' : 'mb-1.5'}`}>{t('mapStyleSwitcher')}</div>
           <div className="flex flex-wrap gap-1">
             {styleButtons.map(btn => (
               <button
@@ -96,7 +108,7 @@ export default function LayerControls({
       )}
 
       {onApplyPreset && (
-        <div className="flex flex-wrap gap-1 mb-3">
+        <div className={`flex flex-wrap gap-1 ${compact ? 'mb-2' : 'mb-3'}`}>
           {(Object.keys(LAYER_PRESETS) as LayerPresetId[]).map(id => (
             <button
               key={id}
@@ -110,45 +122,45 @@ export default function LayerControls({
         </div>
       )}
 
-      <div className="space-y-2">
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={layers.sites} onChange={() => onToggle('sites')} className="w-4 h-4 accent-[#FF8C00]" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapLayerMethaneSites')}</span>
+      <div className={compact ? 'space-y-1' : 'space-y-2'}>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={layers.sites} onChange={() => onToggle('sites')} className={`accent-[#FF8C00] ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapLayerMethaneSites')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={layers.grid} onChange={() => onToggle('grid')} className="w-4 h-4 accent-[#5BC0BE]" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapLayerPowerGrid')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={layers.grid} onChange={() => onToggle('grid')} className={`accent-[#5BC0BE] ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapLayerPowerGrid')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={layers.internet} onChange={() => onToggle('internet')} className="w-4 h-4 accent-blue-400" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapLayerInternet')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={layers.internet} onChange={() => onToggle('internet')} className={`accent-blue-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapLayerInternet')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={!!layers.satellite} onChange={() => onToggle('satellite')} className="w-4 h-4 accent-purple-400" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapSatellite')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={!!layers.satellite} onChange={() => onToggle('satellite')} className={`accent-purple-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapSatellite')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={!!layers.terrain} onChange={() => onToggle('terrain')} className="w-4 h-4 accent-emerald-400" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapTerrain')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={!!layers.terrain} onChange={() => onToggle('terrain')} className={`accent-emerald-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapTerrain')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={!!layers.heatmap} onChange={() => onToggle('heatmap')} className="w-4 h-4 accent-rose-400" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapLayerHeatmap')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={!!layers.heatmap} onChange={() => onToggle('heatmap')} className={`accent-rose-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapLayerHeatmap')}</span>
         </label>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <input type="checkbox" checked={!!layers.choropleth} onChange={() => onToggle('choropleth')} className="w-4 h-4 accent-amber-400" />
-          <span className="text-sm text-gray-300 group-hover:text-white">{t('mapLayerChoropleth')}</span>
+        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+          <input type="checkbox" checked={!!layers.choropleth} onChange={() => onToggle('choropleth')} className={`accent-amber-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapLayerChoropleth')}</span>
         </label>
         {onSiteLabelsChange && (
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" checked={showSiteLabels} onChange={() => onSiteLabelsChange(!showSiteLabels)} className="w-4 h-4 accent-cyan-400" />
-            <span className="text-sm text-gray-300 group-hover:text-white">{t('mapSiteLabels')}</span>
+          <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+            <input type="checkbox" checked={showSiteLabels} onChange={() => onSiteLabelsChange(!showSiteLabels)} className={`accent-cyan-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+            <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapSiteLabels')}</span>
           </label>
         )}
         {onPerformanceModeChange && (
-          <label className="flex items-center gap-3 cursor-pointer group">
-            <input type="checkbox" checked={performanceMode} onChange={() => onPerformanceModeChange(!performanceMode)} className="w-4 h-4 accent-slate-400" />
-            <span className="text-sm text-gray-300 group-hover:text-white">{t('mapPerformanceMode')}</span>
+          <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
+            <input type="checkbox" checked={performanceMode} onChange={() => onPerformanceModeChange(!performanceMode)} className={`accent-slate-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+            <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-[11px] leading-tight' : 'text-sm'}`}>{t('mapPerformanceMode')}</span>
           </label>
         )}
       </div>
@@ -166,7 +178,23 @@ export default function LayerControls({
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-[#5BC0BE]/20 text-[10px] text-gray-500">{t('mapLayerNote2')}</div>
+      <div className={`border-t border-[#5BC0BE]/20 text-[10px] text-gray-500 ${compact ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>{t('mapLayerNote2')}</div>
+
+      {onCopyViewport && (
+        <details className="mt-2 group">
+          <summary className="text-[9px] uppercase tracking-wider text-gray-600 cursor-pointer hover:text-gray-400 list-none [&::-webkit-details-marker]:hidden">
+            Dev
+          </summary>
+          <button
+            type="button"
+            onClick={onCopyViewport}
+            className="mt-2 w-full text-[10px] px-2 py-1.5 rounded-lg border border-white/10 text-gray-500 hover:text-[#5BC0BE] hover:border-[#5BC0BE]/30 transition"
+            data-testid="copy-viewport-json"
+          >
+            {copyViewportLabel}
+          </button>
+        </details>
+      )}
     </div>
   )
 }

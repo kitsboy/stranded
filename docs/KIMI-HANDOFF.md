@@ -1,6 +1,32 @@
 # Kimi Handoff — Stranded
 
-## Latest Session Summary (from 2026-07-15 — v2.5.0 round 6 elite release)
+## Latest Session Summary (from 2026-07-15 — v2.6.1 round 8 polish + QA pack)
+
+**Chat topic:** Parallel agent merges for upgrades **351–410** → polish/QA batch **411–425**.
+
+**Finished this session:**
+- **Map command center CSS** — upgrades 351–370 (`--map-hud-gap`, toolbar pill, filter glow, layer stack)
+- **Extracted components** — `MapToolbar`, `MapHud`, `EcccFreshnessBadge`, `MapEmptyState`, `FilterPanelHeader`
+- **`lib/map-csp.ts`** + `lib/format-number.ts` + `map-filters` validation helpers
+- **i18n 365 keys** × EN/FR/DE/ES (ECCC badge, empty state, compare CTA, print line)
+- **PWA** `stranded-v9` · province print ECCC header · map print header ECCC line
+- E2E **+3** (map canvas visible, loading overlay clears, ECCC badge vs nav overlap)
+- `test:helpers` — format-number, map-csp, validatePresetName, shouldShowFilterToast
+- `docs/UPGRADES-351-425.md` (75/75), CHANGELOG [2.6.1], TS merge fixes
+
+**Still to do:**
+- Kimi: sync when Cam says go — ingest v2.6.1 + UPGRADES-351-425
+- GitHub release **v2.6.1** after push + deploy:check (no SHA yet this session)
+
+**Git State:**
+- SHA: *(pending — session handoff before push)*
+- Version: **2.6.0** in package.json (CHANGELOG drafts 2.6.1; no package bump per Cam)
+- Branch: `main`
+- Pipeline target: `npx tsc --noEmit` ✅ · `npm run test:helpers` ✅ · e2e **19** expected
+
+---
+
+## Session Summary (from 2026-07-15 — v2.5.0 round 6 elite release)
 
 **Chat topic:** Round 6 upgrades 276–300 → v2.5.0 ship.
 

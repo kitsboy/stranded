@@ -46,6 +46,13 @@ const {
   boundsCenter,
   isValidBounds,
 } = await import('../lib/map-bounds.ts')
+const { formatCompactNumber } = await import('../lib/format-number.ts')
+const {
+  MAP_CSP_IMG_DOMAINS,
+  MAP_CSP_CONNECT_DOMAINS,
+  MAP_TILE_URL_PATTERNS,
+  mapTileUrlsCoveredByCsp,
+} = await import('../lib/map-csp.ts')
 
 
 // --- score explain (shared cjs is production path) ---
@@ -262,6 +269,29 @@ const share = buildMapShareUrl({ minEmission: 100, sources: ['landfill_waste'] }
 assert.equal(share, 'https://stranded.test/map?minEmission=100&sources=landfill_waste')
 const km = haversineKm(53.5, -113.5, 51.0, -114.0)
 assert.ok(km > 200 && km < 400)
+
+// format-number (#371)
+assert.equal(formatCompactNumber(0), '0')
+assert.equal(formatCompactNumber(450), '450')
+assert.equal(formatCompactNumber(12500), '12.5K')
+assert.equal(formatCompactNumber(2400000), '2.4M')
+assert.equal(formatCompactNumber(1500000000), '1.5B')
+
+// map-csp (#414) — tile URLs must be covered by CSP allowlist documented in lib/map-csp.ts
+assert.ok(MAP_CSP_IMG_DOMAINS.length >= 6)
+assert.ok(MAP_CSP_CONNECT_DOMAINS.includes('https://demotiles.maplibre.org'))
+assert.ok(mapTileUrlsCoveredByCsp(MAP_TILE_URL_PATTERNS))
+const headers = fs.readFileSync(path.join(__dirname, '..', 'public', '_headers'), 'utf8')
+for (const domain of ['tile.openstreetmap.org', 'basemaps.cartocdn.com', 'demotiles.maplibre.org']) {
+  assert.ok(headers.includes(domain), `_headers must allow ${domain}`)
+}
+
+// map-filters (#388–389)
+const { validatePresetName, shouldShowFilterToast } = await import('../lib/map-filters.ts')
+assert.deepEqual(validatePresetName('  elite AB  '), { ok: true, trimmed: 'elite AB' })
+assert.deepEqual(validatePresetName('   '), { ok: false })
+assert.equal(shouldShowFilterToast('dedupe-test'), true)
+assert.equal(shouldShowFilterToast('dedupe-test'), false)
 
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Navigation, Share2, RefreshCw, X } from 'lucide-react'
+import { useLocale } from '@/lib/useLocale'
 
 export type QuickAction = {
   id: string
@@ -24,10 +25,11 @@ export default function QuickActions({
   className = '',
 }: QuickActionsProps) {
   const [open, setOpen] = useState(false)
+  const { t } = useLocale()
   const posClass = position === 'bottom-right' ? 'right-4 md:right-6' : 'left-4 md:left-6'
 
   return (
-    <div className={`fixed bottom-20 ${posClass} z-[68] flex flex-col items-end gap-2 ${className}`}>
+    <div className={`fixed bottom-20 ${posClass} z-[78] flex flex-col items-end gap-2 ${className}`} data-testid="quick-actions-fab">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -63,7 +65,7 @@ export default function QuickActions({
             ? 'bg-white/10 border-white/30 text-white'
             : 'bg-gradient-to-br from-[#FF8C00] to-[#f59e0b] border-[#FF8C00]/50 text-black'
         }`}
-        aria-label={open ? 'Close quick actions' : 'Open quick actions'}
+        aria-label={open ? t('quickActionsClose') : t('quickActionsOpen')}
         aria-expanded={open}
       >
         {open ? <X size={20} /> : <Plus size={22} className="rotate-0" />}

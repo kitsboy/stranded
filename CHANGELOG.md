@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.6.1] — 2026-07-15
+
+### Added (upgrades 351–425, map polish + QA pack)
+- **351–370** — Map command center CSS polish: vignette, glass nav/scale, toolbar pill, HUD wrap, filter glow, chip animations, layer stack, status/footer typography
+- **371–390** — `MapToolbar`, `MapHud`, `EcccFreshnessBadge`, `MapEmptyState`, `FilterPanelHeader`; `format-number`; split loading overlays; compare CTA; `lib/map-csp.ts`
+- **391–410** — **365 i18n keys** × EN/FR/DE/ES; `printEcccLine`; PWA `stranded-v9`; aria/testid audits; TS merge fixes
+- **411–425** — E2E map canvas + overlay clear + ECCC badge layout; `test:helpers` CSP/format-number cases; `UPGRADES-351-425.md`; handoff pack
+
+### Fixed
+- Map page `map-stage` wrapper closing tag (agent merge TS error)
+- Duplicate component imports on map page
+
 ## [2.6.0] — 2026-07-15
 
 ### Fixed (map layout)

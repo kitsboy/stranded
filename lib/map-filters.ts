@@ -1,4 +1,23 @@
-/** Map filter helpers — active count, chips, preset matching (#301–315) */
+/** Map filter helpers — active count, chips, preset matching (#301–315, #388–389) */
+
+const TOAST_DEDUPE_MS = 3200
+const recentFilterToasts = new Map<string, number>()
+
+/** Returns true when a toast with this key may be shown (dedupes rapid repeats). */
+export function shouldShowFilterToast(key: string, windowMs = TOAST_DEDUPE_MS): boolean {
+  const now = Date.now()
+  const last = recentFilterToasts.get(key) ?? 0
+  if (now - last < windowMs) return false
+  recentFilterToasts.set(key, now)
+  return true
+}
+
+/** Non-empty preset name validation (#388). */
+export function validatePresetName(name: string): { ok: true; trimmed: string } | { ok: false } {
+  const trimmed = name.trim()
+  if (!trimmed) return { ok: false }
+  return { ok: true, trimmed }
+}
 
 export const DEFAULT_MIN_EMISSION = 0
 export const DEFAULT_MAX_EMISSION = 100_000

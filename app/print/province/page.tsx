@@ -4,9 +4,11 @@ import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import { resolveProvinceName, provinceCode } from '@/lib/provinces'
+import { useLocale } from '@/lib/useLocale'
 
 
 function ProvincePrintContent() {
+  const { t } = useLocale()
   const searchParams = useSearchParams()
   const provinceParam = searchParams.get('province') || searchParams.get('name') || ''
   const [sites, setSites] = useState<EnrichedSite[]>([])
@@ -57,11 +59,14 @@ function ProvincePrintContent() {
         }
       `}</style>
 
-      <header className="border-b-2 border-[#FF8C00] pb-4 mb-6">
+      <header className="border-b-2 border-[#FF8C00] pb-4 mb-6" data-testid="print-province-header">
         <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500">Stranded Value · Executive One-Pager</div>
         <h1 className="text-3xl font-bold mt-1">{provinceName}</h1>
         <div className="text-sm text-gray-600 mt-1">
           {provinceCode(provinceName)} · {provinceSites.length.toLocaleString()} sites · avg score {avgScore}
+        </div>
+        <div className="text-[10px] text-gray-500 mt-2" data-testid="print-eccc-line">
+          {t('printEcccLine')}
         </div>
       </header>
 
