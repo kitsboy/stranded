@@ -970,6 +970,8 @@ function StrandedCommandCenter() {
     return () => clearInterval(id)
   }, [allSites])
 
+  const showRightColumn = !!(selectedSite || portfolio.length > 0 || compareSites.length >= 2)
+
   return (
     <div className="relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container" role="region" aria-label="Stranded command center map">
       <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
@@ -1470,8 +1472,9 @@ function StrandedCommandCenter() {
         )}
       </AnimatePresence>
 
-      {/* Right side — SiteDetails + Mission (desktop) */}
-      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)]">
+      {/* Right side — SiteDetails + Mission (desktop); hidden when empty to avoid scroll-shadow bar */}
+      {showRightColumn && (
+      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)]" data-testid="map-right-column">
         <AnimatePresence mode="wait">
           {selectedSite && (
             <SiteDetailsPanel
@@ -1536,8 +1539,9 @@ function StrandedCommandCenter() {
             {compareSites.some(s => s.id === selectedSite.id) ? t('mapRemoveFromCompare') : t('mapAddToCompare')}
           </button>
         )}
-      {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       </div>
+      )}
+      {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
       {!isXlViewport && <OnboardingTour layout="floating" />}
 

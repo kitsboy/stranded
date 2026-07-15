@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.6.4] — 2026-07-15
+
+### Fixed
+- **Empty black bar on map** — hide desktop right column when no site/mission/compare content; remove solid `--bg-dark` scroll-shadow bands that painted a ghost horizontal strip beside zoom controls
+
 ## [2.6.3] — 2026-07-15
 
 ### Fixed

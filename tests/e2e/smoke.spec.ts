@@ -135,6 +135,33 @@ test('map loading overlay clears when map is ready', async ({ page }) => {
   await expect(page.locator('.maplibregl-canvas').first()).toBeVisible()
 })
 
+test('empty right column does not render ghost bar over map', async ({ page }) => {
+  test.setTimeout(60000)
+  await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+  await page.setViewportSize({ width: 1400, height: 900 })
+  await page.goto('/map')
+  await expect(page.getByTestId('map-loading-overlay')).toBeHidden({ timeout: 45000 })
+  await expect(page.getByTestId('map-right-column')).toHaveCount(0)
+  const ghostBar = await page.evaluate(() => {
+    const zoom = document.querySelector('[data-testid="map-stage"] .maplibregl-ctrl-top-right')
+    if (!zoom) return { ok: true }
+    const z = zoom.getBoundingClientRect()
+    const nodes = document.querySelectorAll('.map-command-center *')
+    for (const el of nodes) {
+      if (el === zoom || zoom.contains(el) || el.contains(zoom)) continue
+      const r = el.getBoundingClientRect()
+      if (r.width < 280 || r.height < 6 || r.height > 48) continue
+      const cs = getComputedStyle(el)
+      const bg = cs.backgroundColor
+      const isDark = /rgba?\(\s*(\d+)/.test(bg) && Number(RegExp.$1) < 80
+      const overlapsZoom = !(r.right < z.left || r.left > z.right || r.bottom < z.top || r.top > z.bottom)
+      if (overlapsZoom && isDark && !el.textContent?.trim()) return { ok: false, class: el.className }
+    }
+    return { ok: true }
+  })
+  expect(ghostBar.ok).toBe(true)
+})
+
 test('ECCC freshness badge does not overlap map zoom controls', async ({ page }) => {
   test.setTimeout(60000)
   await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))

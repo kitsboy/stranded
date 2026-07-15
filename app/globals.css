@@ -1194,7 +1194,7 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
   box-shadow: 0 0 8px currentColor;
 }
 
-/* 366. Right column scroll shadow indicators */
+/* 366. Right column scroll — soft edge fade only (no solid --bg-dark bands) */
 .map-command-center .map-right-column {
   max-height: calc(100vh - 5.5rem);
   padding-bottom: 1rem;
@@ -1202,10 +1202,8 @@ html.theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
   overflow-x: hidden;
   scrollbar-gutter: stable;
   background:
-    linear-gradient(var(--bg-dark) 28%, transparent) center top / 100% 2.5rem no-repeat local,
-    linear-gradient(transparent, var(--bg-dark) 72%) center bottom / 100% 2.5rem no-repeat local,
-    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.28), transparent) center top / 100% 0.875rem no-repeat scroll,
-    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.28), transparent) center bottom / 100% 0.875rem no-repeat scroll;
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.22), transparent) center top / 100% 0.875rem no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.22), transparent) center bottom / 100% 0.875rem no-repeat scroll;
 }
 
 /* 367. Site details panel header gradient accent */
