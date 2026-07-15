@@ -17,7 +17,8 @@ export default function Footer() {
   const [statsDate, setStatsDate] = useState('')
   const [version, setVersion] = useState('2.4')
   const btcAddress = 'bc1qhm5ndfjhqxdk3cx0pngyps4f5nnwdckulmge6c8keyf2pk0neqtshjn8ad'
-  const hideMobileCtas = pathname === '/map'
+  const isMapPage = pathname === '/map' || pathname === '/map/'
+  const hideMobileCtas = isMapPage
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -37,6 +38,8 @@ export default function Footer() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [showQR])
+
+  if (isMapPage) return null
 
   return (
     <footer

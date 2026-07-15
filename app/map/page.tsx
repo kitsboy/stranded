@@ -123,7 +123,7 @@ function StrandedCommandCenter() {
   const [filterPresetsRevision, setFilterPresetsRevision] = useState(0)
   const [compareSites, setCompareSites] = useState<EnrichedSite[]>([])
   const [showCompare, setShowCompare] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
+
   const [loadProgress, setLoadProgress] = useState(0)
   const [radiusFilter, setRadiusFilter] = useState<{ lat: number; lng: number; radiusKm: number } | null>(null)
   const [centerTarget, setCenterTarget] = useState<{ lat: number; lng: number; zoom?: number } | null>(null)
@@ -285,7 +285,7 @@ function StrandedCommandCenter() {
   useEffect(() => {
     const id = requestAnimationFrame(() => mapApiRef.current?.resize())
     return () => cancelAnimationFrame(id)
-  }, [filtersCollapsed, fullscreen, mapResizeNonce])
+  }, [filtersCollapsed, mapResizeNonce])
 
   useEffect(() => {
     const base = t('mapSeoTitle')
@@ -971,7 +971,7 @@ function StrandedCommandCenter() {
   }, [allSites])
 
   return (
-    <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center ${fullscreen ? 'fixed inset-0 z-[200] h-screen' : 'map-container'}`} role="region" aria-label="Stranded command center map">
+    <div className="relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container" role="region" aria-label="Stranded command center map">
       <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
         Stranded Command Center — Map View · ECCC GHGRP verified data
       </div>
@@ -1045,9 +1045,9 @@ function StrandedCommandCenter() {
         </div>
       )}
 
-      <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-4 items-stretch pointer-events-none [&>*]:pointer-events-auto">
+      <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-3 max-h-[calc(100dvh-5.5rem)] pb-3 items-stretch pointer-events-none [&>*]:pointer-events-auto">
       <div
-        className={`map-filter-panel glass rounded-3xl shadow-2xl border border-white/10 flex flex-col min-h-0 max-h-[min(58vh,calc(100vh-20rem))] overflow-hidden shrink-0${activeFilterCount > 0 ? ' map-filter-panel--active' : ''}`}
+        className={`map-filter-panel glass rounded-3xl shadow-2xl border border-white/10 flex flex-col min-h-0 max-h-[min(50vh,calc(100dvh-24rem))] overflow-hidden shrink-0${activeFilterCount > 0 ? ' map-filter-panel--active' : ''}`}
         data-tour="map-filters"
       >
         <div className="map-filter-scroll flex-1 min-h-0 overflow-y-auto">
@@ -1512,9 +1512,6 @@ function StrandedCommandCenter() {
         {selectedSite && (
           <button onClick={watchSite} className="text-[10px] self-end text-gray-400 hover:text-[#5BC0BE]">Watch site (local alert)</button>
         )}
-        <button onClick={() => setFullscreen(f => !f)} className="text-[10px] self-end px-2 py-1 rounded-full border border-white/15 text-gray-400 hover:text-white">
-          {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-        </button>
         {compareSites.length >= 2 && (
           <button
             type="button"

@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.3] — 2026-07-15
+
+### Fixed
+- Quick Tour card nudged up (stacked column padding + mobile safe-area bottom)
+- Removed fullscreen toggle from map right column
+- Global site footer hidden on `/map` — only map ECCC footer strip remains
+- Mobile map: `100dvh` height, no main padding bleed, status/layer/FAB constrained to viewport
+
 ## [2.6.2] — 2026-07-15
 
 ### Fixed

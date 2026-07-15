@@ -51,8 +51,8 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
 
   const positionClass =
     layout === 'stacked'
-      ? 'relative w-full shrink-0'
-      : 'absolute bottom-24 left-4 z-[75] w-[min(320px,90vw)] xl:hidden'
+      ? 'relative w-full shrink-0 mb-1'
+      : 'absolute left-3 right-3 z-[75] w-auto max-w-[min(320px,calc(100vw-1.5rem))] xl:hidden bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))]'
 
   return (
     <div
