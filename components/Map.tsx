@@ -24,6 +24,7 @@ interface MapProps {
   radiusOverlay?: { lat: number; lng: number; radiusKm: number } | null
 }
 
+/** MapLibre native cluster source + layer ids (upgrade 166-175) */
 const SITES_SOURCE = 'stranded-sites'
 const CLUSTER_LAYER = 'stranded-clusters'
 const CLUSTER_COUNT_LAYER = 'stranded-cluster-count'
