@@ -111,7 +111,7 @@ export default function FundingPage() {
   )
   const totalGrant = eligible.reduce((sum, p) => sum + Math.min(capex * p.match, p.max), 0)
 
-  const currentQuiz = QUIZ_STEPS[quizStep]
+  const currentQuiz = QUIZ_STEPS[quizStep] ?? QUIZ_STEPS[0]
 
   const pickQuizAnswer = (value: string) => {
     const key = currentQuiz.key

@@ -455,27 +455,31 @@ export default function Map({
       totals[p] = (totals[p] || 0) + s.emission
     })
     const geojson = emissionChoroplethGeojson(totals)
-    if (map.getSource(srcId)) {
-      (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
-    } else {
-      map.addSource(srcId, { type: 'geojson', data: geojson })
-      map.addLayer({
-        id: layerId,
-        type: 'fill',
-        source: srcId,
-        paint: {
-          'fill-color': [
-            'interpolate', ['linear'], ['get', 'intensity'],
-            0, 'rgba(91,192,190,0.12)',
-            0.35, 'rgba(251,191,36,0.28)',
-            1, 'rgba(255,140,0,0.48)',
-          ],
-          'fill-outline-color': 'rgba(255,255,255,0.25)',
-        },
-      })
-    }
-    if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, 'visibility', showChoropleth ? 'visible' : 'none')
+    try {
+      if (map.getSource(srcId)) {
+        (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
+      } else {
+        map.addSource(srcId, { type: 'geojson', data: geojson })
+        map.addLayer({
+          id: layerId,
+          type: 'fill',
+          source: srcId,
+          paint: {
+            'fill-color': [
+              'interpolate', ['linear'], ['get', 'intensity'],
+              0, 'rgba(91,192,190,0.12)',
+              0.35, 'rgba(251,191,36,0.28)',
+              1, 'rgba(255,140,0,0.48)',
+            ],
+            'fill-outline-color': 'rgba(255,255,255,0.25)',
+          },
+        })
+      }
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', showChoropleth ? 'visible' : 'none')
+      }
+    } catch (err) {
+      console.warn('[Map] choropleth sync failed', err)
     }
   }, [sites, showChoropleth])
 
@@ -495,32 +499,36 @@ export default function Map({
         properties: { weight: Math.max(0.1, Math.log10(Math.max(s.emission, 10))) },
       })),
     }
-    if (map.getSource(srcId)) {
-      (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
-    } else {
-      map.addSource(srcId, { type: 'geojson', data: geojson })
-      map.addLayer({
-        id: 'emission-heat-layer',
-        type: 'heatmap',
-        source: srcId,
-        paint: {
-          'heatmap-weight': ['get', 'weight'],
-          'heatmap-intensity': 0.6,
-          'heatmap-radius': 28,
-          'heatmap-opacity': 0.75,
-          'heatmap-color': [
-            'interpolate', ['linear'], ['heatmap-density'],
-            0, 'rgba(20,184,166,0)',
-            0.3, '#14b8a6',
-            0.6, '#fbbf24',
-            1, '#f43f5e',
-          ],
-        },
-      })
-    }
-    if (map.getLayer('emission-heat-layer')) {
-      map.setLayoutProperty('emission-heat-layer', 'visibility', showHeatmap ? 'visible' : 'none')
-      map.setPaintProperty('emission-heat-layer', 'heatmap-opacity', heatmapOpacity)
+    try {
+      if (map.getSource(srcId)) {
+        (map.getSource(srcId) as maplibregl.GeoJSONSource).setData(geojson)
+      } else {
+        map.addSource(srcId, { type: 'geojson', data: geojson })
+        map.addLayer({
+          id: 'emission-heat-layer',
+          type: 'heatmap',
+          source: srcId,
+          paint: {
+            'heatmap-weight': ['get', 'weight'],
+            'heatmap-intensity': 0.6,
+            'heatmap-radius': 28,
+            'heatmap-opacity': 0.75,
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(20,184,166,0)',
+              0.3, '#14b8a6',
+              0.6, '#fbbf24',
+              1, '#f43f5e',
+            ],
+          },
+        })
+      }
+      if (map.getLayer('emission-heat-layer')) {
+        map.setLayoutProperty('emission-heat-layer', 'visibility', showHeatmap ? 'visible' : 'none')
+        map.setPaintProperty('emission-heat-layer', 'heatmap-opacity', heatmapOpacity)
+      }
+    } catch (err) {
+      console.warn('[Map] heatmap sync failed', err)
     }
   }, [showHeatmap, heatmapOpacity])
 
@@ -666,43 +674,54 @@ export default function Map({
     const main = mapRef.current
     if (!main) return
 
-    const mini = new maplibregl.Map({
-      container: minimapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 },
-        },
-        layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
-      },
-      center: main.getCenter(),
-      zoom: Math.max(main.getZoom() - 4, 0),
-      interactive: false,
-      attributionControl: false,
-    })
-    minimapRef.current = mini
-
+    let mini: maplibregl.Map | null = null
     const box = document.createElement('div')
     box.className = 'absolute border-2 border-[#FF8C00]/80 bg-[#FF8C00]/10 pointer-events-none'
-    const updateBox = () => {
-      if (!minimapRef.current || !mapRef.current) return
-      const b = mapRef.current.getBounds()
-      const sw = minimapRef.current.project(b.getSouthWest())
-      const ne = minimapRef.current.project(b.getNorthEast())
-      box.style.left = `${Math.min(sw.x, ne.x)}px`
-      box.style.top = `${Math.min(sw.y, ne.y)}px`
-      box.style.width = `${Math.abs(ne.x - sw.x)}px`
-      box.style.height = `${Math.abs(ne.y - sw.y)}px`
+
+    try {
+      mini = new maplibregl.Map({
+        container: minimapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256 },
+          },
+          layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+        },
+        center: main.getCenter(),
+        zoom: Math.max(main.getZoom() - 4, 0),
+        interactive: false,
+        attributionControl: false,
+      })
+      minimapRef.current = mini
+
+      const updateBox = () => {
+        if (!minimapRef.current || !mapRef.current) return
+        try {
+          const b = mapRef.current.getBounds()
+          const sw = minimapRef.current.project(b.getSouthWest())
+          const ne = minimapRef.current.project(b.getNorthEast())
+          box.style.left = `${Math.min(sw.x, ne.x)}px`
+          box.style.top = `${Math.min(sw.y, ne.y)}px`
+          box.style.width = `${Math.abs(ne.x - sw.x)}px`
+          box.style.height = `${Math.abs(ne.y - sw.y)}px`
+        } catch { /* map mid-teardown */ }
+      }
+      mini.on('load', () => {
+        minimapContainer.current?.appendChild(box)
+        updateBox()
+      })
+      main.on('move', updateBox)
+    } catch (err) {
+      console.warn('[Map] minimap init failed', err)
+      minimapRef.current = null
     }
-    mini.on('load', () => {
-      minimapContainer.current?.appendChild(box)
-      updateBox()
-    })
-    main.on('move', updateBox)
 
     return () => {
       box.remove()
-      mini.remove()
+      if (mini) {
+        try { mini.remove() } catch { /* ignore */ }
+      }
       minimapRef.current = null
     }
   }, [])

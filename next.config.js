@@ -11,6 +11,8 @@ const nextConfig = {
 if (process.env.NODE_ENV === 'production' || process.env.BUILD_STATIC === 'true') {
   nextConfig.output = 'export';
   nextConfig.distDir = 'dist';
+  // Reliable static hosting on Cloudflare Pages (avoids client-nav 404s)
+  nextConfig.trailingSlash = true;
 }
 
 module.exports = nextConfig;

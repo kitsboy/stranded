@@ -25,7 +25,9 @@ export function loadPortfolioIds(): string[] {
   try {
     const raw = localStorage.getItem(PORTFOLIO_KEY)
     if (!raw) return []
-    return JSON.parse(raw).map((s: { id: string }) => s.id)
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map((s: { id: string }) => s.id).filter(Boolean)
   } catch { return [] }
 }
 
@@ -42,7 +44,8 @@ export function loadPortfolioMinimal(): MissionMinimal[] {
   try {
     const raw = localStorage.getItem(PORTFOLIO_KEY)
     if (!raw) return []
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
   } catch { return [] }
 }
 

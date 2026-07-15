@@ -33,8 +33,15 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
 
   // Load recent from localStorage (power-up)
   useEffect(() => {
-    const saved = localStorage.getItem('stranded-recent')
-    if (saved) setRecent(JSON.parse(saved))
+    try {
+      const saved = localStorage.getItem('stranded-recent')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) setRecent(parsed)
+      }
+    } catch {
+      localStorage.removeItem('stranded-recent')
+    }
     setRecentCommands(getRecentCommands())
   }, [open])
 

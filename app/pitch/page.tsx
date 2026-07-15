@@ -140,9 +140,12 @@ function PitchContent() {
 
   useEffect(() => {
     if (!stats) return
+    let cancelled = false
     const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js'
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
+    script.async = true
     script.onload = () => {
+      if (cancelled) return
       const canvas = document.getElementById('pitch-province-chart') as HTMLCanvasElement
       if (!canvas || !(window as any).Chart) return
       const Chart = (window as any).Chart
@@ -162,8 +165,12 @@ function PitchContent() {
       })
       ;(canvas as any)._chart = chart
     }
+    script.onerror = () => { /* BarChart fallback still renders */ }
     document.head.appendChild(script)
-    return () => { script.remove() }
+    return () => {
+      cancelled = true
+      script.remove()
+    }
   }, [stats])
 
   const adjustedBtc = useMemo(() => btc * (btcSensitivity / 100), [btc, btcSensitivity])

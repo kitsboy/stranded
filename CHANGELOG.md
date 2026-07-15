@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.5.1] — 2026-07-15
+
+### Fixed (crash hardening)
+- **ErrorBoundary** on all pages — isolated failures no longer white-screen the whole app
+- Safe **localStorage JSON.parse** in command palette + mission portfolio loaders
+- Map **choropleth/heatmap/minimap** wrapped in try/catch (duplicate layer races)
+- Education quiz **markEduSection** moved out of render path
+- Pitch **Chart.js** pinned CDN URL with onerror fallback
+- **trailingSlash: true** + `_redirects` for reliable Cloudflare Pages client navigation
+- PWA cache `stranded-v7`
+
 ## [2.5.0] — 2026-07-15
 
 ### Added (upgrades 276–300, round 6 elite release)

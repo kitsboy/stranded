@@ -130,10 +130,13 @@ function QuizSection() {
     } catch { /* cancelled */ }
   };
 
+  useEffect(() => {
+    if (finished) markEduSection('quiz-complete')
+  }, [finished])
+
   if (finished) {
     const pct = Math.round((score / questions.length) * 100);
     const rec = pct > 80 ? "You're a Stranded Value expert — go build a mission on the map!" : pct > 50 ? "Solid foundation — try the Advanced Simulator next." : "Great start — explore the glossary and basic simulator.";
-    markEduSection('quiz-complete');
     return (
       <div className="glass p-8 rounded-3xl text-center mb-16">
         <h3 className="text-2xl font-semibold mb-2">Your Stranded Value IQ: {score}/{questions.length} ({pct}%)</h3>

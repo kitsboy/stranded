@@ -1,8 +1,12 @@
-# Trailing slash normalization
-/map/ /map 301
-/pitch/ /pitch 301
-/dashboard/ /dashboard 301
-/verticals/ /verticals 301
-/funding/ /funding 301
-/partnerships/ /partnerships 301
-/provinces/ /provinces 301
+# Normalize to trailing slash (matches next.config trailingSlash: true)
+/map /map/ 301
+/pitch /pitch/ 301
+/dashboard /dashboard/ 301
+/verticals /verticals/ 301
+/funding /funding/ 301
+/partnerships /partnerships/ 301
+/provinces /provinces/ 301
+/education /education/ 301
+/sites /sites/ 301
+/bookmarks /bookmarks/ 301
+/compare /compare/ 301

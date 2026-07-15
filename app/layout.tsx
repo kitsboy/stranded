@@ -8,6 +8,7 @@ import Providers from '@/components/Providers'
 import JsonLd from '@/components/JsonLd'
 import MobileCtaBar from '@/components/MobileCtaBar'
 import OfflineIndicator from '@/components/OfflineIndicator'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
@@ -53,7 +54,9 @@ export default function RootLayout({
         <Providers>
           <Nav />
           {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
-          <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">{children}</main>
+          <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">
+            <ErrorBoundary label="page">{children}</ErrorBoundary>
+          </main>
           <Footer />
           <Toaster
             position="top-center"

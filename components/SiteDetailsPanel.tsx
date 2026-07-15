@@ -221,7 +221,7 @@ export default function SiteDetailsPanel({
       methaneLossDailyBtc: methaneLossDailyBtc || 0,
       financedPaybackDays: financedPaybackDays,
       effectiveMachineCount: effectiveMachineCount || 0,
-      gensetName: GENSET_DATA[selectedGenset].name
+      gensetName: GENSET_DATA[selectedGenset]?.name ?? String(selectedGenset)
     }
   }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission, site])
 
