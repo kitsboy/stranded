@@ -17,8 +17,8 @@
 - M4 sync deferred until Cam says go
 
 **Git State:**
-- SHA: `65d72d6c381a6bdac0505b5d3af6683b0b671c77`
-- Unpushed: (handoff commit pending — see goodbye push)
+- SHA: `ebf1128d2c6ce3cbfa934a0534ed0e56b00c602f`
+- Unpushed: none
 
 ---
 
