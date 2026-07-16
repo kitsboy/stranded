@@ -1,5 +1,27 @@
 # Kimi Handoff — Stranded
 
+## Session — 2026-07-16
+
+**Done:**
+- Full sprint v2.6.5→v2.9.0: pitch elite, dashboard command center, 150+ upgrades
+- Pitch v2.6.5 — stat cards, capture simulator, province rank, present mode
+- Top-50 batch v2.7.0 — map compare URL, revenue choropleth, sites CSV, i18n, PWA v10
+- Dashboard v2.8.0 — Opportunity Radar, 8 KPI cards, capture slider, genset/confidence panels
+- Megabatch v2.9.0 (#526–625) — 4 pushed waves; status health, exports, HomeKpiStrip, PWA v13
+- 30/30 E2E passing; GitHub releases v2.6.5–v2.9.0; goodbye handoff docs written
+
+**Decisions:**
+- Stat cards use responsive compact values + column grids to prevent bleed
+- Autonomous batches pushed incrementally (4 commits for megabatch) per Cam request
+- Clean handoff summaries only — no full chat logs to Kimi
+- M4 sync deferred until Cam says go
+
+**Git State:**
+- SHA: `65d72d6c381a6bdac0505b5d3af6683b0b671c77`
+- Unpushed: (handoff commit pending — see goodbye push)
+
+---
+
 ## Latest Session Summary (from 2026-07-15 — v2.9.0 megabatch 526–625)
 
 **Chat topic:** 100 upgrades in 4 waves; push each batch; no chat until complete.
