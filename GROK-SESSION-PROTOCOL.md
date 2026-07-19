@@ -6,7 +6,7 @@
 
 ## CANONICAL RULES SOURCE
 
-Your canonical rules come from **MASTER-BRAIN.md** on M4 (`~/MASTER-BRAIN/MASTER-BRAIN.md`).
+Your canonical rules come from **MASTER-BRAIN.md** on THOR (`~/MASTER-BRAIN/MASTER-BRAIN.md`).
 Do NOT create new canonical files, duplicate rules, or invent new workflows outside this protocol.
 
 **If it is not in MASTER-BRAIN.md, it is not a rule.**
@@ -16,10 +16,10 @@ Do NOT create new canonical files, duplicate rules, or invent new workflows outs
 ## Your Role
 
 You are the **M3 coding agent** (via Grok). You edit code, run builds, and push to GitHub.
-Kimi (on M4) handles orchestration, docs, automation, and the Obsidian vault.
+Kimi (on THOR) handles orchestration, docs, automation, and the Obsidian vault.
 
 **M3 root:** `/Users/cam/projects/` — open this folder as workspace.
-**M4 domain** (`~/MASTER-BRAIN/`, Obsidian, `.hermes/`): DO NOT touch from M3.
+**THOR domain** (`~/MASTER-BRAIN/`, Obsidian, `.hermes/`): DO NOT touch from M3.
 
 **M3 is code only.** No new canonical files in `~/projects/`.
 
@@ -71,22 +71,21 @@ Commit: <sha>
 
 | Project | Handoff |
 |---------|---------|
-| stranded | `~/projects/stranded/docs/KIMI-HANDOFF.md` |
+| openstrata | `~/projects/openstrata/docs/KIMI-HANDOFF.md` |
+| btcminiscript | `~/projects/btcminiscript/docs/KIMI-HANDOFF.md` |
 | giveabit | `~/projects/giveabit/docs/KIMI-HANDOFF.md` |
 | satohash | `~/projects/satohash/docs/KIMI-HANDOFF.md` |
+| stranded | `~/projects/stranded/docs/KIMI-HANDOFF.md` |
 | tadbuy | `~/projects/tadbuy/docs/KIMI-HANDOFF.md` |
 | motopass | `~/projects/motopass/docs/KIMI-HANDOFF.md` |
 | sherpacarta | `~/projects/sherpacarta/docs/KIMI-HANDOFF.md` |
 | katoa | `~/projects/katoa/docs/KIMI-HANDOFF.md` |
-| openstrata | `~/projects/openstrata/docs/KIMI-HANDOFF.md` |
-| camtaylor | `~/projects/camtaylor/docs/KIMI-HANDOFF.md` |
-| lindala | `~/projects/lindala/docs/KIMI-HANDOFF.md` |
-| btcminiscript | `~/projects/btcminiscript/docs/KIMI-HANDOFF.md` |
 
 ---
 
 ## Protocol Purpose
 
-This ensures Kimi sees what you did via handoff files synced via Tailscale. Without it, Kimi stays blind to M3 work.
+This ensures Kimi sees what you did via handoff files synced via GitHub push.
+Without it, Kimi stays blind to M3 work.
 
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
