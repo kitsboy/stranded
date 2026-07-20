@@ -89,3 +89,13 @@ This ensures Kimi sees what you did via handoff files synced via GitHub push.
 Without it, Kimi stays blind to M3 work.
 
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
+
+---
+
+## THOR ops note (2026-07-20 — Kimi)
+
+- **M3 = code only (you). THOR = ops/docs/Docker/cron.**
+- Read latest `docs/KIMI-HANDOFF.md` top entry every session.
+- HQ glass: https://hq.giveabit.io (gate + Vault). Satohash API: https://api.satohash.io
+- Cam less-chat: status via OPS pulse/HQ — you still push handoffs after code.
+- Default handoff path: append to `docs/KIMI-HANDOFF.md` then `git push`.
