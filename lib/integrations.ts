@@ -21,9 +21,30 @@ export const INTEGRATIONS = {
     url: 'https://giveabit.io',
     cta: 'Learn Safe Harbour',
   },
+  /** Bitcoin timestamp proofs via OpenTimestamps (thin client: lib/satohash.ts). */
+  satohash: {
+    name: 'Satohash',
+    tagline: 'Bitcoin timestamp proofs for site snapshots & exports',
+    url: 'https://satohash.io',
+    apiUrl: 'https://api.satohash.io',
+    cta: 'Stamp a proof',
+    mapPlacement: 'export-timestamp',
+  },
 } as const
 
 export function integrationUrl(key: keyof typeof INTEGRATIONS, context?: string) {
   const base = INTEGRATIONS[key].url
   return context ? `${base}?ref=stranded&ctx=${encodeURIComponent(context)}` : `${base}?ref=stranded`
 }
+
+/** Re-export thin Satohash client (stampHash, getApiHealth). No secrets. */
+export {
+  stampHash,
+  getApiHealth,
+  satohashVerifyUrl,
+  satohashStampGuideUrl,
+  SATOHASH_API,
+  SATOHASH_SITE,
+  SATOHASH_CLIENT_ID,
+} from './satohash'
+export type { StampResult, ApiHealth } from './satohash'

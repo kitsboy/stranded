@@ -1,3 +1,3 @@
-# stranded — Last Updated 2026-07-16 by Grok
-Brief: v2.9.0 live — pitch + dashboard elite, 100-upgrade megabatch, 30 E2E pass
-Commit: e80182e
+# stranded — Last Updated 2026-07-19 by Grok
+Brief: Thin Satohash client (stampHash/getApiHealth) + integrations wire
+Commit: 475f8be2bded9cdeb3e22a96227c04e9df2a133d

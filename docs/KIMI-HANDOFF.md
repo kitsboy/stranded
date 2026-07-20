@@ -530,3 +530,22 @@
 - Version: **2.3.7**
 - Pushed main → CF strandedbuild auto-deploy
 
+
+## Session — 2026-07-19
+
+**Done:**
+- Added thin Satohash timestamp client: `lib/satohash.ts`
+  - API `https://api.satohash.io`, site `https://satohash.io`
+  - Exports: `stampHash`, `getApiHealth`, `satohashVerifyUrl`, `satohashStampGuideUrl`
+  - Header: `X-Satohash-Client: stranded` (no secrets)
+- Minimal wire: `lib/integrations.ts` adds `satohash` integration entry + re-exports client
+- No UI stamp button yet — import path ready for open-data / export / status flows
+
+**Decisions:**
+- Public endpoints only; family free-tier key (`X-Satohash-Key`) intentionally omitted (no secrets in client)
+- Stamp uses POST `/api/stamp` with 64-char SHA-256 hex; health uses GET `/health`
+- CORS note: if browser preflight fails, satohash server may need `X-Satohash-Client` in `allowedHeaders`
+
+**Git State:**
+- SHA: `475f8be2bded9cdeb3e22a96227c04e9df2a133d`
+- Unpushed: none expected after push
