@@ -1,3 +1,3 @@
 # stranded — Last Updated 2026-07-19 by Grok
 Brief: Thin Satohash client (stampHash/getApiHealth) + integrations wire
-Commit: 475f8be2bded9cdeb3e22a96227c04e9df2a133d
+Commit: 5c5026c8ecfa486b7a6ed980c9c6a9a1f4c4f536

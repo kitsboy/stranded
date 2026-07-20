@@ -547,5 +547,5 @@
 - CORS note: if browser preflight fails, satohash server may need `X-Satohash-Client` in `allowedHeaders`
 
 **Git State:**
-- SHA: `475f8be2bded9cdeb3e22a96227c04e9df2a133d`
+- SHA: `5c5026c8ecfa486b7a6ed980c9c6a9a1f4c4f536`
 - Unpushed: none expected after push
