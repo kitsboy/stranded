@@ -1,0 +1,207 @@
+{
+  "schema": "gab.product-metrics.v1",
+  "productId": "stranded",
+  "name": "Stranded",
+  "updatedAt": "2026-07-21T22:00:00Z",
+  "window": {
+    "label": "all",
+    "from": "2025-01-01T00:00:00Z",
+    "to": "2026-07-21T22:00:00Z"
+  },
+  "health": {
+    "status": "green",
+    "message": "Static product metrics live on stranded.giveabit.io — dataset KPIs from ECCC/site inventory + generator models",
+    "latencyMs": null,
+    "uptimePct24h": null,
+    "dependencies": [
+      {
+        "id": "site-dataset",
+        "status": "green",
+        "detail": "2,611 Canadian stranded energy sites mapped"
+      },
+      {
+        "id": "generator-models",
+        "status": "green",
+        "detail": "24 generators modeled for Bitcoin economics"
+      },
+      {
+        "id": "hq-status",
+        "status": "green",
+        "detail": "status.json pinger"
+      },
+      {
+        "id": "umami",
+        "status": "amber",
+        "detail": "Tracking script wired (website f07bb222-…); reverse proxy to THOR:3002 still required for live pageviews"
+      }
+    ]
+  },
+  "kpis": [
+    {
+      "key": "sites_mapped",
+      "label": "Sites mapped",
+      "value": 2611,
+      "unit": "sites",
+      "format": "number",
+      "priority": 1,
+      "hint": "Verified Canadian stranded energy / methane sites in the public inventory."
+    },
+    {
+      "key": "sites_bitcoin_potential",
+      "label": "Sites with Bitcoin potential",
+      "value": 890,
+      "unit": "sites",
+      "format": "number",
+      "priority": 1,
+      "hint": "Sites passing economic filters for Bitcoin-powered generation / mining viability."
+    },
+    {
+      "key": "total_mw_available",
+      "label": "Total MW available",
+      "value": 12400,
+      "unit": "MW",
+      "format": "number",
+      "priority": 1,
+      "hint": "Sum of available capacity across the mapped site inventory."
+    },
+    {
+      "key": "generators_modeled",
+      "label": "Generators modeled",
+      "value": 24,
+      "unit": "models",
+      "format": "number",
+      "priority": 2,
+      "hint": "Generator / genset models with CapEx + derate + Bitcoin ROI curves."
+    },
+    {
+      "key": "avg_mw_per_site",
+      "label": "Avg MW per site",
+      "value": 4.8,
+      "unit": "MW",
+      "format": "number",
+      "priority": 2,
+      "hint": "Mean available capacity across mapped sites."
+    },
+    {
+      "key": "education_articles",
+      "label": "Education articles",
+      "value": 45,
+      "unit": "articles",
+      "format": "number",
+      "priority": 2,
+      "hint": "Stranded Value Education Center articles and explainers."
+    }
+  ],
+  "series": [],
+  "funnels": [],
+  "segments": [
+    {
+      "id": "top_provinces",
+      "label": "Top provinces (site share)",
+      "rows": [
+        {
+          "id": "AB",
+          "label": "Alberta",
+          "value": 35,
+          "meta": { "share_pct": 35 }
+        },
+        {
+          "id": "BC",
+          "label": "British Columbia",
+          "value": 22,
+          "meta": { "share_pct": 22 }
+        },
+        {
+          "id": "QC",
+          "label": "Quebec",
+          "value": 18,
+          "meta": { "share_pct": 18 }
+        },
+        {
+          "id": "ON",
+          "label": "Ontario",
+          "value": 15,
+          "meta": { "share_pct": 15 }
+        },
+        {
+          "id": "Others",
+          "label": "Others",
+          "value": 10,
+          "meta": { "share_pct": 10 }
+        }
+      ]
+    }
+  ],
+  "offers": [
+    {
+      "id": "site_intelligence",
+      "title": "Stranded site intelligence",
+      "for": ["*"],
+      "status": "ga",
+      "hint": "2,611-site map + filters + portfolio tools"
+    },
+    {
+      "id": "generator_roi",
+      "title": "Generator + ASIC ROI models",
+      "for": ["*"],
+      "status": "ga",
+      "hint": "CapEx, methane-loss ROI, financing"
+    },
+    {
+      "id": "metrics_v1",
+      "title": "Product metrics v1",
+      "for": ["hq"],
+      "status": "live",
+      "endpoint": "GET /metrics.json",
+      "hint": "Published at stranded.giveabit.io origin"
+    }
+  ],
+  "education": [
+    {
+      "id": "dataset_kpis",
+      "title": "Dataset KPIs are ground truth",
+      "body": "sites_mapped, sites_bitcoin_potential, total_mw_available, generators_modeled, avg_mw_per_site, and education_articles come from the Stranded inventory and product surface — not Umami.",
+      "action": "Refresh metrics.json when ECCC/site pipeline or generator catalog changes",
+      "opportunity": "plan"
+    },
+    {
+      "id": "geo_segment",
+      "title": "Provincial concentration",
+      "body": "top_provinces segment shows AB/BC/QC/ON share of the mapped inventory for HQ Analytics.",
+      "action": "Export from HQ Cards / Concert / Analytics",
+      "opportunity": "opportunity"
+    }
+  ],
+  "links": [
+    {
+      "label": "Stranded",
+      "url": "https://stranded.giveabit.io"
+    },
+    {
+      "label": "Live metrics",
+      "url": "https://stranded.giveabit.io/metrics.json"
+    },
+    {
+      "label": "Schema",
+      "url": "https://hq.giveabit.io/schemas/product-metrics.v1.schema.json"
+    },
+    {
+      "label": "All-site inventory",
+      "url": "https://hq.giveabit.io/docs/ALL-SITE-METRICS.md"
+    }
+  ],
+  "raw": {
+    "demo": false,
+    "umamiWebsiteId": "f07bb222-c151-4018-81d5-a021c0a0bbdb",
+    "umamiPending": true,
+    "staticGroundTruth": {
+      "sites_mapped": 2611,
+      "sites_bitcoin_potential": 890,
+      "total_mw_available": 12400,
+      "generators_modeled": 24,
+      "avg_mw_per_site": 4.8,
+      "education_articles": 45
+    },
+    "note": "Origin /metrics.json for HQ. Dataset KPIs are static ground truth from the site inventory; visitor analytics need public Umami (analytics.giveabit.io → THOR:3002)."
+  }
+}

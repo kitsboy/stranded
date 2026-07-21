@@ -46,6 +46,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
         <link rel="preconnect" href="https://api.coingecko.com" crossOrigin="anonymous" />
+        {/* Umami (privacy-friendly analytics) — website f07bb222-…; host is suite Umami on THOR via analytics.giveabit.io */}
+        <script
+          defer
+          src="https://analytics.giveabit.io/script.js"
+          data-website-id="f07bb222-c151-4018-81d5-a021c0a0bbdb"
+        />
         <JsonLd data={jsonLd} />
       </head>
       <body className="bg-[var(--bg-dark)] text-white antialiased flex flex-col min-h-screen">
