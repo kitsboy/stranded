@@ -16,7 +16,7 @@ jobs:
       - name: Install
         run: npm ci || npm install
       - name: Build
-        run: BUILD_STATIC=true next build
+        run: BUILD_STATIC=true npx next build
       - name: Deploy to CF Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
