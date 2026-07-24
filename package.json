@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3003",
     "prebuild": "node scripts/generate-live-stats.js && node scripts/generate-sitemap.js",
-    "build": "BUILD_STATIC=true next build",
+    "build": "BUILD_STATIC=true npx next build",
     "postbuild": "node scripts/sync-docs.js",
     "start": "npx serve -p 3003 dist",
     "preview": "npm run build && npm run start",
