@@ -1,15 +1,11 @@
 # Roadmap
 
-*Template v2 — Auto-generated 2026-07-24*
+*Template v2 — 2026-07-24*
 
-## Current Status
+## Current
 - [x] Project scaffolded
-- [ ] Core functionality built
-- [ ] Design system applied
-- [ ] Agent context files (AGENTS.md, .ai_docs/)
-- [ ] Production deployment
-
-## Future
-See repo issues and project board for detailed plans.
+- [ ] Core functionality
+- [ ] Design system
+- [ ] Production deploy
 
 *Part of the Give A Bit family*
