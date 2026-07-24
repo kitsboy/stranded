@@ -2,10 +2,9 @@
 
 *Template v2 — 2026-07-24*
 
-## Current
+## Status
 - [x] Project scaffolded
 - [ ] Core functionality
-- [ ] Design system
-- [ ] Production deploy
+- [ ] Design system applied
 
-*Part of the Give A Bit family*
+*Give A Bit family*
