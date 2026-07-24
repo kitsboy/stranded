@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
 
       - run: npm ci
@@ -32,10 +32,10 @@ jobs:
       - name: Verify static output
         run: |
           test -f dist/index.html
-          test -f dist/map.html
-          test -f dist/pitch.html
-          test -f dist/verticals.html
-          test -f dist/funding.html
+          test -d dist/map && test -f dist/map/index.html
+          test -d dist/pitch && test -f dist/pitch/index.html
+          test -d dist/verticals && test -f dist/verticals/index.html
+          test -d dist/funding && test -f dist/funding/index.html
           test -f dist/data/live-stats.json
 
       - name: E2E smoke tests
