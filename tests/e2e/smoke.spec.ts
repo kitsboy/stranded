@@ -10,7 +10,7 @@ test('home readiness badge links to dashboard', async ({ page }) => {
   const badge = page.getByTestId('home-readiness-badge')
   await expect(badge).toBeVisible({ timeout: 10000 })
   await expect(badge).toContainText(/Deploy readiness/i)
-  await expect(badge).toHaveAttribute('href', '/dashboard')
+  await expect(badge).toHaveAttribute('href', '/dashboard/')
   await expect(page.getByTestId('home-kpi-strip')).toBeVisible()
 })
 
