@@ -1,0 +1,9 @@
+# Stranded
+
+> Data journalism on stranded fossil-fuel assets — provinces, benchmarks, methodology.
+
+[Stranded](https://stranded.giveabit.io)
+
+- [https://stranded.giveabit.io/](https://stranded.giveabit.io/)
+- [https://stranded.giveabit.io/map/](https://stranded.giveabit.io/map/)
+- [https://stranded.giveabit.io/methodology/](https://stranded.giveabit.io/methodology/)

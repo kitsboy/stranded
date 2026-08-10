@@ -43,7 +43,7 @@ export default function LanguageToggle() {
         type="button"
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-1 px-2 py-1 rounded-lg border border-white/15 text-xs text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#5BC0BE]/50"
-        aria-label={t('changeLanguage')}
+        aria-label={`${t('changeLanguage')} — ${locale}`}
         aria-expanded={open}
         aria-haspopup="listbox"
       >

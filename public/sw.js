@@ -1,5 +1,5 @@
 // Bump on every deploy that must invalidate HTML/data caches
-const CACHE = 'stranded-v13'
+const CACHE = 'stranded-v14'
 const PRECACHE = [
   '/',
   '/map',
@@ -21,6 +21,13 @@ const PRECACHE = [
   '/data/live-stats.json',
   '/logo.png',
 ]
+
+// caches.put() rejects on 206 Partial Content (range requests) — guard every put.
+function cacheable(request, response) {
+  if (!response || response.status !== 200) return false
+  if (request.headers.get('range')) return false
+  return true
+}
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -61,7 +68,7 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       fetch(req)
         .then(res => {
-          if (res.ok) {
+          if (cacheable(req, res)) {
             const clone = res.clone()
             caches.open(CACHE).then(c => c.put(req, clone)).catch(() => {})
           }
@@ -76,7 +83,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(req).then(cached => {
       const fetched = fetch(req).then(res => {
-        if (res.ok && req.url.includes('/_next/static/')) {
+        if (cacheable(req, res) && req.url.includes('/_next/static/')) {
           caches.open(CACHE).then(c => c.put(req, res.clone())).catch(() => {})
         }
         return res

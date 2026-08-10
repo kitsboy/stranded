@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Search, Command } from 'lucide-react'
+import { Search } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
 import ThemeToggle from './ThemeToggle'
 import MobileNav from './MobileNav'
@@ -73,7 +73,7 @@ export default function Nav() {
         aria-label="Main"
       >
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 group flex-shrink-0" aria-label="Stranded Value home">
+        <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
           <Image
             src="/logo.png"
             alt=""
@@ -84,7 +84,7 @@ export default function Nav() {
           />
           <div className="leading-none">
             <span className="nav-logo-text font-bold text-xl tracking-tight text-[#FF8C00] transition-all duration-250">Stranded</span>
-            <div className="nav-logo-sub text-[9px] text-[#FF8C00]/70 -mt-0.5 tracking-[1px] transition-all duration-250">Value</div>
+            <div className="nav-logo-sub text-[9px] text-[#FF8C00] -mt-0.5 tracking-[1px] transition-all duration-250">Value</div>
           </div>
         </Link>
 
@@ -106,12 +106,12 @@ export default function Nav() {
           <button
             onClick={openPalette}
             className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/15 hover:bg-white/5 text-gray-400 hover:text-white transition"
-            aria-label="Open command palette to search sites (⌘K)"
+            aria-label={`${t('search')} ⌘K`}
             title="Search sites (⌘K)"
           >
             <Search size={15} />
             <span className="font-mono">{t('search')}</span>
-            <span className="ml-1 text-[10px] opacity-60 flex items-center gap-px"><Command size={11} />K</span>
+            <span className="ml-1 text-[10px] opacity-60 flex items-center gap-px">⌘K</span>
           </button>
           <div className="hidden md:flex items-center gap-2 text-gray-400">
             <span className="font-mono">2,611</span> {t('sitesCount')}

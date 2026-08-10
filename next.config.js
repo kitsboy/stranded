@@ -3,6 +3,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  productionBrowserSourceMaps: true,
 };
 
 // Only apply static export + custom distDir for production builds.

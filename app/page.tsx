@@ -305,7 +305,7 @@ export default function LandingPage() {
       <div className="max-w-3xl mx-auto px-6 py-14 text-center border-b border-white/10">
         <div className="text-[#FF8C00] text-xs tracking-[3px] mb-1">FEEL WHAT SMALL NUMBERS CAN DO</div>
         <h3 className="text-3xl font-bold tracking-tighter mb-6">What if we captured just 5%?</h3>
-        <input type="range" min="1" max="25" defaultValue="5" className="w-full max-w-md accent-[#FF8C00]" onChange={(e)=>{
+        <input type="range" min="1" max="25" defaultValue="5" aria-label="Number of top sites to compare" className="w-full max-w-md accent-[#FF8C00]" onChange={(e)=>{
           const v = parseInt(e.target.value);
           const n = siteCount;
           const co2e = stats?.impact?.co2eAvoided5PctTonnes
