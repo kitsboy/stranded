@@ -111,7 +111,7 @@ export default function Nav() {
           >
             <Search size={15} />
             <span className="font-mono">{t('search')}</span>
-            <span className="ml-1 text-[10px] opacity-60 flex items-center gap-px">⌘K</span>
+            <span className="ml-1 text-[10px] opacity-90 flex items-center gap-px">⌘K</span>
           </button>
           <div className="hidden md:flex items-center gap-2 text-gray-400">
             <span className="font-mono">2,611</span> {t('sitesCount')}

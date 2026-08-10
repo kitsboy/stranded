@@ -128,7 +128,6 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-1.5 text-gray-200 hover:text-white transition-all mb-3"
-              aria-label="GiveAbit Intelligence"
             >
               <span className="font-medium tracking-tight text-sm">GiveAbit Intelligence</span>
               <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#FF8C00] ring-1 ring-offset-1 ring-offset-[var(--bg-dark)] ring-[#FF8C00]/40 group-hover:ring-white/30 group-hover:scale-[1.08] transition">
