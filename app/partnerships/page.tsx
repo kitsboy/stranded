@@ -36,7 +36,7 @@ export default function PartnershipsPage() {
           data-testid="partnerships-hero-stat"
         >
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-gray-500">Verified portfolio (live-stats)</div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-400">Verified portfolio (live-stats)</div>
             <div className="text-5xl font-bold text-[#FF8C00] tabular-nums">{liveStats.siteCount.toLocaleString('en-CA')}</div>
             <div className="text-sm text-gray-400">stranded methane sites · {liveStats.provinceCount} provinces</div>
           </div>
@@ -51,9 +51,9 @@ export default function PartnershipsPage() {
           <div key={r.name} className="rounded-2xl border border-[#5BC0BE]/25 bg-[#5BC0BE]/5 p-5">
             <div className="font-semibold text-[#5BC0BE]">{r.name}</div>
             <div className="grid grid-cols-3 gap-3 mt-3 text-center text-sm">
-              <div><div className="text-xl font-bold text-white">{r.sites}</div><div className="text-[10px] text-gray-500">sites</div></div>
-              <div><div className="text-xl font-bold text-[#FF8C00]">{r.potentialMw} MW</div><div className="text-[10px] text-gray-500">potential</div></div>
-              <div><div className="text-xl font-bold text-white">{r.communities}</div><div className="text-[10px] text-gray-500">communities</div></div>
+              <div><div className="text-xl font-bold text-white">{r.sites}</div><div className="text-[10px] text-gray-400">sites</div></div>
+              <div><div className="text-xl font-bold text-[#FF8C00]">{r.potentialMw} MW</div><div className="text-[10px] text-gray-400">potential</div></div>
+              <div><div className="text-xl font-bold text-white">{r.communities}</div><div className="text-[10px] text-gray-400">communities</div></div>
             </div>
           </div>
         ))}

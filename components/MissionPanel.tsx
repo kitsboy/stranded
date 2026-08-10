@@ -139,10 +139,10 @@ export default function MissionPanel({
         </div>
       </div>
       <div className="text-[10px] text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
-      <div className="text-[10px] text-gray-500 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
+      <div className="text-[10px] text-gray-400 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
       <div className="text-[10px] text-[#34D399] mt-1">
         Est. simple IRR: <span className="font-mono font-semibold">{simpleIrrPct}%</span>
-        <span className="text-gray-500 ml-1">(annual net ÷ CapEx, illustrative)</span>
+        <span className="text-gray-400 ml-1">(annual net ÷ CapEx, illustrative)</span>
       </div>
 
       <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">{t('missionSelectedSites')}</div>
@@ -153,7 +153,7 @@ export default function MissionPanel({
             <div key={site.id} className="flex items-center justify-between bg-black/30 rounded-lg px-3 py-1.5 group">
               <div className="min-w-0 truncate pr-2">
                 <span className="font-medium">{p.name}</span>
-                <span className="text-gray-500 ml-1.5">• {p.province}</span>
+                <span className="text-gray-400 ml-1.5">• {p.province}</span>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button onClick={() => onFlyTo(site)} className="text-[#5BC0BE] hover:text-white opacity-70 hover:opacity-100">{t('missionFly')}</button>

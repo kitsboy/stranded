@@ -33,7 +33,7 @@ export default function EducationCharts({ provinceData, sourceData, liveBtc }: P
             </button>
           ))}
         </div>
-        <div className="mt-3 text-[10px] text-gray-500">Click any bar → opens the live map filtered to that province with full Value modeling.</div>
+        <div className="mt-3 text-[10px] text-gray-400">Click any bar → opens the live map filtered to that province with full Value modeling.</div>
       </div>
 
       <div className="glass p-6 rounded-2xl">

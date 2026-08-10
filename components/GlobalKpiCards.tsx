@@ -69,12 +69,12 @@ export default function GlobalKpiCards() {
         >
           <div className="flex items-center gap-2 mb-2">
             <card.icon size={16} style={{ color: card.color }} aria-hidden />
-            <span className="text-[10px] uppercase tracking-wider text-gray-500">{card.label}</span>
+            <span className="text-[10px] uppercase tracking-wider text-gray-400">{card.label}</span>
           </div>
           <div className="text-2xl font-bold font-mono tabular-nums" style={{ color: card.color }}>
             {card.value}
           </div>
-          <div className="text-[10px] text-gray-500 mt-1">{card.sub}</div>
+          <div className="text-[10px] text-gray-400 mt-1">{card.sub}</div>
         </div>
       ))}
     </div>

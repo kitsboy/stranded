@@ -31,7 +31,7 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
           <TrendingUp className="h-5 w-5 text-[#5BC0BE]" />
           <div>
             <h2 className="text-xl font-bold">{title}</h2>
-            <p className="text-sm text-gray-500">{desc}</p>
+            <p className="text-sm text-gray-400">{desc}</p>
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
@@ -49,14 +49,14 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 shrink-0 text-gray-500" />
+                  <MapPin className="h-3.5 w-3.5 shrink-0 text-gray-400" />
                   <Link
                     href={`/map?province=${encodeURIComponent(p.name)}`}
                     className="truncate font-medium text-gray-200 hover:text-[#5BC0BE] hover:underline"
                   >
                     {p.name}
                   </Link>
-                  <span className="shrink-0 text-xs text-gray-500">{p.sites} sites</span>
+                  <span className="shrink-0 text-xs text-gray-400">{p.sites} sites</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/5">
                   <div
@@ -64,7 +64,7 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
                     style={{ width: `${(p.estRevenueUsd / top) * 100}%` }}
                   />
                 </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-400">
                   <span>{formatCompactNumber(p.estKgDay, 1)} kg/day CH₄</span>
                   <span className="font-semibold text-[#F472B6]">{fmtUsd(p.estRevenueUsd)}/yr model</span>
                 </div>

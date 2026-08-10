@@ -61,13 +61,13 @@ function ReadinessGauge({ score, label, readinessLabel }: { score: number; label
           <span className="text-3xl font-bold tabular-nums" style={{ color }}>
             {score}
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-gray-500">/ 100</span>
+          <span className="text-[10px] uppercase tracking-wider text-gray-400">/ 100</span>
         </div>
       </div>
       <p className="mt-3 text-sm font-semibold" style={{ color }}>
         {label}
       </p>
-      <p className="text-[10px] text-gray-500">{readinessLabel}</p>
+      <p className="text-[10px] text-gray-400">{readinessLabel}</p>
     </div>
   )
 }
@@ -91,13 +91,13 @@ function FactorTile({ icon: Icon, label, value, sub, accent, delay }: FactorTile
       className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-4"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-500">{label}</span>
+        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-400">{label}</span>
         <Icon className="h-4 w-4 shrink-0 opacity-60" style={{ color: accent }} aria-hidden />
       </div>
       <div className="text-xl font-bold tabular-nums" style={{ color: accent }}>
         {value}
       </div>
-      <p className="mt-1 text-[10px] text-gray-500">{sub}</p>
+      <p className="mt-1 text-[10px] text-gray-400">{sub}</p>
     </motion.div>
   )
 }
@@ -161,7 +161,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
           <h2 id="opportunity-radar-heading" className="text-xl font-bold">
             {t('dashboardOpportunityRadarTitle')}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             {t('dashboardOpportunityRadarSubtitle')}
           </p>
         </div>
@@ -231,7 +231,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                       >
                         {i + 1}
                       </span>
-                      <MapPin className="h-3 w-3 shrink-0 text-gray-500" aria-hidden />
+                      <MapPin className="h-3 w-3 shrink-0 text-gray-400" aria-hidden />
                       <Link
                         href={`/provinces?name=${encodeURIComponent(p.name)}`}
                         className="truncate hover:text-[#5BC0BE] hover:underline"
@@ -241,7 +241,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                     </span>
                     <span className="shrink-0 tabular-nums text-gray-400">
                       <span className="font-semibold text-[#F472B6]">{fmtUsd(p.revenueUsd)}</span>
-                      <span className="ml-1 text-gray-500">{t('dashboardOpportunityRadarPerYear')}</span>
+                      <span className="ml-1 text-gray-400">{t('dashboardOpportunityRadarPerYear')}</span>
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-white/5">
@@ -256,7 +256,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                       transition={{ duration: 0.8, delay: i * 0.05 }}
                     />
                   </div>
-                  <div className="mt-1 flex gap-3 text-[10px] text-gray-500">
+                  <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
                     <span>{p.sites} sites</span>
                     <span>{formatCompactNumber(p.emissionKgDay, 1)} kg/day</span>
                   </div>

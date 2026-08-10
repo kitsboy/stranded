@@ -30,7 +30,7 @@ export default function DashboardEmissionTiers({ stats }: Props) {
           <h2 id="emission-tiers-heading" className="font-semibold">
             Emission Tiers
           </h2>
-          <p className="text-[10px] text-gray-500">kg CH₄/day bands across portfolio</p>
+          <p className="text-[10px] text-gray-400">kg CH₄/day bands across portfolio</p>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ export default function DashboardEmissionTiers({ stats }: Props) {
                   <span className="font-semibold" style={{ color }}>
                     {tier.count.toLocaleString('en-CA')}
                   </span>
-                  <span className="ml-1 text-gray-500">({tier.pct}%)</span>
+                  <span className="ml-1 text-gray-400">({tier.pct}%)</span>
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/5">

@@ -61,30 +61,30 @@ export default function StatusPage() {
         </div>
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
           <div>
-            <div className="text-gray-500 text-xs">Version</div>
+            <div className="text-gray-400 text-xs">Version</div>
             <div className="font-mono text-[#FF8C00]" data-testid="status-version">v{version}</div>
           </div>
           {deployBuild && (
             <div>
-              <div className="text-gray-500 text-xs">Last deploy</div>
+              <div className="text-gray-400 text-xs">Last deploy</div>
               <div className="font-mono text-xs text-[#5BC0BE]">{deployBuild}</div>
             </div>
           )}
           {siteCount != null && (
             <div>
-              <div className="text-gray-500 text-xs">Sites</div>
+              <div className="text-gray-400 text-xs">Sites</div>
               <div className="font-mono tabular-nums">{siteCount.toLocaleString()}</div>
             </div>
           )}
           {provinceCount != null && (
             <div>
-              <div className="text-gray-500 text-xs">Provinces</div>
+              <div className="text-gray-400 text-xs">Provinces</div>
               <div className="font-mono tabular-nums" data-testid="status-province-count">{provinceCount}</div>
             </div>
           )}
           {readiness && (
             <div>
-              <div className="text-gray-500 text-xs">Deployment readiness</div>
+              <div className="text-gray-400 text-xs">Deployment readiness</div>
               <div className="font-mono tabular-nums text-[#5BC0BE]" data-testid="status-readiness-score">
                 {readiness.score} <span className="text-gray-400 text-xs">({readiness.label})</span>
               </div>
@@ -92,19 +92,19 @@ export default function StatusPage() {
           )}
           {stats?.totals?.avgStrandedScore != null && (
             <div>
-              <div className="text-gray-500 text-xs">Avg Score</div>
+              <div className="text-gray-400 text-xs">Avg Score</div>
               <div className="font-mono tabular-nums">{stats.totals.avgStrandedScore}</div>
             </div>
           )}
           {stats?.totals?.highScoreSites != null && (
             <div>
-              <div className="text-gray-500 text-xs">Sites ≥80</div>
+              <div className="text-gray-400 text-xs">Sites ≥80</div>
               <div className="font-mono tabular-nums">{stats.totals.highScoreSites}</div>
             </div>
           )}
           {stats?.generatedAt && (
             <div className="col-span-2">
-              <div className="text-gray-500 text-xs">Stats generated</div>
+              <div className="text-gray-400 text-xs">Stats generated</div>
               <div className="font-mono text-xs text-gray-300">{new Date(stats.generatedAt).toLocaleString()}</div>
             </div>
           )}

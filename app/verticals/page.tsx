@@ -56,7 +56,7 @@ export default function VerticalsPage() {
       <p className="text-gray-400 mb-10">
         Methane is live today. Wind, solar, waste heat, biomass, and hydro spill are expanding the Stranded Value ecosystem.
         {stats && (
-          <span className="text-gray-500"> · Live dataset v{stats.version} · {stats.siteCount.toLocaleString()} sites</span>
+          <span className="text-gray-400"> · Live dataset v{stats.version} · {stats.siteCount.toLocaleString()} sites</span>
         )}
       </p>
 
@@ -75,7 +75,7 @@ export default function VerticalsPage() {
             ))}
           </ul>
           {v.section.mapHint && (
-            <p className="text-xs text-gray-500">{v.section.mapHint} · <Link href="/map" className="text-[#5BC0BE] hover:underline">Open map</Link></p>
+            <p className="text-xs text-gray-400">{v.section.mapHint} · <Link href="/map" className="text-[#5BC0BE] hover:underline">Open map</Link></p>
           )}
         </section>
       ))}
@@ -114,7 +114,7 @@ export default function VerticalsPage() {
                   {methaneTiers.slice(0, 4).map(t => (
                     <div key={t.key} className="flex justify-between text-gray-300">
                       <span>{t.label}</span>
-                      <span className="tabular-nums">{t.count.toLocaleString()} <span className="text-gray-500">({t.pct}%)</span></span>
+                      <span className="tabular-nums">{t.count.toLocaleString()} <span className="text-gray-400">({t.pct}%)</span></span>
                     </div>
                   ))}
                 </div>
@@ -122,7 +122,7 @@ export default function VerticalsPage() {
 
               {v.id !== 'methane' && provinceData.length > 0 && (
                 <div className="text-xs space-y-1.5 mb-4 rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-gray-500">Province proxy (live methane map)</div>
+                  <div className="text-[10px] uppercase tracking-wider text-gray-400">Province proxy (live methane map)</div>
                   {provinceData.map(p => (
                     <div key={p.name} className="flex justify-between text-gray-300">
                       <span>{p.name}</span>
@@ -133,12 +133,12 @@ export default function VerticalsPage() {
               )}
 
               {sourceCount != null && sourceCount > 0 && (
-                <div className="text-xs text-gray-500 mb-2">
+                <div className="text-xs text-gray-400 mb-2">
                   ~{sourceCount.toLocaleString()} mapped source-type sites in dataset
                 </div>
               )}
 
-              <div className="text-xs space-y-1 text-gray-500">
+              <div className="text-xs space-y-1 text-gray-400">
                 <div>~{v.potentialSites.toLocaleString()} potential sites</div>
                 <div>Avg {v.avgPowerKw.toLocaleString()} kW</div>
                 <div className="text-gray-300">{v.btcFit}</div>

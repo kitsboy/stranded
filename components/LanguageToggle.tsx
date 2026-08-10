@@ -58,7 +58,7 @@ export default function LanguageToggle() {
           aria-label={t('changeLanguage')}
           className="absolute right-0 top-full mt-1 z-[80] min-w-[200px] rounded-lg border border-white/15 bg-[#1e293b] py-1 shadow-xl"
         >
-          <p className="px-3 py-1.5 text-[10px] text-gray-500 border-b border-white/10">
+          <p className="px-3 py-1.5 text-[10px] text-gray-400 border-b border-white/10">
             {t('langMenuNote')}
           </p>
           {LOCALES.map(l => (

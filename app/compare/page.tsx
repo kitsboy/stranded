@@ -111,7 +111,7 @@ function CompareContent() {
         Side-by-side scores via <code className="text-[#5BC0BE]">?a=</code>, <code className="text-[#5BC0BE]">?b=</code>, and optional <code className="text-[#5BC0BE]">?c=</code> site IDs.
       </p>
 
-      {loading && <p className="text-gray-500">Loading dataset…</p>}
+      {loading && <p className="text-gray-400">Loading dataset…</p>}
 
       {!loading && active.length < 2 && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 text-sm">
@@ -167,7 +167,7 @@ function CompareContent() {
           <div className="overflow-x-auto rounded-2xl border border-white/10">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-gray-400">
                   <th className="p-4">Metric</th>
                   {active.map(({ slot, site }) => (
                     <th key={slot} className="p-4" style={{ color: slotColors[slot] }}>
@@ -220,17 +220,17 @@ function CompareContent() {
                   const similar = findSimilarByEmission(site, allSites, 3)
                   return (
                     <div key={site.id} className="rounded-xl border border-white/10 p-4 bg-white/[0.02]">
-                      <div className="text-xs text-gray-500 mb-2">{site.properties.name}</div>
-                      <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Same province &amp; source</div>
+                      <div className="text-xs text-gray-400 mb-2">{site.properties.name}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Same province &amp; source</div>
                       <ul className="space-y-1 mb-3">
                         {peers.length ? peers.map(p => (
                           <li key={p.id} className="flex justify-between gap-2">
                             <Link href={`/compare?a=${site.id}&b=${p.id}`} className="text-[#5BC0BE] hover:underline truncate">{p.properties.name}</Link>
                             <span className="font-mono text-[#FF8C00] shrink-0">{p.strandedScore}</span>
                           </li>
-                        )) : <li className="text-gray-500">No close peers</li>}
+                        )) : <li className="text-gray-400">No close peers</li>}
                       </ul>
-                      <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Similar emission (±25%)</div>
+                      <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Similar emission (±25%)</div>
                       <ul className="space-y-1">
                         {similar.map(p => (
                           <li key={p.id} className="flex justify-between gap-2">

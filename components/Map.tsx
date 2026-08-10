@@ -253,7 +253,7 @@ export default function Map({
         `<div class="text-xs font-semibold">${count} sites</div>`
         + `<div class="text-[10px] text-gray-300 mt-0.5">Avg score <span class="text-[#FF8C00] font-mono">${avgScore}</span></div>`
         + `<div class="text-[10px] text-gray-400">Total ~${totalEmission}/day</div>`
-        + `<div class="text-[10px] text-gray-500 mt-0.5">Click to expand cluster</div>`,
+        + `<div class="text-[10px] text-gray-400 mt-0.5">Click to expand cluster</div>`,
         coords,
       )
     })
@@ -1240,15 +1240,15 @@ export default function Map({
           title={coordCopyLabel}
         >
           <span className="inline-flex items-center gap-1">
-            <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-500'} />
+            <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-400'} />
             {displayCoord.lat.toFixed(4)}°, {displayCoord.lng.toFixed(4)}°
           </span>
-          <span className="text-gray-500">{zoomLabel.replace('{level}', mapZoom.toFixed(1))}</span>
+          <span className="text-gray-400">{zoomLabel.replace('{level}', mapZoom.toFixed(1))}</span>
           {showBearing && (
-            <span className="text-gray-500">{bearingLabel.replace('{deg}', mapBearing.toFixed(0))}</span>
+            <span className="text-gray-400">{bearingLabel.replace('{deg}', mapBearing.toFixed(0))}</span>
           )}
           {showPitch && (
-            <span className="text-gray-500">{pitchLabel.replace('{deg}', mapPitch.toFixed(0))}</span>
+            <span className="text-gray-400">{pitchLabel.replace('{deg}', mapPitch.toFixed(0))}</span>
           )}
           <span className="text-[#5BC0BE]/80">{viewportSitesLabel.replace('{count}', String(viewportSiteCount))}</span>
         </div>
@@ -1258,7 +1258,7 @@ export default function Map({
         href={tileFallbackActive ? 'https://www.openstreetmap.org/copyright' : 'https://carto.com/attributions'}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-2 left-3 z-[11] text-[8px] text-gray-500/80 hover:text-[#5BC0BE] transition pointer-events-auto sm:bottom-[7.25rem]"
+        className="absolute bottom-2 left-3 z-[11] text-[8px] text-gray-400/80 hover:text-[#5BC0BE] transition pointer-events-auto sm:bottom-[7.25rem]"
         data-testid="map-attribution"
       >
         {tileFallbackActive ? '© OSM' : attributionLabel}

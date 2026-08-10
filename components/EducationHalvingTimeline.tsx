@@ -25,7 +25,7 @@ export default function EducationHalvingTimeline({ dailyBtc = 0.01, btcUsd = 850
         className="w-full accent-[#FBBF24]"
         aria-label="Projection year"
       />
-      <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+      <div className="flex justify-between text-[10px] text-gray-400 mt-1">
         <span>{projections[0]?.year}</span>
         <span className="font-mono text-white">{row?.year}</span>
         <span>{projections[projections.length - 1]?.year}</span>
@@ -33,15 +33,15 @@ export default function EducationHalvingTimeline({ dailyBtc = 0.01, btcUsd = 850
 
       <div className="grid grid-cols-3 gap-3 mt-4 text-center text-sm">
         <div className="rounded-xl bg-black/25 p-3 border border-white/10">
-          <div className="text-[10px] text-gray-500 uppercase">Reward factor</div>
+          <div className="text-[10px] text-gray-400 uppercase">Reward factor</div>
           <div className="text-lg font-mono text-[#FBBF24]">{(row.halvingFactor * 100).toFixed(0)}%</div>
         </div>
         <div className="rounded-xl bg-black/25 p-3 border border-white/10">
-          <div className="text-[10px] text-gray-500 uppercase">Annual BTC</div>
+          <div className="text-[10px] text-gray-400 uppercase">Annual BTC</div>
           <div className="text-lg font-mono text-white">{row.annualBtc.toFixed(3)}</div>
         </div>
         <div className="rounded-xl bg-black/25 p-3 border border-white/10">
-          <div className="text-[10px] text-gray-500 uppercase">Annual USD</div>
+          <div className="text-[10px] text-gray-400 uppercase">Annual USD</div>
           <div className="text-lg font-mono text-emerald-400">${Math.round(row.annualBtc * btcUsd).toLocaleString()}</div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function EducationHalvingTimeline({ dailyBtc = 0.01, btcUsd = 850
         })}
       </div>
 
-      <ul className="mt-4 space-y-1 text-[10px] text-gray-500">
+      <ul className="mt-4 space-y-1 text-[10px] text-gray-400">
         {HALVING_SCHEDULE.slice(-3).map(h => (
           <li key={h.block}>
             <span className="text-gray-400">{h.date.slice(0, 4)}</span> · block {h.block.toLocaleString()} · {h.rewardBtc} BTC/block

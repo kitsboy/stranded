@@ -71,12 +71,12 @@ export default function GlobalPage() {
               <span className="text-[10px] px-2 py-1 rounded-full border border-white/15 text-gray-400">{r.status}</span>
             </div>
             <div className="text-sm text-gray-400 mb-1">{r.sites}</div>
-            <div className="text-xs text-gray-500 mb-3">Source: {r.methane}</div>
+            <div className="text-xs text-gray-400 mb-3">Source: {r.methane}</div>
             <p className="text-xs text-gray-300 leading-relaxed">{r.note}</p>
           </div>
         ))}
       </div>
-      <p className="mt-8 text-sm text-gray-500">
+      <p className="mt-8 text-sm text-gray-400">
         Partner inquiries: <Link href="/partnerships" className="text-[#FF8C00]">/partnerships</Link>
         {' · '}
         <Link href="/roadmap" className="text-[#5BC0BE] hover:underline">Roadmap</Link>

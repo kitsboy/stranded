@@ -71,7 +71,7 @@ function ProvincesContent() {
             <div className="overflow-x-auto rounded-2xl border border-white/10 mb-10" data-testid="provinces-table">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+                  <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
                     <th className="p-3">Province</th>
                     <th className="p-3 text-right">Sites</th>
                     <th className="p-3 text-right">Emission kg/d</th>

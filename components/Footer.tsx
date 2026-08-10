@@ -81,7 +81,7 @@ export default function Footer() {
                 {t('footerEccc')}
               </a>
             </p>
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-gray-400">
               2026 · 2,611 {t('sitesCount')}
               {statsDate && <> · {t('footerStats')} {statsDate}</>}
             </p>
@@ -122,7 +122,7 @@ export default function Footer() {
             <h3 className="text-[10px] uppercase tracking-[0.15em] text-gray-300 font-semibold mb-2">
               Connect
             </h3>
-            <p className="text-[10px] text-gray-500 mb-2">{t('footerBy')}</p>
+            <p className="text-[10px] text-gray-400 mb-2">{t('footerBy')}</p>
             <a
               href="https://giveabit.io"
               target="_blank"
@@ -156,7 +156,7 @@ export default function Footer() {
                     <p className="mt-2 text-center text-[10px] text-gray-600 max-w-[140px] break-all">{btcAddress}</p>
                     <button
                       type="button"
-                      className="mt-2 w-full text-[10px] text-gray-500 hover:text-gray-800"
+                      className="mt-2 w-full text-[10px] text-gray-400 hover:text-gray-800"
                       onClick={() => setShowQR(false)}
                     >
                       {t('close')}

@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Privacy' }]} />
       <h1 className="text-4xl font-bold tracking-tighter not-prose">Privacy</h1>
       <p className="text-gray-400 not-prose mb-2">Local-first by design. No ads. No third-party trackers in the product default.</p>
-      <p className="text-gray-500 not-prose text-sm mb-8">
+      <p className="text-gray-400 not-prose text-sm mb-8">
         Last updated: v{pkg.version} · {new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
       </p>
 
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
       <div className="not-prose overflow-x-auto rounded-xl border border-white/10 my-4">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
               <th className="p-3">Data type</th>
               <th className="p-3">Storage</th>
               <th className="p-3">Retention</th>

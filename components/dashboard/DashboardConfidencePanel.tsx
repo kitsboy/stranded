@@ -50,7 +50,7 @@ export default function DashboardConfidencePanel({ stats }: Props) {
           <h2 id="confidence-panel-heading" className="text-lg font-bold">
             Data Confidence
           </h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-400">
             {total.toLocaleString('en-CA')} sites · ECCC GHGRP attribution quality
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function DashboardConfidencePanel({ stats }: Props) {
                 {row.count.toLocaleString('en-CA')}
               </div>
               <div className="mt-1 text-sm tabular-nums text-gray-400">{row.pct}%</div>
-              <p className="mt-2 text-[10px] leading-snug text-gray-500">{meta.description}</p>
+              <p className="mt-2 text-[10px] leading-snug text-gray-400">{meta.description}</p>
             </motion.div>
           )
         })}

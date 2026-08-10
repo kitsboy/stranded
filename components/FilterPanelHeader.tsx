@@ -55,7 +55,7 @@ export default function FilterPanelHeader({
         </div>
       </div>
       {activeFilterCount > 0 && (
-        <div className="text-[9px] text-gray-500 mt-1">
+        <div className="text-[9px] text-gray-400 mt-1">
           {tf(locale, 'mapFiltersActive', { count: String(activeFilterCount) })}
         </div>
       )}

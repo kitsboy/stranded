@@ -67,7 +67,7 @@ function GwpCalculatorWidget() {
         <div className="text-xs uppercase tracking-wider text-gray-400">CO₂-equivalent (annualized)</div>
         <div className="text-3xl font-bold text-[#34D399] tabular-nums mt-2">{(co2eTonnes * 365).toLocaleString(undefined, { maximumFractionDigits: 0 })} t/yr</div>
         <div className="text-sm text-gray-400 mt-2">{co2eTonnes.toFixed(1)} t CO₂e per day</div>
-        <p className="text-[10px] text-gray-500 mt-3">AR6 uses GWP₁₀₀ ≈ 27.9 for CH₄; 20-yr GWP is higher — slider lets you explore sensitivity.</p>
+        <p className="text-[10px] text-gray-400 mt-3">AR6 uses GWP₁₀₀ ≈ 27.9 for CH₄; 20-yr GWP is higher — slider lets you explore sensitivity.</p>
       </div>
     </div>
   )
@@ -147,7 +147,7 @@ function QuizSection() {
           <button onClick={reset} className="px-6 py-2 bg-[#FF8C00] text-black rounded-xl font-medium">Retake Quiz</button>
           <button onClick={shareScore} className="px-6 py-2 border border-white/20 rounded-xl font-medium flex items-center gap-2"><Share2 size={16} /> Share score</button>
         </div>
-        <p className="text-xs mt-3 text-gray-500">Tag @give_bit to join the movement.</p>
+        <p className="text-xs mt-3 text-gray-400">Tag @give_bit to join the movement.</p>
       </div>
     );
   }
@@ -462,7 +462,7 @@ export default function EducationContent() {
             </div>
           ))}
         </div>
-        <p className="text-center text-[10px] text-gray-500 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
+        <p className="text-center text-[10px] text-gray-400 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
       </div>
 
       {/* Methane GWP calculator widget */}
@@ -666,7 +666,7 @@ export default function EducationContent() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-gray-500">Prices are approximate North American 2026 installed costs for biogas-rated equipment (including basic gas conditioning). Real quotes vary with site conditions, H₂S levels, and scale. Larger units = better $/kW economics.</p>
+        <p className="text-center text-xs text-gray-400">Prices are approximate North American 2026 installed costs for biogas-rated equipment (including basic gas conditioning). Real quotes vary with site conditions, H₂S levels, and scale. Larger units = better $/kW economics.</p>
 
         <div className="mt-10 mb-6">
           <h3 className="text-2xl font-semibold tracking-tighter mb-2">Used & Refurb ASIC Market</h3>
@@ -677,7 +677,7 @@ export default function EducationContent() {
                 <div className="font-semibold text-[#FF8C00] text-xs">{a.name}</div>
                 <div className="text-xl font-mono mt-1">{a.hashrate} TH/s</div>
                 <div className="text-gray-400 text-xs mt-2">C${a.costCad.toLocaleString()} · {a.condition}</div>
-                <div className="text-[10px] text-gray-500 mt-1">{a.warranty} warranty</div>
+                <div className="text-[10px] text-gray-400 mt-1">{a.warranty} warranty</div>
               </div>
             ))}
           </div>
@@ -706,7 +706,7 @@ export default function EducationContent() {
             <div>
               <label className="text-xs text-gray-400">Gas Treatment Cost Adder (% of CapEx)</label>
               <input type="range" min="0" max="30" value={treatmentAdder} onChange={e => setTreatmentAdder(+e.target.value)} className="w-full accent-[#FF8C00]" />
-              <div className="text-[10px] text-gray-500">{treatmentAdder}% (H2S, moisture, etc.)</div>
+              <div className="text-[10px] text-gray-400">{treatmentAdder}% (H2S, moisture, etc.)</div>
             </div>
             <div className="text-xs text-gray-300 flex items-end">Total Installed Power: <span className="ml-2 text-lg font-mono text-[#FF8C00]">{((GENSET_DATA as any)[selectedGenset].powerKW * numUnits).toLocaleString()} kW</span></div>
           </div>
@@ -766,7 +766,7 @@ export default function EducationContent() {
                   {p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
-              <span className="text-xs text-gray-500 self-center ml-2"> (changes focus &amp; defaults)</span>
+              <span className="text-xs text-gray-400 self-center ml-2"> (changes focus &amp; defaults)</span>
             </div>
 
             {/* Site Selector - use real data, filterable by province for regional suitability */}
@@ -867,7 +867,7 @@ export default function EducationContent() {
                     <strong>Methane Loss (Opportunity Cost if vented):</strong> {methaneLossDailyBtc.toFixed(2)} BTC/day (~${(methaneLossDailyBtc * liveBtc).toLocaleString()}) lost forever. This is the &ldquo;methane loss ROI&rdquo; — the value destroyed by not capturing.
                   </div>
 
-                  <div className="mt-3 text-[10px] text-gray-500">{personaNote} All numbers use real emission from dataset + current live BTC + your generator/ASIC choices. CapEx and opex are honest (no hype).</div>
+                  <div className="mt-3 text-[10px] text-gray-400">{personaNote} All numbers use real emission from dataset + current live BTC + your generator/ASIC choices. CapEx and opex are honest (no hype).</div>
                 </div>
               )
             })()}
@@ -896,7 +896,7 @@ export default function EducationContent() {
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-gray-500 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
+        <p className="text-[10px] text-gray-400 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
       </div>
 
       <div id="edu-gensets" className="mb-16 scroll-mt-28">
@@ -1003,7 +1003,7 @@ export default function EducationContent() {
                 <option value="cummins">Cummins QSK60G (1.5 MW)</option>
                 <option value="microturbine">Capstone C200 Microturbine</option>
               </select>
-              <div className="text-[10px] text-gray-500 mt-1">Higher efficiency gensets increase your effective BTC yield in the model.</div>
+              <div className="text-[10px] text-gray-400 mt-1">Higher efficiency gensets increase your effective BTC yield in the model.</div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -1084,7 +1084,7 @@ export default function EducationContent() {
             <div key={i} className="glass p-5 rounded-2xl border-l-4 border-[#FF8C00]">
               <div className="text-2xl font-semibold text-[#FF8C00]">{item.val}</div>
               <div className="text-sm mt-1">{item.label}</div>
-              <div className="text-[10px] text-gray-500 mt-1">{item.sub}</div>
+              <div className="text-[10px] text-gray-400 mt-1">{item.sub}</div>
             </div>
           ))}
         </div>
@@ -1104,12 +1104,12 @@ export default function EducationContent() {
           <div>
             <label className="text-xs text-gray-400">Internet Factor (tune it)</label>
             <input type="range" min="0.5" max="1.5" step="0.05" defaultValue="1" className="w-full accent-[#5BC0BE]" onChange={(e) => { /* demo only - would update a live score display */ }} />
-            <div className="text-[10px] text-gray-500">Fiber 1.35 / Starlink 1.15 / LTE 1.0</div>
+            <div className="text-[10px] text-gray-400">Fiber 1.35 / Starlink 1.15 / LTE 1.0</div>
           </div>
           <div>
             <label className="text-xs text-gray-400">Confidence Factor</label>
             <input type="range" min="0.5" max="1.5" step="0.05" defaultValue="1" className="w-full accent-[#FF8C00]" />
-            <div className="text-[10px] text-gray-500">High 1.25 / Medium 1.0 / Low 0.75</div>
+            <div className="text-[10px] text-gray-400">High 1.25 / Medium 1.0 / Low 0.75</div>
           </div>
           <div className="text-xs text-gray-300">Tweak the factors and see how Stranded Scores (and therefore Value priority) shift dramatically. This is why transparent modeling wins capital.</div>
         </div>
@@ -1242,7 +1242,7 @@ export default function EducationContent() {
               <label key={i} className="flex items-center gap-2"><input type="checkbox" className="accent-[#FF8C00]" /> {item}</label>
             ))}
           </div>
-          <div className="text-[10px] text-gray-500 mt-2">Progress saves in your browser. Complete the journey and you earn the “Stranded Value Advocate” mental badge.</div>
+          <div className="text-[10px] text-gray-400 mt-2">Progress saves in your browser. Complete the journey and you earn the “Stranded Value Advocate” mental badge.</div>
         </div>
 
         {/* Comparison Tool */}
@@ -1276,7 +1276,7 @@ export default function EducationContent() {
             <Link href="/sites" className="px-8 py-3 border border-white/30 rounded-xl hover:bg-white/5">Browse All 2,611 Sites</Link>
             <a href="/Marketing-Hub.html" className="px-8 py-3 border border-white/30 rounded-xl hover:bg-white/5">Download Full Professional Docs</a>
           </div>
-          <p className="mt-12 text-xs text-gray-500">This is an educational tool for demonstration purposes. Not investment or engineering advice. Everything here quantifies real Stranded Value.</p>
+          <p className="mt-12 text-xs text-gray-400">This is an educational tool for demonstration purposes. Not investment or engineering advice. Everything here quantifies real Stranded Value.</p>
         </div>
       </div>
     </div>

@@ -175,7 +175,7 @@ export default function AllSitesExplorer() {
 
       {activeChips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="text-[10px] uppercase tracking-wider text-gray-500">Active filters</span>
+          <span className="text-[10px] uppercase tracking-wider text-gray-400">Active filters</span>
           {activeChips.map(chip => (
             <button
               key={chip.key}
@@ -378,7 +378,7 @@ export default function AllSitesExplorer() {
         </div>
       )}
 
-      <p className="text-center text-[11px] text-gray-500 mt-8">All data 100% from source geojson. Stranded Score is a computed signal for capture attractiveness.</p>
+      <p className="text-center text-[11px] text-gray-400 mt-8">All data 100% from source geojson. Stranded Score is a computed signal for capture attractiveness.</p>
     </div>
   )
 }

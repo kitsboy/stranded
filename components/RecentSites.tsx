@@ -60,7 +60,7 @@ export default function RecentSites({ onSelect, compact = false, max = 5 }: Rece
             title={r.province}
           >
             {r.name}
-            <span className="text-gray-500 ml-1">· {r.score}</span>
+            <span className="text-gray-400 ml-1">· {r.score}</span>
           </button>
         ))}
       </div>

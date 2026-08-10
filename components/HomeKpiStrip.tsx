@@ -36,7 +36,7 @@ export default function HomeKpiStrip({ stats }: Props) {
     >
       <div className="max-w-5xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-[10px] uppercase tracking-widest text-gray-500">Live KPIs</span>
+          <span className="text-[10px] uppercase tracking-widest text-gray-400">Live KPIs</span>
           <Link href="/dashboard" className="text-[10px] text-[#5BC0BE] hover:underline">
             Open dashboard →
           </Link>
@@ -50,7 +50,7 @@ export default function HomeKpiStrip({ stats }: Props) {
                 </div>
                 <div className="text-[10px] text-gray-400 mt-0.5 leading-tight">{item.label}</div>
                 {item.sub && (
-                  <div className="text-[9px] text-gray-500 mt-0.5 leading-tight">{item.sub}</div>
+                  <div className="text-[9px] text-gray-400 mt-0.5 leading-tight">{item.sub}</div>
                 )}
               </>
             )

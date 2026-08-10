@@ -83,7 +83,7 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 ${color}`}>
               <Icon size={16} />
             </div>
-            <span className="text-[9px] text-gray-500 uppercase tracking-wider">{i + 1}</span>
+            <span className="text-[9px] text-gray-400 uppercase tracking-wider">{i + 1}</span>
           </div>
         ))}
       </div>

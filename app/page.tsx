@@ -141,7 +141,7 @@ export default function LandingPage() {
             {tf(locale, 'heroBrowseSites', { count: siteCount.toLocaleString() })}
           </Link>
         </div>
-        <p className="mt-4 text-xs text-gray-500">{t('heroDataNote')}</p>
+        <p className="mt-4 text-xs text-gray-400">{t('heroDataNote')}</p>
       </div>
 
       <HomeKpiStrip stats={stats} />
@@ -235,7 +235,7 @@ export default function LandingPage() {
             </Link>
           ))}
         </div>
-        <p className="text-[10px] text-gray-500 mt-3 text-center">Capturing these alone could avoid thousands of tonnes CO₂e annually while generating significant Bitcoin.</p>
+        <p className="text-[10px] text-gray-400 mt-3 text-center">Capturing these alone could avoid thousands of tonnes CO₂e annually while generating significant Bitcoin.</p>
       </div>
 
       {/* How Stranded Value Works - Clear Business Flow */}
@@ -259,7 +259,7 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-500 mt-6">Every step uses live data from the 2,611-site dataset for honest, bankable Stranded Value.</p>
+        <p className="text-center text-xs text-gray-400 mt-6">Every step uses live data from the 2,611-site dataset for honest, bankable Stranded Value.</p>
       </div>
 
       {/* Choose Your Path - Persona Driven Business Flow */}
@@ -317,7 +317,7 @@ export default function LandingPage() {
         <div id="quick-impact" className="mt-4 text-2xl font-mono text-[#FF8C00]">
           ~{Math.round(siteCount * 0.05).toLocaleString()} sites • ~{(stats?.impact?.co2eAvoided5PctTonnes ?? 1049340).toLocaleString()} t CO₂e avoided/yr • serious sats
         </div>
-        <p className="text-xs text-gray-500 mt-1">This is only 5%. The full {siteCount.toLocaleString()} is 20× more powerful.</p>
+        <p className="text-xs text-gray-400 mt-1">This is only 5%. The full {siteCount.toLocaleString()} is 20× more powerful.</p>
       </div>
 
       {/* Voices from the Frontier */}
@@ -349,8 +349,8 @@ export default function LandingPage() {
           <Link href="/map" className="px-9 py-4 rounded-2xl bg-[#FF8C00] text-[#0b111f] font-semibold text-lg hover:bg-[#ff9d33] active:scale-[0.985] touch-manipulation">Open the Live Command Center</Link>
           <Link href="/education" className="px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/5 text-lg touch-manipulation">Dive deeper in the Education Center</Link>
         </div>
-        <p className="mt-4 text-xs text-gray-500 tracking-widest">EVERYTHING IS VERIFIABLE • ⌘K ANYWHERE TO SEARCH THE 2,611</p>
-        <p className="mt-6 text-[10px] text-gray-500">
+        <p className="mt-4 text-xs text-gray-400 tracking-widest">EVERYTHING IS VERIFIABLE • ⌘K ANYWHERE TO SEARCH THE 2,611</p>
+        <p className="mt-6 text-[10px] text-gray-400">
           Full professional marketing suite available in the <a href="/Marketing-Hub.html" className="underline hover:text-[#FF8C00]">Marketing Hub</a> (includes all 5 documents + visuals)
         </p>
       </div>

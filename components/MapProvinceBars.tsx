@@ -30,7 +30,7 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
 
   if (!provinces.length) {
     return (
-      <div className={`text-[10px] text-gray-500 ${className}`} data-testid="map-province-bars">
+      <div className={`text-[10px] text-gray-400 ${className}`} data-testid="map-province-bars">
         {t('mapProvinceBarsEmpty')}
       </div>
     )
@@ -71,7 +71,7 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
                 style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }}
               />
             </div>
-            <span className="text-[9px] text-gray-500 tabular-nums w-6 text-right shrink-0">{p.count}</span>
+            <span className="text-[9px] text-gray-400 tabular-nums w-6 text-right shrink-0">{p.count}</span>
           </div>
         ))}
       </div>

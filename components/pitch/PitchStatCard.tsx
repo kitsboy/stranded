@@ -55,7 +55,7 @@ export default function PitchStatCard({
         <span className="xl:hidden">{compactValue ?? value}</span>
       </div>
       {sub && (
-        <p className="relative mt-auto pt-2.5 text-[10px] leading-snug text-gray-500 line-clamp-2">
+        <p className="relative mt-auto pt-2.5 text-[10px] leading-snug text-gray-400 line-clamp-2">
           {sub}
         </p>
       )}

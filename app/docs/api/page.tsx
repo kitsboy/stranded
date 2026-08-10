@@ -37,7 +37,7 @@ export default function ApiDocsPage() {
       <div className="not-prose overflow-x-auto rounded-xl border border-white/10 mb-8">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
               <th className="p-3">Route</th>
               <th className="p-3">Format</th>
               <th className="p-3">Description</th>
@@ -55,7 +55,7 @@ export default function ApiDocsPage() {
             ].map(([route, fmt, desc]) => (
               <tr key={route} className="border-b border-white/5">
                 <td className="p-3"><a href={route} className="font-mono text-xs text-[#5BC0BE] hover:underline">{route}</a></td>
-                <td className="p-3 text-xs text-gray-500">{fmt}</td>
+                <td className="p-3 text-xs text-gray-400">{fmt}</td>
                 <td className="p-3 text-xs">{desc}</td>
               </tr>
             ))}
@@ -70,7 +70,7 @@ export default function ApiDocsPage() {
       <div className="not-prose overflow-x-auto rounded-xl border border-white/10 mb-8">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
               <th className="p-3">Param</th>
               <th className="p-3">Type</th>
               <th className="p-3">Description</th>
@@ -80,14 +80,14 @@ export default function ApiDocsPage() {
             {MAP_QUERY_PARAMS.map(([param, type, desc]) => (
               <tr key={param} className="border-b border-white/5">
                 <td className="p-3 font-mono text-xs text-[#FF8C00]">{param}</td>
-                <td className="p-3 text-xs text-gray-500">{type}</td>
+                <td className="p-3 text-xs text-gray-400">{type}</td>
                 <td className="p-3 text-xs">{desc}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500 mb-8">
+      <p className="text-xs text-gray-400 mb-8">
         Example: <a href="/map?province=Alberta&minScore=80" className="text-[#5BC0BE] hover:underline font-mono">/map?province=Alberta&amp;minScore=80</a>
       </p>
 
@@ -109,7 +109,7 @@ export default function ApiDocsPage() {
           <div className="not-prose overflow-x-auto rounded-lg border border-white/10 mb-3">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-white/10 text-left text-gray-500">
+                <tr className="border-b border-white/10 text-left text-gray-400">
                   <th className="p-2">Field</th>
                   <th className="p-2">Type</th>
                   <th className="p-2">Description</th>
@@ -119,7 +119,7 @@ export default function ApiDocsPage() {
                 {LIVE_STATS_PROVINCE_FIELDS.map(([field, type, desc]) => (
                   <tr key={field} className="border-b border-white/5">
                     <td className="p-2 font-mono text-[#5BC0BE]">{field}</td>
-                    <td className="p-2 text-gray-500">{type}</td>
+                    <td className="p-2 text-gray-400">{type}</td>
                     <td className="p-2">{desc}</td>
                   </tr>
                 ))}
@@ -151,7 +151,7 @@ curl -sS https://stranded.giveabit.io/status.json | jq '.'`}
           </pre>
         </section>
 
-        <p className="text-gray-500">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="text-[#5BC0BE]">ECCC Open Data</a></p>
+        <p className="text-gray-400">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="text-[#5BC0BE]">ECCC Open Data</a></p>
         <Link href="/map" className="inline-block text-[#FF8C00] hover:underline">Try it on the map →</Link>
       </div>
     </div>

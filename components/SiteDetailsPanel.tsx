@@ -352,14 +352,14 @@ export default function SiteDetailsPanel({
                 <span>
                   {f.label}
                   {f.inferred && <span className="ml-1 text-[9px] text-amber-400/90">inferred</span>}
-                  <span className="block text-[10px] text-gray-500">{f.detail}</span>
+                  <span className="block text-[10px] text-gray-400">{f.detail}</span>
                 </span>
                 <span className="font-mono text-[#5BC0BE] shrink-0">+{f.points}</span>
               </li>
             ))}
           </ul>
           {scoreExplain.notes.length > 0 && (
-            <p className="mt-2 text-[10px] text-gray-500 leading-snug">{scoreExplain.notes[0]}</p>
+            <p className="mt-2 text-[10px] text-gray-400 leading-snug">{scoreExplain.notes[0]}</p>
           )}
         </details>
       )}
@@ -562,7 +562,7 @@ export default function SiteDetailsPanel({
           <div>
             <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — current network estimate</label>
             <input type="number" step="0.0000001" value={revenuePerThPerDayBtc} onChange={(e) => setRevenuePerThPerDayBtc(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
-            <div className="text-[10px] text-gray-500 mt-0.5">This is the key honest variable. Adjust based on real hashprice data.</div>
+            <div className="text-[10px] text-gray-400 mt-0.5">This is the key honest variable. Adjust based on real hashprice data.</div>
           </div>
 
           <div>
@@ -590,7 +590,7 @@ export default function SiteDetailsPanel({
             </div>
           </div>
 
-          <div className="text-[10px] text-gray-500 pt-2 border-t border-slate-700">
+          <div className="text-[10px] text-gray-400 pt-2 border-t border-slate-700">
             These advanced inputs make the model more realistic. Fixed costs mean payback improves with scale. All values are estimates only — see disclaimer below.
           </div>
         </div>
@@ -646,7 +646,7 @@ export default function SiteDetailsPanel({
         </button>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-700 text-[10px] text-gray-500 leading-snug">
+      <div className="mt-4 pt-3 border-t border-slate-700 text-[10px] text-gray-400 leading-snug">
         <strong>Important Honesty Note:</strong> This is a simplified model for educational purposes only. 
         Real Bitcoin mining revenue varies constantly with network difficulty, transaction fees, hardware degradation, 
         actual gas composition, weather, maintenance downtime, and local regulations. Power costs, hardware prices, 
@@ -654,7 +654,7 @@ export default function SiteDetailsPanel({
         Past or modeled performance is not a guarantee of future results.
       </div>
 
-      <p className="text-xs text-gray-500 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
+      <p className="text-xs text-gray-400 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
       </>
       )}
     </motion.div>

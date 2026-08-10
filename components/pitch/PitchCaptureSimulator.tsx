@@ -66,7 +66,7 @@ export default function PitchCaptureSimulator({
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">{desc}</p>
+            <p className="mt-1 max-w-2xl text-sm text-gray-400">{desc}</p>
           </div>
           <div className="pitch-capture-pill rounded-full border border-[#FF8C00]/30 bg-[#FF8C00]/10 px-4 py-2 text-sm font-semibold tabular-nums text-[#FF8C00]">
             {capturePct}% · {projection.sites.toLocaleString('en-CA')} sites
@@ -104,7 +104,7 @@ export default function PitchCaptureSimulator({
                 transition={{ delay: i * 0.04 }}
               >
                 <tile.icon className="mb-2 h-4 w-4 opacity-60" style={{ color: tile.accent }} />
-                <div className="text-[10px] uppercase tracking-wider text-gray-500">{tile.label}</div>
+                <div className="text-[10px] uppercase tracking-wider text-gray-400">{tile.label}</div>
                 <div
                   className="mt-1 text-lg font-bold tabular-nums sm:text-xl"
                   style={{ color: tile.accent }}
@@ -115,7 +115,7 @@ export default function PitchCaptureSimulator({
             ))}
           </div>
 
-          <p className="mt-5 text-xs text-gray-500">
+          <p className="mt-5 text-xs text-gray-400">
             {powerLabel}: <span className="text-gray-300">{formatCompactNumber(projection.generatorKw, 1)} kW</span> estimated generator capacity at this capture rate.
           </p>
         </div>

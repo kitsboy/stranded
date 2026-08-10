@@ -49,7 +49,7 @@ export default function AboutPage() {
           <li><strong className="text-white">Communities</strong> — partnership pathway at <Link href="/partnerships" className="link-animated">/partnerships</Link>; funding quiz at <Link href="/funding" className="link-animated">/funding</Link>.</li>
           <li><strong className="text-white">Developers</strong> — repo is open at <a href="https://github.com/kitsboy/stranded" className="link-animated text-[#FF8C00]">github.com/kitsboy/stranded</a>; run <code className="text-xs bg-black/30 px-1 rounded">npm run validate</code> before PRs.</li>
         </ul>
-        <p className="text-xs text-gray-500 mt-4">Stranded is client-first: bookmarks, missions, and alerts stay on your device unless you choose to share export files.</p>
+        <p className="text-xs text-gray-400 mt-4">Stranded is client-first: bookmarks, missions, and alerts stay on your device unless you choose to share export files.</p>
       </section>
     </div>
   )

@@ -66,7 +66,7 @@ export default function ChangelogView({ initialContent }: { initialContent: stri
       {version && (
         <p className="text-sm text-gray-400 mb-6">
           Live deploy: <span className="font-mono text-[#FF8C00]">v{version}</span>
-          {buildId && <span className="text-gray-500"> · build {buildId}</span>}
+          {buildId && <span className="text-gray-400"> · build {buildId}</span>}
           <span className="text-gray-600"> — from live-stats.json</span>
         </p>
       )}
@@ -90,11 +90,11 @@ export default function ChangelogView({ initialContent }: { initialContent: stri
                   {isOpen ? (
                     <ChevronDown size={18} className="text-[#FF8C00] shrink-0" />
                   ) : (
-                    <ChevronRight size={18} className="text-gray-500 shrink-0" />
+                    <ChevronRight size={18} className="text-gray-400 shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-[#FF8C00] font-mono">[{section.version}]</div>
-                    <div className="text-xs text-gray-500">{section.date}{bulletCount ? ` · ${bulletCount} items` : ''}</div>
+                    <div className="text-xs text-gray-400">{section.date}{bulletCount ? ` · ${bulletCount} items` : ''}</div>
                   </div>
                   {section.version === version && (
                     <span className="text-[10px] uppercase px-2 py-0.5 rounded-full border border-[#34D399]/30 text-[#34D399]">
@@ -130,7 +130,7 @@ export default function ChangelogView({ initialContent }: { initialContent: stri
         <pre className="whitespace-pre-wrap text-sm text-gray-300 font-sans leading-relaxed">{initialContent}</pre>
       )}
 
-      <p className="mt-8 text-xs text-gray-500">
+      <p className="mt-8 text-xs text-gray-400">
         Full git history on{' '}
         <Link href="https://github.com/kitsboy/stranded" className="link-animated" target="_blank" rel="noreferrer">
           GitHub

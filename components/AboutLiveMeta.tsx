@@ -33,7 +33,7 @@ export default function AboutLiveMeta() {
         </span>
       )}
       {siteCount != null && (
-        <span className="text-gray-500">
+        <span className="text-gray-400">
           · {siteCount.toLocaleString()} sites in live dataset
         </span>
       )}

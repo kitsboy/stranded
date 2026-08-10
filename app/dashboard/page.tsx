@@ -193,14 +193,14 @@ export default function DashboardPage() {
             <div className="grid gap-4 text-sm sm:grid-cols-3">
               {carbonScenarios.map(c => (
                 <div key={c.price} className="rounded-xl border border-white/10 bg-black/20 p-4 text-center">
-                  <div className="text-[10px] uppercase text-gray-500">${c.price}/t CO₂e</div>
+                  <div className="text-[10px] uppercase text-gray-400">${c.price}/t CO₂e</div>
                   <div className="mt-1 text-xl font-bold tabular-nums text-[#34D399]">${c.usd5.toLocaleString()}/yr</div>
-                  <div className="mt-1 text-xs text-gray-500">{c.tonnes5.toLocaleString()} t</div>
+                  <div className="mt-1 text-xs text-gray-400">{c.tonnes5.toLocaleString()} t</div>
                 </div>
               ))}
             </div>
           )}
-          <p className="mt-3 text-[10px] text-gray-500">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands.</p>
+          <p className="mt-3 text-[10px] text-gray-400">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands.</p>
         </div>
 
         <div className="dashboard-panel mb-8 rounded-2xl border border-white/10 p-5">
@@ -228,7 +228,7 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-wider text-gray-400">
                   <th className="pb-2 pr-3">#</th>
                   <th className="pb-2 pr-3">Site</th>
                   <th className="pb-2 pr-3">Province</th>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                     : ''
                   return (
                     <tr key={s.id} className="border-b border-white/5 hover:bg-white/[0.02]">
-                      <td className="py-2 pr-3 text-gray-500">{i + 1}</td>
+                      <td className="py-2 pr-3 text-gray-400">{i + 1}</td>
                       <td className="py-2 pr-3">
                         <Link href={`/map?site=${s.id}`} className="block max-w-[200px] truncate text-[#5BC0BE] hover:underline">{s.name}</Link>
                       </td>
@@ -278,7 +278,7 @@ export default function DashboardPage() {
                   className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
                   style={{ borderColor: `${color}33` }}
                 >
-                  <div className="text-[10px] uppercase tracking-wider text-gray-500">{tier.label.split(' ')[0]}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-gray-400">{tier.label.split(' ')[0]}</div>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-2xl font-bold tabular-nums" style={{ color }}>
                       {tier.count.toLocaleString('en-CA')}

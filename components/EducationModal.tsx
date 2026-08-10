@@ -72,7 +72,7 @@ export default function EducationModal() {
             </ul>
           </div>
           
-          <p className="text-xs text-gray-500 pt-2 border-t border-[#5BC0BE]/20">
+          <p className="text-xs text-gray-400 pt-2 border-t border-[#5BC0BE]/20">
             Data sources: Provincial energy regulators, satellite methane detection, 
             and industry partnerships. This is a prototype for demonstration purposes.
           </p>

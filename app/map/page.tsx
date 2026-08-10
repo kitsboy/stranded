@@ -1015,7 +1015,7 @@ function StrandedCommandCenter() {
             />
           </label>
           <span className="text-gray-400 hidden sm:inline">@ {radiusFilter.lat.toFixed(2)}, {radiusFilter.lng.toFixed(2)}</span>
-          <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-500 hover:text-white">✕</button>
+          <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-400 hover:text-white">✕</button>
         </div>
       )}
 
@@ -1120,7 +1120,7 @@ function StrandedCommandCenter() {
                     >
                       {minEmission.toLocaleString()}
                     </button>
-                    <span className="text-gray-500">—</span>
+                    <span className="text-gray-400">—</span>
                     <button
                       type="button"
                       onClick={() => handleEmissionLabelTap('max')}
@@ -1201,7 +1201,7 @@ function StrandedCommandCenter() {
                     ))}
                   </div>
                   {!showAllProvinces && provinces.length > 6 && (
-                    <div className="text-[9px] text-gray-500 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
+                    <div className="text-[9px] text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
                   )}
                 </div>
 
@@ -1260,7 +1260,7 @@ function StrandedCommandCenter() {
                             setMapBookmarks(getMapViewBookmarks())
                             toast.message(t('mapViewBookmarkDeleted'))
                           }}
-                          className="text-[9px] text-gray-500 hover:text-white px-0.5"
+                          className="text-[9px] text-gray-400 hover:text-white px-0.5"
                           aria-label={`Delete ${b.name}`}
                         >
                           ✕
@@ -1271,7 +1271,7 @@ function StrandedCommandCenter() {
                   <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">{t('mapFilterPresets')}</div>
                   {recentPresets.length > 0 && (
                     <div className="mb-3">
-                      <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">{t('mapRecentPresets')}</div>
+                      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
                       <div className="flex flex-wrap gap-1">
                         {recentPresets.map(p => (
                           <button
@@ -1299,7 +1299,7 @@ function StrandedCommandCenter() {
                         <button
                           type="button"
                           onClick={() => handleDeletePreset(p.name)}
-                          className="p-0.5 text-gray-500 hover:text-red-400 rounded"
+                          className="p-0.5 text-gray-400 hover:text-red-400 rounded"
                           aria-label={t('mapDeletePreset')}
                           data-testid={`delete-preset-${p.name}`}
                         >
@@ -1651,7 +1651,7 @@ function StrandedCommandCenter() {
 
       {liveStats && <EcccFreshnessBadge stats={liveStats} />}
 
-      <div className="map-footer-bar absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-gray-500 flex flex-wrap items-center justify-between gap-2">
+      <div className="map-footer-bar absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-gray-400 flex flex-wrap items-center justify-between gap-2">
         <span>Data: Environment and Climate Change Canada (ECCC) GHGRP · Open Government of Canada</span>
         <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">ECCC dataset ↗</a>
       </div>

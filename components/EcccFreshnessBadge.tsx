@@ -29,7 +29,7 @@ export default function EcccFreshnessBadge({ stats, className = '' }: EcccFreshn
           <span className="font-mono text-[#5BC0BE]">
             {tf(locale, 'mapEcccReportingYear', { year: String(reportingYear) })}
           </span>
-          <span className="text-gray-500"> · </span>
+          <span className="text-gray-400"> · </span>
           <span className="text-gray-400" title={new Date(stats.generatedAt).toLocaleString()}>
             {tf(locale, 'mapEcccGenerated', { when: generatedLabel })}
           </span>

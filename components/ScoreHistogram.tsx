@@ -35,11 +35,11 @@ export default function ScoreHistogram({ scores, bucketSize = 10, className = ''
               style={{ height: `${(b.count / max) * 100}%`, minHeight: b.count ? 4 : 0 }}
               title={`${b.label}: ${b.count} sites`}
             />
-            <span className="text-[8px] text-gray-500 truncate w-full text-center">{b.min}</span>
+            <span className="text-[8px] text-gray-400 truncate w-full text-center">{b.min}</span>
           </div>
         ))}
       </div>
-      <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+      <div className="flex justify-between text-[10px] text-gray-400 mt-2">
         <span>Stranded Score distribution</span>
         <span>{scores.length.toLocaleString()} sites</span>
       </div>

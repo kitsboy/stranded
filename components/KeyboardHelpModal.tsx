@@ -49,7 +49,7 @@ export default function KeyboardHelpModal({ open, onClose }: { open: boolean; on
             </button>
           </div>
 
-          <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-2">{t('kbdGlobalSection')}</h3>
+          <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-2">{t('kbdGlobalSection')}</h3>
           <ul className="space-y-2 text-sm mb-5">
             {GLOBAL_SHORTCUTS.map(s => (
               <li key={s.keys} className="flex justify-between gap-4">

@@ -44,7 +44,7 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
           <h2 id="dashboard-capture-heading" className="text-xl font-bold">
             {t('dashboardCaptureTitle')}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-400">
             {t('dashboardCaptureSubtitle')}
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
               transition={{ delay: i * 0.04 }}
             >
               <tile.icon className="mb-1.5 h-4 w-4 opacity-60" style={{ color: tile.accent }} aria-hidden />
-              <div className="text-[10px] uppercase tracking-wider text-gray-500">{tile.label}</div>
+              <div className="text-[10px] uppercase tracking-wider text-gray-400">{tile.label}</div>
               <div className="mt-1 text-base font-bold tabular-nums sm:text-lg" style={{ color: tile.accent }}>
                 {tile.value}
               </div>

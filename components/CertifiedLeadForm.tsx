@@ -110,7 +110,7 @@ export default function CertifiedLeadForm() {
         <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/40">LOCAL ONLY</span>
         <span className="text-sm font-semibold">Stranded Value Certified — draft application</span>
       </div>
-      <p className="text-xs text-gray-500 -mt-2">
+      <p className="text-xs text-gray-400 -mt-2">
         Submissions stay on your device until you export or email them. No server-side intake yet — this is not a live certified intake form.
         {draftSaved && <span className="block mt-1 text-[#5BC0BE]">Draft autosaved locally.</span>}
       </p>

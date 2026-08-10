@@ -50,7 +50,7 @@ export default function AsicFleetSizer({ className = '' }: AsicFleetSizerProps) 
           <div className="text-xl font-bold tabular-nums">{result.containerEstimate}</div>
         </div>
       </div>
-      <p className="text-[10px] text-gray-500 mt-3">MW → ASIC count: floor(MW × 1e6 ÷ W per machine). ~120 ASICs per 40&apos; container.</p>
+      <p className="text-[10px] text-gray-400 mt-3">MW → ASIC count: floor(MW × 1e6 ÷ W per machine). ~120 ASICs per 40&apos; container.</p>
     </div>
   )
 }

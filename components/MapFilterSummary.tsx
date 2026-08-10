@@ -31,7 +31,7 @@ export default function MapFilterSummary({ chips }: MapFilterSummaryProps) {
       data-testid="map-filter-summary"
       aria-label={t('mapFilterSummary')}
     >
-      <div className="text-[9px] uppercase tracking-widest text-gray-500 mb-1.5">{t('mapFilterSummary')}</div>
+      <div className="text-[9px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapFilterSummary')}</div>
       <div className="flex flex-wrap gap-1.5">
         <AnimatePresence mode="popLayout" initial={false}>
           {chips.map(chip => (

@@ -56,7 +56,7 @@ function BarChart({ items, maxBars = 8 }: { items: { label: string; value: numbe
             <span className="truncate pr-2 text-gray-300">{item.label}</span>
             <span className="shrink-0 tabular-nums text-gray-400">
               {fmt(item.value)}
-              {item.pct != null && <span className="ml-1 text-gray-500">({item.pct}%)</span>}
+              {item.pct != null && <span className="ml-1 text-gray-400">({item.pct}%)</span>}
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/5">
@@ -436,7 +436,7 @@ function PitchContent() {
       {/* Charts row 1 */}
       <section data-pitch-section className="mx-auto max-w-6xl px-6 py-10">
         <h2 className="mb-2 text-2xl font-bold">{t('pitchGeographyScale')}</h2>
-        <p className="mb-8 text-sm text-gray-500">{t('pitchGeoDesc')}</p>
+        <p className="mb-8 text-sm text-gray-400">{t('pitchGeoDesc')}</p>
         <div className="grid gap-6 md:grid-cols-2">
           <div className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#5BC0BE]">{t('pitchSitesByProvince')}</h3>
@@ -493,7 +493,7 @@ function PitchContent() {
               </button>
             ))}
           </div>
-          <p className="mb-2 text-[10px] text-gray-500">{SENSITIVITY_PRESETS[activePreset].description}</p>
+          <p className="mb-2 text-[10px] text-gray-400">{SENSITIVITY_PRESETS[activePreset].description}</p>
           <label className="text-xs text-gray-400">
             {tf(locale, 'pitchBtcScenario', { pct: String(btcSensitivity), price: adjustedBtc.toLocaleString() })}
           </label>
@@ -530,7 +530,7 @@ function PitchContent() {
             <div className="rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-6 text-center">
               <div className="text-3xl font-bold tabular-nums text-[#5BC0BE] sm:text-4xl">{fmt(i.co2eAvoided5PctTonnes)}</div>
               <div className="mt-2 text-sm text-gray-400">{t('pitchCo2e5')}</div>
-              <div className="mt-1 text-xs text-gray-500">~{i.sitesAt5Pct} sites · GWP {i.methaneGwp}×</div>
+              <div className="mt-1 text-xs text-gray-400">~{i.sitesAt5Pct} sites · GWP {i.methaneGwp}×</div>
             </div>
             <div className="rounded-2xl border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-6 text-center">
               <div className="text-3xl font-bold tabular-nums text-[#FF8C00] sm:text-4xl">{fmt(i.co2eAvoided100PctTonnes)}</div>
@@ -558,7 +558,7 @@ function PitchContent() {
       {/* Top sites */}
       <section data-pitch-section className="mx-auto max-w-6xl px-6 py-14">
         <h2 className="mb-2 text-2xl font-bold">{t('pitchTopOpportunities')}</h2>
-        <p className="mb-6 text-sm text-gray-500">{t('pitchTopDesc')}</p>
+        <p className="mb-6 text-sm text-gray-400">{t('pitchTopDesc')}</p>
         <div className="overflow-x-auto rounded-2xl border border-white/10">
           <table className="w-full text-sm">
             <thead>
@@ -574,7 +574,7 @@ function PitchContent() {
             <tbody>
               {stats.topSites.slice(0, 10).map((site, idx) => (
                 <tr key={site.id} className="border-b border-white/5 transition hover:bg-white/[0.03]">
-                  <td className="px-4 py-3 text-gray-500 tabular-nums">{idx + 1}</td>
+                  <td className="px-4 py-3 text-gray-400 tabular-nums">{idx + 1}</td>
                   <td className="px-4 py-3">
                     <Link href={`/map?site=${site.id}`} className="text-[#5BC0BE] hover:underline">
                       {site.name}
@@ -587,7 +587,7 @@ function PitchContent() {
                       {site.score}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{site.genset}</td>
+                  <td className="px-4 py-3 text-xs text-gray-400">{site.genset}</td>
                 </tr>
               ))}
             </tbody>

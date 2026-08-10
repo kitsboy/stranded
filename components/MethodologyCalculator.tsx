@@ -81,7 +81,7 @@ export default function MethodologyCalculator() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-8">
           <div className="text-xs uppercase tracking-wider text-gray-400 mb-2">Estimated Score</div>
           <div className={`stranded-score text-4xl px-4 py-2 ${scoreTierClass(score)}`}>{score}</div>
-          <p className="text-[10px] text-gray-500 mt-4 text-center max-w-xs">
+          <p className="text-[10px] text-gray-400 mt-4 text-center max-w-xs">
             Uses the same v3 formula as the map. Omitting grid/internet triggers inferred proxies — here you supply explicit values.
           </p>
         </div>

@@ -23,7 +23,7 @@ export default function DashboardGensetMix({ stats, maxBars = 6 }: Props) {
           <h2 id="genset-mix-heading" className="text-lg font-bold">
             Genset Mix
           </h2>
-          <p className="text-xs text-gray-500">Jenbacher-class recommendations across portfolio</p>
+          <p className="text-xs text-gray-400">Jenbacher-class recommendations across portfolio</p>
         </div>
       </div>
 
@@ -34,7 +34,7 @@ export default function DashboardGensetMix({ stats, maxBars = 6 }: Props) {
               <span className="truncate pr-2 font-medium text-gray-300">{g.id}</span>
               <span className="shrink-0 tabular-nums text-gray-400">
                 {g.count.toLocaleString('en-CA')}
-                <span className="ml-1 text-gray-500">({g.pct}%)</span>
+                <span className="ml-1 text-gray-400">({g.pct}%)</span>
               </span>
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-white/5">

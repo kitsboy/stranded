@@ -17,17 +17,17 @@ export default function OpenDataPage() {
       <ul>
         <li>
           <a href="/data/stranded-sites.geojson" download><code>/data/stranded-sites.geojson</code></a>
-          {' '}— 2,611 FeatureCollection · <span className="text-gray-500">~1.9 MB</span>
+          {' '}— 2,611 FeatureCollection · <span className="text-gray-400">~1.9 MB</span>
           {' '}(<a href="/data/stranded-sites.geojson" download className="text-[#5BC0BE]">direct download</a>)
         </li>
         <li>
           <a href="/data/live-stats.json" download><code>/data/live-stats.json</code></a>
-          {' '}— aggregates, top sites, value model · <span className="text-gray-500">~8.5 KB</span>
+          {' '}— aggregates, top sites, value model · <span className="text-gray-400">~8.5 KB</span>
           {' '}(<a href="/data/live-stats.json" download className="text-[#5BC0BE]">direct download</a>)
         </li>
         <li><a href="/status.json"><code>/status.json</code></a> — health + version</li>
       </ul>
-      <p className="text-xs text-gray-500 not-prose">File sizes are approximate static build artifacts; re-run <code>npm run build</code> to refresh.</p>
+      <p className="text-xs text-gray-400 not-prose">File sizes are approximate static build artifacts; re-run <code>npm run build</code> to refresh.</p>
 
       <h2>Source lineage</h2>
       <p>
@@ -46,7 +46,7 @@ export default function OpenDataPage() {
       <div className="not-prose overflow-x-auto rounded-xl border border-white/10 my-4">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
               <th className="p-3">Field</th>
               <th className="p-3">Type</th>
               <th className="p-3">Description</th>
@@ -70,7 +70,7 @@ export default function OpenDataPage() {
             ].map(([field, type, desc]) => (
               <tr key={field} className="border-b border-white/5">
                 <td className="p-3 font-mono text-[#5BC0BE] text-xs">{field}</td>
-                <td className="p-3 text-xs text-gray-500">{type}</td>
+                <td className="p-3 text-xs text-gray-400">{type}</td>
                 <td className="p-3 text-xs">{desc}</td>
               </tr>
             ))}

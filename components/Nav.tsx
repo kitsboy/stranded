@@ -106,7 +106,6 @@ export default function Nav() {
           <button
             onClick={openPalette}
             className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/15 hover:bg-white/5 text-gray-400 hover:text-white transition"
-            aria-label={`${t('search')} ⌘K`}
             title="Search sites (⌘K)"
           >
             <Search size={15} />

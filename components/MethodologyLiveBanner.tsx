@@ -33,7 +33,7 @@ export default function MethodologyLiveBanner() {
           </>
         )}
         {stats?.version && (
-          <span className="text-gray-500"> · v{stats.version}</span>
+          <span className="text-gray-400"> · v{stats.version}</span>
         )}
       </div>
       <div className="flex flex-wrap gap-3 text-xs">

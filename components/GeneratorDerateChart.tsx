@@ -37,11 +37,11 @@ export default function GeneratorDerateChart({
               style={{ height: `${(p.kw / maxKw) * 100}%`, minHeight: 3 }}
               title={`${(p.derate * 100).toFixed(0)}% derate → ${p.kw} kW`}
             />
-            <span className="text-[7px] text-gray-500">{Math.round(p.derate * 100)}%</span>
+            <span className="text-[7px] text-gray-400">{Math.round(p.derate * 100)}%</span>
           </div>
         ))}
       </div>
-      <p className="text-[9px] text-gray-500 mt-1">H₂S / treatment derate vs rated kW ({gensetId})</p>
+      <p className="text-[9px] text-gray-400 mt-1">H₂S / treatment derate vs rated kW ({gensetId})</p>
     </div>
   )
 }

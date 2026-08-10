@@ -157,7 +157,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, GHGRP ID (G12345), NAICS, province… (⌘K)"
               aria-label="Search sites by name, province, or company"
-              className="flex-1 bg-transparent text-lg placeholder:text-gray-500 focus:outline-none focus:ring-0"
+              className="flex-1 bg-transparent text-lg placeholder:text-gray-400 focus:outline-none focus:ring-0"
             />
             <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close search"><X size={20} /></button>
           </div>
@@ -208,7 +208,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
                     <div className="text-xs text-[#5BC0BE] font-mono tabular-nums">
                       {site.emission.toLocaleString()} kg/d
                     </div>
-                    <MapPin className="w-4 h-4 text-gray-500 group-hover:text-[#FF8C00]" />
+                    <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#FF8C00]" />
                   </div>
                 </button>
               )
@@ -322,7 +322,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
             )}
           </div>
 
-          <div className="px-5 py-3 border-t border-white/10 text-[10px] text-gray-500 flex items-center gap-2">
+          <div className="px-5 py-3 border-t border-white/10 text-[10px] text-gray-400 flex items-center gap-2">
             <div>Press <kbd className="px-1.5 py-px bg-white/10 rounded">↑↓</kbd> to navigate • <kbd className="px-1.5 py-px bg-white/10 rounded">⏎</kbd> to fly to site</div>
             <div className="flex-1" />
             <div>ESC to close</div>

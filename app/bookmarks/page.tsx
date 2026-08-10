@@ -121,7 +121,7 @@ export default function BookmarksPage() {
         ))}
       </div>
 
-      {loading && <p className="text-gray-500">Loading…</p>}
+      {loading && <p className="text-gray-400">Loading…</p>}
       {!loading && sites.length === 0 && (
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 text-center" data-testid="bookmarks-empty">
           <p className="text-gray-400 mb-4">No bookmarks yet. Star sites from the map panel to build a watchlist.</p>
@@ -139,12 +139,12 @@ export default function BookmarksPage() {
             <div className="flex justify-between items-start gap-3">
               <Link href={`/map?site=${s.id}`} className="flex-1 min-w-0">
                 <div className="font-medium truncate">{s.properties.name || s.id}</div>
-                <div className="text-xs text-gray-500">{s.properties.province} · score {s.strandedScore}</div>
+                <div className="text-xs text-gray-400">{s.properties.province} · score {s.strandedScore}</div>
               </Link>
               <span className="font-mono text-[#5BC0BE] text-sm shrink-0">{s.emission.toLocaleString()} kg/d</span>
             </div>
             <div className="mt-3 flex items-center gap-2">
-              <label className="text-[10px] text-gray-500 uppercase">Tag</label>
+              <label className="text-[10px] text-gray-400 uppercase">Tag</label>
               <input
                 type="text"
                 defaultValue={s.tag || ''}

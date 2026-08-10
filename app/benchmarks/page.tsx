@@ -45,7 +45,7 @@ export default function BenchmarksPage() {
           { label: 'Map render mode', value: 'Native cluster @ 180+ pins' },
         ].map(row => (
           <div key={row.label} className="p-4 rounded-xl border border-white/10">
-            <div className="text-[10px] uppercase text-gray-500">{row.label}</div>
+            <div className="text-[10px] uppercase text-gray-400">{row.label}</div>
             <div className="text-xl font-mono mt-1 text-[#5BC0BE]">{row.value}</div>
           </div>
         ))}
@@ -58,7 +58,7 @@ export default function BenchmarksPage() {
           <div className="overflow-x-auto rounded-xl border border-white/10 mb-10" data-testid="benchmarks-top-sites">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+                <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
                   <th className="p-3">#</th>
                   <th className="p-3">Site</th>
                   <th className="p-3">Province</th>
@@ -70,7 +70,7 @@ export default function BenchmarksPage() {
               <tbody>
                 {stats.topSites.slice(0, 10).map((s, i) => (
                   <tr key={s.id} className="border-b border-white/5 hover:bg-white/[0.02]">
-                    <td className="p-3 text-gray-500">{i + 1}</td>
+                    <td className="p-3 text-gray-400">{i + 1}</td>
                     <td className="p-3">
                       <Link href={`/map?site=${s.id}`} className="font-medium hover:text-[#FF8C00]">
                         {s.name}
@@ -79,7 +79,7 @@ export default function BenchmarksPage() {
                     <td className="p-3 text-gray-400">{s.province}</td>
                     <td className="p-3 text-right font-mono text-[#FF8C00]">{s.score}</td>
                     <td className="p-3 text-right font-mono text-[#5BC0BE]">{s.emissionKgDay.toLocaleString()}</td>
-                    <td className="p-3 text-xs text-gray-500">{s.genset}</td>
+                    <td className="p-3 text-xs text-gray-400">{s.genset}</td>
                   </tr>
                 ))}
               </tbody>
@@ -93,7 +93,7 @@ export default function BenchmarksPage() {
       <div className="overflow-x-auto rounded-xl border border-white/10">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-500">
+            <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
               <th className="p-3">Model</th>
               <th className="p-3">Hashrate</th>
               <th className="p-3">Power</th>
@@ -108,7 +108,7 @@ export default function BenchmarksPage() {
                 <td className="p-3 font-mono text-xs text-[#5BC0BE]">{row.hashrate}</td>
                 <td className="p-3 font-mono text-xs">{row.power}</td>
                 <td className="p-3 font-mono text-xs text-[#FF8C00]">{row.efficiency}</td>
-                <td className="p-3 text-xs text-gray-500">{row.vendor}</td>
+                <td className="p-3 text-xs text-gray-400">{row.vendor}</td>
               </tr>
             ))}
           </tbody>

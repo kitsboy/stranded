@@ -149,7 +149,7 @@ export default function MapFiltersPanel({
           ))}
         </div>
         {!showAllProvinces && provinces.length > 6 && (
-          <div className="text-[9px] text-gray-500 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
+          <div className="text-[9px] text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
         )}
       </div>
 
@@ -168,7 +168,7 @@ export default function MapFiltersPanel({
         <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">{t('mapFilterPresets')}</div>
         {recentPresets.length > 0 && (
           <div className="mb-3">
-            <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1.5">{t('mapRecentPresets')}</div>
+            <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
             <div className="flex flex-wrap gap-1">
               {recentPresets.map(p => (
                 <button
@@ -196,7 +196,7 @@ export default function MapFiltersPanel({
               <button
                 type="button"
                 onClick={() => onDeletePreset(p.name)}
-                className="p-0.5 text-gray-500 hover:text-red-400 rounded"
+                className="p-0.5 text-gray-400 hover:text-red-400 rounded"
                 aria-label={t('mapDeletePreset')}
                 data-testid={`delete-preset-${p.name}`}
               >

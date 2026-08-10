@@ -29,7 +29,7 @@ export default function DashboardSourceMix({ stats }: Props) {
           <h2 id="source-mix-heading" className="font-semibold">
             Source Type Mix
           </h2>
-          <p className="text-[10px] text-gray-500">Top 6 ECCC facility categories</p>
+          <p className="text-[10px] text-gray-400">Top 6 ECCC facility categories</p>
         </div>
       </div>
 
@@ -50,7 +50,7 @@ export default function DashboardSourceMix({ stats }: Props) {
                   <span className="font-semibold" style={{ color }}>
                     {src.count.toLocaleString('en-CA')}
                   </span>
-                  <span className="ml-1 text-gray-500">({src.pct}%)</span>
+                  <span className="ml-1 text-gray-400">({src.pct}%)</span>
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/5">
@@ -68,7 +68,7 @@ export default function DashboardSourceMix({ stats }: Props) {
         })}
       </div>
 
-      <p className="mt-4 text-[10px] text-gray-500">
+      <p className="mt-4 text-[10px] text-gray-400">
         {stats.sourceTypes.length} source categories · {stats.siteCount.toLocaleString('en-CA')} total sites
       </p>
     </section>

@@ -83,7 +83,7 @@ export default function LayerControls({
       data-compact={compact || undefined}
     >
       <h3 className={`font-bold text-[#FF8C00] flex items-center gap-2 ${compact ? 'text-xs mb-2' : 'text-sm mb-3'}`}>
-        {t('mapLayers')} <span className="text-[10px] text-gray-500 font-normal">{t('mapLayersNote')}</span>
+        {t('mapLayers')} <span className="text-[10px] text-gray-400 font-normal">{t('mapLayersNote')}</span>
       </h3>
 
       {onMapStyleChange && (
@@ -179,7 +179,7 @@ export default function LayerControls({
         </div>
       )}
 
-      <div className={`border-t border-[#5BC0BE]/20 text-[10px] text-gray-500 ${compact ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>{t('mapLayerNote2')}</div>
+      <div className={`border-t border-[#5BC0BE]/20 text-[10px] text-gray-400 ${compact ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>{t('mapLayerNote2')}</div>
 
       {onCopyViewport && (
         <details className="mt-2 group">
@@ -189,7 +189,7 @@ export default function LayerControls({
           <button
             type="button"
             onClick={onCopyViewport}
-            className="mt-2 w-full text-[10px] px-2 py-1.5 rounded-lg border border-white/10 text-gray-500 hover:text-[#5BC0BE] hover:border-[#5BC0BE]/30 transition"
+            className="mt-2 w-full text-[10px] px-2 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-[#5BC0BE] hover:border-[#5BC0BE]/30 transition"
             data-testid="copy-viewport-json"
           >
             {copyViewportLabel}

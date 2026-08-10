@@ -54,7 +54,7 @@ export default function BreakevenCalculator({
           <div className="text-2xl font-bold text-[#5BC0BE] tabular-nums">C${Math.round(result.dailyNet).toLocaleString()}</div>
         </div>
       </div>
-      <p className="text-[10px] text-gray-500 mt-3">Simple payback: CapEx ÷ (net daily × 30). Illustrative — excludes debt service &amp; halving.</p>
+      <p className="text-[10px] text-gray-400 mt-3">Simple payback: CapEx ÷ (net daily × 30). Illustrative — excludes debt service &amp; halving.</p>
     </div>
   )
 }
