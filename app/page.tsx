@@ -342,7 +342,7 @@ export default function LandingPage() {
         <p className="text-xl text-gray-300 max-w-lg mx-auto">Not another tax. Not another rule. Just the hardest money ever invented, quietly eating one of the dirtiest problems on Earth — one small, profitable, beautiful site at a time.</p>
       </div>
 
-      {/* In-page CTAs (scroll with content). Mobile sticky Open Map / Pitch live in Footer — not a second fixed layer. */}
+      {/* In-page CTAs (scroll with content). Footer is in-flow at page bottom (not sticky/fixed). */}
       <div className="max-w-6xl mx-auto px-6 pb-16 text-center">
         <div className="text-xs tracking-[3px] text-[#FF8C00] mb-3">THE DATA IS OPEN. THE TOOLS ARE READY.</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

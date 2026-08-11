@@ -57,8 +57,7 @@ export default function RootLayout({
       <body className="bg-[var(--bg-dark)] text-white antialiased flex flex-col min-h-screen">
         <Providers>
           <Nav />
-          {/* pb clears sticky footer (+ mobile CTA row inside it) so page content is not clipped */}
-          <main id="main-content" className="flex-1 max-md:pb-36 md:pb-0">
+          <main id="main-content" className="flex-1">
             <ErrorBoundary label="page">{children}</ErrorBoundary>
           </main>
           <Footer />

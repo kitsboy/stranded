@@ -43,7 +43,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="sticky bottom-0 z-40 w-full bg-[var(--bg-dark)]/95 backdrop-blur border-t border-white/10 px-4 sm:px-6 py-4 text-[11px] text-gray-300 mt-auto"
+      className="w-full bg-[var(--bg-dark)]/95 backdrop-blur border-t border-white/10 px-4 sm:px-6 py-6 text-[11px] text-gray-300 mt-auto shrink-0"
       role="contentinfo"
     >
       <div className="max-w-7xl mx-auto">

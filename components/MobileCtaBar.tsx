@@ -1,10 +1,8 @@
 'use client'
 
 /**
- * Mobile primary actions live inside the sticky Footer now
- * (see Footer.tsx). Kept as a no-op so layout imports stay stable.
- * Previously a fixed bar at bottom-14 sat under the footer (z-index
- * fight) and looked like half-visible orange/outline button ghosts.
+ * No-op: mobile primary CTAs live in the in-flow Footer (scroll to bottom).
+ * Kept so layout imports stay stable. Previously a fixed bar, then sticky footer.
  */
 export default function MobileCtaBar() {
   return null
