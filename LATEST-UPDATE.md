@@ -1,5 +1,4 @@
 # stranded — Last Updated 2026-08-11 by Grok
 
-Brief: v2.10.0 mega batch + fuller 4-col footer (giveabit logo, all pages, legal); session closed  
-Commit: 7982619 (79826197ab610c62353662f36f33a517ba9f0516)  
-HEAD: will bump if docs commit follows  
+Brief: v2.10.0 mega batch + 4-col footer (giveabit logo); docs/handoff closed  
+Commit: a84ea6f (a84ea6fa3ea21af63397ef4fad117674f022fbce)  
