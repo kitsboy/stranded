@@ -46,18 +46,20 @@ Open http://localhost:3003
 
 Hit **⌘K** (or the Search button) anywhere for the global site command palette. It's magical.
 
-## Key Features (Current — v2.3.5)
+## Key Features (Current — v2.10.0)
 
-- **Stranded Score™ v3** — Shared formula (`lib/scoring-shared.cjs`); factor explain UI; inferred grid/internet when ECCC fields missing; tier colors elite/high/med/low.
+- **Stranded Score™ v3** — Shared formula (`lib/scoring-shared.cjs`); factor explain UI; confidence bands + data-quality grade; tier colors elite/high/med/low.
+- **Site models** — Monte Carlo ROI, multi-vertical scores, gas decline, CapEx/FX, amortization, carbon overlay, case-study export.
 - **Bank packs** — Diligence exports: CSV, Excel-friendly TSV, Markdown, HTML print, JSON (site + mission).
-- **Command Center Map** — Filters, heatmap, score legend, mission portfolio, peers, sensitivity tornado, watch-site local banner, deep links (`site`, `province`, `mission`).
-- **Active Mission Portfolio** — localStorage; add from map, education, or sites browser.
+- **Command Center Map** — Filters, heatmap, saved views, visible-site list, mission portfolio, deep links (`site`, `province`, `mission`, `compare`).
+- **Dashboard** — Command center + portfolio rollup, province leaderboard, one-pager PDF/print, weekly digest, term sheet sketch.
+- **Pitch** — Live investor page, present mode, speaker notes.
+- **Funding** — Grant quiz + term sheet / CapEx tools.
 - **Live BTC + Real Machines** — CoinGecko + genset library + advanced ROI in `lib/roi-model.ts`.
-- **Education** — Simulators, quiz, real-site explorer, glossary tips on methodology.
-- **Mobile** — Primary CTAs live inside sticky footer (no fixed ghost bar).
-- **i18n** — Nav, home hero, footer, sites filters, mission panel EN/FR/DE/ES; `useLocale` hook; menu opens downward (EN default).
-- **Quality** — `npm run validate` · `test:helpers` · `e2e` (9) · `deploy:check`.
-- **Docs / handoff** — `docs/KIMI-HANDOFF.md`, `SESSION-SUMMARY-2026-07-09.md`, `docs/PROGRESS-SNAPSHOT-2026-07-09.md`.
+- **Footer** — Full in-flow 4-column site footer (all pages, legal, suite, giveabit logo); not sticky; hidden on `/map`.
+- **i18n** — Nav, home, footer, sites, mission EN/FR/DE/ES.
+- **Quality** — `npm run validate` · `test:helpers` · `e2e` · `deploy:check`.
+- **Docs / handoff** — `docs/KIMI-HANDOFF.md`, `LATEST-UPDATE.md`, `.ai_docs/current-status.md`.
 
 ## Data
 

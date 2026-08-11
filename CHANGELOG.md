@@ -3,7 +3,7 @@
 ## [2.10.0] — 2026-08-11
 
 ### Added — Mega upgrade batch (~50 shipped items)
-- **Footer** — in-flow at page bottom (no sticky viewport hog)
+- **Footer** — in-flow (not sticky); fuller **4-column** layout (platform / resources / company-legal / brand); all app routes; suite + donate; giveabit wordmark (`public/images/giveabit-logo.png`); hover color transitions
 - **Data quality** — per-site DQ grade A–D + flags (`lib/data-quality`)
 - **Score confidence bands** — high/medium/low range around score
 - **Monte Carlo ROI** — seeded BTC/uptime/gas shocks (P10/P50/P90)

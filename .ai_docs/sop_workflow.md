@@ -4,6 +4,7 @@
 > Stack: Next.js 14 (App Router) + TypeScript + Tailwind CSS + Framer Motion
 > Build output: Static export to `dist/` (not `.next/`)
 > Port: **3003**
+> Version: **2.10.0** · Updated 2026-08-11
 
 ---
 
