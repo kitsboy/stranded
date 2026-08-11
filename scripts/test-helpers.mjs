@@ -489,5 +489,136 @@ const schema = websiteSchemaExtras(dashStats)
 assert.equal(schema.numberOfItems, 100)
 assert.ok(schema.about.description.includes('deploy readiness'))
 
+// --- pure helpers batch (data-quality, monte-carlo, gas-decline, amortization, locale, carbon, score-confidence) ---
+const {
+  assessSiteDataQuality,
+  qualityGrade,
+} = await import('../lib/data-quality.ts')
+const { runMonteCarloRoi } = await import('../lib/monte-carlo.ts')
+const { projectGasDecline, cumulativeCapture } = await import('../lib/gas-decline.ts')
+const { amortizeLoan, exportAmortizationCsv } = await import('../lib/amortization.ts')
+const {
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+  localeFromStranded,
+} = await import('../lib/locale-format.ts')
+const {
+  methaneToCo2eTonnes,
+  carbonValueUsd,
+  avoidedMethaneValue,
+} = await import('../lib/carbon-overlay.ts')
+const { scoreConfidenceBand } = await import('../lib/score-confidence.ts')
+
+// data-quality
+const dqEmpty = assessSiteDataQuality({})
+assert.ok(dqEmpty.flags.length >= 4)
+assert.ok(dqEmpty.score < 100)
+assert.equal(qualityGrade(90), 'A')
+assert.equal(qualityGrade(75), 'B')
+assert.equal(qualityGrade(55), 'C')
+assert.equal(qualityGrade(20), 'D')
+assert.equal(dqEmpty.grade, qualityGrade(dqEmpty.score))
+
+const dqGood = assessSiteDataQuality({
+  emission_rate_kg_day: 5000,
+  province: 'Alberta',
+  source_type: 'oil_gas_extraction',
+  confidence: 'high',
+  distance_to_grid_km: 12,
+  reference_year: 2023,
+  name: 'Test Site',
+  company: 'Acme',
+  geometry: { coordinates: [-114, 53] },
+})
+assert.ok(dqGood.score >= 85, `good site score ${dqGood.score}`)
+assert.equal(dqGood.grade, 'A')
+
+const dqZeroCoords = assessSiteDataQuality({
+  emission_rate_kg_day: 100,
+  province: 'AB',
+  source_type: 'landfill',
+  confidence: 'medium',
+  name: 'Zero',
+  geometry: { coordinates: [0, 0] },
+})
+assert.ok(dqZeroCoords.flags.some(f => f.id === 'missing_coords'), '0,0 coords flagged')
+
+// monte-carlo — deterministic seed
+const mc1 = runMonteCarloRoi(1000, { trials: 500, seed: 99, sampleLimit: 10 })
+const mc2 = runMonteCarloRoi(1000, { trials: 500, seed: 99, sampleLimit: 10 })
+assert.equal(mc1.p50, mc2.p50)
+assert.equal(mc1.mean, mc2.mean)
+assert.equal(mc1.p10, mc2.p10)
+assert.equal(mc1.p90, mc2.p90)
+assert.equal(mc1.trials, 500)
+assert.ok(mc1.p10 <= mc1.p50 && mc1.p50 <= mc1.p90)
+assert.equal(mc1.samples?.length, 10)
+const mcOther = runMonteCarloRoi(1000, { trials: 500, seed: 1, sampleLimit: 0 })
+assert.notEqual(mc1.p50, mcOther.p50)
+assert.equal(mcOther.samples, undefined)
+
+// gas-decline
+const curve = projectGasDecline(1000, 10, 3)
+assert.equal(curve.length, 4) // years 0..3
+assert.equal(curve[0].emission, 1000)
+assert.equal(curve[0].revenueFactor, 1)
+assert.ok(Math.abs(curve[1].emission - 900) < 0.1)
+assert.ok(curve[3].revenueFactor < curve[1].revenueFactor)
+const cap = cumulativeCapture(100, 0, 2)
+assert.equal(cap, 100 * 365 * 2)
+const capDecline = cumulativeCapture(100, 50, 2)
+assert.ok(capDecline < cap)
+
+// amortization
+const loan = amortizeLoan(100_000, 8, 5)
+assert.equal(loan.schedule.length, 5)
+assert.ok(loan.annualPayment > 0)
+assert.ok(loan.totalInterest > 0)
+assert.equal(loan.schedule[loan.schedule.length - 1].balance, 0)
+const zeroRate = amortizeLoan(10_000, 0, 4)
+assert.equal(zeroRate.annualPayment, 2500)
+const csvLoan = exportAmortizationCsv(loan.schedule)
+assert.ok(csvLoan.startsWith('year,payment,interest,principal,balance'))
+assert.equal(csvLoan.trim().split('\n').length, 6)
+
+// locale-format
+assert.equal(localeFromStranded('en'), 'en-CA')
+assert.equal(localeFromStranded('fr'), 'fr-CA')
+assert.equal(localeFromStranded('de'), 'de-DE')
+assert.equal(localeFromStranded('es'), 'es-ES')
+const cad = formatCurrency(123456, 'en-CA', 'CAD')
+assert.ok(cad.includes('123') || cad.includes('123456'))
+assert.ok(formatNumber(1234.5, 'en-CA').length > 0)
+assert.ok(formatPercent(0.125, 'en').includes('12'))
+assert.ok(formatPercent(12.5, 'en').includes('12'))
+
+// carbon-overlay
+assert.equal(methaneToCo2eTonnes(10, 28), 280)
+assert.equal(carbonValueUsd(100, 45), 4500)
+const avoided = avoidedMethaneValue(1000, 50, 28) // 365 t CH4/yr * 28 * 50
+assert.ok(avoided > 0)
+assert.equal(avoided, carbonValueUsd(methaneToCo2eTonnes(365, 28), 50))
+
+// score-confidence (object form + positional form)
+const bandHigh = scoreConfidenceBand({
+  score: 80,
+  confidence: 'high',
+  distance_to_grid_km: 5,
+  dataQualityScore: 90,
+})
+assert.equal(bandHigh.band, 'high')
+assert.ok(bandHigh.low >= 0 && bandHigh.high <= 100)
+assert.ok(bandHigh.low <= 80 && bandHigh.high >= 80)
+
+const bandLow = scoreConfidenceBand(50, { confidence: 'low' }, 40)
+assert.equal(bandLow.band, 'low')
+assert.ok(bandLow.high - bandLow.low >= bandHigh.high - bandHigh.low)
+
+const bandClamp = scoreConfidenceBand({ score: 2, confidence: 'low' })
+assert.equal(bandClamp.low, 0)
+const bandTop = scoreConfidenceBand({ score: 99, confidence: 'low' })
+assert.equal(bandTop.high, 100)
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)
