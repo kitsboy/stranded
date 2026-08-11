@@ -199,6 +199,28 @@ button:focus-visible,
   transform: scaleX(1);
 }
 
+/* Site footer — fuller in-flow footer (not sticky) */
+.site-footer {
+  box-shadow: 0 -1px 0 rgba(91, 192, 190, 0.08);
+}
+
+.site-footer .footer-link {
+  letter-spacing: 0.01em;
+}
+
+html.theme-light .site-footer {
+  background: linear-gradient(to bottom, rgba(248, 250, 252, 0.98), #f1f5f9);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+html.theme-light .site-footer .footer-link {
+  color: #64748b;
+}
+
+html.theme-light .site-footer .footer-link:hover {
+  color: #0d9488;
+}
+
 /* Section divider */
 .section-divider {
   border: none;
