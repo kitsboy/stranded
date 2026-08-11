@@ -52,7 +52,7 @@ npm run deploy:check
 8. **Docs drift risk** — prefer git tag `v2.3.5` + live-stats version over prose  
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-08-10T10:56:13.577Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-08-11T17:45:41.800Z
 
 | Metric | Value |
 |--------|-------|

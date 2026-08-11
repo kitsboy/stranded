@@ -1,3 +1,22 @@
+## Session — 2026-08-11 (Grok / M3)
+
+**Done:**
+- In-flow footer (removed sticky bottom overlay + main pb-36)
+- v2.10.0 mega upgrade batch (~50 items): data quality, confidence bands, Monte Carlo, multi-vertical scores, gas decline, CapEx/FX, amortization, carbon overlay, formula tips, saved map views, cluster/visible site list, dashboard rollup/leaderboard/KPI picker/one-pager/digest/term sheet, pitch speaker notes, funding tools, PWA install + stale banner + density mode, suite footer links, onboarding checklist, command palette tools
+- `npm run test:helpers` ALL PASSED; `npm run build` OK (26 routes)
+- Commits: `67e0d60` footer · `984e4df` libs/UI · `e41e639` wiring
+
+**Decisions:**
+- Footer stays document-flow (`mt-auto` on short pages only) — not CSS sticky
+- New model panels live primarily on Site Details + Dashboard/Funding (map stays lean)
+- Version bump 2.9.0 → 2.10.0
+
+**Git State:**
+- SHA: see `git log -1` after push
+- Branch: main
+
+---
+
 ## 2026-08-10 — Kimi/THOR: Lighthouse sweep (DONE, deployed)
 Full site optimization sweep completed end-to-end (sw.js 206-crash fix, console-error elimination, a11y + SEO + security pass). See LATEST-UPDATE.md (top) for per-site summary + commit. Scores re-verified by Kimi. Before touching code, re-check the live Lighthouse state; do not regress: sw.js cache guards (status 200 only), CSP analytics allowlist, image width/height attrs, aria-labels on form controls.
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.10.0] — 2026-08-11
+
+### Added — Mega upgrade batch (~50 shipped items)
+- **Footer** — in-flow at page bottom (no sticky viewport hog)
+- **Data quality** — per-site DQ grade A–D + flags (`lib/data-quality`)
+- **Score confidence bands** — high/medium/low range around score
+- **Monte Carlo ROI** — seeded BTC/uptime/gas shocks (P10/P50/P90)
+- **Multi-vertical scores** — mining / heat / H₂ / abatement
+- **Gas decline scenarios** — multi-year emission + revenue factor chart
+- **CapEx inflation + FX** — USD/CAD scaling controls
+- **Debt amortization** — schedule table + CSV export
+- **Carbon overlay** — CH₄ → CO₂e value @ carbon price
+- **Formula tooltips** — catalog of Score / payback / CO₂e formulas
+- **Saved map views** — named filter snapshots in map panel
+- **Visible site list** — cluster-style drawer for filtered sites
+- **Dashboard** — portfolio rollup, province leaderboard, KPI tile picker, print one-pager, weekly digest.md, term sheet sketch
+- **Pitch** — speaker notes panel (present mode)
+- **Funding** — term sheet + CapEx/FX + amortization tools
+- **Site details** — case study export (md/html), all model panels above
+- **PWA install prompt** + **stale data banner** + **density toggle** (comfy/compact)
+- **Suite footer links** (GiveAbit / Satohash / HQ)
+- **Onboarding checklist** on home
+- **Command palette** tools & calculators section
+- **API docs** — compare param + changelog/llms endpoints
+- Unit tests for new pure helpers
+
 ## [2.9.0] — 2026-07-15
 
 ### Added — Megabatch upgrades #526–625 (100 items across 4 waves)
