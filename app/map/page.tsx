@@ -74,6 +74,9 @@ import MapEmptyState from '@/components/MapEmptyState'
 import FilterPanelHeader from '@/components/FilterPanelHeader'
 import { computeMapFilterStats, buildFilterAnnouncement, siteDensityTier } from '@/lib/map-stats'
 import { useReducedMotion } from '@/lib/useReducedMotion'
+import SavedMapViews from '@/components/SavedMapViews'
+import ClusterSiteList from '@/components/ClusterSiteList'
+import type { ClusterListItem } from '@/lib/cluster-list'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
@@ -135,6 +138,7 @@ function StrandedCommandCenter() {
   const [performanceMode, setPerformanceMode] = useState(false)
   const [mapBookmarks, setMapBookmarks] = useState<MapViewBookmark[]>([])
   const [bookmarkName, setBookmarkName] = useState('')
+  const [clusterList, setClusterList] = useState<ClusterListItem[] | null>(null)
   const [historyTick, setHistoryTick] = useState(0)
   const [showSearchHint, setShowSearchHint] = useState(false)
   const [mapResizeNonce, setMapResizeNonce] = useState(0)
@@ -1031,6 +1035,23 @@ function StrandedCommandCenter() {
         onKeyboardHelp={() => setShowKeyboardHelp(true)}
       />
 
+      {clusterList && (
+        <ClusterSiteList
+          items={clusterList}
+          title="Visible sites"
+          onClose={() => setClusterList(null)}
+          onSelect={id => {
+            const site = allSites.find(s => s.id === id)
+            if (site) {
+              setSelectedSite(site)
+              setClusterList(null)
+              const [lng, lat] = site.geometry?.coordinates || []
+              if (lat != null && lng != null) setCenterTarget({ lat, lng, zoom: 10 })
+            }
+          }}
+        />
+      )}
+
       <MapHud
         filteredCount={filteredSites.length}
         totalCount={allSites.length}
@@ -1085,6 +1106,48 @@ function StrandedCommandCenter() {
                 />
               </div>
               <MapFilterSummary chips={filterChips} />
+              <div className="map-filter-body">
+                <SavedMapViews
+                  getCurrentState={() => ({
+                    filters: {
+                      minScore: String(minScore || ''),
+                      minEmission: String(minEmission || ''),
+                      maxEmission: String(maxEmission < 100000 ? maxEmission : ''),
+                      provinces: Array.from(selectedProvinces).join(','),
+                      sources: Array.from(selectedSources).join(','),
+                    },
+                  })}
+                  onLoad={state => {
+                    const f = state.filters || {}
+                    if (f.minScore) setMinScore(Number(f.minScore) || 0)
+                    if (f.minEmission) setMinEmission(Number(f.minEmission) || 0)
+                    if (f.maxEmission) setMaxEmission(Number(f.maxEmission) || 100000)
+                    if (f.provinces) setSelectedProvinces(new Set(f.provinces.split(',').filter(Boolean)))
+                    if (f.sources) setSelectedSources(new Set(f.sources.split(',').filter(Boolean)))
+                    if (state.lat != null && state.lng != null) {
+                      setCenterTarget({ lat: state.lat, lng: state.lng, zoom: state.zoom })
+                    }
+                    toast.success('Saved view loaded')
+                  }}
+                />
+                <button
+                  type="button"
+                  className="mt-2 w-full rounded-lg border border-white/15 py-1.5 text-[11px] text-gray-300 hover:bg-white/5"
+                  onClick={() => {
+                    const items: ClusterListItem[] = filteredSites.slice(0, 40).map(s => ({
+                      id: s.id,
+                      name: s.properties.name || s.id,
+                      score: s.strandedScore,
+                      emission: s.emission,
+                      province: s.properties.province,
+                    }))
+                    setClusterList(items)
+                  }}
+                  data-testid="open-visible-site-list"
+                >
+                  List visible sites ({Math.min(40, filteredSites.length)})
+                </button>
+              </div>
 
               <div className="map-filter-body space-y-4">
                 <label className="flex items-center justify-between gap-2 text-xs cursor-pointer group">

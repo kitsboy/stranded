@@ -25,6 +25,19 @@ import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormat
 import BankPackPreview from '@/components/BankPackPreview'
 import CopyLinkButton from '@/components/CopyLinkButton'
 import { useLocale } from '@/lib/useLocale'
+import { assessSiteDataQuality } from '@/lib/data-quality'
+import { scoreConfidenceBand } from '@/lib/score-confidence'
+import { computeVerticalScores } from '@/lib/vertical-scores'
+import { avoidedMethaneValue } from '@/lib/carbon-overlay'
+import DataQualityBadge from '@/components/DataQualityBadge'
+import ConfidenceBandBar from '@/components/ConfidenceBandBar'
+import VerticalScoreGrid from '@/components/VerticalScoreGrid'
+import MonteCarloPanel from '@/components/MonteCarloPanel'
+import GasDeclineChart from '@/components/GasDeclineChart'
+import FormulaTip from '@/components/FormulaTip'
+import CaseStudyExport from '@/components/CaseStudyExport'
+import CapexFxControls from '@/components/CapexFxControls'
+import AmortizationTable from '@/components/AmortizationTable'
 
 const ASIC_MACHINES = [
   { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
@@ -259,6 +272,28 @@ export default function SiteDetailsPanel({
   }, [site, allSites])
   const peerMeta = useMemo(() => (site && peers.length ? peerSummary(site as EnrichedSite, peers) : null), [site, peers])
   const tornado = useMemo(() => (site ? sensitivityTornado(site as EnrichedSite, liveBtcPrice) : []), [site, liveBtcPrice])
+  const dataQuality = useMemo(
+    () => (site ? assessSiteDataQuality(p, site.geometry) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [site?.id],
+  )
+  const confBand = useMemo(() => {
+    if (!site || typeof site.strandedScore !== 'number') return null
+    return scoreConfidenceBand(site.strandedScore, p, dataQuality?.score)
+  }, [site, p, dataQuality?.score])
+  const verticalScores = useMemo(
+    () =>
+      computeVerticalScores(
+        { source_type: p.source_type, confidence: p.confidence, province: p.province },
+        siteEmission,
+        site?.strandedScore ?? 0,
+      ),
+    [site?.strandedScore, siteEmission, p.source_type, p.confidence, p.province],
+  )
+  const carbonValue = useMemo(
+    () => avoidedMethaneValue(siteEmission, 50, 28),
+    [siteEmission],
+  )
 
   if (!site || !calculations) return null
 
@@ -296,9 +331,12 @@ export default function SiteDetailsPanel({
           </p>
           {typeof site.strandedScore === 'number' && (
             <div className={`flex items-center gap-1.5 flex-wrap ${compact ? 'mt-1.5' : 'mt-2'}`}>
-              <span className={`stranded-score ${scoreTierClass(site.strandedScore)} ${compact ? 'text-sm' : ''}`}>{site.strandedScore}</span>
+              <span className={`stranded-score ${scoreTierClass(site.strandedScore)} ${compact ? 'text-sm' : ''}`}>
+                <FormulaTip formulaId="score">{site.strandedScore}</FormulaTip>
+              </span>
               <span className={`uppercase tracking-wider text-gray-400 ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{scoreTier(site.strandedScore)}</span>
               {site.scoreBadge && <span className={`text-[#5BC0BE] ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{site.scoreBadge}</span>}
+              {dataQuality && <DataQualityBadge report={dataQuality} />}
               {!compact && scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
             </div>
           )}
@@ -363,6 +401,43 @@ export default function SiteDetailsPanel({
           )}
         </details>
       )}
+
+      {confBand && (
+        <div className="mb-4">
+          <ConfidenceBandBar score={site.strandedScore || confBand.low} low={confBand.low} high={confBand.high} band={confBand.band} reason={confBand.reason} />
+        </div>
+      )}
+
+      <div className="mb-4 grid gap-3">
+        <VerticalScoreGrid scores={verticalScores} />
+        <p className="text-[10px] text-gray-500">
+          <FormulaTip formulaId="carbonValue">Carbon abatement @ $50/t</FormulaTip>
+          {': '}
+          <span className="font-mono text-[#34D399]">${carbonValue.toLocaleString()}/yr</span>
+          {' · '}
+          <FormulaTip formulaId="co2e">GWP100=28</FormulaTip>
+        </p>
+        <MonteCarloPanel baseDailyCad={site.potentialDailyProfitCAD || 0} />
+        <GasDeclineChart emissionKgDay={siteEmission} baseDailyCad={site.potentialDailyProfitCAD || 0} />
+        <CapexFxControls baseCapexUsd={Math.max(250_000, (site.maxGeneratorPowerKW || 500) * 1000)} />
+        <AmortizationTable defaultPrincipal={Math.round(((site.maxGeneratorPowerKW || 500) * 1000) * 0.6)} />
+        <CaseStudyExport
+          site={{
+            id: site.id,
+            name: p.name,
+            province: p.province,
+            city: p.city,
+            sourceType: p.source_type,
+            score: site.strandedScore,
+            emissionKgDay: siteEmission,
+            gensetKw: site.maxGeneratorPowerKW,
+            confidence: p.confidence,
+            company: p.company,
+            potentialDailyCad: site.potentialDailyProfitCAD,
+          }}
+          liveBtc={liveBtcPrice}
+        />
+      </div>
 
       {tornado.length > 0 && (
         <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">

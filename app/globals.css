@@ -521,6 +521,20 @@ html.theme-transition *::after {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
+/* Density mode (comfortable default / compact for power users) */
+html.density-compact .page-container,
+html.density-compact .dashboard-page {
+  --density-pad: 0.65rem;
+}
+html.density-compact .dashboard-panel,
+html.density-compact .rounded-2xl.border {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+html.density-compact .nav-root {
+  font-size: 0.8125rem;
+}
+
 /* Fix for map height with sticky nav — dvh avoids mobile browser chrome clipping */
 .map-container {
   height: calc(100vh - 3.5rem);

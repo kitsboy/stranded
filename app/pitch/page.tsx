@@ -29,6 +29,7 @@ import ScoreHistogram from '@/components/ScoreHistogram'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { buildNostrShareUrl } from '@/lib/nostr-share'
 import { markPageReady } from '@/lib/performance'
+import PitchSpeakerNotes from '@/components/PitchSpeakerNotes'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -279,6 +280,7 @@ function PitchContent() {
 
   return (
     <div className="pitch-page min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
+      <PitchSpeakerNotes present={present} />
       {/* Hero */}
       <section data-pitch-section className="pitch-hero relative px-6 pb-12 pt-14 text-center">
         <div className="pitch-hero-mesh pointer-events-none absolute inset-0" />

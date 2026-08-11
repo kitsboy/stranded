@@ -9,6 +9,7 @@ import type { LiveStats } from '@/types/live-stats'
 import { scoreTierClass } from '@/lib/scoring'
 import { formatEmissionCompact, readinessMini, websiteSchemaExtras } from '@/lib/home-metrics'
 import HomeKpiStrip from '@/components/HomeKpiStrip'
+import OnboardingChecklist from '@/components/OnboardingChecklist'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
 import { useLocale } from '@/lib/useLocale'
@@ -145,6 +146,10 @@ export default function LandingPage() {
       </div>
 
       <HomeKpiStrip stats={stats} />
+
+      <div className="max-w-5xl mx-auto px-6 pt-8">
+        <OnboardingChecklist />
+      </div>
 
       {/* Stats */}
       <div className="border-y border-white/10 bg-black/20">

@@ -15,6 +15,7 @@ const MAP_QUERY_PARAMS = [
   ['maxEmission', 'number', 'Maximum emission kg CH₄/day'],
   ['sources', 'string', 'Comma-separated source_type values'],
   ['mission', 'string', 'Comma-separated site IDs to load into mission portfolio'],
+  ['compare', 'string', 'Comma-separated site IDs for compare tray'],
   ['radius', 'number', 'Radius filter in km (requires lat + lng)'],
   ['lat', 'number', 'Radius center latitude (WGS84)'],
   ['lng', 'number', 'Radius center longitude (WGS84)'],
@@ -52,6 +53,8 @@ export default function ApiDocsPage() {
               ['/manifest.json', 'JSON', 'PWA manifest and shortcuts'],
               ['/sitemap.xml', 'XML', 'Crawlable route index'],
               ['/robots.txt', 'text', 'Crawler rules'],
+              ['/llms.txt', 'text', 'LLM-oriented site summary'],
+              ['/changelog', 'HTML', 'Human changelog (parsed from CHANGELOG.md)'],
             ].map(([route, fmt, desc]) => (
               <tr key={route} className="border-b border-white/5">
                 <td className="p-3"><a href={route} className="font-mono text-xs text-[#5BC0BE] hover:underline">{route}</a></td>

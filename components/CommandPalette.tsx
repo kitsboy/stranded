@@ -81,7 +81,18 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
     { label: 'Methodology', href: '/methodology' },
     { label: 'Global', href: '/global' },
     { label: 'Benchmarks', href: '/benchmarks' },
+    { label: 'Status', href: '/status' },
+    { label: 'Changelog', href: '/changelog' },
+    { label: 'API Docs', href: '/docs/api' },
+    { label: 'Open Data', href: '/open-data' },
     { label: 'Marketing Hub', href: '/Marketing-Hub.html' },
+  ]
+
+  const calcCommands = [
+    { label: 'Open ASIC fleet sizer (education)', href: '/education#simulators' },
+    { label: 'Funding + term sheet tools', href: '/funding' },
+    { label: 'Dashboard one-pager export', href: '/dashboard' },
+    { label: 'Grant eligibility quiz', href: '/funding' },
   ]
 
   const bookmarkIds = typeof window !== 'undefined' ? getBookmarks() : []
@@ -220,6 +231,14 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
             <div className="flex flex-wrap gap-2">
               {routes.map(r => (
                 <button key={r.href} onClick={() => runRoute(r.href, r.label)} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <div className="text-[10px] text-gray-400 mb-2 mt-3">TOOLS &amp; CALCULATORS</div>
+            <div className="flex flex-wrap gap-2">
+              {calcCommands.map(r => (
+                <button key={r.label} onClick={() => runRoute(r.href, r.label)} className="text-xs px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/30 text-[#5BC0BE]">
                   {r.label}
                 </button>
               ))}

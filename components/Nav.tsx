@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import LanguageToggle from './LanguageToggle'
 import ThemeToggle from './ThemeToggle'
+import DensityToggle from './DensityToggle'
 import MobileNav from './MobileNav'
 import { useLocale } from '@/lib/useLocale'
 
@@ -102,6 +103,7 @@ export default function Nav() {
         <div className="flex items-center gap-2 text-xs">
           <MobileNav />
           <ThemeToggle />
+          <DensityToggle />
           <LanguageToggle />
           <button
             onClick={openPalette}

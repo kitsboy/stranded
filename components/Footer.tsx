@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { Briefcase } from 'lucide-react'
 import { useLocale } from '@/lib/useLocale'
 import RecentSites from '@/components/RecentSites'
+import SuiteFooterLinks from '@/components/SuiteFooterLinks'
 import { useRouter } from 'next/navigation'
 
 export default function Footer() {
@@ -177,6 +178,9 @@ export default function Footer() {
                 <Briefcase className="w-3 h-3" />
                 <span>{t('footerMarketingHub')}</span>
               </a>
+            </div>
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <SuiteFooterLinks />
             </div>
           </div>
         </div>

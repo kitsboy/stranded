@@ -9,6 +9,8 @@ import JsonLd from '@/components/JsonLd'
 import MobileCtaBar from '@/components/MobileCtaBar'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import PwaInstallPrompt from '@/components/PwaInstallPrompt'
+import StaleDataBanner from '@/components/StaleDataBanner'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
@@ -57,6 +59,7 @@ export default function RootLayout({
       <body className="bg-[var(--bg-dark)] text-white antialiased flex flex-col min-h-screen">
         <Providers>
           <Nav />
+          <StaleDataBanner />
           <main id="main-content" className="flex-1">
             <ErrorBoundary label="page">{children}</ErrorBoundary>
           </main>
@@ -78,6 +81,7 @@ export default function RootLayout({
           <GlobalCommand />
           <MobileCtaBar />
           <OfflineIndicator />
+          <PwaInstallPrompt />
         </Providers>
       </body>
     </html>

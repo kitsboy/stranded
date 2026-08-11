@@ -15,6 +15,9 @@ import { toast } from 'sonner'
 import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { liveModelRevenue, captureAtPct } from '@/lib/dashboard-metrics'
+import TermSheetCard from '@/components/TermSheetCard'
+import AmortizationTable from '@/components/AmortizationTable'
+import CapexFxControls from '@/components/CapexFxControls'
 
 const CETA_PROGRAMS = [
   { id: 'cleantech', name: 'CETA Cleantech SME', max: 5000000, match: 0.5, provinces: ['All'] },
@@ -297,6 +300,20 @@ export default function FundingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <TermSheetCard
+          projectName={`${province} stranded pilot`}
+          province={province}
+          siteCount={sites}
+          totalCapexCad={capex}
+          annualRevenueCad={Math.round(capex * 0.22)}
+        />
+        <div className="space-y-4">
+          <CapexFxControls baseCapexUsd={Math.round(capex / 1.36)} />
+          <AmortizationTable defaultPrincipal={Math.round(capex * 0.6)} />
         </div>
       </div>
 

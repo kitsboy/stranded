@@ -21,6 +21,12 @@ import DashboardEmissionTiers from '@/components/dashboard/DashboardEmissionTier
 import DashboardSourceMix from '@/components/dashboard/DashboardSourceMix'
 import DashboardGensetMix from '@/components/dashboard/DashboardGensetMix'
 import DashboardConfidencePanel from '@/components/dashboard/DashboardConfidencePanel'
+import PortfolioRollup from '@/components/PortfolioRollup'
+import ProvinceLeaderboard from '@/components/ProvinceLeaderboard'
+import KpiTilePicker from '@/components/KpiTilePicker'
+import DashboardExportButton from '@/components/DashboardExportButton'
+import TermSheetCard from '@/components/TermSheetCard'
+import { buildWeeklyDigestMarkdown } from '@/lib/digest'
 import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { downloadBlob } from '@/lib/export-formats'
@@ -147,6 +153,71 @@ export default function DashboardPage() {
         <DashboardStatGrid stats={stats} btcUsd={btc} />
         <DashboardOpportunityRadar stats={stats} />
         <DashboardCaptureSlider stats={stats} btcUsd={btc} />
+
+        <div className="mb-6 flex flex-wrap gap-2">
+          <DashboardExportButton stats={stats} />
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-xs text-gray-300 hover:bg-white/5"
+            onClick={() =>
+              downloadBlob(
+                buildWeeklyDigestMarkdown({
+                  siteCount: stats.siteCount,
+                  version: stats.version,
+                  generatedAt: stats.generatedAt,
+                  avgScore: stats.totals?.avgStrandedScore,
+                  topProvinces: stats.provinces,
+                  topSites: stats.topSites?.map(s => ({ name: s.name, province: s.province, score: s.score })),
+                }),
+                'stranded-weekly-digest.md',
+                'text/markdown',
+              )
+            }
+            data-testid="dashboard-weekly-digest"
+          >
+            Weekly digest .md
+          </button>
+        </div>
+
+        <div className="mb-10 grid gap-6 lg:grid-cols-3">
+          <PortfolioRollup className="lg:col-span-1" />
+          <ProvinceLeaderboard
+            className="lg:col-span-1"
+            provinces={stats.provinces.map(p => ({
+              name: p.name,
+              count: p.count,
+              pct: p.pct,
+            }))}
+          />
+          <KpiTilePicker className="lg:col-span-1" />
+        </div>
+
+        <div className="mb-10 grid gap-6 md:grid-cols-2">
+          <TermSheetCard
+            projectName="Stranded Canada pilot"
+            siteCount={Math.min(25, stats.siteCount)}
+            totalCapexCad={8_000_000}
+            annualRevenueCad={Math.round((stats.valueModel?.annualRevenueUsd || 2_000_000) * 0.05 * 1.35)}
+            co2eTonnesYear={stats.impact?.co2eAvoided5PctTonnes}
+          />
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <h3 className="font-semibold text-[#5BC0BE] mb-2">Capital tools</h3>
+            <p className="text-sm text-gray-400 mb-3">
+              Export a print-ready one-pager, sketch a term sheet, or download a weekly opportunity digest for partners.
+            </p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Link href="/funding" className="rounded-lg border border-[#FF8C00]/40 px-3 py-1.5 text-[#FF8C00] hover:bg-[#FF8C00]/10">
+                Funding wizard
+              </Link>
+              <Link href="/pitch" className="rounded-lg border border-white/15 px-3 py-1.5 hover:bg-white/5">
+                Live pitch
+              </Link>
+              <Link href="/docs/api" className="rounded-lg border border-white/15 px-3 py-1.5 hover:bg-white/5">
+                Data API
+              </Link>
+            </div>
+          </div>
+        </div>
 
         <div className="mb-10 grid gap-6 md:grid-cols-2">
           <DashboardEmissionTiers stats={stats} />
