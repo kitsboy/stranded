@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   icons: { icon: '/logo.png' },
   manifest: '/manifest.json',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stranded.giveabit.io'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      en: '/',
+      'x-default': '/',
+    },
+  },
   openGraph: {
     title: 'Stranded | Stranded Energy, Bitcoin Access',
     description: 'Turn wasted energy into verifiable wealth. 2,611 sites, real generator models, honest per-site ROI (generator + ASIC + financing + methane loss), portfolio simulator, Stranded Value Education Center, and direct pathways to capital.',
