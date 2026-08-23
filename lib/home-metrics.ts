@@ -8,6 +8,9 @@ export type HomeKpiItem = {
   value: string
   sub?: string
   href?: string
+  /** Rich ELI16 tooltip copy (design-tokens: data-tip + data-tip-title) */
+  tipTitle?: string
+  tip?: string
 }
 
 export type ReadinessMini = {
@@ -44,6 +47,8 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
       value: stats.siteCount.toLocaleString(),
       sub: `${stats.provinceCount} provinces`,
       href: '/sites',
+      tipTitle: 'Verified sites',
+      tip: 'Real stranded-energy locations backed by public government data — not estimates. Browse them all, or jump straight to the live map.',
     },
     {
       key: 'emissions',
@@ -51,6 +56,8 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
       value: formatCompactNumber(stats.totals.emissionKgDay, 2),
       sub: 'kg/day',
       href: '/dashboard',
+      tipTitle: 'Methane vented daily',
+      tip: 'Methane is 25× more potent than CO₂ over 100 years. This is how much is currently released into the air every single day across these sites.',
     },
     {
       key: 'readiness',
@@ -58,6 +65,8 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
       value: String(readiness.score),
       sub: readiness.label,
       href: '/dashboard',
+      tipTitle: 'Deploy readiness',
+      tip: 'How close the full dataset is to being truly deploy-ready: data completeness, freshness and documentation all factor in. We are honest about gaps.',
     },
     {
       key: 'revenue',
@@ -65,6 +74,8 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
       value: fmtUsd(revenue),
       sub: 'annual @ live BTC',
       href: '/pitch',
+      tipTitle: 'Modelled revenue',
+      tip: 'What the portfolio could earn in a year at the current Bitcoin price. A modelled scenario from real generator + ASIC economics — always labelled as a model, never promised.',
     },
     {
       key: 'co2e',
@@ -72,6 +83,8 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
       value: formatCompactNumber(stats.impact.co2eAvoided100PctTonnes, 1),
       sub: 't/yr @ 100% capture',
       href: '/education',
+      tipTitle: 'Avoidable CO₂e',
+      tip: 'Tonnes of CO₂-equivalent that stop entering the atmosphere each year if the methane at these sites is captured. 100% capture is the ceiling, not the promise.',
     },
   ]
 }

@@ -11,6 +11,7 @@ import OfflineIndicator from '@/components/OfflineIndicator'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import PwaInstallPrompt from '@/components/PwaInstallPrompt'
 import StaleDataBanner from '@/components/StaleDataBanner'
+import TooltipBinder from '@/components/TooltipBinder'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
@@ -66,6 +67,7 @@ export default function RootLayout({
       <body className="bg-[var(--bg-dark)] text-white antialiased flex flex-col min-h-screen">
         <Providers>
           <Nav />
+          <TooltipBinder />
           <StaleDataBanner />
           <main id="main-content" className="flex-1">
             <ErrorBoundary label="page">{children}</ErrorBoundary>

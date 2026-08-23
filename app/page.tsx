@@ -106,18 +106,23 @@ export default function LandingPage() {
           {t('heroBadge')}
         </HeroBadge>
 
-        {readiness && (
-          <Link
-            href="/dashboard"
-            data-testid="home-readiness-badge"
-            className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#34D399]/30 bg-[#34D399]/10 px-3 py-1 text-xs text-[#34D399] hover:border-[#34D399]/50 transition"
-          >
-            <Gauge size={14} aria-hidden />
-            <span>Deploy readiness <strong className="tabular-nums">{readiness.score}</strong>/100</span>
-            <span className="text-[#34D399]/70">· {readiness.label}</span>
-            <span className="text-[#5BC0BE]">Dashboard →</span>
-          </Link>
-        )}
+        {/* Reserved slot for the deploy-readiness badge so mounting after the
+            live-stats fetch does NOT push the hero H1 down (CLS killer on mobile).
+            Fixed min-height keeps layout stable whether or not data has arrived. */}
+        <div className="flex justify-center min-h-[2.5rem] items-center mb-4">
+          {readiness ? (
+            <Link
+              href="/dashboard"
+              data-testid="home-readiness-badge"
+              className="inline-flex items-center gap-2 rounded-full border border-[#34D399]/30 bg-[#34D399]/10 px-3 py-1 text-xs text-[#34D399] hover:border-[#34D399]/50 transition"
+            >
+              <Gauge size={14} aria-hidden />
+              <span>Deploy readiness <strong className="tabular-nums">{readiness.score}</strong>/100</span>
+              <span className="text-[#34D399]/70">· {readiness.label}</span>
+              <span className="text-[#5BC0BE]">Dashboard →</span>
+            </Link>
+          ) : null}
+        </div>
 
         <h1 className="text-6xl md:text-7xl font-bold tracking-tighter mb-6">
           {t('heroTitle1')}<br />
@@ -151,38 +156,48 @@ export default function LandingPage() {
         <OnboardingChecklist />
       </div>
 
-      {/* Stats */}
+      {/* Stats — jewel-tone teal data surface with rich hover tooltips (Mimi 2026-08-23) */}
       <div className="border-y border-white/10 bg-black/20">
-        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
-          <div>
+        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+          <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
+            data-tip-title="Verified sites" data-tip="Every one of these 2,611 sites is a real stranded-energy location with public government data behind it. No estimates dressed up as facts — each row links to its source.">
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
               <CountUp value={siteCount} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statVerifiedSites')}</div>
+            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
-          <div>
+          <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
+            data-tip-title="Provinces covered" data-tip="Sites span every major oil-and-gas province in Canada — Alberta, BC, Saskatchewan, Manitoba and more. Filter the live map by province to see regional concentration.">
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
               <CountUp value={provinceCount} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statProvinces')}</div>
+            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
-          <div>
+          <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
+            data-tip-title="Average Stranded Score" data-tip="A 0–100 score of how attractive each site is: methane intensity, CapEx cost, ROI and financing all factor in. Higher is better. We publish the full scoring method openly.">
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
               {avgScore != null ? <CountUp value={avgScore} decimals={1} /> : '—'}
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statAvgScore')}{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
+            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
-          <div>
+          <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
+            data-tip-title="Grid impact" data-tip="These projects run on stranded gas that is currently vented or flared — they add zero new load to the electrical grid. Bitcoin mining here is a clean offtaker, not a burden.">
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
               <CountUp value={0} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statGridImpact')}</div>
+            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
-          <div>
+          <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
+            data-tip-title="Live Bitcoin price" data-tip="Updated in real time. Revenue at each site is modelled on this live price, so your per-site ROI is never stale — it recomputes as the market moves.">
             <div className="text-4xl font-semibold tabular-nums text-emerald-400">
               <CountUp value={btc} prefix="$" />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statLiveBtc')}</div>
+            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
         </div>
       </div>
@@ -228,7 +243,10 @@ export default function LandingPage() {
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {(featured.length ? featured : [{ name: 'Loading top sites…', province: '', emission: 0, score: 0, link: '/map' }]).map((site, i) => (
-            <Link key={site.id || i} href={site.link} className="glass glass-card-lift p-5 rounded-2xl border border-white/10 block">
+            <Link key={site.id || i} href={site.link} className="group glass glass-card-lift p-5 rounded-2xl border border-[#5BC0BE]/15 block relative overflow-hidden transition-all hover:border-[#5BC0BE]/50"
+              data-tip-title={site.name}
+              data-tip={`A live top-ranked site. Stranded Score ${site.score || '—'} · ${site.emission > 0 ? formatEmissionCompact(site.emission) + ' CH₄/day' : 'emission data pending'}. Open the map for real CapEx, generator and ROI models.`}>
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#5BC0BE]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex justify-between gap-2">
                 <div className="font-semibold truncate">{site.name}</div>
                 {site.score > 0 && <div className={`stranded-score text-xs ${scoreTierClass(site.score)}`}>{site.score}</div>}
@@ -236,7 +254,7 @@ export default function LandingPage() {
               <div className="text-sm text-gray-400 mt-1">
                 {site.province} • {site.emission > 0 ? formatEmissionCompact(site.emission) : '—'} • Live from dataset
               </div>
-              <div className="text-xs text-[#5BC0BE] mt-3">View on map → (real CapEx + ROI with gensets)</div>
+              <div className="text-xs text-[#5BC0BE] mt-3 group-hover:text-[#7dd3d1] transition-colors">View on map → (real CapEx + ROI with gensets)</div>
             </Link>
           ))}
         </div>

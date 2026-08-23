@@ -36,3 +36,20 @@ npm run deploy:check   # optional post-deploy
 | `.ai_docs/current-status.md` | Agent status layer |
 | `CHANGELOG.md` | Release notes |
 | `docs/DEPLOYMENT.md` | Deploy truth |
+
+<!-- LIVE-STATS:START -->
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-08-23T00:42:32.271Z
+
+| Metric | Value |
+|--------|-------|
+| Sites | 2,611 |
+| Provinces | 13 |
+| Daily methane (kg) | 2,053,504 |
+| CH₄ (tonnes/yr) | 749,529 |
+| Avg Stranded Score | 60.4 |
+| High-score sites (≥80) | 108 |
+| 5% CO₂e avoided/yr | 1,049,340 t |
+| Model annual revenue | $15,090,541,726 (@ $85,000 BTC) |
+
+Full breakdown: [docs/LIVE-STATS.md](./LIVE-STATS.md) · Live JSON: `/data/live-stats.json` · Pitch: [https://stranded.giveabit.io/pitch](https://stranded.giveabit.io/pitch)
+<!-- LIVE-STATS:END -->

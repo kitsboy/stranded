@@ -58,7 +58,9 @@ export default function HomeKpiStrip({ stats }: Props) {
               <Link
                 key={item.key}
                 href={item.href}
-                className="min-w-[6.5rem] shrink-0 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 hover:border-[#FF8C00]/30 transition"
+                data-tip-title={item.tipTitle}
+                data-tip={item.tip}
+                className="min-w-[6.5rem] shrink-0 rounded-xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-white/[0.02] px-3 py-2 transition hover:border-[#5BC0BE]/50 hover:shadow-[0_0_18px_-4px_rgba(91,192,190,0.4)] hover:-translate-y-0.5"
               >
                 {inner}
               </Link>
