@@ -1,3 +1,12 @@
+## Session — 2026-08-27 · Breez footer donate (Grok M3)
+
+**Done:**
+- Footer donate QR: `lightning:stranded@breez.tips` + on-chain `bc1pprmp4…ke9q5j` (`4eed1c9`).
+- Live-verified on stranded.giveabit.io footer Donate popover.
+
+**Git State:** SHA `4eed1c9` on `origin/main`.
+
+---
 ## Session — 2026-08-11 (Grok / M3) — GOODBYE
 
 **Done:**

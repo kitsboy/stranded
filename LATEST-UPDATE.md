@@ -1,4 +1,8 @@
-# stranded — Last Updated 2026-08-11 by Grok
+# stranded — Last Updated 2026-08-27 by Grok (M3)
 
-Brief: v2.10.0 mega batch + 4-col footer (giveabit logo); docs/handoff closed  
-Commit: c620122 (c620122)  
+**Brief:** Footer donate is Breez Spark (`stranded@breez.tips`).
+
+**Commit:** `4eed1c9`
+
+- Lightning: `stranded@breez.tips`
+- On-chain: `bc1pprmp4x7r2c0tz625laewh6h5usn9fupmd3zlg9zunxnvkrmke54qke9q5j`
