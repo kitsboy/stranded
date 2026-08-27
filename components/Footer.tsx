@@ -74,7 +74,8 @@ export default function Footer() {
   const [statsDate, setStatsDate] = useState('')
   const [version, setVersion] = useState('2.10')
   const [siteCount, setSiteCount] = useState(2611)
-  const btcAddress = 'bc1qhm5ndfjhqxdk3cx0pngyps4f5nnwdckulmge6c8keyf2pk0neqtshjn8ad'
+  const btcAddress = 'bc1pprmp4x7r2c0tz625laewh6h5usn9fupmd3zlg9zunxnvkrmke54qke9q5j'
+  const lnAddress = 'stranded@breez.tips'
   const isMapPage = pathname === '/map' || pathname === '/map/'
 
   useEffect(() => {
@@ -263,8 +264,11 @@ export default function Footer() {
                     aria-modal="true"
                     aria-label="Bitcoin donation QR"
                   >
-                    <QRCodeSVG value={`bitcoin:${btcAddress}`} size={140} level="M" includeMargin />
-                    <p className="mt-2 text-center text-[10px] text-gray-600 max-w-[140px] break-all">
+                    <QRCodeSVG value={`lightning:${lnAddress}`} size={140} level="M" includeMargin />
+                    <p className="mt-2 text-center text-[10px] text-gray-800 font-medium max-w-[140px] break-all">
+                      {lnAddress}
+                    </p>
+                    <p className="mt-1 text-center text-[9px] text-gray-500 max-w-[140px] break-all">
                       {btcAddress}
                     </p>
                     <button
