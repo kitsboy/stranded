@@ -33,8 +33,12 @@ jobs:
       # generatedAt/buildId (the build time) into every file it writes
       # (scripts/generate-live-stats.js, scripts/sync-docs.js), so a byte-diff
       # is dirty after every single run and the check would be permanently red.
-      # Real content drift — a changed dataset that was never regenerated —
-      # still shows up, because only timestamps/build ids are normalised away.
+      # The `commit`/`commitShort` deploy markers are normalised for the same
+      # reason PLUS a structural one: a committed file can never name the commit
+      # that contains it (the sha does not exist until after the file is
+      # written), so the checked-in value is always one commit behind. Real
+      # content drift — a changed dataset that was never regenerated — still
+      # shows up, because only clock/provenance fields are normalised away.
       - name: Docs in sync (read-only check)
         run: |
           set -euo pipefail
@@ -50,7 +54,9 @@ jobs:
           normalise() {
             sed -E \
               -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z/<timestamp>/g' \
-              -e 's/"buildId": *"[0-9]+"/"buildId": "<id>"/g' "$1"
+              -e 's/"buildId": *"[0-9]+"/"buildId": "<id>"/g' \
+              -e 's/"commit": *"[^"]*"/"commit": "<sha>"/g' \
+              -e 's/"commitShort": *"[^"]*"/"commitShort": "<sha>"/g' "$1"
           }
 
           failed=0

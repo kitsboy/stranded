@@ -52,12 +52,22 @@ jobs:
         run: npm run build
 
       # Waits (up to 15 min) for Cloudflare Pages to publish this commit and
-      # fails red if it never does. `--dist dist` additionally checks that the
-      # data payload the live site serves is the one this build produced.
+      # fails red if it never does. The gate is IDENTITY: the live build must
+      # name this workflow's commit sha (`commit` in /data/live-stats.json,
+      # written by scripts/generate-live-stats.js from GITHUB_SHA /
+      # CF_PAGES_COMMIT_SHA). A build clock is NOT accepted as proof — see
+      # .ai_docs/deploy-verification.md: a timestamp floor passed a stale
+      # deploy by 41 seconds (commit 94ef068 vs stale build 20260911215842).
+      # `--dist dist` additionally checks that the data payload the live site
+      # serves is the one this build produced.
       # All of the logic lives in scripts/deploy-check.sh — run the same script
       # by hand with `npm run deploy:check`.
       - name: Verify the live site is serving this commit
-        run: bash scripts/deploy-check.sh --wait --timeout 900 --interval 20 --dist dist
+        env:
+          # Pin the expected identity explicitly. The script would also derive
+          # it from GITHUB_SHA, but being explicit keeps the contract obvious.
+          STRANDED_EXPECTED_COMMIT: ${{ github.sha }}
+        run: bash scripts/deploy-check.sh --wait --timeout 900 --interval 20 --dist dist --expected-commit "$STRANDED_EXPECTED_COMMIT"
 
       - name: Notify on success
         if: success() && env.SLACK_WEBHOOK_URL != ''

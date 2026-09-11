@@ -19,6 +19,7 @@
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",
     "deploy:check": "bash scripts/deploy-check.sh",
+    "deploy:check:selftest": "bash scripts/deploy-check-selftest.sh",
     "refresh-data": "node scripts/refresh-eccc-data.js",
     "nightly": "bash scripts/nightly-docs-sync.sh",
     "version": "node scripts/generate-live-stats.js && node scripts/sync-docs.js && git add public/data/live-stats.json public/status.json docs/LIVE-STATS.md docs/SOURCE-OF-TRUTH.md docs/DOCUMENTATION.md STATUS.md README.md"

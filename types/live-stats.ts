@@ -2,6 +2,9 @@ export type LiveStats = {
   generatedAt: string
   version: string
   buildId?: string
+  /** Commit this build was produced from — the deploy-verification marker. */
+  commit?: string
+  commitShort?: string
   siteCount: number
   provinceCount: number
   provinces: {

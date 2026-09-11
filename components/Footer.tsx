@@ -73,6 +73,7 @@ export default function Footer() {
   const [showQR, setShowQR] = useState(false)
   const [statsDate, setStatsDate] = useState('')
   const [buildId, setBuildId] = useState('')
+  const [commitShort, setCommitShort] = useState('')
   const [version, setVersion] = useState('2.10')
   const [siteCount, setSiteCount] = useState(2611)
   const btcAddress = 'bc1pprmp4x7r2c0tz625laewh6h5usn9fupmd3zlg9zunxnvkrmke54qke9q5j'
@@ -85,6 +86,7 @@ export default function Footer() {
       .then(j => {
         setStatsDate(j.generatedAt ? new Date(j.generatedAt).toLocaleDateString('en-CA') : '')
         if (j.buildId) setBuildId(String(j.buildId))
+        if (j.commitShort) setCommitShort(String(j.commitShort))
         if (j.version) setVersion(String(j.version))
         if (j.siteCount) setSiteCount(Number(j.siteCount))
       })
@@ -217,6 +219,7 @@ export default function Footer() {
                   <span className="text-white/15">·</span>
                   <span className="font-mono" data-testid="footer-build-id" title="Build that produced this deploy — read from /data/live-stats.json">
                     build {buildId}
+                    {commitShort ? ` · ${commitShort}` : ''}
                   </span>
                 </>
               )}

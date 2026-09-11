@@ -5,6 +5,7 @@
  */
 const fs = require('fs')
 const path = require('path')
+const { execSync } = require('child_process')
 
 const ROOT = path.join(__dirname, '..')
 const GEO_PATH = path.join(ROOT, 'data', 'stranded-sites-REAL.geojson')
@@ -26,6 +27,36 @@ function recommendGenset(emissionKgDay) {
 }
 
 const { computeStrandedScore } = require('../lib/scoring-shared.cjs')
+
+/**
+ * The commit this build was produced from.
+ *
+ * This is the deploy-verification marker: scripts/deploy-check.sh polls the
+ * live /data/live-stats.json and asserts this value equals the commit being
+ * shipped. A build clock (buildId) is NOT enough — two builds seconds apart
+ * are indistinguishable by timestamp, so a stale deploy can look fresh
+ * (see .ai_docs/deploy-verification.md).
+ *
+ * Precedence: STRANDED_COMMIT_SHA (manual override) → GITHUB_SHA (Actions) →
+ * CF_PAGES_COMMIT_SHA (Cloudflare Pages builder) → local `git rev-parse HEAD`.
+ * Returns '' when none is available; deploy-check.sh treats '' as "identity
+ * cannot be verified" and fails rather than falling back to recency.
+ */
+function resolveCommit() {
+  const fromEnv = [process.env.STRANDED_COMMIT_SHA, process.env.GITHUB_SHA, process.env.CF_PAGES_COMMIT_SHA]
+    .map(v => (v || '').trim())
+    .find(v => /^[0-9a-fA-F]{7,40}$/.test(v))
+  if (fromEnv) return fromEnv.toLowerCase()
+  try {
+    const out = execSync('git rev-parse HEAD', { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim()
+    if (/^[0-9a-fA-F]{7,40}$/.test(out)) return out.toLowerCase()
+  } catch (e) {
+    /* not a git checkout and no env var — the marker stays '' */
+  }
+  return ''
+}
 
 function computeGeneratorPower(dailyMethaneKg, powerKW = 850, methaneNm3h = 220, derate = 0.9) {
   const dailyM3 = dailyMethaneKg / 0.717
@@ -130,11 +161,18 @@ function main() {
 
   const generatedAt = new Date().toISOString()
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'))
+  const commit = resolveCommit()
+  if (!commit) {
+    console.warn('⚠ no commit marker available (no STRANDED_COMMIT_SHA/GITHUB_SHA/CF_PAGES_COMMIT_SHA and not a git checkout) — deploy identity cannot be verified from this build')
+  }
 
   const stats = {
     generatedAt,
     version: pkg.version || '2.1.0',
     buildId: generatedAt.replace(/[^0-9]/g, '').slice(0, 14),
+    /** Deploy-verification marker — the commit this build came from. */
+    commit,
+    commitShort: commit ? commit.slice(0, 7) : '',
     siteCount,
     provinceCount: Object.keys(provinces).length,
     provinces: Object.entries(provinces)
@@ -248,6 +286,9 @@ ${stats.gensetRecommendations.map(g => `- **${g.id}:** ${g.count} sites (${g.pct
     service: 'stranded.giveabit.io',
     version: stats.version,
     buildId: stats.buildId,
+    /** Deploy-verification marker — the commit this build came from. */
+    commit: stats.commit,
+    commitShort: stats.commitShort,
     siteCount,
     generatedAt,
   }
@@ -256,6 +297,7 @@ ${stats.gensetRecommendations.map(g => `- **${g.id}:** ${g.count} sites (${g.pct
   console.log(`✓ live-stats.json — ${siteCount} sites, ${Object.keys(provinces).length} provinces`)
   console.log(`✓ docs/LIVE-STATS.md updated`)
   console.log(`✓ status.json updated`)
+  console.log(`✓ commit marker: ${stats.commit ? `${stats.commitShort} (${stats.commit})` : '(none)'}`)
 }
 
 main()
