@@ -49,8 +49,13 @@ const MIN_FONT = 11          // px, visible text
 const MIN_CONTROL = 24       // px — ignore tiny things when computing overlap (noise)
 const OVERLAP_PCT = 0.4      // overlap > 40% of the smaller control counts
 const CEILINGS = [
-  { re: /([\d,]{4,})\s*sats\s*\/?\s*day/i, max: 5e7, label: 'sats/day' },
-  { re: /\$\s?([\d,]{5,})\s*\/?\s*day/i, max: 5e6, label: '$/day' },
+  // Plausibility bands, not "expected values". A full-gas build on the largest
+  // site (G10161 Keele Valley: 105.8 MW of gas, ~26k miners) legitimately reaches
+  // ~6.6e8 sats/day and ~$5e5/day, so the ceilings sit well above that and catch
+  // only order-of-magnitude unit bugs — the cockpit's formatSats double-conversion
+  // showed sats/day at ~1e16.
+  { re: /([\d,]{4,})\s*sats\s*\/?\s*day/i, max: 1e10, label: 'sats/day' },
+  { re: /\$\s?([\d,]{5,})\s*\/?\s*day/i, max: 1e8, label: '$/day' },
   { re: /([\d,]{4,})\s*kW\b/i, max: 2e5, label: 'kW' },
 ]
 
@@ -83,16 +88,16 @@ async function probe(browser, width, { slug, path }) {
     // cold load has to fetch and parse the 2.85 MB dataset first, so a fixed 3-5s
     // sleep under load produces phantom "the panel is missing" findings.
     if (path.startsWith('/map')) {
-      // The docked cockpit (hidden xl:flex) and the mobile sheet cockpit can both
-      // be in the DOM; wait until ANY of them has a real box.
-      await page.waitForFunction(() => {
-        const els = document.querySelectorAll('[data-testid="site-cockpit"]')
-        for (const el of els) {
-          const r = el.getBoundingClientRect()
-          if (r.width > 0 && r.height > 0) return true
-        }
-        return false
-      }, null, { timeout: 45000 }).catch(() => {})
+      // Wait for the panel that is actually visible at this width: the docked
+      // cockpit column on desktop, the bottom sheet below xl. On phones the sheet
+      // opens in preview (header only) mode, so expand it before asserting — the
+      // cockpit itself is only rendered once the sheet is expanded.
+      const panel = width < 1280
+        ? '[data-testid="mobile-site-sheet"]'
+        : '[data-testid="map-right-column"]'
+      await page.waitForSelector(panel, { state: 'visible', timeout: 45000 }).catch(() => {})
+      const expand = page.locator('[data-testid="mobile-site-expand"]')
+      if (await expand.count()) await expand.first().click().catch(() => {})
     }
     await page.waitForTimeout(3000)
 
