@@ -547,7 +547,7 @@ function PitchContent() {
           <div className="mt-8 grid gap-4 text-sm text-gray-400 md:grid-cols-2">
             <div className="rounded-xl border border-[#FBBF24]/20 bg-[#FBBF24]/5 p-4 md:col-span-2" data-testid="batten-validation-line">
               <span className="font-semibold text-white">The site class the industry is moving on:</span>{' '}
-              1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest venting landfill, Essex-Windsor (32,544 kg/day ≈ 1.36 t/hr), sits within ~10% of the 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. Third-party context only — no partnership, endorsement, or use of our data is implied.
+              1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest landfill by reported CH₄ (Essex-Windsor, 32,544 kg/day ≈ 1.36 t/hr) sits within ~10% of that 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. ECCC publishes no venting/flaring split for landfill gas (filed under &quot;Waste&quot;), so we make no venting claim about that landfill — we rank it purely on reported CH₄. Third-party context only — no partnership, endorsement, or use of our data is implied.
             </div>
             <div className="rounded-xl border border-white/10 p-4">
               <span className="font-medium text-white">{t('pitchGenCapacity')}:</span>{' '}

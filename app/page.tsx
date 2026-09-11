@@ -234,7 +234,7 @@ export default function LandingPage() {
         </div>
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-gray-300" data-testid="batten-validation-line">
           <span className="font-semibold text-white">The site class the industry is now moving on:</span>{' '}
-          1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest venting landfill, Essex-Windsor (32,544 kg/day ≈ 1.36 t/hr), sits within ~10% of the 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. We cite that reporting as third-party context — no partnership, endorsement, or use of our data is implied.
+          1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest landfill by reported CH₄ (Essex-Windsor, 32,544 kg/day ≈ 1.36 t/hr) sits within ~10% of that 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. ECCC publishes no venting/flaring split for landfill gas (it is filed under &quot;Waste&quot;), so we make no claim about how that landfill vents or flares — we rank it purely on reported CH₄. We cite that post as third-party context only — no partnership, endorsement, or use of our data is implied.
         </div>
       </div>
 
