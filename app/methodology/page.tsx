@@ -36,6 +36,22 @@ export default function MethodologyPage() {
       <h2>ROI model</h2>
       <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs. Site panel shows a sensitivity tornado and peer cohort when available.</p>
 
+      <h2 id="hashprice">Hashprice — two honest ends</h2>
+      <p>Daily mining revenue is driven by <em>hashprice</em>: what 1 TH/s earns per day. We show both ends instead of claiming one.</p>
+      <div className="not-prose grid gap-3 my-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-[#FF8C00]/25 bg-[#FF8C00]/5 p-4">
+          <div className="text-[10px] uppercase tracking-widest text-[#FF8C00]">App default · optimistic scenario</div>
+          <div className="text-2xl font-bold text-white tabular-nums mt-1">0.0000009 BTC / TH / day</div>
+          <p className="text-xs text-gray-400 mt-2">Editable in the site panel. Roughly <strong>2.2×</strong> the network-derived figure — every payback that relies on it is an optimistic scenario, labelled as such in the panel, education page and all exports.</p>
+        </div>
+        <div className="rounded-2xl border border-[#34D399]/30 bg-[#34D399]/5 p-4">
+          <div className="text-[10px] uppercase tracking-widest text-[#34D399]">Network-derived reference</div>
+          <div className="text-2xl font-bold text-white tabular-nums mt-1">≈ 0.00000041 BTC / TH / day</div>
+          <p className="text-xs text-gray-400 mt-2">Derived live from the two editable inputs in the site panel: daily BTC issuance (≈450 BTC/day subsidy + fees) ÷ network hashrate (≈1.1 ZH/s). Moves with price and difficulty.</p>
+        </div>
+      </div>
+      <p className="text-sm text-gray-400">Formula: <code>networkDerived = dailyBtcIssuance ÷ networkHashrate</code>. The numbers in the site panel recompute when you edit those two inputs; this page shows the shipped <code>@/lib/fleet-model.ts</code> defaults.</p>
+
       <h2>Bank packs</h2>
       <p>Export diligence packages from the map site panel, mission panel, or sites browser: Markdown brief (score factors + peers + sensitivity), CSV, Excel-friendly TSV, printable HTML, and JSON. No account required — files download locally.</p>
 

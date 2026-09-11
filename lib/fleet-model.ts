@@ -13,8 +13,24 @@
 import { siteGasCeilingKw, minerCeiling, type FleetGenset, type FleetSite } from './fleet-template'
 import { GENSET_DATA } from './sites'
 
-/** The BTC-per-TH-per-day rate the app ships as its "current network estimate". */
+/**
+ * The BTC-per-TH-per-day rate the app ships as its default assumption.
+ * This is deliberately OPTIMISTIC vs the network-derived figure below — the app
+ * ships it because it is Cam's call to keep published paybacks stable, but it must
+ * never be shown as "neutral". Any build using this rate is an "optimistic scenario".
+ */
 export const NETWORK_ESTIMATE_BTC_PER_TH_DAY = 0.0000009
+
+/**
+ * Network-derived hashprice inputs, exposed honestly.
+ * dailyBtcIssuance / networkHashrateThs = networkDerivedBtcPerThDay.
+ * As of the 2024 halving: block subsidy + approximate fees ≈ 450 BTC/day across a
+ * network of ≈1.1 ZH/s. These are visible assumptions, not hidden constants.
+ */
+export const NETWORK_DAILY_BTC_ISSUANCE = 450
+export const NETWORK_HASHRATE_THS = 1_100_000_000 // ≈1.1 ZH/s
+/** ≈ 0.000000409 BTC/TH/day — the honest network-derived reference. */
+export const NETWORK_DERIVED_BTC_PER_TH_DAY = NETWORK_DAILY_BTC_ISSUANCE / NETWORK_HASHRATE_THS
 
 /** Assumed power cost in USD/kWh used by the base model (advanced panel can restate it). */
 export const DEFAULT_POWER_COST_USD_PER_KWH = 0.04
@@ -44,6 +60,8 @@ export type FleetModelInput = {
   maintenanceAnnualPercent: number
   revenuePerThPerDayBtc: number
   fixedSetupCostCad: number
+  /** Power cost in USD/kWh. Defaults to DEFAULT_POWER_COST_USD_PER_KWH (0.04 grid-ish); a stranded-gas site is O&M-only. */
+  powerCostUsdPerKwh?: number
   debtPercent: number
   interestRate: number
   /** Human label for the genset inventory (e.g. "1 × INNIO Jenbacher J316"). */
@@ -96,6 +114,8 @@ export function computeFleetModel(input: FleetModelInput): FleetModel {
     fixedSetupCostCad, debtPercent, interestRate, gensetName = 'no genset',
   } = input
 
+  const powerCostUsdPerKwh = input.powerCostUsdPerKwh ?? DEFAULT_POWER_COST_USD_PER_KWH
+
   const overclockMultiplier = 1 + (overclockPercent / 100)
   const adjustedHashrate = asic.hashrate_ths * overclockMultiplier
   const adjustedPower = asic.power_w * overclockMultiplier * (1 + overclockPercent / 200)
@@ -117,8 +137,8 @@ export function computeFleetModel(input: FleetModelInput): FleetModel {
   const dailyRevenueBtc = effectiveDailyBtc
   const dailyRevenueFiat = effectiveDailyBtc * btcPriceInFiat
 
-  // Power cost: base assumption 0.04 in USD/kWh, converted via BTC rates for honesty across currencies
-  const powerCostUsd = effectivePowerKw * 24 * DEFAULT_POWER_COST_USD_PER_KWH
+  // Power cost: base assumption 0.04 in USD/kWh (grid-like), editable via the advanced panel; converted via BTC rates for honesty across currencies
+  const powerCostUsd = effectivePowerKw * 24 * powerCostUsdPerKwh
   const usdBtcPrice = btcPrices.usd || 85000
   const dailyPowerCostBtc = powerCostUsd / usdBtcPrice
   const dailyPowerCostFiat = dailyPowerCostBtc * btcPriceInFiat
@@ -153,13 +173,13 @@ export function computeFleetModel(input: FleetModelInput): FleetModel {
 
   // Marginal payback (for one additional machine, ignoring fixed) — for transparency
   const marginalDailyProfitBtc = (adjustedHashrate * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100))
-    - (adjustedPower / 1000 * 24 * DEFAULT_POWER_COST_USD_PER_KWH / usdBtcPrice)
+    - (adjustedPower / 1000 * 24 * powerCostUsdPerKwh / usdBtcPrice)
     - ((asic.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365)
   const marginalPayback = marginalDailyProfitBtc > 0 ? (asic.cost_cad / cadBtcPrice) / marginalDailyProfitBtc : Infinity
 
   // Methane loss opportunity cost (the daily profit you lose by venting instead of capturing)
   const maxPossibleDailyBtc = (generatorPowerKw * 1000 / asic.power_w) * asic.hashrate_ths * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100)
-  const maxPossibleDailyProfitBtc = maxPossibleDailyBtc - (generatorPowerKw * 24 * DEFAULT_POWER_COST_USD_PER_KWH / usdBtcPrice) - ((asic.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365) - (gensetCapexBtc / 365)
+  const maxPossibleDailyProfitBtc = maxPossibleDailyBtc - (generatorPowerKw * 24 * powerCostUsdPerKwh / usdBtcPrice) - ((asic.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365) - (gensetCapexBtc / 365)
   const methaneLossDailyBtc = maxPossibleDailyBtc
 
   // Financing for CapEx (debt % at interest, simple annual cost)

@@ -65,7 +65,7 @@ import {
   type FleetSite,
   type FleetTemplate,
 } from '@/lib/fleet-template'
-import { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY, DEFAULT_POWER_COST_USD_PER_KWH } from '@/lib/fleet-model'
+import { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY, NETWORK_DERIVED_BTC_PER_TH_DAY, NETWORK_HASHRATE_THS, NETWORK_DAILY_BTC_ISSUANCE, DEFAULT_POWER_COST_USD_PER_KWH } from '@/lib/fleet-model'
 import {
   blockScaleLabel,
   capacityModel,
@@ -172,6 +172,14 @@ export default function SiteDetailsPanel({
   const [poolFeePercent, setPoolFeePercent] = useState(1.5)
   const [maintenanceAnnualPercent, setMaintenanceAnnualPercent] = useState(5)
   const [revenuePerThPerDayBtc, setRevenuePerThPerDayBtc] = useState(0.0000009)
+  /**
+   * Honest hashprice inputs (Fix: optimistic must be visible). Net value derived
+   * live from the two editable network inputs; anything above it is an optimistic scenario.
+   */
+  const [networkHashrateThs, setNetworkHashrateThs] = useState(NETWORK_HASHRATE_THS)
+  const [networkDailyIssuanceBtc, setNetworkDailyIssuanceBtc] = useState(NETWORK_DAILY_BTC_ISSUANCE)
+  /** Power cost editable — a stranded-gas site has O&M-only electricity (≈0.015). */
+  const [powerCostUsdPerKwh, setPowerCostUsdPerKwh] = useState(DEFAULT_POWER_COST_USD_PER_KWH)
   const [gasTreatmentDerate, setGasTreatmentDerate] = useState(1.0)
   const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
@@ -230,19 +238,27 @@ export default function SiteDetailsPanel({
     maintenanceAnnualPercent,
     revenuePerThPerDayBtc,
     fixedSetupCostCad,
+    powerCostUsdPerKwh,
     debtPercent,
     interestRate,
-    powerCostUsdPerKwh: DEFAULT_POWER_COST_USD_PER_KWH,
   }), [
     site, gensetStack, selectedASIC, overclockPercent, btcPrice, btcPrices, uptimePercent,
     poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, fixedSetupCostCad,
-    debtPercent, interestRate,
+    powerCostUsdPerKwh, debtPercent, interestRate,
   ])
 
   const calculations = useMemo(() => (
     site ? computeFleetModel({ ...modelInput, machineCount, gensetName: gensetStackLabel(gensetStack) }) : null
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [site, modelInput, machineCount])
+
+  /** The site-model's payback at the grid-ish default 0.04 — so the power-cost edit always shows before/after. */
+  const defaultPowerPaybackDays = useMemo(() => {
+    if (!site) return null
+    const m = computeFleetModel({ ...modelInput, powerCostUsdPerKwh: DEFAULT_POWER_COST_USD_PER_KWH, machineCount })
+    return m.paybackDays
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [site, modelInput, machineCount])
 
   /** The cockpit asks for any candidate count (drag, ±, typed) and gets the same model back. */
   const previewFor = useMemo(
@@ -389,10 +405,11 @@ export default function SiteDetailsPanel({
   const hashprice = hashpriceRead({
     usedBtcPerThDay: revenuePerThPerDayBtc,
     usdBtcPrice,
-    networkBtcPerThDay: NETWORK_ESTIMATE_BTC_PER_TH_DAY,
+    // Honest reference: the network-derived value, NOT the optimistic shipped default.
+    networkBtcPerThDay: NETWORK_DERIVED_BTC_PER_TH_DAY,
     asicHashrateThs: selectedASIC.hashrate_ths,
     asicWatts: selectedASIC.power_w,
-    powerCostUsdPerKwh: DEFAULT_POWER_COST_USD_PER_KWH,
+    powerCostUsdPerKwh,
   })
   const capacity = capacityModel({
     count: machineCount,
@@ -401,6 +418,12 @@ export default function SiteDetailsPanel({
     asicWatts: selectedASIC.power_w,
   })
   const currentPreview = previewFor(machineCount)
+
+  /** Honest hashprice derivation — the two editable network inputs → the reference. */
+  const networkDerived = networkHashrateThs > 0 ? networkDailyIssuanceBtc / networkHashrateThs : 0
+  const hashpriceDiffPct =
+    networkDerived > 0 ? ((revenuePerThPerDayBtc - networkDerived) / networkDerived) * 100 : 0
+  const isOptimistic = hashpriceDiffPct > 1
 
   /** One place that turns a template into "this template at this site" — cards and apply agree. */
   const resolveTemplateForSite = (template: FleetTemplate): FleetTemplate => {
@@ -645,7 +668,7 @@ export default function SiteDetailsPanel({
         unusedKgPerDay={unused.unusedKgPerDay}
         unusedUsdPerDay={unminedUsdPerDay}
         hashprice={hashprice}
-        powerCostUsdPerKwh={DEFAULT_POWER_COST_USD_PER_KWH}
+        powerCostUsdPerKwh={powerCostUsdPerKwh}
         dataYear={Number(p.reference_year) || undefined}
       >
         <div className="mt-3 flex flex-wrap gap-2">
@@ -989,9 +1012,43 @@ export default function SiteDetailsPanel({
             <input type="range" min="0.5" max="1.5" step="0.05" value={difficultyMultiplier} onChange={e => setDifficultyMultiplier(+e.target.value)} className="w-full accent-[#FF8C00]" />
           </div>
           <div>
-            <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — current network estimate</label>
+            <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — your assumption, editable</label>
             <input type="number" step="0.0000001" value={revenuePerThPerDayBtc} onChange={(e) => setRevenuePerThPerDayBtc(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
-            <div className="text-[10px] text-gray-400 mt-0.5">This is the key honest variable. Adjust based on real hashprice data.</div>
+            <div className={`text-[10px] mt-1 ${isOptimistic ? 'text-amber-300' : 'text-[#34D399]'}`}>
+              Network-derived: <span className="tabular-nums">{networkDerived.toFixed(10)}</span> BTC/TH/day ·{' '}
+              <span className="tabular-nums">{hashpriceDiffPct >= 0 ? '+' : ''}{hashpriceDiffPct.toFixed(0)}%</span> {isOptimistic ? 'above network — optimistic scenario' : 'in line with / below network'}
+            </div>
+            <div className="text-[10px] text-gray-400 mt-1 grid grid-cols-2 gap-2">
+              <label className="text-gray-500">Network hashrate (TH/s)
+                <input type="number" step="10000000" value={networkHashrateThs} onChange={(e) => setNetworkHashrateThs(Number(e.target.value))} className="w-full mt-0.5 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white tabular-nums" />
+              </label>
+              <label className="text-gray-500">BTC issuance/day (subsidy+fees)
+                <input type="number" step="10" value={networkDailyIssuanceBtc} onChange={(e) => setNetworkDailyIssuanceBtc(Number(e.target.value))} className="w-full mt-0.5 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white tabular-nums" />
+              </label>
+            </div>
+            <div className="text-[10px] text-gray-400 mt-1.5">Hashprice = network BTC issuance ÷ network hashrate. It moves with price and difficulty; we show both ends rather than claiming one. The shipped default of {NETWORK_ESTIMATE_BTC_PER_TH_DAY.toFixed(7)} is an <span className="text-amber-300">optimistic scenario</span>, not a neutral estimate.</div>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-400">Power cost (USD/kWh) — editable</label>
+            <input type="number" step="0.005" min="0" value={powerCostUsdPerKwh} onChange={(e) => setPowerCostUsdPerKwh(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+            <div className="text-[10px] text-gray-400 mt-1">
+              A stranded-gas site burns gas with no fuel cost — its electricity-equivalent is O&amp;M only.
+            </div>
+            <button
+              type="button"
+              onClick={() => setPowerCostUsdPerKwh(0.015)}
+              className="mt-1.5 text-[10px] px-2 py-1 rounded border border-[#34D399]/40 text-[#34D399] hover:bg-[#34D399]/10"
+              data-testid="preset-stranded-gas-power"
+            >
+              Stranded gas (O&amp;M only) ≈ 0.015
+            </button>
+            {calculations && (
+              <div className="text-[10px] text-gray-400 mt-1.5" data-testid="power-cost-before-after">
+                Payback: <span className="tabular-nums text-white">{formatPayback(defaultPowerPaybackDays ?? Infinity)}</span> at {DEFAULT_POWER_COST_USD_PER_KWH.toFixed(2)}/kWh →{' '}
+                <span className={`tabular-nums ${powerCostUsdPerKwh < DEFAULT_POWER_COST_USD_PER_KWH ? 'text-[#34D399]' : 'text-white'}`}>{formatPayback(calculations.paybackDays)}</span> at {powerCostUsdPerKwh.toFixed(3)}/kWh
+              </div>
+            )}
           </div>
 
           <div>

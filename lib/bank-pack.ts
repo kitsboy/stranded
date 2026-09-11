@@ -116,6 +116,7 @@ export function bankPackMarkdown(
     `Sites: ${sites.length} · Total CH₄: ${totalEm.toLocaleString()} kg/day · Avg score: ${avgScore}`,
     `Model daily potential (portfolio): C$${totalPot.toLocaleString()}`,
     ``,
+    `> ⚠️ Model scenarios: revenue uses a hashprice of 0.0000009 BTC/TH/day, which is ABOVE the network-derived estimate (~0.00000041 BTC/TH/day from ≈450 BTC/day ÷ ≈1.1 ZH/s). These are optimistic-scenario figures, not a neutral forecast.`,
     `> Not financial advice. ECCC open data + Stranded Score™ v3 model. Independent verification required.`,
     ``,
   ]

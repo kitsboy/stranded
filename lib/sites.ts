@@ -118,6 +118,9 @@ export function computeSiteValue(site: EnrichedSite, gensetId: GensetId = 'jenba
   const emission = site.emission || 0
   const powerKW = computeGeneratorPower(emission, gensetId)
   const numAsics = Math.max(1, Math.floor(powerKW * 1000 / asicPowerW))
+  // NOTE(honesty): 0.0000009 BTC/TH/day is an OPTIMISTIC scenario (~2.2× the network-derived
+  // ~0.00000041 BTC/TH/day). Kept as default (published paybacks must not shift), surfaced as
+  // "optimistic scenario" in the panel, methodology, education and exports.
   const dailyBtc = numAsics * asicHashrate * 0.0000009 * (liveBtc / 85000) // adjusted
   const gensetCapex = GENSET_DATA[gensetId].powerKW * GENSET_DATA[gensetId].capexPerKW
   const miningCapex = numAsics * asicCost

@@ -27,15 +27,21 @@ export const FORMULAS: Record<string, FormulaEntry> = {
       'Alias of emission-kw. Rough rule of thumb: kW ≈ emission_kg_day / 10 before derates.',
   },
   'daily-btc': {
-    title: 'Daily BTC (fleet)',
-    formula: 'dailyBtc ≈ numAsics × hashrateTh × hashpriceProxy(btc, difficulty) + txFees',
+    title: 'Daily BTC (fleet) & the honest hashprice',
+    formula: 'dailyBtc ≈ numAsics × hashrateTh × hashpriceUsed(btc, difficulty) + txFees',
     notes:
-      'Hashprice proxy scales with live BTC and difficulty multiplier; seasonal uptime and gas derates reduce effective power and ASIC count.',
+      'Hashprice used is editable and defaults to 0.0000009 BTC/TH/day — an OPTIMISTIC scenario. The network-derived reference is (daily BTC issuance ≈ 450 BTC/day subsidy+fees) ÷ (network hashrate ≈ 1.1 ZH/s) ≈ 0.00000041 BTC/TH/day. We show both ends rather than claiming one. Seasonal uptime and gas derates reduce effective power and ASIC count.',
   },
   'daily btc': {
-    title: 'Daily BTC (fleet)',
-    formula: 'dailyBtc ≈ numAsics × hashrateTh × hashpriceProxy(btc, difficulty) + txFees',
-    notes: 'Alias of daily-btc.',
+    title: 'Daily BTC (fleet) & the honest hashprice',
+    formula: 'dailyBtc ≈ numAsics × hashrateTh × hashpriceUsed(btc, difficulty) + txFees',
+    notes: 'Alias of daily-btc. Default is optimistic-scenario; network-derived reference ≈ 0.00000041 BTC/TH/day.',
+  },
+  'hashprice': {
+    title: 'Hashprice — two honest ends',
+    formula: 'networkDerived ≈ dailyBtcIssuance(≈450) ÷ networkHashrate(≈1.1 ZH/s) ≈ 0.00000041 BTC/TH/day',
+    notes:
+      'App default 0.0000009 is 2.2× the network-derived figure — an optimistic scenario, shown visibly (site panel, education, exports). Hashprice moves with price and difficulty; we show both ends rather than claiming one.',
   },
   payback: {
     title: 'Simple payback',

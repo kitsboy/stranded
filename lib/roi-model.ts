@@ -81,6 +81,10 @@ export function computeAdvancedRoi(
 
   let annualBtc = 0
   let annualRevenue = 0
+  // NOTE(honesty): 0.0000009 BTC/TH/day is an OPTIMISTIC scenario, ~2.2× the
+  // network-derived reference (~0.00000041 = ≈450 BTC/day ÷ ≈1.1 ZH/s). Deliberately
+  // kept as the default (Cam's call — published paybacks must not shift), and surfaced
+  // as "optimistic scenario" in the panel, methodology, education and every export.
   for (let y = 0; y < years; y++) {
     const declineFactor = Math.pow(1 - decline / 100, y)
     const dailyBtc = numAsics * hashrate * 0.0000009 * (btc / 85000) * difficulty * declineFactor + txFees

@@ -58,6 +58,8 @@ export function sketchTermSheet(input: TermSheetInput): TermSheetSketch {
     `| Rev / CapEx | ${revenueToCapex != null ? revenueToCapex : '—'} |`,
     `| CO₂e abated / yr | ${input.co2eTonnesYear != null ? input.co2eTonnesYear.toLocaleString() : '—'} t |`,
     '',
+    '> ⚠️ Model scenarios: hashprice assumption (0.0000009 BTC/TH/day) sits ABOVE the network-derived estimate (~0.00000041 BTC/TH/day) — optimistic-scenario figures, not a neutral forecast. Burning methane still emits CO₂; the defensible claim is ~28–80× lower warming impact per molecule (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80), never "no emissions".',
+    '',
     input.fleet ? '## Fleet template\n' + fleetBlockMarkdown(input.fleet) + '\n' : '',
     '## Structure notes',
     '- SPV per cluster or province preferred',

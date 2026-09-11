@@ -35,7 +35,9 @@ export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerO
   const provinces = (stats.topProvinces || []).slice(0, 6)
   const thesis =
     opts.thesis ||
-    'Turn wasted methane into verifiable Bitcoin-powered wealth with zero grid impact — 2,611 ECCC-verified sites across Canada.'
+    'Turn stranded methane into verifiable Bitcoin-powered wealth with no net draw on the electrical grid — 2,611 mapped sites across Canada (2,588 with reported CH₄ · 675 high-confidence).'
+  const modelNote =
+    'Model scenarios use a hashprice of 0.0000009 BTC/TH/day, ABOVE the network-derived estimate (~0.00000041 BTC/TH/day) — optimistic-scenario figures, not a neutral forecast. Burning methane still emits CO₂; the honest claim is ~28–80× lower warming per molecule (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80), never "no emissions".'
 
   const rows = top
     .map(
@@ -88,6 +90,7 @@ export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerO
   <h1>${escapeHtml(title)}</h1>
   <p class="sub">stranded.giveabit.io · v${escapeHtml(String(stats.version || '—'))} · BTC $${btc.toLocaleString()} · ${escapeHtml(stats.generatedAt || new Date().toISOString().slice(0, 10))}</p>
   <div class="thesis">${escapeHtml(thesis)}</div>
+  <div class="ask" style="background:#fffbeb;border-color:#f59e0b">${escapeHtml(modelNote)}</div>
   <div class="kpis">
     <div class="kpi"><b>${(stats.siteCount ?? 2611).toLocaleString()}</b><span>Sites</span></div>
     <div class="kpi"><b>${stats.provinceCount ?? '—'}</b><span>Provinces</span></div>
@@ -106,7 +109,7 @@ export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerO
     <thead><tr><th>Province</th><th class="num">Sites</th><th class="num">Share</th></tr></thead>
     <tbody>${provRows || '<tr><td colspan="3">—</td></tr>'}</tbody>
   </table>
-  <footer>Data: Environment and Climate Change Canada (ECCC). Models are illustrative — not investment advice. Part of the Give A Bit family · Safe Harbour.</footer>
+  <footer>Data: Environment and Climate Change Canada (ECCC). Models are illustrative — optimistic-scenario hashprice, not investment advice. Part of the Give A Bit family · Safe Harbour.</footer>
 </body>
 </html>`
 }

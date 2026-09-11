@@ -551,7 +551,7 @@ export default function MinerStackCockpit({
               {hashprice.aboveNetwork === null
                 ? '— in line with the network-derived estimate'
                 : hashprice.aboveNetwork
-                  ? <span className="text-amber-300">— above the network-derived estimate (${hashprice.networkUsdPerThDay.toFixed(4)})</span>
+                  ? <span className="text-amber-300">— optimistic scenario: above the network-derived estimate of ${hashprice.networkUsdPerThDay.toFixed(4)}/TH/day</span>
                   : <span className="text-[#34D399]">— below the network-derived estimate (${hashprice.networkUsdPerThDay.toFixed(4)})</span>}
             </li>
             <li>
