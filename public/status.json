@@ -1,8 +1,8 @@
 {
   "status": "operational",
   "service": "stranded.giveabit.io",
-  "version": "2.10.0",
-  "buildId": "20260823004232",
+  "version": "2.11.0",
+  "buildId": "20260911140539",
   "siteCount": 2611,
-  "generatedAt": "2026-08-23T00:42:32.271Z"
+  "generatedAt": "2026-09-11T14:05:39.469Z"
 }
