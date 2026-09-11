@@ -463,7 +463,7 @@ export default function MinerStackCockpit({
           {gensets.map(g => (
             <div key={g.gensetId} className="flex items-center justify-between gap-2 text-[11px] text-gray-300">
               <span className="truncate tabular-nums">
-                {g.count} × {GENSET_DATA[g.gensetId]?.name} · {formatKw((GENSET_DATA[g.gensetId]?.powerKW || 0) * g.count)} kW ceiling
+                {g.count} × {GENSET_DATA[g.gensetId]?.name} · {formatKw((GENSET_DATA[g.gensetId]?.powerKW || 0) * g.count)} kW rated
               </span>
               <button
                 type="button"

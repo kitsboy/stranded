@@ -1793,9 +1793,11 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
 @media (min-width: 1280px) {
   .map-command-center.map-right-column-open .maplibregl-ctrl-top-right { margin-right: 480px; }
   .map-command-center.map-right-column-open .map-layer-stack { right: 496px; }
+  .map-command-center.map-right-column-open [data-testid="map-toolbar"] { left: calc(50% - 240px); }
 }
 @media (min-width: 1600px) {
   .map-command-center.map-right-column-open .maplibregl-ctrl-top-right { margin-right: 560px; }
   .map-command-center.map-right-column-open .map-layer-stack { right: 576px; }
+  .map-command-center.map-right-column-open [data-testid="map-toolbar"] { left: calc(50% - 280px); }
 }
 
