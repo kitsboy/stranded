@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
+import { hoverTeaser, formatCount, formatMoneyShort } from '@/lib/cockpit'
 import { emissionChoroplethGeojson, revenueChoroplethGeojson } from '@/lib/province-choropleth'
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
@@ -93,6 +94,32 @@ const CLUSTER_AVG_SCORE_COLOR: maplibregl.ExpressionSpecification = [
   ['>=', ['/', ['get', 'score_sum'], ['get', 'point_count']], 45], '#eab308',
   '#f97316',
 ]
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? '').replace(/[&<>"]/g, ch => (
+    ch === '&' ? '&amp;' : ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : '&quot;'
+  ))
+}
+
+/**
+ * The hover teaser: a pin should teach before it opens. Name, measured gas, score
+ * and the one line that makes the site make sense — how many miners its gas can
+ * power and what that pays per day. Read-only; hovering never opens the panel.
+ */
+export function siteTeaserHtml(site: EnrichedSite, btcUsd: number): string {
+  const teaser = hoverTeaser(site, btcUsd)
+  const name = escapeHtml(site.properties?.name || site.id)
+  const kg = Math.round(site.emission || 0).toLocaleString()
+  const minerLine = teaser.miners > 0
+    ? `Gas supports up to <strong>${formatCount(teaser.miners)} miners</strong> ≈ <strong>${formatMoneyShort(teaser.usdPerDay)}/day</strong>`
+    : 'No usable gas measured at this site'
+  return (
+    `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div>`
+    + `<div class="text-[10px] text-gray-300 mt-0.5">${kg} kg CH₄/day · Stranded Score <span class="text-[#FF8C00] font-mono">${escapeHtml(site.strandedScore)}</span></div>`
+    + `<div class="text-[10px] font-semibold text-[#FF8C00] mt-1">${minerLine}</div>`
+    + `<div class="text-[10px] text-gray-400 mt-0.5">Click to build it →</div>`
+  )
+}
 
 function resolveViewMode(
   viewMode: MapProps['viewMode'],
@@ -186,6 +213,8 @@ export default function Map({
   const performanceModeRef = useRef(performanceMode)
   const nativeHandlersAttached = useRef(false)
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
+  /** Live BTC price for the hover teaser — the native handlers are attached once. */
+  const btcUsdRef = useRef(liveBtcPrice)
   const skipHistoryRef = useRef(false)
   const viewChangeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 55.8, lng: -95.5 })
@@ -202,6 +231,7 @@ export default function Map({
 
   onViewChangeRef.current = onViewChange
   performanceModeRef.current = performanceMode
+  btcUsdRef.current = liveBtcPrice
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
@@ -262,13 +292,11 @@ export default function Map({
       map.getCanvas().style.cursor = 'pointer'
       const feature = e.features?.[0]
       if (!feature) return
-      const name = feature.properties?.name || 'Site'
-      const score = feature.properties?.score ?? '—'
+      const id = feature.properties?.id
       const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
-      showHoverPopup(
-        `<div class="text-xs font-semibold truncate max-w-[180px]">${name}</div><div class="text-[10px]">Score <span class="text-[#FF8C00] font-mono">${score}</span></div>`,
-        coords,
-      )
+      const site = sitesRef.current.find(s => s.id === id)
+      if (!site) return
+      showHoverPopup(siteTeaserHtml(site, btcUsdRef.current), coords)
     })
     map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
 
@@ -485,9 +513,32 @@ export default function Map({
         el.tabIndex = 0
         el.setAttribute(
           'aria-label',
-          `${site.properties?.name || 'Site'}, score ${score}, ${Math.round(emission)} kg per day`,
+          `${site.properties?.name || 'Site'}, score ${score}, ${Math.round(emission)} kg per day, gas supports up to ${hoverTeaser(site, btcUsdRef.current).miners} miners`,
         )
         el.title = site.properties?.name || site.id
+
+        // Hover teaches before it opens (same teaser as the vector pins). Never opens the panel.
+        const onEnter = () => {
+          const map = mapRef.current
+          if (!map) return
+          if (!hoverPopupRef.current) {
+            hoverPopupRef.current = new maplibregl.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              className: 'stranded-hover-popup',
+              offset: 12,
+            })
+          }
+          hoverPopupRef.current
+            .setLngLat(site.geometry.coordinates as [number, number])
+            .setHTML(siteTeaserHtml(site, btcUsdRef.current))
+            .addTo(map)
+        }
+        const onLeave = () => { hoverPopupRef.current?.remove() }
+        el.addEventListener('mouseenter', onEnter)
+        el.addEventListener('mouseleave', onLeave)
+        el.addEventListener('focus', onEnter)
+        el.addEventListener('blur', onLeave)
 
         const openSite = (e: Event) => {
           e.stopPropagation()

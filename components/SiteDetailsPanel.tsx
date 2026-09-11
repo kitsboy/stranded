@@ -21,6 +21,7 @@ import TadbuyAdHook from '@/components/TadbuyAdHook'
 import GeneratorDerateChart from '@/components/GeneratorDerateChart'
 import { trackCategory } from '@/lib/analytics'
 import { motion } from 'framer-motion'
+import { Send } from 'lucide-react'
 import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
 import BankPackPreview from '@/components/BankPackPreview'
 import CopyLinkButton from '@/components/CopyLinkButton'
@@ -59,6 +60,23 @@ import {
   type FleetSite,
   type FleetTemplate,
 } from '@/lib/fleet-template'
+import { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY, DEFAULT_POWER_COST_USD_PER_KWH } from '@/lib/fleet-model'
+import {
+  blockScaleLabel,
+  capacityModel,
+  dataRecencyBadge,
+  fluxBadge,
+  formatCount,
+  formatKw,
+  formatPayback,
+  formatSats,
+  hashpriceRead,
+  satsPerDay,
+  ventingComparison,
+} from '@/lib/cockpit'
+import MinerStackCockpit, { type CockpitPreview } from '@/components/MinerStackCockpit'
+import MinerStackThumbBar from '@/components/MinerStackThumbBar'
+import FleetTemplateShelf, { type ShelfResult } from '@/components/FleetTemplateShelf'
 
 const FIAT_OPTIONS = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -88,6 +106,8 @@ export default function SiteDetailsPanel({
   compact = false,
   onExpand,
   initialFleet = null,
+  /** Rendered inside the mobile bottom sheet — adds the sticky thumb-zone controls. */
+  sheet = false,
 }: { 
   site: any
   onClose: () => void
@@ -99,6 +119,7 @@ export default function SiteDetailsPanel({
   onExpand?: () => void
   /** Fleet template restored from a share link (already capped to this site) */
   initialFleet?: FleetTemplate | null
+  sheet?: boolean
 }) {
   const { t } = useLocale()
   const p = site?.properties || {}
@@ -188,107 +209,50 @@ export default function SiteDetailsPanel({
     if (live) setBtcPrice(live)
   }
 
-  const calculations = useMemo(() => {
-    if (!site) return null
-    const overclockMultiplier = 1 + (overclockPercent / 100)
-    const adjustedHashrate = selectedASIC.hashrate_ths * overclockMultiplier
-    const adjustedPower = selectedASIC.power_w * overclockMultiplier * (1 + overclockPercent / 200)
-    const totalPowerKw = (adjustedPower * machineCount) / 1000
+  /**
+   * Fleet economics live in lib/fleet-model.ts so the cockpit preview, this panel's
+   * readouts and the exports can never disagree. Same inputs, same arithmetic.
+   */
+  const modelInput = useMemo(() => ({
+    site: site as FleetSite,
+    gensets: gensetStack,
+    asic: selectedASIC,
+    overclockPercent,
+    btcPrice,
+    btcPrices,
+    uptimePercent,
+    poolFeePercent,
+    maintenanceAnnualPercent,
+    revenuePerThPerDayBtc,
+    fixedSetupCostCad,
+    debtPercent,
+    interestRate,
+    powerCostUsdPerKwh: DEFAULT_POWER_COST_USD_PER_KWH,
+  }), [
+    site, gensetStack, selectedASIC, overclockPercent, btcPrice, btcPrices, uptimePercent,
+    poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, fixedSetupCostCad,
+    debtPercent, interestRate,
+  ])
 
-    // Generator integration: limit power from site's real emission using the genset stack (gas ceiling)
-    const generatorPowerKw = siteGasCeilingKw(site, gensetStack)
-    const effectivePowerKw = Math.min(totalPowerKw, generatorPowerKw)
-    const effectiveMachineCount = Math.min(machineCount, minerCeiling(generatorPowerKw, selectedASIC.power_w))
+  const calculations = useMemo(() => (
+    site ? computeFleetModel({ ...modelInput, machineCount, gensetName: gensetStackLabel(gensetStack) }) : null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [site, modelInput, machineCount])
 
-    // Honest revenue: use editable per-TH/day BTC rate (accounts for current difficulty, fees, etc.)
-    const dailyBtcGross = adjustedHashrate * effectiveMachineCount * revenuePerThPerDayBtc
-    const dailyBtcAfterPool = dailyBtcGross * (1 - poolFeePercent / 100)
-    const effectiveDailyBtc = dailyBtcAfterPool * (uptimePercent / 100)
-
-    const btcPriceInFiat = btcPrice
-
-    const dailyRevenueBtc = effectiveDailyBtc
-    const dailyRevenueFiat = effectiveDailyBtc * btcPriceInFiat
-
-    // Power cost: base assumption 0.04 in USD/kWh, converted via BTC rates for honesty across currencies
-    const powerCostUsd = effectivePowerKw * 24 * 0.04
-    const usdBtcPrice = btcPrices.usd || 85000
-    const dailyPowerCostBtc = powerCostUsd / usdBtcPrice
-    const dailyPowerCostFiat = dailyPowerCostBtc * btcPriceInFiat
-
-    // Maintenance as annual % of hardware investment (realistic opex)
-    const cadBtcPrice = btcPrices.cad || 115000
-    const hardwareCostBtc = (selectedASIC.cost_cad * effectiveMachineCount) / cadBtcPrice
-    const hardwareCostFiat = hardwareCostBtc * btcPriceInFiat
-    const dailyMaintBtc = hardwareCostBtc * (maintenanceAnnualPercent / 100) / 365
-    const dailyMaintFiat = dailyMaintBtc * btcPriceInFiat
-
-    const dailyProfitBtc = dailyRevenueBtc - dailyPowerCostBtc - dailyMaintBtc
-    const dailyProfitFiat = dailyProfitBtc * btcPriceInFiat
-
-    // Generator CapEx (production side, real from dataset) — summed across the genset stack
-    const gensetCapexCad = gensetStack.reduce((sum, g) => {
-      const spec = GENSET_DATA[g.gensetId]
-      if (!spec) return sum
-      return sum + spec.powerKW * spec.capexPerKW * Math.max(0, Math.floor(g.count || 0))
-    }, 0)
-    const gensetCapexBtc = gensetCapexCad / cadBtcPrice
-    const gensetCapexFiat = gensetCapexBtc * btcPriceInFiat
-
-    // Fixed setup costs (site prep, base generator, permitting, shipping, install) — do NOT scale linearly with every ASIC
-    const fixedCostBtc = fixedSetupCostCad / cadBtcPrice
-    const fixedCostFiat = fixedCostBtc * btcPriceInFiat
-    const totalInvestmentBtc = hardwareCostBtc + fixedCostBtc + gensetCapexBtc
-    const totalInvestmentFiat = hardwareCostFiat + fixedCostFiat + gensetCapexFiat
-
-    // Payback now correctly uses TOTAL investment (fixed + variable + generator). 
-    const paybackDays = dailyProfitBtc > 0 ? totalInvestmentBtc / dailyProfitBtc : Infinity
-
-    // Marginal payback (for one additional machine, ignoring fixed) — for transparency
-    const marginalDailyProfitBtc = (adjustedHashrate * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100)) 
-      - (adjustedPower / 1000 * 24 * 0.04 / usdBtcPrice) 
-      - ( (selectedASIC.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365 )
-    const marginalPayback = marginalDailyProfitBtc > 0 ? (selectedASIC.cost_cad / cadBtcPrice) / marginalDailyProfitBtc : Infinity
-
-    // Methane loss opportunity cost (the daily profit you lose by venting instead of capturing)
-    const maxPossibleDailyBtc = (generatorPowerKw * 1000 / selectedASIC.power_w ) * selectedASIC.hashrate_ths * revenuePerThPerDayBtc * (1 - poolFeePercent / 100) * (uptimePercent / 100)
-    const maxPossibleDailyProfitBtc = maxPossibleDailyBtc - (generatorPowerKw * 24 * 0.04 / usdBtcPrice) - ( (selectedASIC.cost_cad / cadBtcPrice) * (maintenanceAnnualPercent / 100) / 365 ) - (gensetCapexBtc / 365)
-    const methaneLossDailyBtc = maxPossibleDailyBtc
-
-    // Financing for CapEx (debt % at interest, simple annual cost)
-    const debtAmount = totalInvestmentBtc * (debtPercent / 100)
-    const annualFinancingCostBtc = debtAmount * (interestRate / 100) * 0.2 // approx 5yr amort factor
-    const financedPaybackDays = (dailyProfitBtc - annualFinancingCostBtc) > 0 ? totalInvestmentBtc / (dailyProfitBtc - annualFinancingCostBtc) : Infinity
-
-    return { 
-      effectiveDailyBtc: effectiveDailyBtc || 0,
-      dailyRevenueBtc: dailyRevenueBtc || 0,
-      dailyRevenueFiat: dailyRevenueFiat || 0,
-      dailyPowerCostBtc: dailyPowerCostBtc || 0,
-      dailyPowerCostFiat: dailyPowerCostFiat || 0,
-      dailyMaintBtc: dailyMaintBtc || 0,
-      dailyMaintFiat: dailyMaintFiat || 0,
-      dailyProfitBtc: dailyProfitBtc || 0,
-      dailyProfitFiat: dailyProfitFiat || 0,
-      monthlyProfitBtc: (dailyProfitBtc * 30) || 0,
-      monthlyProfitFiat: (dailyProfitFiat * 30) || 0,
-      hardwareCostBtc: hardwareCostBtc || 0,
-      hardwareCostFiat: hardwareCostFiat || 0,
-      fixedCostBtc: fixedCostBtc || 0,
-      fixedCostFiat: fixedCostFiat || 0,
-      totalInvestmentBtc: totalInvestmentBtc || 0,
-      totalInvestmentFiat: totalInvestmentFiat || 0,
-      paybackDays: paybackDays,
-      marginalPayback: marginalPayback,
-      totalPowerKw: totalPowerKw || 0,
-      generatorPowerKw: generatorPowerKw || 0,
-      gensetCapexBtc: gensetCapexBtc || 0,
-      methaneLossDailyBtc: methaneLossDailyBtc || 0,
-      financedPaybackDays: financedPaybackDays,
-      effectiveMachineCount: effectiveMachineCount || 0,
-      gensetName: gensetStackLabel(gensetStack)
-    }
-  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, gensetStack, debtPercent, interestRate, siteEmission, site])
+  /** The cockpit asks for any candidate count (drag, ±, typed) and gets the same model back. */
+  const previewFor = useMemo(
+    () => (count: number): CockpitPreview => {
+      const m = computeFleetModel({ ...modelInput, machineCount: count })
+      return {
+        satsPerDay: satsPerDay(m.effectiveDailyBtc),
+        usdPerDay: m.dailyRevenueFiat,
+        netUsdPerDay: m.dailyProfitFiat,
+        kwUsed: m.usedPowerKw,
+        paybackDays: m.paybackDays,
+      }
+    },
+    [modelInput],
+  )
 
   // Auto mode: the miner stack always fills the gas ceiling (maximum capture)
   useEffect(() => {
@@ -408,6 +372,66 @@ export default function SiteDetailsPanel({
   const sparePct = Math.max(0, 100 - gaugePct)
   const modeLabel = stackMode === 'auto' ? 'Fill the gas' : 'My build'
 
+  // ---- Cockpit inputs (lib/cockpit.ts is pure + unit-tested) ------------------
+  const recency = dataRecencyBadge(p)
+  const flux = fluxBadge(p)
+  const venting = ventingComparison({
+    siteEmissionKgDay: siteEmission,
+    capturedKgPerDay,
+    dailyProfitFiat: calculations.dailyProfitFiat,
+    unusedKgPerDay: unused.unusedKgPerDay,
+  })
+  const hashprice = hashpriceRead({
+    usedBtcPerThDay: revenuePerThPerDayBtc,
+    usdBtcPrice,
+    networkBtcPerThDay: NETWORK_ESTIMATE_BTC_PER_TH_DAY,
+    asicHashrateThs: selectedASIC.hashrate_ths,
+    asicWatts: selectedASIC.power_w,
+    powerCostUsdPerKwh: DEFAULT_POWER_COST_USD_PER_KWH,
+  })
+  const capacity = capacityModel({
+    count: machineCount,
+    ceilingMiners,
+    gasCeilingKw: calculations.generatorPowerKw,
+    asicWatts: selectedASIC.power_w,
+  })
+  const currentPreview = previewFor(machineCount)
+
+  /** One place that turns a template into "this template at this site" — cards and apply agree. */
+  const resolveTemplateForSite = (template: FleetTemplate): FleetTemplate => {
+    const reference = referenceSiteForPreset(template, allSites)
+    return capFleetToSite(reference ? rescaleToSite(template, reference, siteAsFleet) : template, siteAsFleet)
+  }
+  const shelfResultFor = (template: FleetTemplate): ShelfResult => {
+    const scaled = resolveTemplateForSite(template)
+    const asic = ASIC_MACHINES.find(m => m.id === scaled.asicId) || selectedASIC
+    const m = computeFleetModel({ ...modelInput, asic, gensets: scaled.gensets, machineCount: scaled.minerCount })
+    return {
+      minerCount: m.effectiveMachineCount,
+      satsPerDay: satsPerDay(m.effectiveDailyBtc),
+      ceilingKw: m.generatorPowerKw,
+    }
+  }
+
+  /**
+   * The sales handoff: the fleet link travels into the certified-application form
+   * (/partnerships reads it) so one click turns a build into a qualified lead.
+   */
+  const handoffHref = `/partnerships?category=${encodeURIComponent('Site application')}`
+    + `&site=${encodeURIComponent(p.name || site.id)}`
+    + `&fleet=${encodeURIComponent(fleetShareUrl)}`
+
+  /** Any manual edit stops the build claiming to be a named template. */
+  const setCountManually = (next: number) => {
+    setStackMode('manual')
+    setFleetId('custom')
+    setMachineCount(next)
+  }
+  const stepMiners = (delta: number) => {
+    const top = ceilingMiners > 0 ? ceilingMiners : Number.MAX_SAFE_INTEGER
+    setCountManually(Math.max(1, Math.min(machineCount + delta, top)))
+  }
+
   const decMiners = () => {
     setStackMode('manual')
     setMachineCount(c => Math.max(1, c - 1))
@@ -424,6 +448,8 @@ export default function SiteDetailsPanel({
       return next
     })
     // the tap the ceiling blocked: one more miner, now that the ceiling has risen
+    setStackMode('manual')
+    setFleetId('custom')
     setMachineCount(c => c + 1)
   }
   const ceilingWithout = (gensetId: GensetId): number => {
@@ -444,8 +470,7 @@ export default function SiteDetailsPanel({
     })
   }
   const applyTemplate = (template: FleetTemplate) => {
-    const reference = referenceSiteForPreset(template, allSites)
-    const scaled = capFleetToSite(reference ? rescaleToSite(template, reference, siteAsFleet) : template, siteAsFleet)
+    const scaled = resolveTemplateForSite(template)
     setGensetStack(scaled.gensets.map(g => ({ ...g })))
     const head = scaled.gensets[0]?.gensetId
     if (head) setSelectedGenset(head)
@@ -454,6 +479,7 @@ export default function SiteDetailsPanel({
     setFleetId(scaled.id)
     setStackMode(scaled.mode)
     if (scaled.mode === 'manual') setMachineCount(Math.max(1, scaled.minerCount || 1))
+    toast.success(`Applied “${scaled.name}” at this site`)
   }
 
   const saveCurrentAsNamed = () => {
@@ -476,10 +502,10 @@ export default function SiteDetailsPanel({
       animate={{ opacity: 1, x: 0, y: 0 }}
       exit={{ opacity: 0, x: compact ? 0 : 24, y: compact ? 16 : 0 }}
       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-      className={`w-full bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 shadow-xl max-w-md relative ${compact ? 'rounded-t-2xl p-4' : 'rounded-xl p-6 max-h-full overflow-y-auto'}`}
+      className={`w-full bg-[#1e293b] border border-[#5BC0BE]/30 shadow-xl relative ${compact ? 'rounded-t-2xl p-4' : 'rounded-xl p-4 sm:p-6 max-h-full overflow-y-auto'}`}
       data-testid={compact ? 'mobile-site-peek' : 'site-details-panel'}
     >
-      <div className={`flex items-start justify-between ${compact ? 'mb-3 gap-2' : 'mb-4'}`}>
+      <div className={`flex items-start justify-between ${compact ? 'mb-3 gap-2' : 'mb-3'}`}>
         <div className="min-w-0 flex-1">
           <h2 className={`font-bold text-white truncate ${compact ? 'text-[15px] leading-tight' : 'text-xl'}`}>
             {p.name || 'Unknown'}
@@ -497,6 +523,46 @@ export default function SiteDetailsPanel({
               {site.scoreBadge && <span className={`text-[#5BC0BE] ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{site.scoreBadge}</span>}
               {dataQuality && <DataQualityBadge report={dataQuality} />}
               {!compact && scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
+            </div>
+          )}
+          {/* Honesty visuals: where the number comes from, right in the header. */}
+          {!compact && (
+            <div className="flex items-center gap-1.5 flex-wrap mt-2" data-testid="site-honesty-badges">
+              {recency && (
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] ${
+                    recency.tier === 'high'
+                      ? 'border-[#34D399]/45 bg-[#34D399]/10 text-[#34D399]'
+                      : recency.tier === 'low'
+                        ? 'border-amber-400/45 bg-amber-400/10 text-amber-200'
+                        : 'border-[#5BC0BE]/40 bg-[#5BC0BE]/10 text-[#5BC0BE]'
+                  }`}
+                  title={`Source: ${p.data_source || 'dataset'} · reference year ${p.reference_year ?? 'not stated'} · confidence ${p.confidence || 'not stated'}`}
+                  data-testid="site-data-recency"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+                  {recency.label} · {recency.detail}
+                </span>
+              )}
+              {flux && (
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-[10px] ${
+                    flux.tone === 'flare'
+                      ? 'border-[#FF8C00]/50 bg-[#FF8C00]/10 text-[#FF8C00]'
+                      : 'border-amber-400/50 bg-amber-400/10 text-amber-200'
+                  }`}
+                  data-testid="site-flux-badge"
+                >
+                  {flux.label}
+                </span>
+              )}
+              <a
+                href="/open-data"
+                className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-gray-300 hover:border-[#5BC0BE]/50 hover:text-[#5BC0BE]"
+                data-testid="site-verify-link"
+              >
+                Verify this yourself →
+              </a>
             </div>
           )}
         </div>
@@ -540,6 +606,111 @@ export default function SiteDetailsPanel({
 
       {!compact && (
       <>
+      {/* ---- THE COCKPIT: hero number, capacity bar with the gas ceiling, live readouts ---- */}
+      <MinerStackCockpit
+        siteId={site.id}
+        machineCount={machineCount}
+        onCountChange={setCountManually}
+        mode={stackMode}
+        onModeChange={setStackMode}
+        ceilingMiners={ceilingMiners}
+        gasCeilingKw={calculations.generatorPowerKw}
+        asic={selectedASIC}
+        gensets={gensetStack}
+        headGensetName={GENSET_DATA[headGenset]?.name || 'generator'}
+        headGensetId={headGenset}
+        onAddGenset={addGensetUnit}
+        onRemoveGenset={(gensetId) => { setFleetId('custom'); removeGensetUnit(gensetId) }}
+        canRemoveGenset={canRemoveGenset}
+        preview={previewFor}
+        currencySymbol={currencySymbol}
+        fiatCode={selectedFiat}
+        siteEmissionKgDay={siteEmission}
+        capturedKgPerDay={capturedKgPerDay}
+        co2eAvoidedTonnesPerYear={venting.co2eAvoidedTonnesPerYear}
+        unusedKgPerDay={unused.unusedKgPerDay}
+        unusedUsdPerDay={unminedUsdPerDay}
+        hashprice={hashprice}
+        powerCostUsdPerKwh={DEFAULT_POWER_COST_USD_PER_KWH}
+        dataYear={Number(p.reference_year) || undefined}
+      >
+        <div className="mt-3 flex flex-wrap gap-2">
+          <CopyLinkButton
+            url={fleetShareUrl}
+            label="Copy fleet link"
+            successMessage="Fleet link copied — miners, gensets and mode included"
+            className="w-full justify-center"
+          />
+        </div>
+      </MinerStackCockpit>
+
+      {/* ---- templates as a shelf, not a form ---- */}
+      <FleetTemplateShelf
+        presets={MINER_STACK_PRESETS}
+        saved={namedFleets}
+        activeId={fleetId}
+        suggestedId={suggestedPreset?.id}
+        resultFor={shelfResultFor}
+        onApply={applyTemplate}
+        onDeleteSaved={(id) => { deleteNamedFleet(id); setNamedFleets(listNamedFleets()) }}
+        onSaveCurrent={() => setShowSaveFleetName(true)}
+        saveOpen={showSaveFleetName}
+      />
+
+      {showSaveFleetName && (
+        <div className="flex gap-1.5 mt-2" data-testid="miner-stack-save-form">
+          <input
+            autoFocus
+            value={fleetNameInput}
+            onChange={e => setFleetNameInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { saveCurrentAsNamed(); } if (e.key === 'Escape') { setShowSaveFleetName(false); setFleetNameInput('') } }}
+            placeholder="Template name (e.g. Keele Valley)"
+            aria-label="Name for this build"
+            className="flex-1 min-w-0 text-[11px] px-2 py-1.5 rounded border border-white/15 bg-black/30 text-white"
+          />
+          <button
+            type="button"
+            onClick={saveCurrentAsNamed}
+            disabled={!fleetNameInput.trim()}
+            className="text-[11px] px-3 py-1.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] disabled:opacity-40"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={() => { setShowSaveFleetName(false); setFleetNameInput('') }}
+            className="text-[11px] px-2 py-1.5 rounded border border-white/15 text-gray-400"
+            aria-label="Cancel save"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* ---- one obvious next step: the build becomes a sales handoff ---- */}
+      <div className="mt-3 rounded-2xl border border-[#FF8C00]/35 bg-[#FF8C00]/10 p-3" data-testid="send-this-build">
+        <div className="text-[11px] text-gray-200 leading-snug">
+          This build: <span className="text-white font-semibold tabular-nums">{formatCount(capacity.miners)} miners</span> ·{' '}
+          <span className="text-[#5BC0BE] font-semibold tabular-nums">{formatKw(capacity.usedKw)} kW</span> ·{' '}
+          <span className="text-[#FF8C00] font-semibold tabular-nums">{formatSats(currentPreview.satsPerDay)} sats/day</span> ·{' '}
+          payback <span className="text-white font-semibold tabular-nums">{formatPayback(currentPreview.paybackDays)}</span>
+        </div>
+        <a
+          href={handoffHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] px-3 py-3 text-sm font-semibold text-black active:scale-[0.985] transition"
+          data-testid="send-this-build-cta"
+        >
+          <Send size={15} aria-hidden /> Send this build to the team
+        </a>
+        <div className="text-[10px] text-gray-400 mt-1.5 leading-snug">
+          Opens the certified application with this fleet link pre-filled, category{' '}
+          <span className="text-gray-300">Site application</span>, subject{' '}
+          <span className="text-gray-300">“Stranded Energy — Site application: {p.name || site.id}”</span>.
+        </div>
+      </div>
+
       {scoreExplain && (
         <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3" open>
           <summary className="text-sm font-semibold text-[#FF8C00] cursor-pointer">Why this score ({scoreExplain.score})</summary>
@@ -680,252 +851,6 @@ export default function SiteDetailsPanel({
         <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{calculations.hardwareCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span></div>
       </div>
-      {/* ---- Miner stack: add/subtract miners at this location ---- */}
-      <div className="mb-4 rounded-lg border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-3" data-testid="miner-stack">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-sm font-semibold text-[#FF8C00]">Miner stack</span>
-          <div className="flex rounded-lg overflow-hidden border border-white/15" role="group" aria-label="Miner stack mode">
-            <button
-              type="button"
-              onClick={() => setStackMode('auto')}
-              aria-pressed={stackMode === 'auto'}
-              title="Miners fill the gas ceiling — maximum methane capture"
-              className={`px-2 py-1 text-[11px] ${stackMode === 'auto' ? 'bg-[#FF8C00] text-black font-semibold' : 'text-gray-300'}`}
-              data-testid="miner-stack-auto"
-            >
-              Fill the gas
-            </button>
-            <button
-              type="button"
-              onClick={() => setStackMode('manual')}
-              aria-pressed={stackMode === 'manual'}
-              title="Keep your own miner count"
-              className={`px-2 py-1 text-[11px] ${stackMode === 'manual' ? 'bg-[#5BC0BE] text-black font-semibold' : 'text-gray-300'}`}
-              data-testid="miner-stack-manual"
-            >
-              My build
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={decMiners}
-            aria-label="Remove one miner"
-            className="h-12 w-12 min-w-[44px] min-h-[44px] rounded-xl border border-white/20 text-white text-2xl leading-none hover:bg-[#5BC0BE]/20 active:scale-95 transition"
-            data-testid="miner-stack-dec"
-          >
-            −
-          </button>
-          <div className="min-w-[5.5rem] text-center">
-            <div className="text-2xl font-bold text-white font-mono" data-testid="miner-stack-count">
-              {machineCount.toLocaleString()}
-            </div>
-            <div className="text-[10px] text-gray-400">miners · {modeLabel}</div>
-          </div>
-          <button
-            type="button"
-            onClick={incMiners}
-            aria-label="Add one miner"
-            className="h-12 w-12 min-w-[44px] min-h-[44px] rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] text-2xl leading-none hover:bg-[#FF8C00]/20 active:scale-95 transition"
-            data-testid="miner-stack-inc"
-          >
-            +
-          </button>
-        </div>
-
-        <div className="text-center text-[11px] text-gray-400 mt-1">
-          {selectedASIC.name} · {selectedASIC.hashrate_ths} TH/s @ {selectedASIC.power_w} W
-        </div>
-
-        {/* Capacity gauge — filled = your miners, amber = spare gas on the table */}
-        <div className="mt-3">
-          <div className="flex justify-between gap-2 text-[10px] text-gray-300">
-            <span className="font-mono" data-testid="miner-stack-gauge-label">
-              {machineCount.toLocaleString()} / {ceilingMiners.toLocaleString()} miners · {usedPowerKw.toLocaleString(undefined, { maximumFractionDigits: 0 })} kW of {calculations.generatorPowerKw.toLocaleString(undefined, { maximumFractionDigits: 0 })} kW
-            </span>
-            <span className="truncate text-gray-400" title={gensetStackLabel(gensetStack)}>
-              {gensetStackLabel(gensetStack)}
-            </span>
-          </div>
-          <div
-            className="h-2.5 w-full rounded bg-white/10 mt-1 overflow-hidden flex"
-            role="progressbar"
-            aria-valuenow={gaugePct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`${machineCount} of ${ceilingMiners} miners, gas ceiling`}
-          >
-            <div className="h-full bg-[#5BC0BE]" style={{ width: `${gaugePct}%` }} />
-            {sparePct > 0 && <div className="h-full bg-amber-400/80" style={{ width: `${sparePct}%` }} />}
-          </div>
-          <div className="flex justify-between text-[9px] text-gray-400 mt-0.5">
-            <span>■ your miners</span>
-            <span>{sparePct > 0 ? `▨ spare gas (${sparePct}%)` : 'no spare gas'}</span>
-          </div>
-        </div>
-
-        {atGasCeiling && (
-          <div className="mt-2 text-[11px] text-amber-400 flex items-center gap-2 flex-wrap" data-testid="miner-stack-gas-limit">
-            <span>{stackMode === 'manual' ? 'Gas limit reached —' : 'Full capture —'}</span>
-            <button
-              type="button"
-              onClick={addGensetUnit}
-              className="rounded-full border border-amber-400/60 px-2 py-1 font-semibold hover:bg-amber-400/10"
-              data-testid="miner-stack-add-genset"
-            >
-              + Add another {GENSET_DATA[headGenset]?.name}
-            </button>
-          </div>
-        )}
-
-        {stackMode === 'manual' && machineCount < ceilingMiners && siteEmission > 0 && (
-          <div className="mt-2 text-[11px] text-amber-400 leading-snug" data-testid="miner-stack-venting">
-            Venting left on the table: {unused.unusedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day (
-            {unused.unusedTPerYear.toLocaleString(undefined, { maximumFractionDigits: 1 })} t/yr CH₄) ≈ ${unminedUsdPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })}/day unmined
-          </div>
-        )}
-
-        {/* Genset inventory — stack units to raise the ceiling */}
-        <div className="mt-3 space-y-1" data-testid="miner-stack-gensets">
-          {gensetStack.map(g => (
-            <div key={g.gensetId} className="flex items-center justify-between gap-2 text-[11px] text-gray-300">
-              <span className="truncate">{g.count} × {GENSET_DATA[g.gensetId]?.name}</span>
-              <button
-                type="button"
-                onClick={() => removeGensetUnit(g.gensetId)}
-                disabled={!canRemoveGenset(g.gensetId)}
-                title={canRemoveGenset(g.gensetId) ? 'Remove one unit' : 'Remove miners first — they need this unit'}
-                aria-label={`Remove one ${GENSET_DATA[g.gensetId]?.name}`}
-                className="h-6 w-6 shrink-0 rounded border border-white/20 text-gray-300 disabled:opacity-30"
-              >
-                −
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Live readouts — every tap updates these on the same render tick */}
-        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-          <div className="flex justify-between"><span className="text-gray-400">Miners</span><span className="text-white font-mono">{machineCount.toLocaleString()}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Total power</span><span className="text-[#5BC0BE] font-mono">{calculations.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Sats/day</span><span className="text-[#FF8C00] font-mono">{Math.round(calculations.effectiveDailyBtc * 1e8).toLocaleString()}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">CH₄ captured</span><span className="text-[#34D399] font-mono">{capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/d ({capturedPct.toFixed(0)}%)</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Payback</span><span className="text-white font-mono">{isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays).toLocaleString() + ' d' : 'N/A'}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Ceiling</span><span className="text-gray-300 font-mono">{ceilingMiners.toLocaleString()}</span></div>
-        </div>
-
-        {suggestedPreset && (
-          <button
-            type="button"
-            onClick={() => applyTemplate(suggestedPreset)}
-            className="mt-3 w-full text-left text-[10px] px-2 py-1.5 rounded border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
-            data-testid="miner-stack-preset"
-          >
-            Apply template: {suggestedPreset.name} · {gensetStackLabel(suggestedPreset.gensets)}
-          </button>
-        )}
-
-        {/* Fleet presets — browse all 5 presets */}
-        <div className="mt-3">
-          <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">Fleet presets</div>
-          <div className="flex flex-wrap gap-1">
-            {MINER_STACK_PRESETS.map(preset => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => applyTemplate(preset)}
-                title={`${preset.name} · ${gensetStackLabel(preset.gensets)}`}
-                className={`text-[10px] px-2 py-1 rounded-full border ${preset.id === fleetId ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400 hover:border-[#5BC0BE]/50 hover:text-[#5BC0BE]'}`}
-                data-testid={`fleet-preset-${preset.id}`}
-              >
-                {preset.name.split(' — ')[0]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Save as named template */}
-        <div className="mt-3">
-          {!showSaveFleetName ? (
-            <button
-              type="button"
-              onClick={() => setShowSaveFleetName(true)}
-              className="w-full text-left text-[10px] px-2 py-1.5 rounded border border-[#FF8C00]/30 text-[#FF8C00] hover:bg-[#FF8C00]/10"
-              data-testid="miner-stack-save-template"
-            >
-              + Save as template
-            </button>
-          ) : (
-            <div className="flex gap-1.5" data-testid="miner-stack-save-form">
-              <input
-                autoFocus
-                value={fleetNameInput}
-                onChange={e => setFleetNameInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { saveCurrentAsNamed(); } if (e.key === 'Escape') { setShowSaveFleetName(false); setFleetNameInput('') } }}
-                placeholder="Template name (e.g. Keele Valley)"
-                className="flex-1 min-w-0 text-[10px] px-2 py-1.5 rounded border border-white/15 bg-black/30 text-white"
-              />
-              <button
-                type="button"
-                onClick={saveCurrentAsNamed}
-                disabled={!fleetNameInput.trim()}
-                className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] disabled:opacity-40"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => { setShowSaveFleetName(false); setFleetNameInput('') }}
-                className="text-[10px] px-2 py-1 rounded border border-white/15 text-gray-400"
-                aria-label="Cancel save"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Saved named templates */}
-        {namedFleets.length > 0 && (
-          <div className="mt-3 space-y-1" data-testid="saved-fleet-templates">
-            <div className="text-[10px] uppercase tracking-widest text-gray-400">Saved templates</div>
-            {namedFleets.map(rec => (
-              <div key={rec.id} className="flex items-center gap-2 text-[10px]">
-                <button
-                  type="button"
-                  onClick={() => applyTemplate(rec.template)}
-                  className="flex-1 truncate text-left px-2 py-1 rounded border border-[#5BC0BE]/25 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
-                  title={`Apply "${rec.name}" to this site`}
-                  data-testid={`apply-named-fleet-${rec.id}`}
-                >
-                  {rec.name}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { deleteNamedFleet(rec.id); setNamedFleets(listNamedFleets()) }}
-                  className="shrink-0 px-1.5 py-0.5 rounded border border-white/15 text-gray-400 hover:border-red-400/60 hover:text-red-400"
-                  aria-label={`Delete template ${rec.name}`}
-                  data-testid={`delete-named-fleet-${rec.id}`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-3 flex">
-          <CopyLinkButton
-            url={fleetShareUrl}
-            label="Copy fleet link"
-            successMessage="Fleet link copied — miners, gensets and mode included"
-            className="w-full justify-center"
-          />
-        </div>
-      </div>
-
       <div className="mb-4">
         <label className="text-sm font-semibold text-[#5BC0BE]">ASIC Model</label>
         <select value={selectedASIC.id} onChange={(e) => setSelectedASIC(ASIC_MACHINES.find(m => m.id === e.target.value) || ASIC_MACHINES[0])} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
@@ -1145,6 +1070,24 @@ export default function SiteDetailsPanel({
       </div>
 
       <p className="text-xs text-gray-400 text-center mt-3">v0.5 • GiveAbit Intelligence — live BTC price shown in selected currency. All values BTC-first.</p>
+
+      {/* Mobile bottom sheet: thumb-zone controls for the miner stack. */}
+      {sheet && (
+        <MinerStackThumbBar
+          count={capacity.miners}
+          ceilingMiners={ceilingMiners}
+          filledPct={capacity.filledPct}
+          usedKw={capacity.usedKw}
+          gasCeilingKw={calculations.generatorPowerKw}
+          satsPerDay={currentPreview.satsPerDay}
+          onStep={stepMiners}
+          onJumpToStack={() => {
+            if (typeof document === 'undefined') return
+            const el = document.querySelector('[data-testid="miner-stack"]')
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+        />
+      )}
       </>
       )}
     </motion.div>

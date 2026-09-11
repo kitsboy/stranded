@@ -1711,3 +1711,91 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   .site-card { padding: 1rem; }
   .home-kpi-tile, [data-testid="home-kpi-strip"] a { min-height: 44px; }
 }
+
+/* ==========================================================================
+   SITE COCKPIT — the miner-stack visual (components/MinerStackCockpit.tsx)
+   Solid surfaces only: every label is light-on-dark at full opacity so the
+   cockpit stays readable in grayscale and for colour-blind users.
+   ========================================================================== */
+.cockpit { font-variant-numeric: tabular-nums; }
+.cockpit .tabular-nums, .cockpit [data-testid="cockpit-sats"] { font-variant-numeric: tabular-nums; }
+
+.cockpit-hero {
+  background: linear-gradient(155deg, rgba(255, 140, 0, 0.16), rgba(30, 41, 59, 0.98) 60%);
+  border: 1px solid rgba(255, 140, 0, 0.30);
+}
+
+.cockpit-bar { background: rgba(15, 23, 42, 0.85); }
+.cockpit-bar:focus-visible { outline-offset: 3px; }
+
+.cockpit-filled { background: rgba(91, 192, 190, 0.08); }
+.cockpit-block { box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25); }
+
+.cockpit-spare {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(226, 232, 240, 0.14) 0 5px,
+    rgba(226, 232, 240, 0.03) 5px 10px
+  );
+}
+.cockpit-spare--amber {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.34) 0 5px,
+    rgba(251, 191, 36, 0.10) 5px 10px
+  );
+}
+
+/* Tooltip: opens to the LEFT so it can never clip at the panel's right edge.
+   Shown on hover (desktop), focus (keyboard) and tap (focus-within) alike. */
+.cockpit-tip {
+  position: absolute;
+  right: calc(100% + 0.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15rem;
+  max-width: 60vw;
+  z-index: 40;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  border: 1px solid rgba(91, 192, 190, 0.45);
+  color: #f1f5f9;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.group:hover .cockpit-tip,
+.group:focus-within .cockpit-tip { opacity: 1; visibility: visible; }
+
+@keyframes cockpit-nudge {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+}
+.cockpit-nudge { animation: cockpit-nudge 380ms ease-in-out 2; }
+
+/* Mobile thumb zone: the stack controls pinned to the bottom of the sheet. */
+.cockpit-thumb-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  background: #0f172a;
+  border-top: 1px solid rgba(91, 192, 190, 0.30);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Keep the map's own controls clear of the docked cockpit (desktop). */
+@media (min-width: 1280px) {
+  .map-command-center.map-right-column-open .maplibregl-ctrl-top-right { margin-right: 480px; }
+  .map-command-center.map-right-column-open .map-layer-stack { right: 496px; }
+}
+@media (min-width: 1600px) {
+  .map-command-center.map-right-column-open .maplibregl-ctrl-top-right { margin-right: 560px; }
+  .map-command-center.map-right-column-open .map-layer-stack { right: 576px; }
+}
+

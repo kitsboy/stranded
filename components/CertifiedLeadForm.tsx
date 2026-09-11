@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { downloadBlob } from '@/lib/export-formats'
 
@@ -31,15 +32,42 @@ const empty: FormState = { name: '', email: '', org: '', province: '', sites: ''
 const CONTACT_TO = 'hello@giveabit.io'
 
 export default function CertifiedLeadForm() {
+  const searchParams = useSearchParams()
   const [form, setForm] = useState<FormState>(empty)
   const [category, setCategory] = useState('')
   const [specify, setSpecify] = useState('')
+  const [fleetLink, setFleetLink] = useState('')
   const [sending, setSending] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [lastLead, setLastLead] = useState<Record<string, string> | null>(null)
   const [draftSaved, setDraftSaved] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  /**
+   * Handoff from the site cockpit ("Send this build to the team"): the fleet link
+   * arrives in the query string, so the application is already about a real build.
+   * Never overwrite a draft the visitor has already started.
+   */
+  const handoffApplied = useState(() => ({ done: false }))[0]
+  useEffect(() => {
+    if (handoffApplied.done) return
+    const wantedCategory = searchParams.get('category')
+    const siteName = searchParams.get('site')
+    const fleet = searchParams.get('fleet')
+    if (!wantedCategory && !siteName && !fleet) return
+    handoffApplied.done = true
+    let hasDraft = false
+    try { hasDraft = !!localStorage.getItem(DRAFT_KEY) } catch { hasDraft = false }
+    if (hasDraft) return
+    if (wantedCategory && (CATEGORIES as readonly string[]).includes(wantedCategory)) setCategory(wantedCategory)
+    if (siteName) setSpecify(siteName)
+    if (fleet) {
+      setFleetLink(fleet)
+      setForm(f => ({ ...f, sites: f.sites || fleet }))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   useEffect(() => {
     try {
@@ -71,7 +99,9 @@ export default function CertifiedLeadForm() {
 
   const buildBody = (lead: Record<string, string>) =>
     `Stranded Value Certified — local application (please review)\n\n` +
-    `Name: ${lead.name}\nEmail: ${lead.email}\nOrg: ${lead.org}\nProvince: ${lead.province}\nSites: ${lead.sites || '—'}\nCategory: ${lead.category}${lead.specify ? ` (${lead.specify})` : ''}\nAt: ${lead.at}\n\n` +
+    `Name: ${lead.name}\nEmail: ${lead.email}\nOrg: ${lead.org}\nProvince: ${lead.province}\nSites: ${lead.sites || '—'}\n` +
+    (lead.fleet ? `Build link: ${lead.fleet}\n` : '') +
+    `Category: ${lead.category}${lead.specify ? ` (${lead.specify})` : ''}\nAt: ${lead.at}\n\n` +
     `(Sent via stranded.giveabit.io.)`
 
   const copyEmail = useCallback(async () => {
@@ -89,7 +119,7 @@ export default function CertifiedLeadForm() {
     e.preventDefault()
     setSending(true)
     setSubmitError(null)
-    const lead = { ...form, category, specify, at: new Date().toISOString(), source: 'stranded.giveabit.io' }
+    const lead = { ...form, category, specify, fleet: fleetLink, at: new Date().toISOString(), source: 'stranded.giveabit.io' }
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -102,6 +132,9 @@ export default function CertifiedLeadForm() {
           sites: form.sites,
           category,
           specify,
+          // Full text of the application, including the fleet link when the lead
+          // arrived from a site cockpit ("Send this build to the team").
+          message: buildBody(lead),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -256,7 +289,7 @@ export default function CertifiedLeadForm() {
             {copied ? 'Copied ✓' : `Copy ${CONTACT_TO}`}
           </button>
           <a
-            href={`mailto:${CONTACT_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildBody(lastLead || { name: form.name, email: form.email, org: form.org, province: form.province, sites: form.sites, category, specify, at: '' }))}`}
+            href={`mailto:${CONTACT_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildBody(lastLead || { name: form.name, email: form.email, org: form.org, province: form.province, sites: form.sites, category, specify, fleet: fleetLink, at: '' }))}`}
             className="px-3 py-1.5 rounded-lg bg-[#FF8C00] text-black text-xs font-semibold hover:bg-[#ff9d33]"
           >
             Open email → {CONTACT_TO}

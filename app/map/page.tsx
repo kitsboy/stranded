@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner'
 
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
+import FirstRunStrip from '@/components/FirstRunStrip'
 import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/LayerControls'
 import DualRangeSlider from '@/components/DualRangeSlider'
 import type { LiveStats } from '@/types/live-stats'
@@ -1002,7 +1003,7 @@ function StrandedCommandCenter() {
   const showRightColumn = !!(selectedSite || portfolio.length > 0 || compareSites.length >= 2)
 
   return (
-    <div className="relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container" role="region" aria-label="Stranded command center map">
+    <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container${showRightColumn ? ' map-right-column-open' : ''}`} role="region" aria-label="Stranded command center map">
       <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
         Stranded Command Center — Map View · ECCC GHGRP verified data
       </div>
@@ -1074,25 +1075,15 @@ function StrandedCommandCenter() {
         onGeolocate={nearMe}
       />
 
-      {/* Left premium filter command center (wild creative) */}
+      {/* First-run guidance: Pick a site → See the build → Send it (dismissible, ⌘K included) */}
       {showSearchHint && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[72] max-w-md w-[92vw] glass px-4 py-3 rounded-2xl border border-[#5BC0BE]/40 text-xs flex items-start gap-3 shadow-lg">
-          <div className="flex-1">
-            <span className="text-[#5BC0BE] font-semibold">Tip:</span> Press{' '}
-            <kbd className="px-1.5 py-px bg-white/10 rounded font-mono">⌘K</kbd> to fuzzy-search 2,611 sites by name, province, or company.
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.setItem('stranded-map-search-hint-dismissed', '1')
-              setShowSearchHint(false)
-            }}
-            className="text-gray-400 hover:text-white shrink-0"
-            aria-label="Dismiss search hint"
-          >
-            ✕
-          </button>
-        </div>
+        <FirstRunStrip
+          commandHint={typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘K' : 'Ctrl K'}
+          onOpenSearch={() => {
+            try { localStorage.setItem('stranded-map-firstrun-dismissed', '1'); localStorage.setItem('stranded-map-search-hint-dismissed', '1') } catch { /* storage blocked */ }
+            setShowSearchHint(false)
+          }}
+        />
       )}
 
       <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-3 max-h-[calc(100dvh-5.5rem)] pb-3 items-stretch pointer-events-none [&>*]:pointer-events-auto">
@@ -1546,12 +1537,13 @@ function StrandedCommandCenter() {
             }}
             data-testid="mobile-site-sheet"
           >
-            <div className="mx-auto w-full max-w-lg pb-[max(1rem,env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top,0px)]">
-              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 mt-2" aria-hidden />
+            <div className="mx-auto w-full max-w-lg max-h-[85dvh] flex flex-col pb-[max(1rem,env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top,0px)]">
+              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 mt-2 shrink-0" aria-hidden />
               <SiteDetailsPanel
                 key={selectedSite.id}
                 site={selectedSite}
                 compact={mobileSiteSheet === 'peek'}
+                sheet
                 onExpand={() => setMobileSiteSheet('expanded')}
                 onClose={() => { setSelectedSite(null); setMobileSiteSheet('peek') }}
                 onAddToMission={addToPortfolio}
@@ -1564,9 +1556,9 @@ function StrandedCommandCenter() {
         )}
       </AnimatePresence>
 
-      {/* Right side — SiteDetails + Mission (desktop); hidden when empty to avoid scroll-shadow bar */}
+      {/* Right side — docked site cockpit + Mission (desktop ≥1280px); hidden when empty */}
       {showRightColumn && (
-      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[min(340px,92vw)]" data-testid="map-right-column">
+      <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[480px] min-[1600px]:w-[560px]" data-testid="map-right-column">
         <AnimatePresence mode="wait">
           {selectedSite && (
             <SiteDetailsPanel

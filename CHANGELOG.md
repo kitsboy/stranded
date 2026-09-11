@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.11.0] — 2026-09-11 · Site cockpit: the miner stack explains itself
+- **Hover before click** — a pin hover now teaches: name, measured CH₄/day, Stranded Score and *"Gas supports up to 468 miners ≈ $/day"*, computed with the same helpers the cockpit uses (vector pins **and** DOM markers)
+- **Click → a cockpit, not a form** — header badges first (data recency `ECCC 2023 · high confidence`, flux when the dataset carries it, "verify this yourself"), then **one big number** (sats/day + $/day), then the miner-stack visual, then the readout strip, then **"How this number is made"** (hashprice used, above/below the network-derived estimate, power-cost assumption, data year)
+- **Capacity bar replaces the slider as the primary control** — filled = your miners (blocks drawn to scale, legend always says `1 block = N miners`), amber hatch = *left on the table*; drag it, tap ± (44 px), or type an exact count; a numeric label (`468 / 468 miners · 1,895 kW of 1,895 kW`) means it reads in grayscale
+- **Ceiling behaviour** — when the bar is full an inline chip offers `+ Add another <genset>`; adding one raises the ceiling and re-scales the bar (the slider now lives under Advanced)
+- **Two modes, human names** — *Fill the gas* (default) and *My build*; the spare-gas figure appears only in *My build* as information, never a scolding
+- **Templates as a shelf** — the 5 industry presets + saved templates render as cards with a one-line promise and the **live result at the selected site** (gensets, kW, miners, sats/day); one click applies; own templates tagged `yours`
+- **Venting baseline vs your build** — `+$/day net` and `+t CO₂e avoided/yr` next to the big number, with the venting case as the ghost line
+- **Send this build to the team** — one obvious next step that opens the certified application with the fleet link, category `Site application` and subject `Stranded Energy — Site application: <site>` pre-filled (the lead form reads `?category=&site=&fleet=` and adds the build link to the email body)
+- **Mobile-first** — bottom sheet with drag handle (≤85 vh), sticky thumb-zone bar with ± and the live count, shelf becomes a snap-scroll row, readout collapses to the two numbers that matter with a "show all" expander; every ⓘ tooltip has a tap/focus equivalent
+- **Desktop spends the width** — cockpit docked at 480 px (560 px ≥1600 px) beside the map, readouts 4-across, shelf 2–3 cards across, map controls shift clear of the docked panel
+- **Accessibility** — the stack control is a focusable `role="slider"` with arrow / PageUp / Home / End keys and an `aria-valuetext` naming the current build; 44 px touch targets; visible focus rings
+- **First-run guidance** — dismissible 3-step strip (*Pick a site → See the build → Send it*) plus the ⌘K hint, remembered in guarded localStorage
+- `lib/fleet-model.ts` extracts the fleet economics out of the panel (same arithmetic) so the cockpit preview, the readouts and the exports can never disagree; `lib/cockpit.ts` holds the pure presentation helpers (+ 30 new assertions in `scripts/test-helpers.mjs`)
+
 ## [2.11.0] — 2026-09-11
 
 ### Added — Fleet templates v2 (named, reusable, exportable)

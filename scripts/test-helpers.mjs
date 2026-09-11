@@ -857,5 +857,121 @@ assert.ok(tsWithFleet.markdown.includes('Fleet template'))
 const tsPlain = sketchTermSheet({ projectName: 'P', siteCount: 1, totalCapexCad: 1000000 })
 assert.ok(!tsPlain.markdown.includes('Fleet template'))
 
+// --- site cockpit (lib/cockpit.ts + lib/fleet-model.ts) ---------------------
+const {
+  minersPerBlock, minerBlocks, blockScaleLabel, capacityModel, satsPerDay,
+  formatPayback, ventingComparison, dataRecencyBadge, fluxBadge, hashpriceRead,
+  hoverTeaser, METHANE_GWP100,
+} = await import('../lib/cockpit.ts')
+const { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY } = await import('../lib/fleet-model.ts')
+
+// the cockpit model is the panel's model: same inputs -> same money
+const keeleModel = computeFleetModel({
+  site: keele,
+  gensets: [{ gensetId: 'jenbacher316', count: 1 }],
+  asic: { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, cost_cad: 8500 },
+  machineCount: ceiling,
+  overclockPercent: 0,
+  btcPrice: 85000,
+  btcPrices: { usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 },
+  uptimePercent: 95,
+  poolFeePercent: 1.5,
+  maintenanceAnnualPercent: 5,
+  revenuePerThPerDayBtc: 0.0000009,
+  fixedSetupCostCad: 25000,
+  debtPercent: 60,
+  interestRate: 8,
+})
+// hand-check of the shipped arithmetic at the cockpit defaults
+const expectedDailyBtc = 300 * ceiling * 0.0000009 * (1 - 0.015) * 0.95
+assert.ok(Math.abs(keeleModel.effectiveDailyBtc - expectedDailyBtc) < 1e-15)
+assert.ok(Math.abs(keeleModel.totalPowerKw - (ceiling * 4050) / 1000) < 1e-9)
+assert.equal(keeleModel.ceilingMiners, ceiling)
+assert.equal(satsPerDay(keeleModel.effectiveDailyBtc), Math.round(expectedDailyBtc * 1e8))
+
+// the exports and the model must quote the same build
+const hudBlock = fleetBlockData({ template: { ...autoTpl, minerCount: ceiling }, site: keele })
+assert.equal(hudBlock.minerCount, keeleModel.effectiveMachineCount)
+assert.ok(Math.abs(hudBlock.totalPowerKw - keeleModel.totalPowerKw) < 1e-9)
+assert.equal(hudBlock.ceilingMiners, keeleModel.ceilingMiners)
+
+// the hover teaser is the same ceiling as the cockpit (teach before the click)
+const teaser = hoverTeaser(keele, 85000)
+assert.equal(teaser.miners, ceiling)
+assert.ok(Math.abs(teaser.usdPerDay - expectedDailyBtc * 85000) < 1e-6)
+assert.equal(hoverTeaser({ properties: { emission_rate_kg_day: 0 } }, 85000).miners, 0)
+
+// capacity bar: never past the gas ceiling, labels agree with the model
+const full = capacityModel({ count: ceiling, ceilingMiners: ceiling, gasCeilingKw: oneJ316, asicWatts: 4050 })
+assert.equal(full.filledPct, 100)
+assert.equal(full.sparePct, 0)
+assert.equal(full.atCeiling, true)
+assert.equal(full.spareMiners, 0)
+assert.ok(Math.abs(full.usedKw - keeleModel.totalPowerKw) < 1e-9)
+const over = capacityModel({ count: ceiling * 3, ceilingMiners: ceiling, gasCeilingKw: oneJ316, asicWatts: 4050 })
+assert.equal(over.miners, ceiling)
+assert.equal(over.filledPct, 100)
+const half = capacityModel({ count: Math.floor(ceiling / 2), ceilingMiners: ceiling, gasCeilingKw: oneJ316, asicWatts: 4050 })
+assert.ok(half.filledPct > 49 && half.filledPct < 51)
+assert.equal(Math.round(half.filledPct + half.sparePct), 100)
+assert.equal(half.spareMiners, ceiling - Math.floor(ceiling / 2))
+assert.equal(half.sparePct > 0, true)
+// no gas → no miners, never a negative or NaN bar
+const empty = capacityModel({ count: 10, ceilingMiners: 0, gasCeilingKw: 0, asicWatts: 4050 })
+assert.equal(empty.ceilingMiners, 0)
+assert.equal(empty.filledPct, 0)
+
+// block scale is always labelled and never explodes the DOM
+for (const n of [0, 1, 7, 60, 61, 468, 1524, 9999, 100000]) {
+  const b = minerBlocks(n)
+  assert.ok(b.perBlock >= 1)
+  assert.ok(b.blocks + (b.partial > 0 ? 1 : 0) <= 61, `${n} -> ${JSON.stringify(b)}`)
+  assert.ok(b.blocks * b.perBlock + Math.round(b.partial * b.perBlock) <= Math.max(n, 1))
+  assert.ok(blockScaleLabel(n).startsWith('1 block ='))
+}
+assert.equal(minersPerBlock(468), 10)
+assert.equal(blockScaleLabel(468), '1 block = 10 miners')
+
+// venting comparison — the two numbers the Batten story is made of
+const vent = ventingComparison({
+  siteEmissionKgDay: 56013.9,
+  capturedKgPerDay: 50000,
+  dailyProfitFiat: 1234.5,
+  unusedKgPerDay: 6013.9,
+})
+assert.equal(vent.extraUsdPerDay, 1234.5)
+assert.ok(Math.abs(vent.co2eAvoidedTonnesPerYear - ((50000 * 365) / 1000) * METHANE_GWP100) < 1e-6)
+assert.ok(Math.abs(vent.ventedTPerYear - (6013.9 * 365) / 1000) < 1e-9)
+assert.ok(vent.capturedFraction > 0.89 && vent.capturedFraction < 0.9)
+
+// honesty badges: render from real fields, degrade to null when absent
+const recency = dataRecencyBadge(keeleProps)
+assert.ok(recency && recency.label.includes('ECCC') && recency.label.includes('2023'))
+assert.equal(recency.detail, 'high confidence')
+assert.equal(dataRecencyBadge({}), null)
+assert.equal(dataRecencyBadge(null), null)
+assert.equal(fluxBadge(keeleProps), null) // dataset carries no flux field today
+assert.equal(fluxBadge({ flux_status: 'Currently flaring' }).label, 'Currently flaring')
+assert.equal(fluxBadge({ flux_status: 'venting' }).tone, 'vent')
+
+// hashprice read: above/below the network-derived estimate, and power break-even
+const hp = hashpriceRead({
+  usedBtcPerThDay: 0.0000018, usdBtcPrice: 85000, networkBtcPerThDay: NETWORK_ESTIMATE_BTC_PER_TH_DAY,
+  asicHashrateThs: 300, asicWatts: 4050, powerCostUsdPerKwh: 0.04,
+})
+assert.equal(hp.aboveNetwork, true)
+assert.ok(Math.abs(hp.networkUsdPerThDay - 0.0000009 * 85000) < 1e-9)
+assert.ok(hp.breakEvenUsdPerThDay > 0 && hp.breakEvenUsdPerThDay < hp.usedUsdPerThDay)
+const hpSame = hashpriceRead({
+  usedBtcPerThDay: NETWORK_ESTIMATE_BTC_PER_TH_DAY, usdBtcPrice: 85000,
+  networkBtcPerThDay: NETWORK_ESTIMATE_BTC_PER_TH_DAY, asicHashrateThs: 300, asicWatts: 4050,
+  powerCostUsdPerKwh: 0.04,
+})
+assert.equal(hpSame.aboveNetwork, null)
+
+assert.equal(formatPayback(Infinity), 'N/A')
+assert.equal(formatPayback(90), '90 d')
+assert.equal(formatPayback(1000), '2.7 yr')
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

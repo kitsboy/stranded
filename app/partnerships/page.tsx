@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import CertifiedLeadForm from '@/components/CertifiedLeadForm'
 import type { LiveStats } from '@/types/live-stats'
@@ -90,7 +90,9 @@ export default function PartnershipsPage() {
           </ul>
           <Link href="/funding" className="inline-block mt-6 text-[#5BC0BE] hover:underline">Explore funding pathways →</Link>
         </div>
-        <CertifiedLeadForm />
+        <Suspense fallback={<div className="text-sm text-gray-400">Loading application form…</div>}>
+          <CertifiedLeadForm />
+        </Suspense>
       </div>
     </div>
   )
