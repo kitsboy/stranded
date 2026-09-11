@@ -41,7 +41,7 @@ See `docs/` for EU funding research documents.
 | app/ | Next.js App Router pages |
 | components/ | React components |
 | docs/ | Project documentation |
-| deploy.sh | Deployment automation script |
+| deploy.sh | Build + verify helper (never deploys; CF Pages git integration is the only deployer) |
 | next.config.js | Next.js config (static export) |
 
 ## Hosting

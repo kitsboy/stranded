@@ -18,26 +18,28 @@ Dev server runs on port 3003.
 cd ~/projects/stranded && git status && BUILD_STATIC=true npm run build
 ```
 
-## Deploy (Auto — git push triggers CF Pages)
+## Deploy (the only deployer: Cloudflare Pages git integration)
 ```bash
 cd ~/projects/stranded && git push origin main
 ```
-Cloudflare Pages auto-builds from GitHub. 
+Cloudflare Pages auto-builds from GitHub (project `strandedbuild`). This is the *only*
+deployer — no token, no wrangler, no manual fallback.
 
-## Manual Deploy Fallback (M4)
-```bash
-rsync -avz --delete ~/projects/stranded/dist/ m4:~/tmp-stranded-dist/
-# On M4:
-# wrangler pages deploy ~/tmp-stranded-dist/ --project-name stranded
-```
+## There is no manual deploy fallback
+A second deployer racing the git integration on the same URL is what caused the
+"push looks deployed but the old build is still served" bug. Do not rsync + deploy, do not
+`wrangler pages deploy`, do not wire a CF token.
 
 ## Post-Deploy Verify
 ```bash
-curl -s https://stranded.giveabit.io | grep -q 'Stranded'
+cd ~/projects/stranded && npm run deploy:check   # waits/checks live buildId + served data
+# or: bash scripts/deploy-check.sh --wait --timeout 900 --interval 20 --dist dist
 ```
+CI runs the same check: workflow `Stranded — verify live deploy` on every push to `main`.
 
-## Deploy Script
-A `deploy.sh` script exists at project root with additional automation.
+## Build & Verify Script
+`deploy.sh` at project root builds the current commit and waits until the live site serves
+it. It is a verifier, not a deployer — deploying is `git push origin main`.
 
 ## Rollback
 ```bash

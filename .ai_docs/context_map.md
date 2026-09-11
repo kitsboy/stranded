@@ -63,7 +63,7 @@
 ├── tsconfig.json                  TypeScript config (@/* path alias)
 ├── postcss.config.js              PostCSS config (Tailwind + Autoprefixer)
 ├── package.json                   Scripts & dependencies
-├── deploy.sh                      Cloudflare Pages deploy script
+├── deploy.sh                      Build + verify helper (NEVER deploys — CF Pages git integration does)
 ├── .gitignore                     Git ignore rules
 ├── README.md                      Project README
 ├── AGENTS.md                      Agent instructions
@@ -208,7 +208,7 @@ node scripts/validate-data.js
 - **Build output**: `dist/`
 - **Domain**: stranded.giveabit.io
 - **GitHub**: github.com/kitsboy/stranded.git
-- **Deploy**: Cloudflare Pages (manual: `./deploy.sh`, auto: from GitHub main)
+- **Deploy**: Cloudflare Pages git integration ONLY (push to main). `./deploy.sh` builds + verifies, it does not deploy. Verify with `npm run deploy:check`.
 - **Data**: 2,611 ECCC stranded methane emission sites with live BTC pricing
 - **Maps**: MapLibre GL (primary) + Leaflet (react-leaflet, fallback)
 - **PWA**: Yes (manifest.json with shortcuts to /map, /education, /sites)

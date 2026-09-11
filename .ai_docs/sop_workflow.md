@@ -112,13 +112,19 @@ npm run lint
 ## 9. Deploy
 
 ```bash
-./deploy.sh
+git push origin main      # ← the deploy: Cloudflare Pages git integration builds it
+npm run deploy:check      # verify the live site actually serves that build
 ```
 
-- Installs deps, cleans caches, builds static export, deploys to Cloudflare Pages
+- **Cloudflare Pages git integration is the ONLY deployer** (project `strandedbuild`).
+  This applies to the Vite-style SOP too: pushing to `main` deploys; nothing else does.
 - Target: **https://stranded.giveabit.io**
-- Deployment: `wrangler pages deploy ./dist --project-name=stranded`
-- Also auto-deploys from GitHub main branch (Cloudflare Pages integration)
+- There is **no** `wrangler pages deploy`, **no** `npx wrangler …`, **no**
+  `CLOUDFLARE_API_TOKEN`. A manual second deployer racing the git integration on the same
+  URL reintroduces the stale-deploy ("old build still served") race — never add one.
+- `./deploy.sh` builds + waits for the live site to serve the build. It does **not** deploy.
+- CI: the `Stranded — verify live deploy` workflow runs the same check on every push to
+  `main` and fails red if the live site is not updated.
 
 ---
 

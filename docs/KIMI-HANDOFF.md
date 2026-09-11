@@ -1,3 +1,9 @@
+> **Deploy note (2026-09-11):** entries below that mention `wrangler pages deploy`,
+> `rsync` + wrangler, or `CLOUDFLARE_API_TOKEN` are **historical**. Cloudflare Pages git
+> integration is now the *only* deployer — push to `main` deploys, `npm run deploy:check`
+> (or the `Stranded — verify live deploy` workflow) verifies. See `docs/DEPLOYMENT.md`
+> and commit `2d0686c`. Never wire a manual deployer back in.
+
 ## Session — 2026-08-27 · Breez footer donate (Grok M3)
 
 **Done:**

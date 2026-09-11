@@ -1,5 +1,11 @@
 # KIMI HANDOFF — Fix Stranded Deploy Pipeline (copy everything below)
 
+> **SUPERSEDED 2026-09-11 (historical — do not act on the wrangler/token steps below).**
+> Cloudflare Pages git integration is now the **only** deployer for stranded.giveabit.io
+> (commit `2d0686c`): push to `main` deploys, `npm run deploy:check` verifies. There is no
+> manual wrangler deploy and **no `CLOUDFLARE_API_TOKEN` is needed or wanted**.
+> Current truth: `docs/DEPLOYMENT.md`.
+
 **Machine:** M3 (coding) or wherever repo is checked out  
 **Project:** stranded  
 **Repo:** https://github.com/kitsboy/stranded  
