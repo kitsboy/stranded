@@ -46,7 +46,7 @@ Open http://localhost:3003
 
 Hit **⌘K** (or the Search button) anywhere for the global site command palette. It's magical.
 
-## Key Features (Current — v2.10.0)
+## Key Features (Current)
 
 - **Stranded Score™ v3** — Shared formula (`lib/scoring-shared.cjs`); factor explain UI; confidence bands + data-quality grade; tier colors elite/high/med/low.
 - **Site models** — Monte Carlo ROI, multi-vertical scores, gas decline, CapEx/FX, amortization, carbon overlay, case-study export.
