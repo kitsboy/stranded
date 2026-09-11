@@ -115,6 +115,7 @@ export default function Footer() {
   const resources: FooterLink[] = [
     { href: '/methodology', label: t('footerMethodology') },
     { href: '/open-data', label: t('footerOpenData') },
+    { href: '/open-data#verify', label: 'Verify the dataset' },
     { href: '/funding', label: t('funding') },
     { href: '/partnerships', label: t('partnerships') },
     { href: '/verticals', label: t('verticals') },
