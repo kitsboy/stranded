@@ -11,6 +11,7 @@ import {
   List,
 } from 'lucide-react'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import DataFreshnessLine from '@/components/DataFreshnessLine'
 import ScoreHistogram from '@/components/ScoreHistogram'
 import DashboardHero from '@/components/dashboard/DashboardHero'
 import DashboardStatGrid from '@/components/dashboard/DashboardStatGrid'
@@ -150,6 +151,9 @@ export default function DashboardPage() {
       <DashboardLiveTicker stats={stats} btcUsd={btc} />
 
       <div className="mx-auto max-w-6xl px-6 py-10">
+        {/* Snapshot date + build id straight from /data/live-stats.json — the
+            KPI figures below are only as fresh as this line says. */}
+        <DataFreshnessLine className="mb-3" />
         <DashboardStatGrid stats={stats} btcUsd={btc} />
         <DashboardOpportunityRadar stats={stats} />
         <DashboardCaptureSlider stats={stats} btcUsd={btc} />

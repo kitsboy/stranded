@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { LiveStats } from '@/types/live-stats'
 import { homeKpiItems } from '@/lib/home-metrics'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
+import DataFreshnessLine from '@/components/DataFreshnessLine'
 
 type Props = {
   stats: LiveStats | null
@@ -71,6 +72,9 @@ export default function HomeKpiStrip({ stats }: Props) {
             )
           })}
         </div>
+        {/* Data snapshot + build id, read live from /data/live-stats.json so a
+            stale deploy shows up here instead of drifting silently. */}
+        <DataFreshnessLine className="mt-2" />
       </div>
     </div>
   )
