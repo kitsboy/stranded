@@ -64,9 +64,10 @@ export default function CertifiedLeadForm() {
   }, [form, category, specify, submitted, sending])
 
   // Subject matches Cam's spec: "Stranded Energy — <category>" (+ ": <specify>").
-  const subject = specify
-    ? `Stranded Energy — ${category}: ${specify}`
-    : `Stranded Energy — ${category}`
+  // With no category chosen yet the title stands alone (never a dangling em-dash).
+  const subject = category
+    ? `Stranded Energy — ${category}${specify ? `: ${specify}` : ''}`
+    : 'Stranded Energy'
 
   const buildBody = (lead: Record<string, string>) =>
     `Stranded Value Certified — local application (please review)\n\n` +
