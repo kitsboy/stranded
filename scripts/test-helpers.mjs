@@ -769,5 +769,93 @@ const noFleet = parseMapUrl(new URLSearchParams('site=G10161&minScore=40&sources
 assert.equal(noFleet.fleet, undefined)
 assert.equal(noFleet.minScore, 40)
 
+// --- named fleet templates (localStorage guarded — no crash on server / corrupt key) ---
+const {
+  saveNamedFleet,
+  listNamedFleets,
+  deleteNamedFleet,
+  fleetBlockData,
+  fleetBlockMarkdown,
+  estimateFleetPaybackDays,
+} = await import('../lib/fleet-template.ts')
+
+// No localStorage in Node — list must return [] and never throw
+assert.deepEqual(listNamedFleets(), [])
+assert.equal(saveNamedFleet('x', autoTpl), null) // no-op without localStorage? we guard: returns null when storage unavailable is acceptable
+assert.equal(deleteNamedFleet('nope'), false)
+
+// In-memory localStorage shim to exercise the real functions end-to-end
+const storageShim = new Map()
+globalThis.localStorage = {
+  getItem: k => storageShim.has(k) ? storageShim.get(k) : null,
+  setItem: (k, v) => { storageShim.set(k, String(v)) },
+  removeItem: k => { storageShim.delete(k) },
+}
+try {
+  const saved = saveNamedFleet('Keele Valley build', autoTpl)
+  assert.ok(saved && saved.id && saved.name === 'Keele Valley build')
+  assert.equal(listNamedFleets().length, 1)
+  assert.deepEqual(listNamedFleets()[0].template.gensets, autoTpl.gensets)
+  // persistence survives a re-read (simulates page reload)
+  const reread = listNamedFleets()
+  assert.equal(reread[0].name, 'Keele Valley build')
+  // reject junk shapes
+  assert.equal(saveNamedFleet('bad', { ...autoTpl, gensets: [{ gensetId: 'zzz', count: 1 }] }), null)
+  assert.equal(listNamedFleets().length, 1)
+  // delete works
+  assert.equal(deleteNamedFleet(saved.id), true)
+  assert.equal(listNamedFleets().length, 0)
+  assert.equal(deleteNamedFleet(saved.id), false)
+} finally {
+  delete globalThis.localStorage
+}
+
+// Corrupt the key by hand — must not throw, must return [] (no white-screen)
+globalThis.localStorage = { getItem: () => '{not json', setItem: () => {}, removeItem: () => {} }
+try {
+  assert.deepEqual(listNamedFleets(), [])
+} finally {
+  delete globalThis.localStorage
+}
+
+// --- fleet export block (additive to exports, no regression without it) ---
+const exportTpl = capFleetToSite({ ...autoTpl, minerCount: 0 }, keele)
+assert.ok(exportTpl.minerCount > 0)
+const block = fleetBlockData({ template: exportTpl, site: keele })
+assert.ok(block.minerCount > 0)
+assert.ok(block.asicName)
+assert.ok(block.gasCeilingKw > 0)
+assert.ok(block.gensetLabel.includes('Jenbacher'))
+assert.ok(block.capturedPct > 0)
+assert.equal(typeof block.paybackDays, 'number')
+const mdBlock = fleetBlockMarkdown({ template: exportTpl, site: keele })
+assert.ok(mdBlock.includes('Fleet template'))
+assert.ok(mdBlock.includes(block.asicName))
+// payback override wins over estimate
+const payback = estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 123 })
+assert.equal(payback, 123)
+
+// exports carry the fleet block when present, and are unchanged when absent
+const withFleet = bankPackMarkdown(packSites, all, { liveBtcUsd: 90000, title: 'Test Pack', fleet: { template: exportTpl, site: keele } })
+assert.ok(withFleet.includes('### Fleet template'))
+assert.ok(withFleet.includes(block.asicName))
+assert.ok(withFleet.includes('Why this score')) // structure preserved
+const jsonWithFleet = bankPackJson([seed], { liveBtcUsd: 90000, fleet: { template: exportTpl, site: keele } })
+assert.ok(jsonWithFleet.fleet && jsonWithFleet.fleet.minerCount > 0)
+
+// case study carries the block
+const { buildCaseStudyMarkdown } = await import('../lib/case-study.ts')
+const csWithFleet = buildCaseStudyMarkdown({ id: seed.id, name: seed.properties.name, fleet: { template: exportTpl, site: keele } }, 90000)
+assert.ok(csWithFleet.includes('## Fleet template'))
+const csPlain = buildCaseStudyMarkdown({ id: seed.id, name: seed.properties.name }, 90000)
+assert.ok(!csPlain.includes('## Fleet template'))
+
+// term sheet carries the block
+const { sketchTermSheet } = await import('../lib/term-sheet.ts')
+const tsWithFleet = sketchTermSheet({ projectName: 'P', siteCount: 1, totalCapexCad: 1000000, fleet: { template: exportTpl, site: keele } })
+assert.ok(tsWithFleet.markdown.includes('Fleet template'))
+const tsPlain = sketchTermSheet({ projectName: 'P', siteCount: 1, totalCapexCad: 1000000 })
+assert.ok(!tsPlain.markdown.includes('Fleet template'))
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

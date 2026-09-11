@@ -8,10 +8,13 @@ import { computeAdvancedRoi } from './roi-model'
 import { findPeerSites } from './peers'
 import { sensitivityTornado } from './sensitivity'
 import { escapeHtml } from './html-escape'
+import { fleetBlockData, fleetBlockMarkdown, type FleetExportBlock } from './fleet-template'
 
 export type BankPackOptions = {
   liveBtcUsd?: number
   title?: string
+  /** Optional fleet block carried into the document (additive, ignored when absent). */
+  fleet?: FleetExportBlock
 }
 
 function esc(s: string) {
@@ -117,6 +120,12 @@ export function bankPackMarkdown(
     ``,
   ]
 
+  if (opts.fleet) {
+    lines.push(`### Fleet template`)
+    lines.push(fleetBlockMarkdown(opts.fleet))
+    lines.push(``)
+  }
+
   for (const s of sites) {
     const p = s.properties
     const ex = explainStrandedScore(s)
@@ -190,7 +199,7 @@ li{margin:4px 0} .note{font-size:11px;color:#64748b;margin-top:40px}</style></he
 
 export function bankPackJson(sites: EnrichedSite[], opts: BankPackOptions = {}) {
   const btc = opts.liveBtcUsd ?? 85000
-  return {
+  const base = {
     generatedAt: new Date().toISOString(),
     version: 'bank-pack-1',
     liveBtcUsd: btc,
@@ -217,4 +226,5 @@ export function bankPackJson(sites: EnrichedSite[], opts: BankPackOptions = {}) 
       }
     }),
   }
+  return opts.fleet ? { ...base, fleet: fleetBlockData(opts.fleet) } : base
 }

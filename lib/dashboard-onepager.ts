@@ -3,6 +3,7 @@
  * Client-safe; no external deps.
  */
 import { escapeHtml } from './html-escape'
+import { fleetBlockHtml, type FleetExportBlock } from './fleet-template'
 
 export type OnePagerStats = {
   version?: string
@@ -23,6 +24,8 @@ export type OnePagerOptions = {
   liveBtcUsd?: number
   thesis?: string
   askCad?: number
+  /** Optional fleet block carried into the document (additive, ignored when absent). */
+  fleet?: FleetExportBlock
 }
 
 export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerOptions = {}): string {
@@ -92,6 +95,7 @@ export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerO
     <div class="kpi"><b>${stats.impact?.co2eAvoided5PctTonnes != null ? Math.round(stats.impact.co2eAvoided5PctTonnes).toLocaleString() : '—'}</b><span>CO₂e @ 5% (t)</span></div>
   </div>
   ${opts.askCad != null ? `<div class="ask"><strong>Indicative ask:</strong> C$${opts.askCad.toLocaleString()} · structure TBD · Safe Harbour · Bitcoin-sovereign</div>` : ''}
+  ${opts.fleet ? `<div class="fleet">${fleetBlockHtml(opts.fleet)}</div>` : ''}
   <h2>Top sites</h2>
   <table>
     <thead><tr><th>Site</th><th>Province</th><th class="num">Score</th><th class="num">kg CH₄/day</th></tr></thead>

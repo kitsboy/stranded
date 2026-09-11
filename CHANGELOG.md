@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0] — 2026-09-11
+
+### Added — Fleet templates v2 (named, reusable, exportable)
+- **Named fleet templates** — save the current miner stack under a name (inline input, no `window.prompt`), listed with Apply + delete; persisted locally in `stranded.fleets.v1`, guarded so a corrupt/stale key never white-screens the page
+- **Fleet presets browser** — all 5 `MINER_STACK_PRESETS` visible in the site panel; picking one rescales the genset mix to the selected site's gas
+- **Exports carry the fleet block** — bank pack (md/html/json), case study, term sheet and one-pager include the fleet config (gensets, ASIC, miners, kW, gas ceiling, captured vs vented, payback) when a fleet is selected; output is byte-unchanged when none is
+
 ## [2.10.0] — 2026-08-11
 
 ### Added — Mega upgrade batch (~50 shipped items)

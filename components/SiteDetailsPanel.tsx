@@ -50,6 +50,11 @@ import {
   rescaleToSite,
   siteGasCeilingKw,
   unusedCapacity,
+  saveNamedFleet,
+  listNamedFleets,
+  deleteNamedFleet,
+  type NamedFleetRecord,
+  type FleetExportBlock,
   type FleetGenset,
   type FleetSite,
   type FleetTemplate,
@@ -131,6 +136,10 @@ export default function SiteDetailsPanel({
   const [fleetId, setFleetId] = useState<string>(() => initialFleet?.id || 'custom')
   const [debtPercent, setDebtPercent] = useState(60)
   const [interestRate, setInterestRate] = useState(8)
+  // Named fleet templates — local-first save/reuse
+  const [namedFleets, setNamedFleets] = useState<NamedFleetRecord[]>(() => listNamedFleets())
+  const [showSaveFleetName, setShowSaveFleetName] = useState(false)
+  const [fleetNameInput, setFleetNameInput] = useState('')
 
   // Advanced parameters for more honest modeling
   const [fixedSetupCostCad, setFixedSetupCostCad] = useState(25000) // One-time site prep, generator base, install, etc.
@@ -342,14 +351,17 @@ export default function SiteDetailsPanel({
 
   const downloadBankPack = (fmt: 'md' | 'csv' | 'tsv' | 'html' | 'json') => {
     const sites = [site as EnrichedSite]
+    const fleet: FleetExportBlock | undefined = fleetTemplate?.minerCount > 0
+      ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
+      : undefined
     const base = `stranded-bank-pack-${(p.name || site.id || 'site').toString().replace(/[^\w-]+/g, '_').slice(0, 40)}`
-    if (fmt === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd: liveBtcPrice }), `${base}.md`, 'text/markdown')
+    if (fmt === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd: liveBtcPrice, fleet }), `${base}.md`, 'text/markdown')
     else if (fmt === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.csv`, 'text/csv')
     else if (fmt === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.tsv`, 'text/tab-separated-values')
     else if (fmt === 'html') {
       const w = window.open('', '_blank')
-      if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd: liveBtcPrice })); w.document.close() }
-    } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd: liveBtcPrice }), null, 2), `${base}.json`, 'application/json')
+      if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd: liveBtcPrice, fleet })); w.document.close() }
+    } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd: liveBtcPrice, fleet }), null, 2), `${base}.json`, 'application/json')
   }
 
   const mapDeepLink = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
@@ -442,6 +454,20 @@ export default function SiteDetailsPanel({
     setFleetId(scaled.id)
     setStackMode(scaled.mode)
     if (scaled.mode === 'manual') setMachineCount(Math.max(1, scaled.minerCount || 1))
+  }
+
+  const saveCurrentAsNamed = () => {
+    const name = fleetNameInput.trim()
+    if (!name) return
+    const rec = saveNamedFleet(name, fleetTemplate)
+    if (rec) {
+      setNamedFleets(listNamedFleets())
+      setShowSaveFleetName(false)
+      setFleetNameInput('')
+      toast.success(`Saved fleet template "${rec.name}"`)
+    } else {
+      toast.error('Could not save fleet template')
+    }
   }
 
   return (
@@ -567,6 +593,9 @@ export default function SiteDetailsPanel({
             confidence: p.confidence,
             company: p.company,
             potentialDailyCad: site.potentialDailyProfitCAD,
+            fleet: fleetTemplate?.minerCount > 0
+              ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
+              : undefined,
           }}
           liveBtc={liveBtcPrice}
         />
@@ -629,6 +658,9 @@ export default function SiteDetailsPanel({
         allSites={allSites}
         liveBtcUsd={liveBtcPrice}
         title={`Bank pack — ${p.name || site.id}`}
+        fleet={fleetTemplate?.minerCount > 0
+          ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
+          : undefined}
       />
       {/* Currency dropdown - BTC always the base/denominator */}
       <div className="mb-4">
@@ -793,6 +825,95 @@ export default function SiteDetailsPanel({
           >
             Apply template: {suggestedPreset.name} · {gensetStackLabel(suggestedPreset.gensets)}
           </button>
+        )}
+
+        {/* Fleet presets — browse all 5 presets */}
+        <div className="mt-3">
+          <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">Fleet presets</div>
+          <div className="flex flex-wrap gap-1">
+            {MINER_STACK_PRESETS.map(preset => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => applyTemplate(preset)}
+                title={`${preset.name} · ${gensetStackLabel(preset.gensets)}`}
+                className={`text-[10px] px-2 py-1 rounded-full border ${preset.id === fleetId ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400 hover:border-[#5BC0BE]/50 hover:text-[#5BC0BE]'}`}
+                data-testid={`fleet-preset-${preset.id}`}
+              >
+                {preset.name.split(' — ')[0]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Save as named template */}
+        <div className="mt-3">
+          {!showSaveFleetName ? (
+            <button
+              type="button"
+              onClick={() => setShowSaveFleetName(true)}
+              className="w-full text-left text-[10px] px-2 py-1.5 rounded border border-[#FF8C00]/30 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+              data-testid="miner-stack-save-template"
+            >
+              + Save as template
+            </button>
+          ) : (
+            <div className="flex gap-1.5" data-testid="miner-stack-save-form">
+              <input
+                autoFocus
+                value={fleetNameInput}
+                onChange={e => setFleetNameInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { saveCurrentAsNamed(); } if (e.key === 'Escape') { setShowSaveFleetName(false); setFleetNameInput('') } }}
+                placeholder="Template name (e.g. Keele Valley)"
+                className="flex-1 min-w-0 text-[10px] px-2 py-1.5 rounded border border-white/15 bg-black/30 text-white"
+              />
+              <button
+                type="button"
+                onClick={saveCurrentAsNamed}
+                disabled={!fleetNameInput.trim()}
+                className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] disabled:opacity-40"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowSaveFleetName(false); setFleetNameInput('') }}
+                className="text-[10px] px-2 py-1 rounded border border-white/15 text-gray-400"
+                aria-label="Cancel save"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Saved named templates */}
+        {namedFleets.length > 0 && (
+          <div className="mt-3 space-y-1" data-testid="saved-fleet-templates">
+            <div className="text-[10px] uppercase tracking-widest text-gray-400">Saved templates</div>
+            {namedFleets.map(rec => (
+              <div key={rec.id} className="flex items-center gap-2 text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => applyTemplate(rec.template)}
+                  className="flex-1 truncate text-left px-2 py-1 rounded border border-[#5BC0BE]/25 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+                  title={`Apply "${rec.name}" to this site`}
+                  data-testid={`apply-named-fleet-${rec.id}`}
+                >
+                  {rec.name}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { deleteNamedFleet(rec.id); setNamedFleets(listNamedFleets()) }}
+                  className="shrink-0 px-1.5 py-0.5 rounded border border-white/15 text-gray-400 hover:border-red-400/60 hover:text-red-400"
+                  aria-label={`Delete template ${rec.name}`}
+                  data-testid={`delete-named-fleet-${rec.id}`}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
         )}
 
         <div className="mt-3 flex">

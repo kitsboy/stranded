@@ -6,9 +6,15 @@
 **Build:** Next.js static export — `npm run build` → `dist/`  
 **Dev:** `npm run dev` → `localhost:3003`  
 **Data:** 2,611 ECCC methane sites  
-**Version:** **2.10.0** · **Routes:** 26 static app pages + Marketing Hub  
+**Version:** **2.11.0** · **Routes:** 26 static app pages + Marketing Hub  
 **Status:** Live — main pushed; CF auto-deploy  
 **Last goodbye:** 2026-08-11 — session handoff in `docs/KIMI-HANDOFF.md` · `LATEST-UPDATE.md`
+
+## Shipped highlights (v2.11)
+
+- **Fleet templates v2** — save the miner stack as a named template (inline name input), apply to this site or any other (rescales to that site's gas), browse all 5 presets
+- **Fleet in every export** — bank pack (md/html/json), case study, term sheet, one-pager all carry the fleet config when one is set (unchanged when not)
+- Persistent saves survive reload; corrupt localStorage key can never white-screen the static site
 
 ## Shipped highlights (v2.10)
 
@@ -38,7 +44,7 @@ npm run deploy:check   # optional post-deploy
 | `docs/DEPLOYMENT.md` | Deploy truth |
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-08-23T00:42:32.271Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T13:42:34.874Z
 
 | Metric | Value |
 |--------|-------|

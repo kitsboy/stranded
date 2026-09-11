@@ -401,3 +401,220 @@ export function decodeFleet(params: URLSearchParams): FleetTemplate | null {
     assumptions: { ...base.assumptions },
   }
 }
+
+// ---------------------------------------------------------------------------
+// Named fleet templates — local-first persistence (no backend).
+// The site is a static export: every read/write is guarded so a bad/stale key
+// can never white-screen the page.
+// ---------------------------------------------------------------------------
+
+export type NamedFleetRecord = {
+  id: string
+  name: string
+  savedAt: string
+  template: FleetTemplate
+}
+
+export const NAMED_FLEET_STORAGE_KEY = 'stranded.fleets.v1'
+
+function validTemplateShape(v: unknown): v is FleetTemplate {
+  if (!v || typeof v !== 'object') return false
+  const t = v as FleetTemplate
+  if (typeof t.id !== 'string' || typeof t.name !== 'string') return false
+  if (!Array.isArray(t.sourceTypes) || !Array.isArray(t.gensets)) return false
+  if (typeof t.asicId !== 'string' || typeof t.minerCount !== 'number') return false
+  if (t.mode !== 'auto' && t.mode !== 'manual') return false
+  if (!t.assumptions || typeof t.assumptions.btcPriceUsd !== 'number') return false
+  // gensets must each be a small {gensetId, count} pair
+  for (const g of t.gensets) {
+    if (!g || typeof g !== 'object') return false
+    const gg = g as FleetGenset
+    if (typeof gg.gensetId !== 'string' || typeof gg.count !== 'number') return false
+    if (!(gg.gensetId in GENSET_DATA)) return false
+  }
+  return true
+}
+
+function readNamedFleetsRaw(): NamedFleetRecord[] {
+  if (typeof localStorage === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(NAMED_FLEET_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (r): r is NamedFleetRecord =>
+        !!r && typeof r === 'object' && typeof r.id === 'string'
+        && typeof r.name === 'string' && typeof r.savedAt === 'string'
+        && validTemplateShape((r as NamedFleetRecord).template),
+    )
+  } catch {
+    return []
+  }
+}
+
+function writeNamedFleets(list: NamedFleetRecord[]) {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.setItem(NAMED_FLEET_STORAGE_KEY, JSON.stringify(list))
+  } catch {
+    // quota / privacy mode — a failed save must never throw into the UI
+  }
+}
+
+/** Save a copy of the template under a human name. Returns the new record. */
+export function saveNamedFleet(name: string, template: FleetTemplate): NamedFleetRecord | null {
+  const trimmed = (name || '').trim()
+  if (!trimmed || !validTemplateShape(template)) return null
+  if (typeof localStorage === 'undefined') return null
+  const record: NamedFleetRecord = {
+    id: `nf_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    name: trimmed,
+    savedAt: new Date().toISOString(),
+    template: {
+      ...template,
+      gensets: template.gensets.map(g => ({ ...g })),
+      assumptions: { ...template.assumptions },
+    },
+  }
+  const list = readNamedFleetsRaw()
+  list.push(record)
+  writeNamedFleets(list)
+  return record
+}
+
+export function listNamedFleets(): NamedFleetRecord[] {
+  return readNamedFleetsRaw()
+}
+
+export function deleteNamedFleet(id: string): boolean {
+  const list = readNamedFleetsRaw()
+  const next = list.filter(r => r.id !== id)
+  if (next.length === list.length) return false
+  writeNamedFleets(next)
+  return true
+}
+
+// ---------------------------------------------------------------------------
+// Fleet export block — one additive section used by the export generators.
+// The generators fall back to their existing output when no fleet is present.
+// ---------------------------------------------------------------------------
+
+export type FleetExportBlock = {
+  template: FleetTemplate
+  /** The site the fleet is sized for — used for gas ceiling / vented figures. */
+  site?: FleetSite
+  /** Override payback (days). Falls back to a model estimate from assumptions. */
+  paybackDays?: number | null
+}
+
+/** Genset inventory label for the export block, e.g. "2 × INNIO Jenbacher J316". */
+function fleetGensetLabel(gensets: FleetGenset[]): string {
+  const parts = (gensets || [])
+    .filter(g => GENSET_DATA[g.gensetId] && Math.floor(g.count || 0) > 0)
+    .map(g => `${Math.floor(g.count)} × ${GENSET_DATA[g.gensetId].name}`)
+  return parts.length ? parts.join(' + ') : '—'
+}
+
+/** A payback estimate (days) from the template's assumptions — mirrors the panel's model. */
+export function estimateFleetPaybackDays(f: FleetExportBlock): number | null {
+  if (f.paybackDays != null) return isFinite(f.paybackDays) ? f.paybackDays : null
+  const t = f.template
+  const a = t.assumptions
+  const asic = asicById(t.asicId)
+  if (!asic) return null
+  const minerCount = Math.max(0, Math.floor(t.minerCount || 0))
+  if (!minerCount) return null
+  const powerKw = (minerCount * asic.power_w) / 1000
+  const dailyBtc =
+    asic.hashrate_ths * minerCount * a.revenuePerThPerDayBtc
+    * (1 - a.poolFeePct / 100) * (a.uptimePct / 100)
+  const usdBtc = a.btcPriceUsd || 1
+  const dailyPowerBtc = (powerKw * 24 * a.powerCostUsdPerKwh) / usdBtc
+  const hardwareCad = asic.cost_cad * minerCount
+  const dailyMaintBtc = (hardwareCad / 1.35 / usdBtc) * (a.maintenancePct / 100) / 365
+  const gensetCapexCad = (t.gensets || []).reduce((sum, g) => {
+    const spec = GENSET_DATA[g.gensetId]
+    return spec ? sum + spec.powerKW * spec.capexPerKW * Math.floor(g.count || 0) : sum
+  }, 0)
+  const totalInvestCad = hardwareCad + gensetCapexCad + a.fixedSetupCostCad
+  const dailyProfitBtc = dailyBtc - dailyPowerBtc - dailyMaintBtc
+  if (!(dailyProfitBtc > 0) || !(usdBtc > 0)) return null
+  return totalInvestCad / 1.35 / usdBtc / dailyProfitBtc
+}
+
+/** Structured numbers for the fleet block (shared by md/html/json generators). */
+export function fleetBlockData(f: FleetExportBlock) {
+  const t = f.template
+  const asic = asicById(t.asicId)
+  const minerCount = Math.max(0, Math.floor(t.minerCount || 0))
+  const asicW = asic ? asic.power_w : ASIC_MACHINES[0].power_w
+  const totalPowerKw = (minerCount * asicW) / 1000
+  const gasCeilingKw = siteGasCeilingKw(f.site, t.gensets)
+  const ceilingMiners = minerCeiling(gasCeilingKw, asicW)
+  const unused = unusedCapacity(f.site || {}, t)
+  const ventedKgPerDay = Math.max(0, unused.unusedKgPerDay)
+  const capturedKgPerDay = f.site
+    ? Math.max(0, siteEmissionKgDay(f.site) - ventedKgPerDay)
+    : 0
+  const capturedPct = f.site && siteEmissionKgDay(f.site) > 0
+    ? Math.min(100, (capturedKgPerDay / siteEmissionKgDay(f.site)) * 100)
+    : 0
+  return {
+    name: t.name || 'Custom fleet',
+    mode: t.mode,
+    asicName: asic ? asic.name : t.asicId,
+    asicId: t.asicId,
+    minerCount,
+    totalPowerKw,
+    gasCeilingKw,
+    ceilingMiners,
+    gensetLabel: fleetGensetLabel(t.gensets),
+    ventedKgPerDay,
+    ventedTPerYear: (ventedKgPerDay * 365) / 1000,
+    capturedKgPerDay,
+    capturedPct,
+    paybackDays: estimateFleetPaybackDays(f),
+  }
+}
+
+export function fleetBlockMarkdown(f: FleetExportBlock): string {
+  const d = fleetBlockData(f)
+  return [
+    `**Fleet template: ${d.name}**`,
+    `- Mode: **${d.mode === 'auto' ? 'Fill the gas' : 'My build'}** · ASIC: ${d.asicName} · Miners: ${d.minerCount.toLocaleString()}`,
+    `- Gensets: ${d.gensetLabel}`,
+    `- Miner load: **${d.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW** of ${d.gasCeilingKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW gas ceiling (${d.ceilingMiners.toLocaleString()} miners max)`,
+    `- Methane: **${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day captured (${d.capturedPct.toFixed(0)}%)** · ${d.ventedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day vented`,
+    d.paybackDays != null
+      ? `- Payback (model): **${Math.round(d.paybackDays).toLocaleString()} days**`
+      : null,
+  ].filter(Boolean).join('\n')
+}
+
+export function fleetBlockHtml(f: FleetExportBlock): string {
+  const d = fleetBlockData(f)
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:2px 8px 2px 0;color:#64748b">${label}</td><td style="padding:2px 0"><strong>${value}</strong></td></tr>`
+  return `<h3 style="color:#FF8C00;margin:16px 0 4px">Fleet template — ${escapeHtmlStr(d.name)}</h3>
+  <table style="border-collapse:collapse;font-size:12px;margin:4px 0">
+    <tbody>
+      ${row('Mode', d.mode === 'auto' ? 'Fill the gas' : 'My build')}
+      ${row('ASIC', escapeHtmlStr(d.asicName))}
+      ${row('Miners', d.minerCount.toLocaleString())}
+      ${row('Gensets', escapeHtmlStr(d.gensetLabel))}
+      ${row('Miner load', `${d.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW of ${d.gasCeilingKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW ceiling`)}
+      ${row('Methane captured', `${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day (${d.capturedPct.toFixed(0)}%)`)}
+      ${row('Vented', `${d.ventedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day`)}
+      ${d.paybackDays != null ? row('Payback (model)', `${Math.round(d.paybackDays).toLocaleString()} days`) : ''}
+    </tbody>
+  </table>`
+}
+
+function escapeHtmlStr(s: string): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}

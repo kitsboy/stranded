@@ -2,6 +2,8 @@
  * Lightweight term-sheet sketch for diligence packs (not legal advice).
  */
 
+import { fleetBlockMarkdown, type FleetExportBlock } from './fleet-template'
+
 export type TermSheetInput = {
   projectName: string
   province?: string
@@ -14,6 +16,8 @@ export type TermSheetInput = {
   annualRevenueCad?: number
   co2eTonnesYear?: number
   notes?: string
+  /** Optional fleet block carried into the document (additive, ignored when absent). */
+  fleet?: FleetExportBlock
 }
 
 export type TermSheetSketch = {
@@ -54,6 +58,7 @@ export function sketchTermSheet(input: TermSheetInput): TermSheetSketch {
     `| Rev / CapEx | ${revenueToCapex != null ? revenueToCapex : '—'} |`,
     `| CO₂e abated / yr | ${input.co2eTonnesYear != null ? input.co2eTonnesYear.toLocaleString() : '—'} t |`,
     '',
+    input.fleet ? '## Fleet template\n' + fleetBlockMarkdown(input.fleet) + '\n' : '',
     '## Structure notes',
     '- SPV per cluster or province preferred',
     '- Generator + ASIC CapEx staged on FID milestones',

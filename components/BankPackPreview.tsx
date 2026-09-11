@@ -13,12 +13,14 @@ import {
   bankPackJson,
 } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
+import type { FleetExportBlock } from '@/lib/fleet-template'
 
 type BankPackPreviewProps = {
   sites: EnrichedSite[]
   allSites?: EnrichedSite[]
   liveBtcUsd?: number
   title?: string
+  fleet?: FleetExportBlock
   open: boolean
   onClose: () => void
   onExported?: (format: ExportFormat) => void
@@ -29,6 +31,7 @@ export default function BankPackPreview({
   allSites = [],
   liveBtcUsd = 85000,
   title = 'Bank Pack',
+  fleet,
   open,
   onClose,
   onExported,
@@ -39,20 +42,20 @@ export default function BankPackPreview({
     if (!sites.length) return ''
     if (format === 'csv') return bankPackCsv(sites, { liveBtcUsd }).split('\n').slice(0, 8).join('\n')
     if (format === 'tsv') return bankPackTsv(sites, { liveBtcUsd }).split('\n').slice(0, 8).join('\n')
-    if (format === 'json') return JSON.stringify(bankPackJson(sites, { liveBtcUsd }), null, 2).slice(0, 1200)
-    if (format === 'html') return bankPackHtml(sites, { liveBtcUsd, title }).replace(/<[^>]+>/g, ' ').slice(0, 900)
-    return bankPackMarkdown(sites, allSites, { liveBtcUsd, title }).slice(0, 1200)
-  }, [sites, allSites, liveBtcUsd, title, format])
+    if (format === 'json') return JSON.stringify(bankPackJson(sites, { liveBtcUsd, fleet }), null, 2).slice(0, 1200)
+    if (format === 'html') return bankPackHtml(sites, { liveBtcUsd, title, fleet }).replace(/<[^>]+>/g, ' ').slice(0, 900)
+    return bankPackMarkdown(sites, allSites, { liveBtcUsd, title, fleet }).slice(0, 1200)
+  }, [sites, allSites, liveBtcUsd, title, format, fleet])
 
   const exportPack = () => {
     const base = `stranded-bank-pack-${sites.length}`
-    if (format === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd, title }), `${base}.md`, 'text/markdown')
+    if (format === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd, title, fleet }), `${base}.md`, 'text/markdown')
     else if (format === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd }), `${base}.csv`, 'text/csv')
     else if (format === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd }), `${base}.tsv`, 'text/tab-separated-values')
     else if (format === 'html') {
       const w = window.open('', '_blank')
-      if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd, title })); w.document.close(); w.print() }
-    } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd }), null, 2), `${base}.json`, 'application/json')
+      if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd, title, fleet })); w.document.close(); w.print() }
+    } else downloadBlob(JSON.stringify(bankPackJson(sites, { liveBtcUsd, fleet }), null, 2), `${base}.json`, 'application/json')
     onExported?.(format)
     onClose()
   }
