@@ -11,7 +11,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to Stranded',
-    body: 'Explore 2,611 verified methane sites across Canada. Pan the map, click markers, and open site details for ROI modeling.',
+    body: 'Explore 2,611 mapped methane sites across Canada (2,588 with reported CH₄, 675 high-confidence). Pan the map, click markers, and open site details for ROI modeling.',
   },
   {
     id: 'filters',

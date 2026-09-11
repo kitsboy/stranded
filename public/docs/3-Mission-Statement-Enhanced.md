@@ -57,7 +57,7 @@ We exist because:
 Success for Stranded is not measured in press releases or funding rounds. It's measured in:
 
 **Energy Captured**  
-Every verified stranded energy site in Canada (and beyond) that can be profitably developed is being developed. The waste stops.
+Every stranded energy site in Canada (and beyond) that can be profitably developed is being developed. The waste stops.
 
 **Capital Deployed**  
 Billions flow efficiently from federal programs, provincial incentives, European trade agreements, Bitcoin-native sources, and traditional infrastructure capital into the highest-impact projects.

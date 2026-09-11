@@ -21,19 +21,19 @@ export default function DataQualityBadge({ report, grade, score, flags, classNam
   const g = report?.grade || grade || 'C'
   const s = report?.score ?? score
   const f = report?.flags || flags || []
+  const noCh4 = f.some(x => x.id === 'no_reported_ch4')
   const title = [
-    s != null ? `Data quality ${s}/100` : 'Data quality',
+    noCh4 ? 'No reported CH₄ — not modelled' : (s != null ? `Data quality ${s}/100` : 'Data quality'),
     ...f.map(x => `• ${x.label}`),
   ].join('\n')
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${GRADE_CLASS[g] || GRADE_CLASS.C} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${noCh4 ? 'border-red-500/40 bg-red-500/15 text-red-300' : (GRADE_CLASS[g] || GRADE_CLASS.C)} ${className}`}
       title={title}
-      data-testid="data-quality-badge"
+      data-testid={noCh4 ? 'data-quality-no-ch4' : 'data-quality-badge'}
     >
-      DQ {g}
-      {s != null && <span className="font-mono opacity-80">{s}</span>}
+      {noCh4 ? 'No reported CH₄ — not modelled' : <>DQ {g}{s != null && <span className="font-mono opacity-80">{s}</span>}</>}
     </span>
   )
 }

@@ -5,7 +5,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://stranded.giveabit.i
 export const metadata: Metadata = {
   title: 'Command Center Map | Stranded Value',
   description:
-    'Interactive map of 2,611 verified stranded methane sites across Canada. Filter by province, emission, and Stranded Score. Build mission portfolios with live BTC ROI.',
+    'Interactive map of 2,611 mapped stranded methane sites across Canada. Filter by province, emission, and Stranded Score. Build mission portfolios with live BTC ROI (optimistic scenarios labelled).',
   keywords: [
     'stranded methane map',
     'Canada GHGRP',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Stranded Command Center — Live Map',
     description:
-      'Explore 2,611 verified methane sites with real-time filters, Stranded Score ROI, and mission portfolio tools.',
+      'Explore 2,611 mapped methane sites (2,588 with reported CH₄, 675 high-confidence) with real-time filters, Stranded Score ROI, and mission portfolio tools.',
     url: `${siteUrl}/map`,
     type: 'website',
     images: [{ url: '/images/3.jpg', width: 1200, height: 630, alt: 'Stranded Command Center Map' }],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Stranded Command Center Map',
-    description: '2,611 verified sites · live filters · mission ROI · ECCC data',
+    description: '2,611 mapped sites · live filters · mission ROI · ECCC data · optimistic scenarios labelled',
     images: ['/images/3.jpg'],
   },
 }

@@ -23,7 +23,7 @@ export default function DashboardLiveTicker({ stats, btcUsd }: Props) {
   const megaLarge = (stats.emissionTiers.mega || 0) + (stats.emissionTiers.large || 0)
 
   const items = [
-    { label: 'verified sites', value: stats.siteCount.toLocaleString('en-CA'), color: '#FF8C00' },
+    { label: 'mapped sites', value: stats.siteCount.toLocaleString('en-CA'), color: '#FF8C00' },
     { label: 'kg CH₄/day', value: formatCompactNumber(totals.emissionKgDay, 2), color: '#5BC0BE' },
     { label: 'avg score', value: String(totals.avgStrandedScore), color: '#34D399' },
     { label: 'mega + large', value: String(megaLarge), color: '#A78BFA' },

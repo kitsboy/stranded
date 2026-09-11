@@ -19,7 +19,7 @@ export default function MethodologyPage() {
       <MethodologyLiveBanner />
 
       <h2>Data source</h2>
-      <p>All 2,611 sites come from <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC verified methane reporting</a>. Stats regenerate on every build via <code>generate-live-stats.js</code>.</p>
+      <p>All 2,611 sites are <em>mapped</em> from <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC open methane reporting</a>: 2,588 carry a reported CH₄ figure and 675 are high-confidence and emission-bearing. We only use the word &quot;verified&quot; for that high-confidence set, never the whole file. Stats regenerate on every build via <code>generate-live-stats.js</code>.</p>
 
       <h2>Stranded Score™ v3</h2>
       <p>Log-scaled emission is the primary driver. When ECCC does not publish grid distance or internet type, we infer proxies from source category (landfill, oil &amp; gas, power, etc.), province infrastructure, emission tier, data confidence, and reporting year. Scores span ~22–96 with meaningful elite (≥85) and high (≥65) tiers. Percentile badges compare each site to the full Canadian dataset.</p>

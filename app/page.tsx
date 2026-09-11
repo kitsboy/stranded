@@ -71,14 +71,14 @@ export default function LandingPage() {
         '@type': 'WebSite',
         name: 'Stranded Value',
         url: 'https://stranded.giveabit.io',
-        description: `${siteCount.toLocaleString()} verified stranded methane sites across Canada with Bitcoin-powered ROI modeling`,
+        description: `${siteCount.toLocaleString()} mapped stranded methane sites (with reported CH₄) across Canada with Bitcoin-powered ROI modeling — optimistic scenarios always labelled as such`,
         publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io' },
         ...(schemaExtras ?? {}),
       },
       {
         '@type': 'Dataset',
         name: 'Stranded Canadian Methane Sites',
-        description: 'ECCC-verified methane vent sites enriched with Stranded Score™ and generator recommendations',
+        description: 'ECCC open methane reporting enriched with Stranded Score™ and generator recommendations (optimistic scenarios labelled)',
         url: 'https://stranded.giveabit.io/data/stranded-sites.geojson',
         distribution: { '@type': 'DataDownload', contentUrl: 'https://stranded.giveabit.io/data/stranded-sites.geojson', encodingFormat: 'application/geo+json' },
         creator: { '@type': 'Organization', name: 'Environment and Climate Change Canada' },
@@ -160,7 +160,7 @@ export default function LandingPage() {
       <div className="border-y border-white/10 bg-black/20">
         <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
           <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
-            data-tip-title="Verified sites" data-tip="Every one of these 2,611 sites is a real stranded-energy location with public government data behind it. No estimates dressed up as facts — each row links to its source.">
+            data-tip-title="Mapped sites — honest split" data-tip={`${siteCount.toLocaleString()} locations mapped from public ECCC data, of which ${(stats?.withReportedCh4 ?? 2588).toLocaleString()} carry a reported CH₄ figure and ${(stats?.highConfidenceWithEmission ?? 675).toLocaleString()} are high-confidence and emission-bearing. "Verified" is used only for that high-confidence set.`}>
             <div className="text-4xl font-semibold text-[#FF8C00] tabular-nums">
               <CountUp value={siteCount} />
             </div>
@@ -209,7 +209,11 @@ export default function LandingPage() {
             <h2 className="text-2xl font-semibold mb-4 text-[#5BC0BE]">The Problem</h2>
             <p className="text-gray-300 leading-relaxed">
               Stranded methane is natural gas that is uneconomical to capture and transport through pipelines.
-              It is routinely vented or flared, releasing methane — a greenhouse gas 25× more potent than CO₂.
+              It is routinely vented or flared. Methane&apos;s global warming potential is ~28× CO₂ over 100 years and ~80× over 20 years (IPCC AR5).
+            </p>
+            <p className="mt-4 text-gray-300 leading-relaxed">
+              Capturing landfill gas and burning it in a genset converts CH₄ to CO₂ — so it still emits a greenhouse gas.
+              The defensible claim, for an operator who already flares: <strong>flaring already destroys methane but earns nothing; mining monetises the same destruction — roughly 28–80× lower warming impact per molecule than venting, with zero <em>additional</em> load on the electrical grid.</strong>
             </p>
             <p className="mt-4 text-gray-300 leading-relaxed">
               Canada has thousands of these sites. The data is public. The technology exists today.
@@ -227,6 +231,10 @@ export default function LandingPage() {
               <Link href="/education" className="text-[#5BC0BE] hover:underline">Learn more in Education →</Link>
             </div>
           </div>
+        </div>
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-gray-300" data-testid="batten-validation-line">
+          <span className="font-semibold text-white">The site class the industry is now moving on:</span>{' '}
+          1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest venting landfill, Essex-Windsor (32,544 kg/day ≈ 1.36 t/hr), sits within ~10% of the 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. We cite that reporting as third-party context — no partnership, endorsement, or use of our data is implied.
         </div>
       </div>
 
@@ -293,7 +301,7 @@ export default function LandingPage() {
         </div>
         <div className="grid md:grid-cols-4 gap-4">
           {[
-            { icon: "⚙️", title: "For Operators & Miners", desc: "Source sites, model real generator + ASIC economics, deploy fast with zero grid impact.", cta: "Explore Sites", href: "/sites" },
+            { icon: "⚙️", title: "For Operators & Miners", desc: "Source sites, model real generator + ASIC economics, deploy fast with no net draw on the grid.", cta: "Explore Sites", href: "/sites" },
             { icon: "💰", title: "For Capital Providers", desc: "Transparent per-site ROI, generator CapEx, financed paybacks, methane value created. De-risked opportunities.", cta: "See the Data", href: "/map" },
             { icon: "🏛️", title: "For Government & Provinces", desc: "Regional impact dashboards, CETA alignment, job creation, CO₂e avoided at scale. Policy intelligence.", cta: "View by Province", href: "/map" },
             { icon: "🤝", title: "For Landowners & Communities", desc: "Real revenue potential from your land, remediation funding, First Nations wealth creation.", cta: "Calculate Your Value", href: "/education" },

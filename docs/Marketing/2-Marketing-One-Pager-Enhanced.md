@@ -33,7 +33,7 @@ Until now.
 We built the world's most sophisticated public intelligence system for turning wasted energy into revenue — now with real generator models, per-site Value/ROI wired to the live 2,611-site dataset (emission → power kW/CapEx → BTC revenue + methane loss + financing), home business flow, persona paths, and a full Education Center with simulators + configurator.
 
 ### 🗺️ Command Center Map
-Every one of our 2,611 verified sites, fully attributed and searchable. Filter by emissions volume, proximity to infrastructure, accessibility, or attractiveness. One click takes you from "this looks interesting" to "here's exactly what I'm dealing with."
+Every one of our 2,611 mapped sites, fully attributed and searchable. Filter by emissions volume, proximity to infrastructure, accessibility, or attractiveness. One click takes you from "this looks interesting" to "here's exactly what I'm dealing with."
 
 ### 📊 Economics Engine (Bitcoin-First)
 Honest, sophisticated ROI modeling that includes what everyone else ignores: pool fees, maintenance, uptime, equipment degradation, realistic network assumptions. Modeling in BTC, EUR, CAD, or USD. No hype. Just numbers.

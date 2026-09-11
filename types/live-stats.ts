@@ -16,6 +16,9 @@ export type LiveStats = {
   gensetRecommendations: { id: string; count: number; pct: number }[]
   emissionTiers: Record<string, number>
   confidenceCounts: Record<string, number>
+  /** Honesty counts — never claim "verified" for the whole dataset. */
+  withReportedCh4: number
+  highConfidenceWithEmission: number
   totals: {
     emissionKgDay: number
     avgEmissionKgDay: number

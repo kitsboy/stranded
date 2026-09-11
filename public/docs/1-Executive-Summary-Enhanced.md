@@ -13,7 +13,7 @@
 
 ---
 
-![Stranded Energy Map of Canada — 2,611 verified sites with Bitcoin opportunity overlay](/images/7-canada-energy.jpg)
+![Stranded Energy Map of Canada — 2,611 mapped sites with Bitcoin opportunity overlay](/images/7-canada-energy.jpg)
 
 *Every glowing point is a verified, modelable, fundable opportunity. Data: ECCC.*
 
@@ -21,7 +21,7 @@
 
 ## The Opportunity
 
-Canada possesses an extraordinary, largely invisible energy asset: **2,611 verified sites where natural gas is vented or flared** because the infrastructure to capture it is uneconomical. 
+Canada possesses an extraordinary, largely invisible energy asset: **2,611 mapped sites where natural gas is vented or flared** because the infrastructure to capture it is uneconomical (2,588 with reported CH₄, 675 high-confidence). 
 
 This is stranded methane—one of the planet's highest-impact climate challenges and simultaneously one of the most compelling, under-monetized investment opportunities available.
 

@@ -43,12 +43,12 @@ export function homeKpiItems(stats: LiveStats, btcUsd: number): HomeKpiItem[] {
   return [
     {
       key: 'sites',
-      label: 'Verified sites',
+      label: 'Mapped sites',
       value: stats.siteCount.toLocaleString(),
-      sub: `${stats.provinceCount} provinces`,
+      sub: `${(stats.withReportedCh4 ?? 2588).toLocaleString()} with reported CH₄ · ${(stats.highConfidenceWithEmission ?? 675).toLocaleString()} high-confidence`,
       href: '/sites',
-      tipTitle: 'Verified sites',
-      tip: 'Real stranded-energy locations backed by public government data — not estimates. Browse them all, or jump straight to the live map.',
+      tipTitle: 'Mapped sites — honest split',
+      tip: `${stats.siteCount.toLocaleString()} locations mapped from ECCC open data, of which ${(stats.withReportedCh4 ?? 2588).toLocaleString()} carry a reported CH₄ figure and ${(stats.highConfidenceWithEmission ?? 675).toLocaleString()} are high-confidence and emission-bearing. "Verified" is only used for that high-confidence set, never the whole file.`,
     },
     {
       key: 'emissions',
@@ -103,7 +103,7 @@ export function websiteSchemaExtras(stats: LiveStats) {
     about: {
       '@type': 'Thing',
       name: 'Canadian stranded methane sites',
-      description: `${stats.siteCount} ECCC-verified sites · avg score ${stats.totals.avgStrandedScore} · deploy readiness ${readiness.score}/100`,
+      description: `${stats.siteCount} mapped ECCC sites (${(stats.withReportedCh4 ?? 2588)} with reported CH₄, ${(stats.highConfidenceWithEmission ?? 675)} high-confidence) · avg score ${stats.totals.avgStrandedScore} · deploy readiness ${readiness.score}/100`,
     },
   }
 }

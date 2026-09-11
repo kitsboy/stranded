@@ -55,7 +55,7 @@ export default function DashboardHero({ stats, onExportJson }: Props) {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mx-auto mb-6 max-w-2xl text-sm text-gray-400 md:text-base"
         >
-          {stats.siteCount.toLocaleString('en-CA')} verified sites across {stats.provinceCount} provinces ·
+          {stats.siteCount.toLocaleString('en-CA')} mapped sites ({(stats.withReportedCh4 ?? 2588).toLocaleString('en-CA')} with reported CH₄ · {(stats.highConfidenceWithEmission ?? 675).toLocaleString('en-CA')} high-confidence) across {stats.provinceCount} provinces ·
           auto-synced {generated}
         </motion.p>
 

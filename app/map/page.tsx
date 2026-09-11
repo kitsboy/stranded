@@ -1040,7 +1040,7 @@ function StrandedCommandCenter() {
   return (
     <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container${showRightColumn ? ' map-right-column-open' : ''}`} role="region" aria-label="Stranded command center map">
       <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
-        Stranded Command Center — Map View · ECCC GHGRP verified data
+        Stranded Command Center — Map View · ECCC GHGRP open reporting
       </div>
       {loading && loadProgress < 100 && (
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden" role="progressbar" aria-valuenow={loadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Loading sites">

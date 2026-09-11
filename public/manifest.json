@@ -1,7 +1,7 @@
 {
   "name": "Stranded | Stranded Energy, Bitcoin Access",
   "short_name": "Stranded",
-  "description": "2,611 sites. Real generators + per-site Value (CapEx, methane-loss ROI, financing). Command center, Education Center, portfolio tools, Marketing Hub.",
+  "description": "2,611 mapped sites. Real generators + per-site Value (CapEx, methane-loss ROI, financing). Command center, Education Center, portfolio tools, Marketing Hub.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#243447",

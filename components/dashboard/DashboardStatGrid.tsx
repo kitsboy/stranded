@@ -33,7 +33,7 @@ export default function DashboardStatGrid({ stats, btcUsd }: Props) {
 
   const cards = [
     {
-      label: 'Verified Sites',
+      label: 'Mapped Sites',
       value: stats.siteCount.toLocaleString('en-CA'),
       icon: MapPin,
       accent: '#FF8C00',

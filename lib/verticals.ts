@@ -22,7 +22,7 @@ export const ENERGY_VERTICALS: EnergyVertical[] = [
     icon: '🔥',
     color: '#FF8C00',
     status: 'live',
-    description: '2,611 ECCC-verified vent/flare sites. Live map, ROI, generators.',
+    description: '2,611 mapped ECCC vent/flare sites. Live map, ROI, generators.',
     potentialSites: 2611,
     avgPowerKw: 850,
     btcFit: 'Primary — zero grid, immediate offtaker',

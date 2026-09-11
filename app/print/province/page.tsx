@@ -81,7 +81,7 @@ function ProvincePrintContent() {
         </div>
         <div className="text-[10px] text-gray-400 mt-2" data-testid="print-eccc-line">
           {ecccYear != null
-            ? `ECCC GHGRP ${ecccYear} verified methane reporting · Stranded Score™ model enrichments`
+            ? `ECCC GHGRP ${ecccYear} open methane reporting · Stranded Score™ model enrichments`
             : t('printEcccLine')}
         </div>
       </header>
@@ -131,7 +131,7 @@ function ProvincePrintContent() {
       </section>
 
       <footer className="mt-10 pt-4 border-t border-gray-200 text-[10px] text-gray-400 leading-relaxed">
-        Data: ECCC verified methane reporting. Stranded Score™, genset, and ROI fields are model enrichments by Stranded Value.
+        Data: ECCC open methane reporting. Stranded Score™, genset, and ROI fields are model enrichments by Stranded Value — optimistic scenarios labelled.
         Not investment advice. Generated {new Date().toLocaleDateString('en-CA')} · stranded.giveabit.io
       </footer>
 

@@ -77,9 +77,9 @@ function QuizSection() {
   const { t } = useLocale()
   const questions = [
     { q: "What makes Bitcoin the perfect offtaker for stranded energy?", opts: ["It needs grid connection", "It is location-agnostic and pays real rates for power no one else wants", "It only works with solar", "It requires subsidies"], ans: 1 },
-    { q: "Roughly how much more potent is methane than CO₂ over 100 years?", opts: ["2×", "10×", "25×", "100×"], ans: 2 },
+    { q: "Roughly how much more potent is methane than CO₂ over 100 years?", opts: ["2×", "10×", "~28×", "100×"], ans: 2 },
     { q: "Stranded Value primarily means...", opts: ["Just environmental credits", "Combined climate restoration + BTC revenue + community wealth", "Only pipeline construction", "Government grants only"], ans: 1 },
-    { q: "How many verified sites are in the Canadian dataset?", opts: ["261", "1,200", "2,611", "10,000+"], ans: 2 },
+    { q: "How many mapped sites are in the Canadian dataset?", opts: ["261", "1,200", "2,611", "10,000+"], ans: 2 },
     { q: "What does the Stranded Score™ primarily rank?", opts: ["Political favor", "Site capture attractiveness (emissions, access, economics)", "Distance from cities only", "Age of equipment"], ans: 1 },
   ];
   const [current, setCurrent] = useState(0);
@@ -287,8 +287,8 @@ export default function EducationContent() {
   const glossary = [
     { term: "Stranded Value (Methane)", def: "The untapped economic + environmental value from natural gas that cannot be economically captured and transported to market through pipelines. It is frequently vented or flared — representing both a climate liability and a Bitcoin-powered wealth creation opportunity." },
     { term: "Stranded Score", def: "Our 0–99 proprietary score that ranks sites by capture attractiveness. Factors: emission volume, grid distance, internet quality, and data confidence." },
-    { term: "CO₂e (CO2 equivalent)", def: "A measure that expresses the climate impact of different greenhouse gases in terms of the amount of CO₂ that would have the same effect. Methane ≈ 25× CO₂ over 100 years." },
-    { term: "ECCC", def: "Environment and Climate Change Canada. The federal source of the verified 2,611-site regulatory dataset used on this platform." },
+    { term: "CO₂e (CO2 equivalent)", def: "A measure that expresses the climate impact of different greenhouse gases in terms of the amount of CO₂ that would have the same effect. Methane ≈ 28× CO₂ over 100 years, ~80× over 20 (IPCC AR5)." },
+    { term: "ECCC", def: "Environment and Climate Change Canada. The federal source of the 2,611-site open methane reporting dataset used on this platform." },
     { term: "Mobile Mining Unit", def: "Containerized or skid-mounted Bitcoin mining equipment that can be deployed quickly at remote gas sites and run on locally generated power." },
     { term: "Flare vs. Vent", def: "Flaring combusts the gas (mostly CO₂ output). Venting releases raw methane. Venting is dramatically worse for the climate." },
     { term: "Stranded Value", def: "The total multi-dimensional return: avoided emissions + BTC revenue + landowner/First Nations revenue + grid-free energy security." },
@@ -302,7 +302,7 @@ export default function EducationContent() {
 
   // FAQs
   const faqs = [
-    { q: "Where does the 2,611-site number come from?", a: "Directly from verified ECCC regulatory filings combined with satellite methane detection. We do not add or remove sites — we only enrich them with infrastructure data." },
+    { q: "Where does the 2,611-site number come from?", a: "Directly from ECCC's open GHGRP methane reporting, which we map and enrich with infrastructure data. 2,588 of the sites carry a reported CH₄ figure; 675 are high-confidence and emission-bearing — we only call that set \"verified\"." },
     { q: "Is the data public?", a: "Yes. The raw open data is available from the Government of Canada. Our value is cleaning, enriching, scoring, and building the interactive tools you see here." },
     { q: "How is the Stranded Score calculated?", a: "Emission rate × proximity to power × internet quality × data confidence. Higher scores = faster payback and easier deployment for mobile miners." },
     { q: "Why mobile mining instead of pipelines?", a: "Many of these sites are too small or too remote for economic pipeline construction. Mobile units can be deployed in weeks and start monetizing gas immediately." },
@@ -416,10 +416,10 @@ export default function EducationContent() {
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-6">
           <div className="px-4 py-1.5 bg-[#0f172a] border border-[#5BC0BE]/30 rounded-full text-sm">
-            {(liveStats?.siteCount ?? 2611).toLocaleString()} verified sites
+            {(liveStats?.siteCount ?? 2611).toLocaleString()} mapped · {(liveStats?.withReportedCh4 ?? 2588).toLocaleString()} with reported CH₄ · {(liveStats?.highConfidenceWithEmission ?? 675).toLocaleString()} high-confidence
           </div>
-          <div className="px-4 py-1.5 bg-[#0f172a] border border-[#FF8C00]/30 rounded-full text-sm">25× worse than CO₂</div>
-          <div className="px-4 py-1.5 bg-[#0f172a] border border-white/20 rounded-full text-sm">Zero grid impact</div>
+          <div className="px-4 py-1.5 bg-[#0f172a] border border-[#FF8C00]/30 rounded-full text-sm">~28–80× less warming than venting</div>
+          <div className="px-4 py-1.5 bg-[#0f172a] border border-white/20 rounded-full text-sm">No net grid draw</div>
         </div>
         {liveStats?.topSites?.[0] && (
           <p className="mt-4 text-sm text-gray-400">
@@ -451,7 +451,7 @@ export default function EducationContent() {
         <div className="grid md:grid-cols-4 gap-4 text-center">
           {[
             { icon: <TrendingUpIcon className="mx-auto text-[#FF8C00]" size={28} />, label: "Economic Value", stat: "Up to $500M+ potential per large site cluster in BTC revenue" },
-            { icon: <GlobeIcon className="mx-auto text-[#5BC0BE]" size={28} />, label: "Climate Value", stat: "25× CO₂ potency destroyed at source = real, verifiable impact" },
+            { icon: <GlobeIcon className="mx-auto text-[#5BC0BE]" size={28} />, label: "Climate Value", stat: "~28× CO₂ warming (100-yr) cut at source = real, verifiable impact" },
             { icon: <UsersIcon className="mx-auto text-emerald-400" size={28} />, label: "Community Value", stat: "Landowner + First Nations revenue + jobs in remote regions" },
             { icon: <ZapIcon className="mx-auto text-[#FF8C00]" size={28} />, label: "Bitcoin Value", stat: "Off-grid, location-agnostic mining turns waste into hard money" },
           ].map((item, i) => (
@@ -487,11 +487,14 @@ export default function EducationContent() {
             Bitcoin mining can transform this waste into value. By placing mobile mining operations at stranded gas sites, we can:
           </p>
           <ul className="mt-3 space-y-2 text-gray-300">
-            <li>Reduce methane emissions (25× more potent than CO₂)</li>
-            <li>Generate clean Bitcoin with zero grid impact</li>
+            <li>Reduce methane&apos;s warming impact — burning it converts CH₄→CO₂, roughly 28× lower over 100 years (~80× over 20) than venting, never &quot;no emissions&quot;</li>
+            <li>Generate Bitcoin with no net draw on the electrical grid</li>
             <li>Create revenue for environmental remediation and landowners</li>
             <li>Utilize otherwise wasted energy resources</li>
           </ul>
+          <div className="mt-4 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-gray-400">
+            <strong className="text-gray-200">Vent vs flare vs capture, honestly:</strong> venting releases methane untouched. Flaring already burns it to CO₂ — but earns nothing. Mining monetises the <em>same destruction</em> a flare does, with ~28–80× lower warming impact per molecule than venting and zero <em>additional</em> load on the grid.
+          </div>
         </div>
 
         <div className="my-8 bg-[#0f172a] border border-[#5BC0BE]/20 rounded-2xl p-8 not-prose">
@@ -499,7 +502,7 @@ export default function EducationContent() {
           <ul className="space-y-3 text-gray-300">
             <li className="flex gap-3">
               <span className="mt-1.5 h-2 w-2 rounded-full bg-[#FF8C00] flex-shrink-0" />
-              <span><strong>Orange markers</strong> = Verified stranded gas sites from provincial regulators and satellite detection</span>
+              <span><strong>Orange markers</strong> = high-confidence stranded gas sites from ECCC GHGRP open reporting</span>
             </li>
             <li className="flex gap-3">
               <span className="mt-1.5 h-2 w-2 rounded-full bg-gray-500 flex-shrink-0" />
@@ -1184,7 +1187,7 @@ export default function EducationContent() {
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Key Takeaways</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          {["Stranded methane is 25× worse than CO₂ — but creates 25× the Value when captured", "2,611 real, verified Stranded Value opportunities exist today", "Bitcoin mining is the only technology that profitably turns this liability into sovereign wealth with zero grid impact"].map((t, i) => (
+          {["Capturing methane is roughly 28–80× less warming than venting (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80) — and flaring already burns it; mining monetises that same destruction", "2,611 mapped Canadian sites — 2,588 with reported CH₄, 675 high-confidence (\"verified\" only for that set)", "Bitcoin mining is the technology that profitably turns this liability into sovereign wealth with no net draw on the grid — optimistic hashprice scenarios always labelled as such"].map((t, i) => (
             <div key={i} className="glass p-5 rounded-2xl text-sm border-l-4 border-[#FF8C00]">{t}</div>
           ))}
         </div>
@@ -1205,7 +1208,7 @@ export default function EducationContent() {
         <h2 className="text-2xl font-semibold mb-4">From Problem to Stranded Value — Timeline</h2>
         <div className="space-y-4 text-sm">
           {[
-            { year: "2022-2024", title: "Data Foundation", desc: "ECCC verifies 2,611 sites. Public dataset becomes the raw material for Value creation." },
+            { year: "2022-2024", title: "Data Foundation", desc: "ECCC maps 2,611 sites. Public dataset becomes the raw material for Value creation." },
             { year: "2025-2026", title: "Platform + Bitcoin Proof", desc: "Stranded Score, live ROI, first pilots. Mobile mining proves the economics at scale." },
             { year: "2027", title: "Multi-Energy + CETA Capital", desc: "Wind/solar curtailment + hydro added. $200B+ European green funds unlocked via trade agreements." },
             { year: "2028+", title: "Sovereign Asset Class", desc: "$500M+ deployed. Stranded Value recognized as a new investable category with standard funding pathways." },

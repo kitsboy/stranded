@@ -9,7 +9,7 @@ A premium, immersive intelligence platform for mapping, modeling, and funding st
 
 An open, public dataset from Environment & Climate Change Canada (ECCC) showing 2,611 real stranded methane emission sites that are currently uneconomical to capture. 
 
-We integrate real generator models (Jenbacher, Caterpillar, MAN, etc.) to turn that gas into on-site power, then Bitcoin mining — creating BTC with zero grid impact while destroying potent methane and generating verifiable economic value ("Stranded Value").
+We integrate real generator models (Jenbacher, Caterpillar, MAN, etc.) to turn that gas into on-site power, then Bitcoin mining — creating BTC with no net draw on the grid while destroying potent methane and generating verifiable economic value ("Stranded Value").
 
 This project is the definitive interactive experience for that thesis:
 
@@ -63,7 +63,7 @@ Hit **⌘K** (or the Search button) anywhere for the global site command palette
 
 ## Data
 
-Source of truth: `data/stranded-sites-REAL.geojson` (never mutated). 2,611 verified ECCC sites.
+Source of truth: `data/stranded-sites-REAL.geojson` (never mutated). 2,611 mapped ECCC sites (2,588 with reported CH₄, 675 high-confidence).
 
 Served at `/data/stranded-sites.geojson`.
 
@@ -94,7 +94,7 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 Built with love for the orange pill and the blue planet.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T17:43:05.007Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T19:11:35.031Z
 
 | Metric | Value |
 |--------|-------|

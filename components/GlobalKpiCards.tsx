@@ -32,7 +32,7 @@ export default function GlobalKpiCards() {
     {
       label: 'Canadian sites',
       value: stats.siteCount.toLocaleString('en-CA'),
-      sub: 'ECCC GHGRP verified',
+      sub: 'ECCC GHGRP open reporting',
       icon: MapPin,
       color: '#FF8C00',
     },

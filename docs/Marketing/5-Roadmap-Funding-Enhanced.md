@@ -29,7 +29,7 @@
 Canada has arrived at an extraordinary moment.
 
 We possess:
-- **World-class public data** (ECCC's verified stranded methane dataset)
+- **World-class public data** (ECCC's open stranded methane dataset)
 - **Proven deployment technology** (mobile Bitcoin mining at scale)
 - **Massive capital availability** (federal, provincial, European via CETA, Bitcoin-native, traditional)
 - **Urgent climate imperative** (methane destruction is one of the highest-leverage actions available)
@@ -48,7 +48,7 @@ We are building that platform. And we are building it with a deliberate, phased 
 We are shipping a world-class intelligence platform built on:
 
 **Data & Mapping**
-- Complete Canadian stranded methane dataset: 2,611 verified sites (ECCC GHGRP, emission_rate_kg_day primary)
+- Complete Canadian stranded methane dataset: 2,611 mapped sites (ECCC GHGRP, emission_rate_kg_day primary)
 - Full geospatial attribution + every field preserved and used (province, source_type, confidence for derates)
 - Emissions volume → real generator sizing (power kW) + maxGeneratorPowerKW enrichment
 

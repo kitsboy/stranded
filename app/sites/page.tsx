@@ -29,6 +29,7 @@ import {
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
+import DataQualityBadge from '@/components/DataQualityBadge'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
 
@@ -360,6 +361,9 @@ export default function AllSitesExplorer() {
                 <div className="text-xs text-gray-400 mt-1 mb-2">{p.province} • {p.city || 'remote'} • {p.source_type}</div>
 
                 <div className="flex flex-wrap gap-1.5 mb-3" data-testid="sites-badges">
+                  {site.emission <= 0 && (
+                    <DataQualityBadge flags={[{ id: 'no_reported_ch4', severity: 'error', label: 'No reported CH₄ — not modelled', detail: 'No emission figure — no generator/ASIC recommendation' }]} />
+                  )}
                   {(() => {
                     const y = siteRecencyYear(p)
                     const stale = y != null && y < 2023
@@ -401,7 +405,11 @@ export default function AllSitesExplorer() {
                   <div>
                     <div className="text-3xl font-semibold text-[#FF8C00] tabular-nums">{site.emission.toLocaleString()}</div>
                     <div className="text-[10px] -mt-1 text-gray-400">kg CH₄ / day</div>
-                    <div className="text-[10px] text-gray-400">Generator: {site.maxGeneratorPowerKW || 'N/A'} kW (rec: {site.recommendedGenset || 'N/A'})</div>
+                    {site.emission > 0 ? (
+                      <div className="text-[10px] text-gray-400">Generator: {site.maxGeneratorPowerKW || 'N/A'} kW (rec: {site.recommendedGenset || 'N/A'})</div>
+                    ) : (
+                      <div className="text-[10px] text-amber-300" data-testid="sites-no-ch4-not-modelled">No reported CH₄ — not modelled</div>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-[#5BC0BE]">Potential daily</div>

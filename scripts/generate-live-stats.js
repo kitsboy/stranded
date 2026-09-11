@@ -55,6 +55,9 @@ function main() {
   let scoreSum = 0
   let totalGeneratorKW = 0
   let highScoreCount = 0
+  // Honesty counts — never claim "verified" for the whole set.
+  let withReportedCh4 = 0
+  let highConfidenceWithEmission = 0
 
   const topSites = []
   let maxReferenceYear = 0
@@ -80,6 +83,10 @@ function main() {
     gensetCounts[genset] = (gensetCounts[genset] || 0) + 1
     emissionTiers[tier] = (emissionTiers[tier] || 0) + 1
     confidenceCounts[conf] = (confidenceCounts[conf] || 0) + 1
+    if (emission > 0) {
+      withReportedCh4++
+      if (conf === 'high') highConfidenceWithEmission++
+    }
 
     totalEmissionKgDay += emission
     totalCh4TonnesYear += p.ch4_tonnes_year || 0
@@ -150,6 +157,9 @@ function main() {
       .sort((a, b) => b.count - a.count),
     emissionTiers,
     confidenceCounts,
+    /** Honesty counts — never "verified" for the whole dataset. */
+    withReportedCh4,
+    highConfidenceWithEmission,
     totals: {
       emissionKgDay: Math.round(totalEmissionKgDay),
       avgEmissionKgDay: Math.round(avgEmission),
@@ -204,7 +214,9 @@ function main() {
 
 | Metric | Value |
 |--------|-------|
-| Verified sites | **${siteCount.toLocaleString()}** |
+| Mapped sites | **${siteCount.toLocaleString()}** |
+| With reported CH₄ | **${withReportedCh4.toLocaleString()}** |
+| High-confidence (with CH₄) | **${highConfidenceWithEmission.toLocaleString()}** |
 | Provinces & territories | **${Object.keys(provinces).length}** |
 | Total daily methane (kg) | **${Math.round(totalEmissionKgDay).toLocaleString()}** |
 | Total CH₄ (tonnes/yr) | **${Math.round(totalCh4TonnesYear).toLocaleString()}** |

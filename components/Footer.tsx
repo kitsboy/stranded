@@ -167,7 +167,7 @@ export default function Footer() {
           {/* Col 1 — Brand */}
           <FooterCol title="Stranded Value" accent="orange">
             <p className="text-[12px] text-gray-400 leading-relaxed mb-4 max-w-[220px]">
-              {t('tagline')}. {siteCount.toLocaleString()} verified methane sites — model, compare, and fund capture with honest economics.
+              {t('tagline')}. {siteCount.toLocaleString()} mapped methane sites — model, compare, and fund capture with honest economics.
             </p>
 
             <a

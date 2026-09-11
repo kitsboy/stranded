@@ -48,8 +48,8 @@ export default function EducationModal() {
               operations at stranded gas sites, we can:
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-gray-400">
-              <li>Reduce methane emissions (25x worse than CO₂)</li>
-              <li>Generate clean Bitcoin with zero grid impact</li>
+              <li>Reduce methane&apos;s warming impact (~28× lower over 100 yr, ~80× over 20, than venting)</li>
+              <li>Generate Bitcoin with no net grid draw</li>
               <li>Create revenue for environmental remediation</li>
             </ul>
           </div>

@@ -14,7 +14,7 @@ export default function AboutPage() {
       <PageHeader
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'About' }]}
         title="About Stranded"
-        subtitle="Turning wasted methane into Bitcoin-powered environmental remediation across 2,611 verified Canadian sites."
+        subtitle="Turning stranded methane into Bitcoin-powered environmental remediation across 2,611 mapped Canadian sites (2,588 with reported CH₄ · 675 high-confidence)."
         actions={
           <>
             <ButtonLink href="/pitch" variant="primary" className="text-sm px-4 py-2">
@@ -31,7 +31,7 @@ export default function AboutPage() {
 
       <p className="text-lg text-gray-300 leading-relaxed mb-6">
         Stranded Canada turns wasted methane emissions into Bitcoin-powered environmental remediation.
-        By mapping 2,611 real sites and showing precise per-site mining ROI, we make sovereign,
+        By mapping 2,611 ECCC-reported sites and showing per-site mining ROI (optimistic scenarios always labelled as such), we make sovereign,
         feel-good giving simple — turning pollution into productive off-grid Bitcoin under Give A Bit&apos;s Safe Harbour framework.
       </p>
 

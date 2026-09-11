@@ -17,7 +17,7 @@
       {
         "id": "site-dataset",
         "status": "green",
-        "detail": "2,611 Canadian stranded energy sites mapped"
+        "detail": "2,611 Canadian stranded energy sites mapped (2,588 with reported CH₄, 675 high-confidence)"
       },
       {
         "id": "generator-models",

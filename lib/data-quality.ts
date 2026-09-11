@@ -23,6 +23,17 @@ export function qualityGrade(score: number): 'A' | 'B' | 'C' | 'D' {
 }
 
 /**
+ * True when a site carries no usable reported CH₄ (emission_rate_kg_day missing or 0).
+ * Such sites must render the "No reported CH₄ — not modelled" badge and must NOT get
+ * a generator / ASIC / ROI recommendation, since emission (and hence power) is unknown.
+ */
+export function hasNoReportedCh4(props: Record<string, unknown> | null | undefined): boolean {
+  if (!props) return true
+  const emission = props.emission_rate_kg_day ?? props.emission
+  return !(emission != null && Number(emission) > 0)
+}
+
+/**
  * Assess missing / weak fields on a site properties bag.
  * Optional `geometry` for coords; also reads props.geometry / props.coordinates.
  */
@@ -37,10 +48,10 @@ export function assessSiteDataQuality(
   const emission = p.emission_rate_kg_day ?? p.emission
   if (emission == null || !(Number(emission) > 0)) {
     flags.push({
-      id: 'missing_emission',
+      id: 'no_reported_ch4',
       severity: 'error',
-      label: 'Missing emission',
-      detail: 'No emission_rate_kg_day',
+      label: 'No reported CH₄ — not modelled',
+      detail: 'No emission_rate_kg_day — the site is not monetised in the ROI model and gets no generator/ASIC recommendation.',
     })
     score -= 25
   }

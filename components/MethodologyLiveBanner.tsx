@@ -25,7 +25,7 @@ export default function MethodologyLiveBanner() {
       <div className="text-sm text-gray-200">
         <span className="font-semibold text-[#5BC0BE]">Live dataset</span>
         {' · '}
-        <span className="tabular-nums">{siteCount.toLocaleString()}</span> verified sites
+        <span className="tabular-nums">{siteCount.toLocaleString()}</span> mapped · {stats?.withReportedCh4 != null ? stats.withReportedCh4.toLocaleString() : '—'} with reported CH₄ · {stats?.highConfidenceWithEmission != null ? stats.highConfidenceWithEmission.toLocaleString() : '—'} high-confidence
         {avgScore != null && (
           <>
             {' · avg Stranded Score '}

@@ -333,7 +333,7 @@ function PitchContent() {
         <div className="pitch-ticker-track flex gap-10 whitespace-nowrap text-xs text-gray-400">
           {[...Array(2)].map((_, dup) => (
             <span key={dup} className="inline-flex shrink-0 items-center gap-10">
-              <span><strong className="text-[#FF8C00]">{fmt(stats.siteCount)}</strong> verified sites</span>
+              <span><strong className="text-[#FF8C00]">{fmt(stats.siteCount)}</strong> mapped sites</span>
               <span><strong className="text-[#5BC0BE]">{formatCompactNumber(totals.emissionKgDay, 2)}</strong> kg CH₄/day</span>
               <span><strong className="text-[#A78BFA]">{formatCompactNumber(totals.ch4TonnesYear, 1)} t</strong> CH₄/yr</span>
               <span><strong className="text-[#34D399]">{totals.avgStrandedScore}</strong> avg score</span>
@@ -545,6 +545,10 @@ function PitchContent() {
             </div>
           </div>
           <div className="mt-8 grid gap-4 text-sm text-gray-400 md:grid-cols-2">
+            <div className="rounded-xl border border-[#FBBF24]/20 bg-[#FBBF24]/5 p-4 md:col-span-2" data-testid="batten-validation-line">
+              <span className="font-semibold text-white">The site class the industry is moving on:</span>{' '}
+              1 Canadian facility reports venting at or above 1.5 t CH₄/hour — and our largest venting landfill, Essex-Windsor (32,544 kg/day ≈ 1.36 t/hr), sits within ~10% of the 1.5 t/hr class that public reporting (@DSBatten, 2026-09-10) says landed a Bitcoin-mining deal. Third-party context only — no partnership, endorsement, or use of our data is implied.
+            </div>
             <div className="rounded-xl border border-white/10 p-4">
               <span className="font-medium text-white">{t('pitchGenCapacity')}:</span>{' '}
               {fmt(totals.totalGeneratorKW)} kW estimated across portfolio (Jenbacher-class derate model)
@@ -609,7 +613,7 @@ function PitchContent() {
           <Link href="/sites" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchAllSites')}</Link>
           <a
             href={buildNostrShareUrl(
-              `Stranded Value — ${fmt(stats.siteCount)} verified methane sites across Canada. Stranded methane → Bitcoin.`,
+              `Stranded Value — ${fmt(stats.siteCount)} mapped methane sites across Canada. Stranded methane → Bitcoin.`,
               `${PROD_URL}/pitch`,
             )}
             target="_blank"

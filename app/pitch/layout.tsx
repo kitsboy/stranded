@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Investor Pitch | Stranded Value',
-  description: 'Live auto-updating pitch deck: 2,611 sites, province charts, climate impact, BTC revenue model.',
+  description: 'Live auto-updating pitch deck: 2,611 mapped sites, province charts, climate impact, BTC revenue model (optimistic scenarios labelled).',
   openGraph: {
     title: 'Stranded Value — Live Pitch Deck',
     description: 'Auto-updating investor pitch with charts and real ECCC data.',
