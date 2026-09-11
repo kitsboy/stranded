@@ -1305,11 +1305,18 @@ export default function Map({
         </div>
       </div>
 
+      {/*
+        OSM/CARTO attribution is a licence term, so it must stay visible whenever
+        the tiles are. It used to sit bottom-left inside the map stage's z-0
+        stacking context, where every page overlay beat it: measured blocked at
+        390/430 by the bottom sheet, at 768/1024 by the site sheet, and at
+        1280+ by the onboarding card. Top-left is contested by nothing.
+      */}
       <a
         href={tileFallbackActive ? 'https://www.openstreetmap.org/copyright' : 'https://carto.com/attributions'}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-2 left-3 z-[11] text-[8px] text-gray-400/80 hover:text-[#5BC0BE] transition pointer-events-auto sm:bottom-[7.25rem]"
+        className="absolute top-3 left-3 z-[12] text-[9px] leading-none rounded bg-[#0f172a]/70 px-1.5 py-1 text-gray-300 hover:text-[#5BC0BE] transition pointer-events-auto"
         data-testid="map-attribution"
       >
         {tileFallbackActive ? '© OSM' : attributionLabel}

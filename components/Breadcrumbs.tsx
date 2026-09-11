@@ -17,7 +17,7 @@ export default function Breadcrumbs({ items }: { items: { label: string; href?: 
             {item.href ? (
               <Link
                 href={item.href}
-                className="breadcrumb-link rounded px-1 py-0.5 transition-colors hover:text-[#5BC0BE] hover:bg-white/5"
+                className="breadcrumb-link inline-flex items-center rounded px-1 py-0.5 min-h-11 md:min-h-0 transition-colors hover:text-[#5BC0BE] hover:bg-white/5"
               >
                 {item.label}
               </Link>

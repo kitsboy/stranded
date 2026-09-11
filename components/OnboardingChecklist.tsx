@@ -54,7 +54,7 @@ export default function OnboardingChecklist() {
         </div>
         <button
           type="button"
-          className="text-[11px] text-gray-500 hover:text-white"
+          className="text-[11px] text-gray-500 hover:text-white min-h-11 inline-flex items-center"
           onClick={() => {
             setDismissed(true)
             persist(done, true)
@@ -74,7 +74,7 @@ export default function OnboardingChecklist() {
                 setDone(next)
                 persist(next)
               }}
-              className="accent-[#FF8C00]"
+              className="accent-[#FF8C00] w-6 h-6 shrink-0"
               aria-label={item.label}
             />
             {item.href ? (

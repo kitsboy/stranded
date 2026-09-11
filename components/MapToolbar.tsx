@@ -30,7 +30,7 @@ export default function MapToolbar({
 
   return (
     <div
-      className="absolute top-16 left-1/2 -translate-x-1/2 z-[69] no-print mt-10 sm:mt-0 sm:top-[4.25rem]"
+      className="pointer-events-auto no-print"
       data-testid="map-toolbar"
     >
       <div className="map-toolbar-pill flex items-center">

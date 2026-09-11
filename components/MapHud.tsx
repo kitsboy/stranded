@@ -27,7 +27,7 @@ export default function MapHud({
 
   return (
     <div
-      className="map-top-hud absolute top-3 left-1/2 -translate-x-1/2 z-[70] flex items-center justify-center text-xs no-print"
+      className="map-top-hud flex items-center justify-center text-xs no-print w-full"
       data-testid="map-hud"
     >
       <div className="map-top-hud__inner glass rounded-2xl flex items-center border border-white/10">

@@ -69,7 +69,7 @@ function Tip({ label, children }: { label: string; children: React.ReactNode }) 
       <button
         type="button"
         aria-label={label}
-        className="inline-flex items-center justify-center rounded-full text-[#5BC0BE] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF8C00]"
+        className="inline-flex items-center justify-center rounded-full h-11 w-11 md:h-6 md:w-6 text-[#5BC0BE] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF8C00]"
       >
         {children}
       </button>
@@ -234,7 +234,7 @@ export default function MinerStackCockpit({
             type="button"
             onClick={() => onModeChange('auto')}
             aria-pressed={mode === 'auto'}
-            className={`px-3 py-2 text-[11px] font-semibold transition ${mode === 'auto' ? 'bg-[#FF8C00] text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-3 min-h-11 md:min-h-0 py-2 text-[11px] font-semibold transition ${mode === 'auto' ? 'bg-[#FF8C00] text-black' : 'text-gray-300 hover:text-white'}`}
             data-testid="cockpit-mode-fill"
           >
             Fill the gas
@@ -243,7 +243,7 @@ export default function MinerStackCockpit({
             type="button"
             onClick={() => onModeChange('manual')}
             aria-pressed={mode === 'manual'}
-            className={`px-3 py-2 text-[11px] font-semibold transition ${mode === 'manual' ? 'bg-[#5BC0BE] text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-3 min-h-11 md:min-h-0 py-2 text-[11px] font-semibold transition ${mode === 'manual' ? 'bg-[#5BC0BE] text-black' : 'text-gray-300 hover:text-white'}`}
             data-testid="cockpit-mode-mine"
           >
             My build
@@ -394,7 +394,7 @@ export default function MinerStackCockpit({
             <button
               type="button"
               onClick={onAddGenset}
-              className={`inline-flex items-center gap-1.5 rounded-full border border-amber-400/70 bg-amber-400/15 px-3 py-2 text-[11px] font-semibold text-amber-200 hover:bg-amber-400/25 active:scale-[0.97] transition ${nudge ? 'cockpit-nudge' : ''}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-amber-400/70 bg-amber-400/15 px-3 py-2 min-h-11 text-[11px] font-semibold text-amber-200 hover:bg-amber-400/25 active:scale-[0.97] transition ${nudge ? 'cockpit-nudge' : ''}`}
               data-testid="miner-stack-add-genset"
               aria-label={`Add another ${headGensetName} — raises the gas ceiling so more miners can run`}
             >
@@ -434,7 +434,7 @@ export default function MinerStackCockpit({
                 type="button"
                 onClick={() => { setTyped(String(machineCount)); setTyping(true) }}
                 aria-label={`Miner count ${formatCount(machineCount)} — tap to type an exact number`}
-                className="w-full text-center rounded-lg py-1 hover:bg-white/5"
+                className="w-full min-h-11 text-center rounded-lg py-1 hover:bg-white/5"
                 data-testid="miner-stack-count"
               >
                 <span className="block text-2xl font-bold text-white tabular-nums leading-none">{formatCount(machineCount)}</span>
@@ -471,7 +471,7 @@ export default function MinerStackCockpit({
                 disabled={!canRemoveGenset(g.gensetId)}
                 title={canRemoveGenset(g.gensetId) ? 'Remove one unit' : 'Remove miners first — they need this unit'}
                 aria-label={`Remove one ${GENSET_DATA[g.gensetId]?.name} (${g.count} installed)`}
-                className="h-8 w-8 shrink-0 rounded-lg border border-white/20 text-gray-300 hover:bg-white/10 disabled:opacity-30"
+                className="h-11 w-11 md:h-8 md:w-8 shrink-0 rounded-lg border border-white/20 text-gray-300 hover:bg-white/10 disabled:opacity-30"
                 data-testid={`miner-stack-remove-${g.gensetId}`}
               >
                 <Minus className="mx-auto" size={14} aria-hidden />
@@ -518,7 +518,7 @@ export default function MinerStackCockpit({
         <button
           type="button"
           onClick={() => setShowAll(v => !v)}
-          className="mt-1 md:hidden text-[10px] text-[#5BC0BE] underline"
+          className="mt-1 md:hidden text-[11px] text-[#5BC0BE] underline min-h-11"
           aria-expanded={showAll}
           data-testid="cockpit-readout-more"
         >
@@ -533,7 +533,7 @@ export default function MinerStackCockpit({
               {formatCount(unusedKgPerDay)} kg CH₄/day ({formatCount(unusedKgPerDay * 365 / 1000, 1)} t/yr) that this site already has gas for —
               about {formatMoneyShort(unusedUsdPerDay, currencySymbol)}/day unmined, {formatMoneyShort(ventingUsdPerYear, currencySymbol)}/year.
             </span>
-            <button type="button" onClick={() => onModeChange('auto')} className="ml-1 underline font-semibold hover:text-white">
+            <button type="button" onClick={() => onModeChange('auto')} className="ml-1 inline-flex items-center min-h-11 underline font-semibold hover:text-white">
               Fill the gas instead
             </button>
           </div>
@@ -541,7 +541,7 @@ export default function MinerStackCockpit({
 
         {/* ---- honesty: how this number is made ---- */}
         <details className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2" data-testid="cockpit-how">
-          <summary className="text-[11px] font-semibold text-[#5BC0BE] cursor-pointer flex items-center gap-1.5">
+          <summary className="text-[11px] font-semibold text-[#5BC0BE] cursor-pointer flex items-center gap-1.5 min-h-11 md:min-h-0">
             <Info size={12} aria-hidden /> How this number is made
           </summary>
           <ul className="mt-2 space-y-1.5 text-[10px] text-gray-300 leading-snug">

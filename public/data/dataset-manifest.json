@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-11T21:04:24.236Z",
-  "dataSnapshotAt": "2026-09-11T21:04:23.003Z",
-  "buildId": "20260911210423",
+  "generatedAt": "2026-09-11T21:41:31.363Z",
+  "dataSnapshotAt": "2026-09-11T21:41:31.055Z",
+  "buildId": "20260911214131",
   "appVersion": "2.11.0",
-  "sha256": "fcdea643f6fa80c39fe09574ee01bfb7268f48489672df1e5d05cc5074117a63",
+  "sha256": "cc887001c5bdce5f47dcbfd64a80cce02d4d5a231ddcec5cc5b00f67129637bd",
   "sha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson + live-stats.json followed by the bytes of dataset-canonical-payload.json",
   "dataSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
   "dataSha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson",
@@ -12,8 +12,8 @@
     "name": "dataset-canonical-payload.json",
     "url": "/data/dataset-canonical-payload.json",
     "bytes": 321,
-    "sha256": "90c70f1d248d8e8176f5328c4de61407557cc692e3ad3aeab0cba3e209885c53",
-    "contents": "{\"datasetVersion\":1,\"files\":[{\"bytes\":2847508,\"name\":\"stranded-sites-REAL.geojson\",\"sha256\":\"28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b\"},{\"bytes\":8782,\"name\":\"live-stats.json\",\"sha256\":\"60f2fa5a5c2dc03c3fd569e1464ba1b32db9812cce1d3076458a6178a5cb4340\"}],\"newestReferenceYear\":2024,\"siteCount\":2611}"
+    "sha256": "794d21a163cd5d898037929cec21da962a31de47103dbc17b72bc74a41a38c6f",
+    "contents": "{\"datasetVersion\":1,\"files\":[{\"bytes\":2847508,\"name\":\"stranded-sites-REAL.geojson\",\"sha256\":\"28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b\"},{\"bytes\":8782,\"name\":\"live-stats.json\",\"sha256\":\"40b562f18cd9c7b33ba71fc49df8b3c322879c307bc670cd0512b1852de46c69\"}],\"newestReferenceYear\":2024,\"siteCount\":2611}"
   },
   "files": [
     {
@@ -30,7 +30,7 @@
       "bytes": 8782,
       "sizeMb": 0.01,
       "gzipBytes": 2170,
-      "sha256": "60f2fa5a5c2dc03c3fd569e1464ba1b32db9812cce1d3076458a6178a5cb4340"
+      "sha256": "40b562f18cd9c7b33ba71fc49df8b3c322879c307bc670cd0512b1852de46c69"
     }
   ],
   "siteCount": 2611,
@@ -93,7 +93,7 @@
     "Compare that output with the published data-file SHA-256: 28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b. It must match exactly.",
     "Run: sha256sum live-stats.json and compare with the value listed for that file.",
     "To reproduce the full dataset digest, download dataset-canonical-payload.json as well, then run: cat stranded-sites-REAL.geojson live-stats.json dataset-canonical-payload.json > stranded-payload.bin",
-    "Then run: sha256sum stranded-payload.bin — it must equal fcdea643f6fa80c39fe09574ee01bfb7268f48489672df1e5d05cc5074117a63.",
+    "Then run: sha256sum stranded-payload.bin — it must equal cc887001c5bdce5f47dcbfd64a80cce02d4d5a231ddcec5cc5b00f67129637bd.",
     "The canonical payload file is a sorted list of file names, sizes and digests with no timestamps in it, so the full dataset digest depends only on the published data, not on when you run it.",
     "If a timestamp is published above, open its verification link to see the Bitcoin block that anchors that digest."
   ]

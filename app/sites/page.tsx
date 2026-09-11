@@ -349,7 +349,7 @@ export default function AllSitesExplorer() {
                       if (next.has(site.id)) next.delete(site.id)
                       else next.add(site.id)
                       setSelectedIds(next)
-                    }} onClick={e => e.stopPropagation()} className="accent-[#FF8C00]" />
+                    }} onClick={e => e.stopPropagation()} className="accent-[#FF8C00] w-6 h-6 shrink-0 cursor-pointer" />
                     <div className="ml-auto text-right">
                       <div className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>
                         {site.strandedScore}

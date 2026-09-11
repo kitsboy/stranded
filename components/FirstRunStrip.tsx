@@ -45,7 +45,7 @@ export default function FirstRunStrip({ onOpenSearch, commandHint = '⌘K' }: Pr
 
   return (
     <div
-      className="absolute top-24 left-1/2 -translate-x-1/2 z-[72] w-[min(42rem,94vw)] rounded-2xl border border-[#5BC0BE]/40 bg-[#1e293b] shadow-xl px-3 py-2.5"
+      className="pointer-events-auto w-[min(42rem,94vw)] rounded-2xl border border-[#5BC0BE]/40 bg-[#1e293b] shadow-xl px-3 py-2.5"
       data-testid="map-first-run-strip"
       role="region"
       aria-label="Getting started"

@@ -1242,7 +1242,7 @@ export default function EducationContent() {
           <div className="flex items-center gap-2 mb-4"><CheckCircle className="text-[#5BC0BE]" /> Your Learning Journey (local progress)</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
             {["Read the explainer", "Complete a simulator", "Take the IQ quiz", "Click a viz to the map"].map((item, i) => (
-              <label key={i} className="flex items-center gap-2"><input type="checkbox" className="accent-[#FF8C00]" /> {item}</label>
+              <label key={i} className="flex items-center gap-2 py-1"><input type="checkbox" className="accent-[#FF8C00] w-6 h-6 shrink-0" /> {item}</label>
             ))}
           </div>
           <div className="text-[10px] text-gray-400 mt-2">Progress saves in your browser. Complete the journey and you earn the “Stranded Value Advocate” mental badge.</div>

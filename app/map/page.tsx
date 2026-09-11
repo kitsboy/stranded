@@ -165,6 +165,12 @@ function StrandedCommandCenter() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
+  /**
+   * The site id a shared/deep link asks for. It is resolved only after the
+   * dataset downloads, so the panel can name it while the map is still loading.
+   */
+  const deepLinkSiteId = searchParams.get('site')
+
   useEffect(() => {
     fetch('/data/live-stats.json')
       .then(r => r.ok ? r.json() : null)
@@ -1042,46 +1048,102 @@ function StrandedCommandCenter() {
       <div className="map-print-header hidden text-black font-semibold" data-testid="map-print-header">
         Stranded Command Center — Map View · ECCC GHGRP open reporting
       </div>
-      {loading && loadProgress < 100 && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[80] w-48 h-1 bg-white/10 rounded-full overflow-hidden" role="progressbar" aria-valuenow={loadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Loading sites">
-          <div className="h-full bg-[#FF8C00] transition-all" style={{ width: `${loadProgress}%` }} />
-        </div>
-      )}
       <div className="sr-only" aria-live="polite" aria-atomic="true" data-testid="map-filter-announcer">
         {filterAnnouncement}
       </div>
 
-      {radiusFilter && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-[70] glass px-4 py-2 rounded-2xl border border-[#FF8C00]/40 text-xs flex flex-wrap items-center gap-3 no-print max-w-[92vw]">
-          <span className="text-[#FF8C00] shrink-0">{tf(locale, 'mapRadius', { km: radiusFilter.radiusKm })}</span>
-          <label className="flex items-center gap-2 text-gray-400 min-w-[140px]">
-            <span className="text-[10px] shrink-0">{t('mapRadiusAdjust')}</span>
-            <input
-              type="range"
-              min={5}
-              max={300}
-              step={5}
-              value={radiusFilter.radiusKm}
-              onChange={e => setRadiusFilter(prev => prev ? { ...prev, radiusKm: Number(e.target.value) } : prev)}
-              className="w-24 accent-[#FF8C00]"
-            />
-          </label>
-          <span className="text-gray-400 hidden sm:inline">@ {radiusFilter.lat.toFixed(2)}, {radiusFilter.lng.toFixed(2)}</span>
-          <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-400 hover:text-white">✕</button>
-        </div>
-      )}
+      {/*
+        One column for every top-centre overlay: loading bar → HUD → toolbar →
+        first-run guidance → radius chip. They used to be five independent
+        absolute elements pinned to `top-16`/`top-20`/`top-24`, so they overlapped
+        each other at the widths where any of them wrapped (measured: the toolbar
+        sat 22px inside the HUD at 768px, 10px inside it at 390px). Stacking them
+        makes the relationship structural instead of a set of magic offsets.
+      */}
+      <div
+        className="map-top-stack absolute left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-2 pointer-events-none no-print w-[min(94vw,52rem)]"
+        data-testid="map-top-stack"
+      >
+        {loading && loadProgress < 100 && (
+          <div className="pointer-events-auto w-48 h-1 bg-white/10 rounded-full overflow-hidden" role="progressbar" aria-valuenow={loadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Loading sites">
+            <div className="h-full bg-[#FF8C00] transition-all" style={{ width: `${loadProgress}%` }} />
+          </div>
+        )}
 
-      <MapToolbar
-        canHistoryBack={canHistoryBack}
-        canHistoryForward={canHistoryForward}
-        onHistoryBack={historyBack}
-        onHistoryForward={historyForward}
-        onFitBounds={fitToFilteredSites}
-        onScreenshot={exportMapScreenshot}
-        onPrint={printMap}
-        onShare={shareMapView}
-        onKeyboardHelp={() => setShowKeyboardHelp(true)}
-      />
+        {/*
+          A shared fleet link is the v2 hand-off (send a build to a counterparty).
+          A cold load has to fetch and parse the 2.85 MB dataset first, so for
+          several seconds the panel used to be simply absent with no explanation —
+          which reads as "the link is broken". Name the site from the URL and say
+          what is happening until it resolves.
+        */}
+        {deepLinkSiteId && !selectedSite && (
+          <div
+            className="pointer-events-auto glass rounded-2xl border border-[#5BC0BE]/40 px-4 py-2 text-xs flex items-center gap-2"
+            role="status"
+            aria-live="polite"
+            data-testid="map-deeplink-loading"
+          >
+            <span className="h-3 w-3 rounded-full border-2 border-[#5BC0BE]/40 border-t-[#5BC0BE] animate-spin" aria-hidden />
+            <span className="text-gray-300">
+              Loading site <span className="font-mono text-[#5BC0BE]">{deepLinkSiteId}</span>
+              {loadProgress > 0 && loadProgress < 100 ? ` · ${loadProgress}%` : '…'}
+            </span>
+          </div>
+        )}
+
+        <MapHud
+          filteredCount={filteredSites.length}
+          totalCount={allSites.length}
+          activeFilterCount={activeFilterCount}
+          liveBtcPrice={liveBtcPrice}
+          missionDailyCad={portfolio.length > 0 ? totalPotential : undefined}
+          onResetFilters={resetFilters}
+          onGeolocate={nearMe}
+        />
+
+        <MapToolbar
+          canHistoryBack={canHistoryBack}
+          canHistoryForward={canHistoryForward}
+          onHistoryBack={historyBack}
+          onHistoryForward={historyForward}
+          onFitBounds={fitToFilteredSites}
+          onScreenshot={exportMapScreenshot}
+          onPrint={printMap}
+          onShare={shareMapView}
+          onKeyboardHelp={() => setShowKeyboardHelp(true)}
+        />
+
+        {showSearchHint && (
+          <FirstRunStrip
+            commandHint={typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘K' : 'Ctrl K'}
+            onOpenSearch={() => {
+              try { localStorage.setItem('stranded-map-firstrun-dismissed', '1'); localStorage.setItem('stranded-map-search-hint-dismissed', '1') } catch { /* storage blocked */ }
+              setShowSearchHint(false)
+            }}
+          />
+        )}
+
+        {radiusFilter && (
+          <div className="pointer-events-auto glass px-4 py-2 rounded-2xl border border-[#FF8C00]/40 text-xs flex flex-wrap items-center justify-center gap-3 max-w-[92vw]">
+            <span className="text-[#FF8C00] shrink-0">{tf(locale, 'mapRadius', { km: radiusFilter.radiusKm })}</span>
+            <label className="flex items-center gap-2 text-gray-400 min-w-[140px]">
+              <span className="text-[10px] shrink-0">{t('mapRadiusAdjust')}</span>
+              <input
+                type="range"
+                min={5}
+                max={300}
+                step={5}
+                value={radiusFilter.radiusKm}
+                onChange={e => setRadiusFilter(prev => prev ? { ...prev, radiusKm: Number(e.target.value) } : prev)}
+                className="w-24 accent-[#FF8C00]"
+              />
+            </label>
+            <span className="text-gray-400 hidden sm:inline">@ {radiusFilter.lat.toFixed(2)}, {radiusFilter.lng.toFixed(2)}</span>
+            <button type="button" onClick={() => setRadiusFilter(null)} className="text-gray-400 hover:text-white h-11 w-11 -my-3 flex items-center justify-center">✕</button>
+          </div>
+        )}
+      </div>
 
       {clusterList && (
         <ClusterSiteList
@@ -1096,27 +1158,6 @@ function StrandedCommandCenter() {
               const [lng, lat] = site.geometry?.coordinates || []
               if (lat != null && lng != null) setCenterTarget({ lat, lng, zoom: 10 })
             }
-          }}
-        />
-      )}
-
-      <MapHud
-        filteredCount={filteredSites.length}
-        totalCount={allSites.length}
-        activeFilterCount={activeFilterCount}
-        liveBtcPrice={liveBtcPrice}
-        missionDailyCad={portfolio.length > 0 ? totalPotential : undefined}
-        onResetFilters={resetFilters}
-        onGeolocate={nearMe}
-      />
-
-      {/* First-run guidance: Pick a site → See the build → Send it (dismissible, ⌘K included) */}
-      {showSearchHint && (
-        <FirstRunStrip
-          commandHint={typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '') ? '⌘K' : 'Ctrl K'}
-          onOpenSearch={() => {
-            try { localStorage.setItem('stranded-map-firstrun-dismissed', '1'); localStorage.setItem('stranded-map-search-hint-dismissed', '1') } catch { /* storage blocked */ }
-            setShowSearchHint(false)
           }}
         />
       )}
@@ -1195,9 +1236,9 @@ function StrandedCommandCenter() {
                     checked={onlyMissionSites}
                     onChange={e => setOnlyMissionSites(e.target.checked)}
                     disabled={!portfolio.length}
-                    className="accent-[#FF8C00]"
-                  />
-                </label>
+                    className="accent-[#FF8C00] w-6 h-6 shrink-0"
+                                      />
+                                    </label>
 
                 <div>
                   <div className="flex justify-between text-xs mb-1.5 text-gray-400 items-center gap-2">
@@ -1207,7 +1248,7 @@ function StrandedCommandCenter() {
                         type="checkbox"
                         checked={emissionLogScale}
                         onChange={e => setEmissionLogScale(e.target.checked)}
-                        className="accent-[#5BC0BE] scale-90"
+                        className="accent-[#5BC0BE] w-6 h-6 shrink-0"
                       />
                       {t('mapEmissionLogScale')}
                     </label>
