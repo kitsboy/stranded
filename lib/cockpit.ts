@@ -121,8 +121,9 @@ export function satsPerDay(dailyBtc: number): number {
   return Math.round(btc * 1e8)
 }
 
-export function formatSats(dailyBtc: number): string {
-  return satsPerDay(dailyBtc).toLocaleString()
+/** Format an already-sats value (sats/day, sats on the table) with thousands separators. */
+export function formatSats(sats: number): string {
+  return Math.round(Number.isFinite(sats) ? Math.max(0, sats) : 0).toLocaleString()
 }
 
 export function formatCount(n: number, digits = 0): string {
