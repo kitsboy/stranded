@@ -30,7 +30,7 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
 
   if (!provinces.length) {
     return (
-      <div className={`text-[10px] text-gray-400 ${className}`} data-testid="map-province-bars">
+      <div className={`text-micro text-gray-400 ${className}`} data-testid="map-province-bars">
         {t('mapProvinceBarsEmpty')}
       </div>
     )
@@ -39,12 +39,12 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
   return (
     <div className={className} data-testid="map-province-bars" role="img" aria-label={t('mapProvinceBarsAria')}>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[9px] uppercase tracking-widest text-gray-400">{t('mapProvinceBarsTitle')}</span>
+        <span className="text-micro uppercase tracking-widest text-gray-400">{t('mapProvinceBarsTitle')}</span>
         {provinces.length > maxBars && (
           <button
             type="button"
             onClick={() => setExpanded(e => !e)}
-            className="flex items-center gap-0.5 text-[9px] text-gray-400 hover:text-[#FF8C00]"
+            className="flex items-center gap-0.5 text-micro text-gray-400 hover:text-[#FF8C00]"
             aria-expanded={expanded}
           >
             {expanded ? t('mapCollapse') : t('mapExpand')}
@@ -55,7 +55,7 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
       <div className="space-y-1" aria-hidden>
         {display.map((p, i) => (
           <div key={p.province} className="flex items-center gap-2">
-            <span className="text-[9px] text-gray-400 w-[4.5rem] truncate shrink-0" title={p.province}>
+            <span className="text-micro text-gray-400 w-[4.5rem] truncate shrink-0" title={p.province}>
               {p.province}
             </span>
             <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
@@ -71,7 +71,7 @@ export default function MapProvinceBars({ provinces, maxBars = 6, className = ''
                 style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }}
               />
             </div>
-            <span className="text-[9px] text-gray-400 tabular-nums w-6 text-right shrink-0">{p.count}</span>
+            <span className="text-micro text-gray-400 tabular-nums w-6 text-right shrink-0">{p.count}</span>
           </div>
         ))}
       </div>

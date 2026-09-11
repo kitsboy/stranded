@@ -94,7 +94,7 @@ export default function MapFiltersPanel({
           <Filter size={16} /> {t('mapFiltersLive')}
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onResetFilters} className="text-[10px] flex items-center gap-1 text-gray-400 hover:text-white">
+          <button type="button" onClick={onResetFilters} className="text-micro flex items-center gap-1 text-gray-400 hover:text-white">
             <RefreshCw size={13} /> {t('mapReset')}
           </button>
           {onClose && (
@@ -136,7 +136,7 @@ export default function MapFiltersPanel({
               key={chip.label}
               type="button"
               onClick={() => onMinScoreChange(chip.v)}
-              className={`text-[10px] px-2 py-0.5 rounded-full border ${minScore === chip.v ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400'}`}
+              className={`text-micro px-2 py-0.5 rounded-full border ${minScore === chip.v ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400'}`}
             >
               {chip.label}
             </button>
@@ -150,7 +150,7 @@ export default function MapFiltersPanel({
           <button
             type="button"
             onClick={onShowAllProvincesToggle}
-            className="flex items-center gap-0.5 text-[10px] text-gray-400 hover:text-[#FF8C00] transition"
+            className="flex items-center gap-0.5 text-micro text-gray-400 hover:text-[#FF8C00] transition"
           >
             {showAllProvinces ? t('mapCollapse') : t('mapExpand')}
             <ChevronDown size={12} className={`transition-transform ${showAllProvinces ? 'rotate-180' : ''}`} />
@@ -164,7 +164,7 @@ export default function MapFiltersPanel({
           ))}
         </div>
         {!showAllProvinces && provinces.length > 6 && (
-          <div className="text-[9px] text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
+          <div className="text-micro text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
         )}
       </div>
 
@@ -182,7 +182,7 @@ export default function MapFiltersPanel({
       <div className="mb-4" data-testid="mobile-recency-filter">
         <div className="text-xs uppercase tracking-widest mb-2 text-gray-400 flex items-center justify-between gap-2">
           <span>DATA RECENCY</span>
-          <span className="text-[10px] normal-case tracking-normal text-gray-400">
+          <span className="text-micro normal-case tracking-normal text-gray-400">
             last reported year
           </span>
         </div>
@@ -201,7 +201,7 @@ export default function MapFiltersPanel({
                 className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${recency === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                 data-testid={`mobile-recency-${f.id}`}
               >
-                {f.label}{typeof count === 'number' && <span className="text-[9px] text-gray-400 tabular-nums"> {count}</span>}
+                {f.label}{typeof count === 'number' && <span className="text-micro text-gray-400 tabular-nums"> {count}</span>}
               </button>
             )
           })}
@@ -211,7 +211,7 @@ export default function MapFiltersPanel({
       <div className="mb-4" data-testid="mobile-flux-filter">
         <div className="text-xs uppercase tracking-widest mb-2 text-gray-400 flex items-center justify-between gap-2">
           <span>FLUX STATUS</span>
-          <span className="text-[10px] normal-case tracking-normal text-gray-400">
+          <span className="text-micro normal-case tracking-normal text-gray-400">
             {typeof fluxCounts?.flaring === 'number' ? `${fluxCounts.flaring} flare` : 'venting vs flaring'}
           </span>
         </div>
@@ -229,7 +229,7 @@ export default function MapFiltersPanel({
                 className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${flux === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                 data-testid={`mobile-flux-${f.id}`}
               >
-                {f.label}{typeof count === 'number' && <span className="text-[9px] text-gray-400 tabular-nums"> {count}</span>}
+                {f.label}{typeof count === 'number' && <span className="text-micro text-gray-400 tabular-nums"> {count}</span>}
               </button>
             )
           })}
@@ -240,14 +240,14 @@ export default function MapFiltersPanel({
         <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">{t('mapFilterPresets')}</div>
         {recentPresets.length > 0 && (
           <div className="mb-3">
-            <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
+            <div className="text-micro uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
             <div className="flex flex-wrap gap-1">
               {recentPresets.map(p => (
                 <button
                   key={`recent-${p.name}`}
                   type="button"
                   onClick={() => onApplyPreset(p)}
-                  className="text-[10px] px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+                  className="text-micro px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
                   data-testid={`recent-preset-${p.name}`}
                 >
                   {p.name}
@@ -258,13 +258,13 @@ export default function MapFiltersPanel({
         )}
         <div className="flex gap-1 mb-2">
           <input value={presetName} onChange={e => onPresetNameChange(e.target.value)} placeholder={t('mapPresetName')} className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
-          <button type="button" onClick={onSavePreset} disabled={!presetName.trim()} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
-          <button type="button" onClick={onSharePreset} className="text-[10px] px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
+          <button type="button" onClick={onSavePreset} disabled={!presetName.trim()} className="text-micro px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
+          <button type="button" onClick={onSharePreset} className="text-micro px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
         </div>
         <div className="flex flex-wrap gap-1">
           {savedPresets.map(p => (
             <span key={p.name} className="inline-flex items-center gap-0.5">
-              <button type="button" onClick={() => onApplyPreset(p)} className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 hover:border-[#5BC0BE]/50">{p.name}</button>
+              <button type="button" onClick={() => onApplyPreset(p)} className="text-micro px-2 py-0.5 rounded-full border border-white/15 hover:border-[#5BC0BE]/50">{p.name}</button>
               <button
                 type="button"
                 onClick={() => onDeletePreset(p.name)}

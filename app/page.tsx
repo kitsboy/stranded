@@ -165,7 +165,7 @@ export default function LandingPage() {
               <CountUp value={siteCount} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statVerifiedSites')}</div>
-            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
+            <div className="text-label text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
           <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
             data-tip-title="Provinces covered" data-tip="Sites span every major oil-and-gas province in Canada — Alberta, BC, Saskatchewan, Manitoba and more. Filter the live map by province to see regional concentration.">
@@ -173,7 +173,7 @@ export default function LandingPage() {
               <CountUp value={provinceCount} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statProvinces')}</div>
-            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
+            <div className="text-label text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
           <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
             data-tip-title="Average Stranded Score" data-tip="A 0–100 score of how attractive each site is: methane intensity, CapEx cost, ROI and financing all factor in. Higher is better. We publish the full scoring method openly.">
@@ -181,7 +181,7 @@ export default function LandingPage() {
               {avgScore != null ? <CountUp value={avgScore} decimals={1} /> : '—'}
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statAvgScore')}{highScore != null ? ` · ${highScore} ≥80` : ''}</div>
-            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
+            <div className="text-label text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
           <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
             data-tip-title="Grid impact" data-tip="These projects run on stranded gas that is currently vented or flared — they add zero new load to the electrical grid. Bitcoin mining here is a clean offtaker, not a burden.">
@@ -189,7 +189,7 @@ export default function LandingPage() {
               <CountUp value={0} />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statGridImpact')}</div>
-            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
+            <div className="text-label text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
           <div className="group rounded-2xl border border-[#5BC0BE]/20 bg-gradient-to-b from-[#5BC0BE]/10 to-transparent px-3 py-5 transition-all hover:border-[#5BC0BE]/50 hover:shadow-[0_0_24px_-4px_rgba(91,192,190,0.35)]"
             data-tip-title="Live Bitcoin price" data-tip="Updated in real time. Revenue at each site is modelled on this live price, so your per-site ROI is never stale — it recomputes as the market moves.">
@@ -197,7 +197,7 @@ export default function LandingPage() {
               <CountUp value={btc} prefix="$" />
             </div>
             <div className="text-sm text-gray-400 mt-1">{t('statLiveBtc')}</div>
-            <div className="text-[10px] text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
+            <div className="text-label text-[#5BC0BE]/70 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">hover for detail</div>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@ export default function LandingPage() {
             </Link>
           ))}
         </div>
-        <p className="text-[10px] text-gray-400 mt-3 text-center">Capturing these alone could avoid thousands of tonnes CO₂e annually while generating significant Bitcoin.</p>
+        <p className="text-label text-gray-400 mt-3 text-center">Capturing these alone could avoid thousands of tonnes CO₂e annually while generating significant Bitcoin.</p>
       </div>
 
       {/* How Stranded Value Works - Clear Business Flow */}
@@ -381,7 +381,7 @@ export default function LandingPage() {
           <Link href="/education" className="px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/5 text-lg touch-manipulation">Dive deeper in the Education Center</Link>
         </div>
         <p className="mt-4 text-xs text-gray-400 tracking-widest">EVERYTHING IS VERIFIABLE • ⌘K ANYWHERE TO SEARCH THE 2,611</p>
-        <p className="mt-6 text-[10px] text-gray-400">
+        <p className="mt-6 text-label text-gray-400">
           Full professional marketing suite available in the <a href="/Marketing-Hub.html" className="underline hover:text-[#FF8C00]">Marketing Hub</a> (includes all 5 documents + visuals)
         </p>
       </div>

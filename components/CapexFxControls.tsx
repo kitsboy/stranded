@@ -21,7 +21,7 @@ export default function CapexFxControls({
   return (
     <div className={`rounded-2xl border border-white/10 bg-white/[0.03] p-4 ${className}`} data-testid="capex-fx-controls">
       <h4 className="text-sm font-semibold text-[#FF8C00] mb-2">CapEx inflation + FX</h4>
-      <p className="text-[10px] text-gray-500 mb-2">Base US${baseCapexUsd.toLocaleString()}</p>
+      <p className="text-label text-gray-500 mb-2">Base US${baseCapexUsd.toLocaleString()}</p>
       <label className="text-xs text-gray-400">Inflation {inflation}%/yr · {years}y</label>
       <input type="range" min={0} max={12} value={inflation} onChange={e => setInflation(+e.target.value)} className="w-full accent-[#FF8C00]" aria-label="Inflation percent" />
       <input type="range" min={0} max={5} value={years} onChange={e => setYears(+e.target.value)} className="w-full accent-[#5BC0BE] mt-1" aria-label="Years until spend" />
@@ -29,11 +29,11 @@ export default function CapexFxControls({
       <input type="range" min={1.2} max={1.6} step={0.01} value={usdCad} onChange={e => setUsdCad(+e.target.value)} className="w-full accent-amber-400" aria-label="USD CAD rate" />
       <div className="mt-3 grid grid-cols-2 gap-2 text-center text-sm">
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">USD</div>
+          <div className="text-label text-gray-400">USD</div>
           <div className="font-mono">${scaled.usd.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">CAD</div>
+          <div className="text-label text-gray-400">CAD</div>
           <div className="font-mono text-[#5BC0BE]">C${scaled.cad.toLocaleString()}</div>
         </div>
       </div>

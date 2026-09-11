@@ -29,11 +29,11 @@ export default function EducationCharts({ provinceData, sourceData, liveBtc }: P
                 <div className="h-3 rounded-full" style={{ width: `${p.pct}%`, backgroundColor: '#FF8C00' }} />
               </div>
               <div className="w-12 text-right text-sm font-mono">{p.pct}%</div>
-              <div className="text-[10px] text-emerald-400">~{(p.emission * 0.0009 * 365 * (liveBtc / 85000)).toFixed(0)} BTC/yr potential</div>
+              <div className="text-micro text-emerald-400">~{(p.emission * 0.0009 * 365 * (liveBtc / 85000)).toFixed(0)} BTC/yr potential</div>
             </button>
           ))}
         </div>
-        <div className="mt-3 text-[10px] text-gray-400">Click any bar → opens the live map filtered to that province with full Value modeling.</div>
+        <div className="mt-3 text-micro text-gray-400">Click any bar → opens the live map filtered to that province with full Value modeling.</div>
       </div>
 
       <div className="glass p-6 rounded-2xl">

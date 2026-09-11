@@ -34,7 +34,7 @@ export default function CopyLinkButton({
 
   // min-h-11: a copy button is a primary action on the mobile cockpit, so it needs
   // a thumb-sized target (it measured 330x25 before this).
-  const sizeClass = size === 'sm' ? 'text-[10px] px-2 py-1 min-h-11 md:min-h-0' : 'text-xs px-3 py-1.5 min-h-11 md:min-h-0'
+  const sizeClass = size === 'sm' ? 'text-label px-2 py-1 min-h-11 md:min-h-0' : 'text-xs px-3 py-1.5 min-h-11 md:min-h-0'
 
   return (
     <button

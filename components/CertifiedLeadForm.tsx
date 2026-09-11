@@ -295,7 +295,7 @@ export default function CertifiedLeadForm() {
             Open email → {CONTACT_TO}
           </a>
         </div>
-        <div className="text-[11px] text-gray-500">
+        <div className="text-label text-gray-500">
           Email: <span className="text-gray-300">{CONTACT_TO}</span> · Subject: <span className="text-gray-300">{subject || 'Stranded Energy — <category>'}</span>
         </div>
       </div>

@@ -142,7 +142,7 @@ function ProvincesContent() {
                     <div className="font-semibold text-lg">{p.name}</div>
                     <div className="text-3xl font-bold text-[#FF8C00] mt-1">{p.count}</div>
                     <div className="text-xs text-gray-400 mt-2">{p.totalEmission.toLocaleString()} kg/day · avg score {p.avgScore}</div>
-                    <div className="text-[11px] text-gray-400 mt-1">
+                    <div className="text-label text-gray-400 mt-1">
                       <span className="text-[#5BC0BE]">{p.filed2024}</span> filed 2024 ·{' '}
                       <span className="text-amber-200">{p.filedBefore2023}</span> pre-2023 ·{' '}
                       <span className="text-[#FF8C00]">{p.flaring}</span> report flaring

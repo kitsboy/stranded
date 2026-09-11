@@ -64,7 +64,7 @@ export default function PitchProvinceRank({ provinces, title, desc, maxRows = 6 
                     style={{ width: `${(p.estRevenueUsd / top) * 100}%` }}
                   />
                 </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-400">
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-label text-gray-400">
                   <span>{formatCompactNumber(p.estKgDay, 1)} kg/day CH₄</span>
                   <span className="font-semibold text-[#F472B6]">{fmtUsd(p.estRevenueUsd)}/yr model</span>
                 </div>

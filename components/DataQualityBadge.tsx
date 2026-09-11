@@ -29,7 +29,7 @@ export default function DataQualityBadge({ report, grade, score, flags, classNam
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${noCh4 ? 'border-red-500/40 bg-red-500/15 text-red-300' : (GRADE_CLASS[g] || GRADE_CLASS.C)} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-label font-semibold ${noCh4 ? 'border-red-500/40 bg-red-500/15 text-red-300' : (GRADE_CLASS[g] || GRADE_CLASS.C)} ${className}`}
       title={title}
       data-testid={noCh4 ? 'data-quality-no-ch4' : 'data-quality-badge'}
     >

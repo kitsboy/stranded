@@ -50,19 +50,19 @@ export default function PortfolioRollup({ sites, className = '' }: { sites?: Sit
       <h3 className="font-semibold text-[#5BC0BE] mb-3">Mission portfolio roll-up</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-sm mb-3">
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">Sites</div>
+          <div className="text-label text-gray-400">Sites</div>
           <div className="font-mono text-lg">{count}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">Avg score</div>
+          <div className="text-label text-gray-400">Avg score</div>
           <div className="font-mono text-lg text-[#FF8C00]">{avgScore}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">kg/day</div>
+          <div className="text-label text-gray-400">kg/day</div>
           <div className="font-mono text-lg">{totalEmission.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">Daily CAD</div>
+          <div className="text-label text-gray-400">Daily CAD</div>
           <div className="font-mono text-lg text-[#34D399]">{dailyCad ? `$${dailyCad.toLocaleString()}` : '—'}</div>
         </div>
       </div>

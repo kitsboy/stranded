@@ -73,25 +73,25 @@ function TemplateCard({
           <div className="text-[12px] font-semibold text-white leading-tight truncate" title={template.name}>
             {template.name}
           </div>
-          <div className="text-[10px] text-gray-400 leading-snug mt-0.5">{promise}</div>
+          <div className="text-label text-gray-400 leading-snug mt-0.5">{promise}</div>
         </div>
         {mine ? (
-          <span className="shrink-0 rounded-full bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 px-1.5 py-0.5 text-[9px] font-semibold text-[#5BC0BE]">
+          <span className="shrink-0 rounded-full bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 px-1.5 py-0.5 text-label font-semibold text-[#5BC0BE]">
             yours
           </span>
         ) : suggested ? (
-          <span className="shrink-0 rounded-full bg-[#FF8C00]/15 border border-[#FF8C00]/40 px-1.5 py-0.5 text-[9px] font-semibold text-[#FF8C00]">
+          <span className="shrink-0 rounded-full bg-[#FF8C00]/15 border border-[#FF8C00]/40 px-1.5 py-0.5 text-label font-semibold text-[#FF8C00]">
             for this site type
           </span>
         ) : null}
       </div>
 
       <div className="rounded-xl bg-black/30 px-2 py-1.5">
-        <div className="text-[9px] uppercase tracking-wider text-gray-500">At this site</div>
-        <div className="text-[11px] text-white tabular-nums">
+        <div className="text-label uppercase tracking-wider text-gray-500">At this site</div>
+        <div className="text-label text-white tabular-nums">
           {gensetLabel(template)} · {formatCount(result.ceilingKw)} kW gas
         </div>
-        <div className="text-[11px] text-[#FF8C00] font-semibold tabular-nums">
+        <div className="text-label text-[#FF8C00] font-semibold tabular-nums">
           {formatCount(result.minerCount)} miners · {formatCount(result.satsPerDay)} sats/day
         </div>
       </div>
@@ -101,7 +101,7 @@ function TemplateCard({
           type="button"
           onClick={onApply}
           aria-pressed={active}
-          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[11px] font-semibold transition ${
+          className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-label font-semibold transition ${
             active ? 'bg-[#FF8C00] text-black' : 'bg-[#5BC0BE]/15 border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/25'
           }`}
           data-testid={`fleet-preset-apply-${template.id}`}
@@ -144,12 +144,12 @@ export default function FleetTemplateShelf({
   return (
     <section className="mt-3" data-testid="fleet-template-shelf">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#5BC0BE]">Start from a template</h3>
+        <h3 className="text-label font-semibold uppercase tracking-wider text-[#5BC0BE]">Start from a template</h3>
         {onSaveCurrent && !saveOpen && (
           <button
             type="button"
             onClick={onSaveCurrent}
-            className="inline-flex items-center gap-1 rounded-full border border-[#FF8C00]/40 px-2 py-1 text-[10px] text-[#FF8C00] hover:bg-[#FF8C00]/10"
+            className="inline-flex items-center gap-1 rounded-full border border-[#FF8C00]/40 px-2 py-1 text-label text-[#FF8C00] hover:bg-[#FF8C00]/10"
             data-testid="miner-stack-save-template"
           >
             <Plus size={11} aria-hidden /> Save this build

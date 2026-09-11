@@ -30,7 +30,7 @@ export default function DashboardEmissionTiers({ stats }: Props) {
           <h2 id="emission-tiers-heading" className="font-semibold">
             Emission Tiers
           </h2>
-          <p className="text-[10px] text-gray-400">kg CH₄/day bands across portfolio</p>
+          <p className="text-label text-gray-400">kg CH₄/day bands across portfolio</p>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function DashboardEmissionTiers({ stats }: Props) {
         {tiers.slice(0, 3).map(tier => (
           <span
             key={tier.key}
-            className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] text-gray-400"
+            className="rounded-lg border border-white/10 bg-black/20 px-2.5 py-1 text-label text-gray-400"
           >
             {tier.label.split(' ')[0]}: <strong className="text-gray-200">{tier.count}</strong>
           </span>

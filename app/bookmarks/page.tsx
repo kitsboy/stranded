@@ -144,7 +144,7 @@ export default function BookmarksPage() {
               <span className="font-mono text-[#5BC0BE] text-sm shrink-0">{s.emission.toLocaleString()} kg/d</span>
             </div>
             <div className="mt-3 flex items-center gap-2">
-              <label className="text-[10px] text-gray-400 uppercase">Tag</label>
+              <label className="text-label text-gray-400 uppercase">Tag</label>
               <input
                 type="text"
                 defaultValue={s.tag || ''}

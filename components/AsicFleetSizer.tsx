@@ -38,19 +38,19 @@ export default function AsicFleetSizer({ className = '' }: AsicFleetSizerProps) 
       </div>
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">ASICs</div>
+          <div className="text-label text-gray-400">ASICs</div>
           <div className="text-xl font-bold text-[#FF8C00] tabular-nums">{result.count.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">Hashrate</div>
+          <div className="text-label text-gray-400">Hashrate</div>
           <div className="text-xl font-bold text-[#5BC0BE] tabular-nums">{(result.totalHashrate / 1000).toFixed(1)} PH</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400">Containers</div>
+          <div className="text-label text-gray-400">Containers</div>
           <div className="text-xl font-bold tabular-nums">{result.containerEstimate}</div>
         </div>
       </div>
-      <p className="text-[10px] text-gray-400 mt-3">MW → ASIC count: floor(MW × 1e6 ÷ W per machine). ~120 ASICs per 40&apos; container.</p>
+      <p className="text-label text-gray-400 mt-3">MW → ASIC count: floor(MW × 1e6 ÷ W per machine). ~120 ASICs per 40&apos; container.</p>
     </div>
   )
 }

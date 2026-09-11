@@ -98,7 +98,7 @@ export default function DashboardConfidencePanel({ stats }: Props) {
                 {row.count.toLocaleString('en-CA')}
               </div>
               <div className="mt-1 text-sm tabular-nums text-gray-400">{row.pct}%</div>
-              <p className="mt-2 text-[10px] leading-snug text-gray-400">{meta.description}</p>
+              <p className="mt-2 text-label leading-snug text-gray-400">{meta.description}</p>
             </motion.div>
           )
         })}

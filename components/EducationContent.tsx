@@ -67,7 +67,7 @@ function GwpCalculatorWidget() {
         <div className="text-xs uppercase tracking-wider text-gray-400">CO₂-equivalent (annualized)</div>
         <div className="text-3xl font-bold text-[#34D399] tabular-nums mt-2">{(co2eTonnes * 365).toLocaleString(undefined, { maximumFractionDigits: 0 })} t/yr</div>
         <div className="text-sm text-gray-400 mt-2">{co2eTonnes.toFixed(1)} t CO₂e per day</div>
-        <p className="text-[10px] text-gray-400 mt-3">AR6 uses GWP₁₀₀ ≈ 27.9 for CH₄; 20-yr GWP is higher — slider lets you explore sensitivity.</p>
+        <p className="text-label text-gray-400 mt-3">AR6 uses GWP₁₀₀ ≈ 27.9 for CH₄; 20-yr GWP is higher — slider lets you explore sensitivity.</p>
       </div>
     </div>
   )
@@ -462,7 +462,7 @@ export default function EducationContent() {
             </div>
           ))}
         </div>
-        <p className="text-center text-[10px] text-gray-400 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
+        <p className="text-center text-label text-gray-400 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
       </div>
 
       {/* Methane GWP calculator widget */}
@@ -553,7 +553,7 @@ export default function EducationContent() {
             >
               <div className="font-mono text-xs tracking-widest mb-1" style={{color: item.color}}>{item.step}</div>
               <div className="text-sm text-gray-300 group-hover:text-white transition">{item.desc}</div>
-              <div className="text-[10px] text-[#FF8C00] mt-3 opacity-70 group-hover:opacity-100">→ CLICK TO ACTIVATE</div>
+              <div className="text-label text-[#FF8C00] mt-3 opacity-70 group-hover:opacity-100">→ CLICK TO ACTIVATE</div>
             </button>
           ))}
         </div>
@@ -680,7 +680,7 @@ export default function EducationContent() {
                 <div className="font-semibold text-[#FF8C00] text-xs">{a.name}</div>
                 <div className="text-xl font-mono mt-1">{a.hashrate} TH/s</div>
                 <div className="text-gray-400 text-xs mt-2">C${a.costCad.toLocaleString()} · {a.condition}</div>
-                <div className="text-[10px] text-gray-400 mt-1">{a.warranty} warranty</div>
+                <div className="text-label text-gray-400 mt-1">{a.warranty} warranty</div>
               </div>
             ))}
           </div>
@@ -709,7 +709,7 @@ export default function EducationContent() {
             <div>
               <label className="text-xs text-gray-400">Gas Treatment Cost Adder (% of CapEx)</label>
               <input type="range" min="0" max="30" value={treatmentAdder} onChange={e => setTreatmentAdder(+e.target.value)} className="w-full accent-[#FF8C00]" />
-              <div className="text-[10px] text-gray-400">{treatmentAdder}% (H2S, moisture, etc.)</div>
+              <div className="text-label text-gray-400">{treatmentAdder}% (H2S, moisture, etc.)</div>
             </div>
             <div className="text-xs text-gray-300 flex items-end">Total Installed Power: <span className="ml-2 text-lg font-mono text-[#FF8C00]">{((GENSET_DATA as any)[selectedGenset].powerKW * numUnits).toLocaleString()} kW</span></div>
           </div>
@@ -844,7 +844,7 @@ export default function EducationContent() {
                       <input type="range" min="0" max="90" value={financingDebtPercent} onChange={e => setFinancingDebtPercent(+e.target.value)} className="flex-1 accent-[#FF8C00]" />
                       <input type="range" min="3" max="15" step="0.5" value={financingInterestRate} onChange={e => setFinancingInterestRate(+e.target.value)} className="w-24 accent-[#5BC0BE]" />
                     </div>
-                    <div className="text-[10px] text-gray-400">Debt portion reduces upfront equity but adds annual financing cost. Dynamic in payback.</div>
+                    <div className="text-label text-gray-400">Debt portion reduces upfront equity but adds annual financing cost. Dynamic in payback.</div>
                   </div>
 
                   {/* Computed Real Per-Site Value */}
@@ -870,7 +870,7 @@ export default function EducationContent() {
                     <strong>Methane Loss (Opportunity Cost if vented):</strong> {methaneLossDailyBtc.toFixed(2)} BTC/day (~${(methaneLossDailyBtc * liveBtc).toLocaleString()}) lost forever. This is the &ldquo;methane loss ROI&rdquo; — the value destroyed by not capturing.
                   </div>
 
-                  <div className="mt-3 text-[10px] text-gray-400">{personaNote} All numbers use real emission from dataset + current live BTC + your generator/ASIC choices. CapEx and opex are honest (no hype).</div>
+                  <div className="mt-3 text-label text-gray-400">{personaNote} All numbers use real emission from dataset + current live BTC + your generator/ASIC choices. CapEx and opex are honest (no hype).</div>
                 </div>
               )
             })()}
@@ -895,11 +895,11 @@ export default function EducationContent() {
             <button key={i} onClick={() => { setSelectedSimulator('advanced'); window.scrollTo({top: 600, behavior: 'smooth'}); }} className="glass p-4 rounded-2xl border border-white/10 text-left hover:border-[#FF8C00]/50 transition">
               <div className="font-semibold text-[#FF8C00]">{item.term}</div>
               <div className="text-sm text-gray-300 mt-1">{item.def}</div>
-              <div className="text-[10px] text-[#5BC0BE] mt-2">Click → jump to Advanced Simulator</div>
+              <div className="text-label text-[#5BC0BE] mt-2">Click → jump to Advanced Simulator</div>
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-gray-400 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
+        <p className="text-label text-gray-400 mt-2">Glossary 2.0: every term is now a live portal into the simulators and data.</p>
       </div>
 
       <div id="edu-gensets" className="mb-16 scroll-mt-28">
@@ -1006,7 +1006,7 @@ export default function EducationContent() {
                 <option value="cummins">Cummins QSK60G (1.5 MW)</option>
                 <option value="microturbine">Capstone C200 Microturbine</option>
               </select>
-              <div className="text-[10px] text-gray-400 mt-1">Higher efficiency gensets increase your effective BTC yield in the model.</div>
+              <div className="text-label text-gray-400 mt-1">Higher efficiency gensets increase your effective BTC yield in the model.</div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
@@ -1087,7 +1087,7 @@ export default function EducationContent() {
             <div key={i} className="glass p-5 rounded-2xl border-l-4 border-[#FF8C00]">
               <div className="text-2xl font-semibold text-[#FF8C00]">{item.val}</div>
               <div className="text-sm mt-1">{item.label}</div>
-              <div className="text-[10px] text-gray-400 mt-1">{item.sub}</div>
+              <div className="text-label text-gray-400 mt-1">{item.sub}</div>
             </div>
           ))}
         </div>
@@ -1107,12 +1107,12 @@ export default function EducationContent() {
           <div>
             <label className="text-xs text-gray-400">Internet Factor (tune it)</label>
             <input type="range" min="0.5" max="1.5" step="0.05" defaultValue="1" className="w-full accent-[#5BC0BE]" onChange={(e) => { /* demo only - would update a live score display */ }} />
-            <div className="text-[10px] text-gray-400">Fiber 1.35 / Starlink 1.15 / LTE 1.0</div>
+            <div className="text-label text-gray-400">Fiber 1.35 / Starlink 1.15 / LTE 1.0</div>
           </div>
           <div>
             <label className="text-xs text-gray-400">Confidence Factor</label>
             <input type="range" min="0.5" max="1.5" step="0.05" defaultValue="1" className="w-full accent-[#FF8C00]" />
-            <div className="text-[10px] text-gray-400">High 1.25 / Medium 1.0 / Low 0.75</div>
+            <div className="text-label text-gray-400">High 1.25 / Medium 1.0 / Low 0.75</div>
           </div>
           <div className="text-xs text-gray-300">Tweak the factors and see how Stranded Scores (and therefore Value priority) shift dramatically. This is why transparent modeling wins capital.</div>
         </div>
@@ -1245,7 +1245,7 @@ export default function EducationContent() {
               <label key={i} className="flex items-center gap-2 py-1"><input type="checkbox" className="accent-[#FF8C00] w-6 h-6 shrink-0" /> {item}</label>
             ))}
           </div>
-          <div className="text-[10px] text-gray-400 mt-2">Progress saves in your browser. Complete the journey and you earn the “Stranded Value Advocate” mental badge.</div>
+          <div className="text-label text-gray-400 mt-2">Progress saves in your browser. Complete the journey and you earn the “Stranded Value Advocate” mental badge.</div>
         </div>
 
         {/* Comparison Tool */}
@@ -1255,7 +1255,7 @@ export default function EducationContent() {
             <div className="p-4 bg-red-500/10 rounded-2xl">Vent/Flare: 0 BTC • 25× CO₂ released • Negative community impact</div>
             <div className="p-4 bg-emerald-500/10 rounded-2xl">Capture + Mine: ~serious sats • 25× CO₂ destroyed • Landowner revenue + jobs</div>
           </div>
-          <div className="text-[10px] mt-2 text-gray-400">The delta is the definition of Stranded Value. Run the full numbers in the simulators above.</div>
+          <div className="text-label mt-2 text-gray-400">The delta is the definition of Stranded Value. Run the full numbers in the simulators above.</div>
         </div>
 
         {/* Downloads */}

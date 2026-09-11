@@ -75,14 +75,14 @@ export default function BankPackPreview({
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
             <div>
               <h2 id="bank-pack-preview-title" className="font-semibold">{title}</h2>
-              <p className="text-[10px] text-gray-400">{sites.length} site{sites.length !== 1 ? 's' : ''} · preview before export</p>
+              <p className="text-label text-gray-400">{sites.length} site{sites.length !== 1 ? 's' : ''} · preview before export</p>
             </div>
             <button type="button" onClick={onClose} aria-label="Close preview"><X size={18} /></button>
           </div>
           <div className="px-5 py-3 border-b border-white/10">
             <ExportFormatPicker value={format} onChange={setFormat} formats={['csv', 'json', 'md', 'html', 'tsv']} />
           </div>
-          <pre className="px-5 py-4 text-[10px] text-gray-300 max-h-56 overflow-auto whitespace-pre-wrap font-mono bg-black/30">
+          <pre className="px-5 py-4 text-label text-gray-300 max-h-56 overflow-auto whitespace-pre-wrap font-mono bg-black/30">
             {preview || 'No sites selected.'}
             {preview.length >= 900 && '\n…'}
           </pre>

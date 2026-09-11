@@ -248,7 +248,7 @@ html.theme-light .site-footer .footer-link:hover {
 }
 
 .section-divider__label {
-  font-size: 0.65rem;
+  font-size: 0.75rem; /* type floor: was 0.65rem (10.4px) */
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -370,7 +370,7 @@ html.theme-light .site-footer .footer-link:hover {
 }
 
 .nav-root.nav-scrolled .nav-logo-sub {
-  font-size: 8px;
+  font-size: 0.75rem; /* type floor: was 8px */
 }
 
 .nav-root.nav-scrolled .nav-logo-img {
@@ -1204,7 +1204,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   border: 1px solid rgba(91, 192, 190, 0.22);
   border-radius: 0.5rem;
   padding: 0.125rem 0.5rem;
-  font-size: 0.625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   font-variant-numeric: tabular-nums;
   color: #94a3b8;
   line-height: 1.4;
@@ -1267,7 +1267,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   display: flex;
   justify-content: space-between;
   margin-top: 0.25rem;
-  font-size: 0.5625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1320,7 +1320,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
 .map-command-center .map-toolbar-pill__fit {
   padding-left: 0.625rem;
   padding-right: 0.625rem;
-  font-size: 0.625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   gap: 0.25rem;
 }
 
@@ -1475,7 +1475,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   justify-content: space-between;
   width: 100%;
   padding: 0.625rem 1rem;
-  font-size: 0.625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   font-weight: 500;
   letter-spacing: 0.02em;
   border: none;
@@ -1585,7 +1585,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   }
   .map-command-center .map-footer-bar {
     padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));
-    font-size: 0.5625rem;
+    font-size: 0.6875rem; /* type floor (11px) */
   }
   .map-command-center [data-testid='quick-actions-fab'] {
     bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
@@ -1605,7 +1605,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   color: #cbd5e1;
 }
 .map-command-center .map-status-bar__density {
-  font-size: 0.625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1617,7 +1617,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
 
 /* 370. Footer ECCC link hover state */
 .map-command-center .map-footer-bar {
-  font-size: 0.625rem;
+  font-size: 0.6875rem; /* type floor (11px) */
   letter-spacing: 0.02em;
   line-height: 1.5;
 }
@@ -1817,3 +1817,76 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   .map-command-center.map-right-column-open [data-testid="map-toolbar"] { transform: translateX(-280px); }
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Touch hit-area floor (WCAG 2.5.5 AAA — 44×44 CSS px)
+   ──────────────────────────────────────────────────────────────────────────
+   On a coarse pointer only (phones/tablets — mouse users keep the compact
+   pixel-perfect layout), real controls get a >=44px touch box.
+
+   Scope rules by CONTAINER, not by instance: the map's overlay chrome is a
+   family of 22-27px pills, and patching each one is how they drift apart
+   again. `.filter-chip` already grows on phones via min-h-[44px]; this block
+   covers the rest of the map chrome and the app-level toggles.
+
+   Explicitly NOT included, with the reason recorded in
+   docs/qa/VERDICT-legibility.md: inline links inside prose (WCAG 2.5.5 and
+   2.5.8 inline exception), native <input type=range> tracks (UA-drawn
+   control), chart row links where a 44px row would double the chart's height,
+   and `display:none`-until-focus skip links.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (pointer: coarse) {
+  /* Map chrome — every real control in the overlay stack. */
+  .map-command-center .map-toolbar-pill button,
+  .map-command-center .map-toolbar-pill__btn,
+  .map-command-center .map-toolbar-pill__fit,
+  .map-command-center .map-layer-stack button,
+  .map-command-center .map-layer-stack summary,
+  .map-command-center .map-status-bar button,
+  .map-command-center .map-status-bar a,
+  .map-command-center .maplibregl-ctrl button,
+  .map-command-center .maplibregl-ctrl-group button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* …but a text pill only needs the height, not a forced 44px width. */
+  .map-command-center .map-status-bar a,
+  .map-command-center .map-layer-stack summary {
+    min-width: 0;
+  }
+  /* Toolbar pills are icon buttons in a row: give the row room to breathe. */
+  .map-command-center .map-toolbar-pill {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Page-level controls: real buttons / selects / disclosure summaries get the
+     44px touch box. Inline links in running prose are deliberately NOT
+     included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on
+     body text is a readability regression, not a fix. */
+  #main-content button,
+  #main-content select,
+  #main-content summary,
+  footer a.footer-link,
+  .filter-chip {
+    min-height: 44px;
+  }
+
+  /* App-level toggles (theme / density / language / palette hint). */
+  .nav-root button {
+    min-height: 44px;
+  }
+  .nav-root button,
+  .nav-root a {
+    touch-action: manipulation;
+  }
+}
+
+/* Effective hit area without moving a pixel: pad the box, pull the layout
+   back with a matching negative margin. Used where a control must stay
+   visually small (checkboxes) but still needs a 44px thumb target — and it is
+   layout-neutral on a fine pointer too, so it needs no media query. */
+.hit-area-44 {
+  padding: 0.625rem;
+  margin: -0.625rem;
+}

@@ -48,13 +48,13 @@ export default function OnboardingChecklist() {
       <div className="flex items-start justify-between gap-2 mb-3">
         <div>
           <h3 className="font-semibold text-[#FF8C00]">Get started</h3>
-          <p className="text-[11px] text-gray-400">
+          <p className="text-label text-gray-400">
             {completed}/{ITEMS.length} complete
           </p>
         </div>
         <button
           type="button"
-          className="text-[11px] text-gray-500 hover:text-white min-h-11 inline-flex items-center"
+          className="text-label text-gray-500 hover:text-white min-h-11 inline-flex items-center"
           onClick={() => {
             setDismissed(true)
             persist(done, true)
@@ -66,17 +66,19 @@ export default function OnboardingChecklist() {
       <ul className="space-y-2">
         {ITEMS.map(item => (
           <li key={item.id} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={!!done[item.id]}
-              onChange={() => {
-                const next = { ...done, [item.id]: !done[item.id] }
-                setDone(next)
-                persist(next)
-              }}
-              className="accent-[#FF8C00] w-6 h-6 shrink-0"
-              aria-label={item.label}
-            />
+            <label className="hit-area-44 inline-flex items-center justify-center shrink-0 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!done[item.id]}
+                onChange={() => {
+                  const next = { ...done, [item.id]: !done[item.id] }
+                  setDone(next)
+                  persist(next)
+                }}
+                className="accent-[#FF8C00] w-6 h-6 shrink-0"
+                aria-label={item.label}
+              />
+            </label>
             {item.href ? (
               <Link href={item.href} className="text-gray-200 hover:text-[#5BC0BE] inline-flex items-center min-h-11 md:min-h-0">
                 {item.label}

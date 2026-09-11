@@ -40,7 +40,7 @@ export default function TermSheetCard({
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5" data-testid="term-sheet-card">
       <h3 className="font-semibold text-[#FF8C00] mb-1">Term sheet sketch</h3>
-      <p className="text-[11px] text-gray-400 mb-3">Illustrative structure — not an offer.</p>
+      <p className="text-label text-gray-400 mb-3">Illustrative structure — not an offer.</p>
       <label className="text-xs text-gray-400">Equity {equityPct}% / Debt {100 - equityPct}%</label>
       <input
         type="range"
@@ -53,19 +53,19 @@ export default function TermSheetCard({
       />
       <div className="grid grid-cols-2 gap-2 text-sm mb-3">
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 uppercase">Equity</div>
+          <div className="text-label text-gray-400 uppercase">Equity</div>
           <div className="font-mono text-[#5BC0BE]">C${sketch.equityCad.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 uppercase">Debt</div>
+          <div className="text-label text-gray-400 uppercase">Debt</div>
           <div className="font-mono">C${sketch.debtCad.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 uppercase">Payback</div>
+          <div className="text-label text-gray-400 uppercase">Payback</div>
           <div className="font-mono">{sketch.simplePaybackYears != null ? `${sketch.simplePaybackYears} yr` : '—'}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 uppercase">Rev/CapEx</div>
+          <div className="text-label text-gray-400 uppercase">Rev/CapEx</div>
           <div className="font-mono">{sketch.revenueToCapex ?? '—'}</div>
         </div>
       </div>

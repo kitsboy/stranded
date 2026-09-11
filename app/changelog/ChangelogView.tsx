@@ -97,7 +97,7 @@ export default function ChangelogView({ initialContent }: { initialContent: stri
                     <div className="text-xs text-gray-400">{section.date}{bulletCount ? ` · ${bulletCount} items` : ''}</div>
                   </div>
                   {section.version === version && (
-                    <span className="text-[10px] uppercase px-2 py-0.5 rounded-full border border-[#34D399]/30 text-[#34D399]">
+                    <span className="text-label uppercase px-2 py-0.5 rounded-full border border-[#34D399]/30 text-[#34D399]">
                       current
                     </span>
                   )}

@@ -45,7 +45,7 @@ export default function BenchmarksPage() {
           { label: 'Map render mode', value: 'Native cluster @ 180+ pins' },
         ].map(row => (
           <div key={row.label} className="p-4 rounded-xl border border-white/10">
-            <div className="text-[10px] uppercase text-gray-400">{row.label}</div>
+            <div className="text-label uppercase text-gray-400">{row.label}</div>
             <div className="text-xl font-mono mt-1 text-[#5BC0BE]">{row.value}</div>
           </div>
         ))}

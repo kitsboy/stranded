@@ -63,7 +63,7 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-widest text-[#FF8C00] mb-1">{t('onboardingBadge')}</div>
+          <div className="text-micro uppercase tracking-widest text-[#FF8C00] mb-1">{t('onboardingBadge')}</div>
           <h3 id="onboarding-tour-title" className="font-semibold text-white leading-snug">{t('onboardingTitle')}</h3>
         </div>
         <button
@@ -83,7 +83,7 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
             <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 ${color}`}>
               <Icon size={16} />
             </div>
-            <span className="text-[9px] text-gray-400 uppercase tracking-wider">{i + 1}</span>
+            <span className="text-micro text-gray-400 uppercase tracking-wider">{i + 1}</span>
           </div>
         ))}
       </div>

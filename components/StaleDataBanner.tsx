@@ -27,7 +27,7 @@ export default function StaleDataBanner({
 
   return (
     <div
-      className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-[11px] text-amber-200"
+      className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-label text-amber-200"
       role="status"
       data-testid="stale-data-banner"
     >

@@ -25,7 +25,7 @@ export default function RecentSites({ onSelect, compact = false, max = 5 }: Rece
   if (compact) {
     return (
       <div>
-        <div className="text-[10px] text-gray-400 mb-2 flex items-center gap-1" data-testid="cmd-recent-sites">
+        <div className="text-label text-gray-400 mb-2 flex items-center gap-1" data-testid="cmd-recent-sites">
           <Clock size={11} /> RECENT SITES
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -34,7 +34,7 @@ export default function RecentSites({ onSelect, compact = false, max = 5 }: Rece
             key={r.id}
             type="button"
             onClick={() => onSelect?.(r)}
-            className="text-[10px] px-2 py-1 rounded-full border border-white/15 hover:border-[#5BC0BE]/40 text-gray-300 truncate max-w-[140px]"
+            className="text-label px-2 py-1 rounded-full border border-white/15 hover:border-[#5BC0BE]/40 text-gray-300 truncate max-w-[140px]"
             title={`${r.name} · ${r.province}`}
           >
             {r.name}
@@ -47,7 +47,7 @@ export default function RecentSites({ onSelect, compact = false, max = 5 }: Rece
 
   return (
     <div>
-      <div className="text-[10px] text-gray-400 mb-2 flex items-center gap-1" data-testid="cmd-recent-sites">
+      <div className="text-label text-gray-400 mb-2 flex items-center gap-1" data-testid="cmd-recent-sites">
         <Clock size={11} /> RECENT SITES
       </div>
       <div className="flex flex-wrap gap-2">

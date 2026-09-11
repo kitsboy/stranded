@@ -8,7 +8,7 @@ type Props = { siteId?: string }
 export default function TadbuyAdHook({ siteId }: Props) {
   return (
     <div className="mb-3 rounded-xl border border-dashed border-[#FF8C00]/35 bg-[#FF8C00]/5 p-3 text-xs">
-      <div className="text-[10px] uppercase tracking-wider text-[#FF8C00] mb-1">Sponsored placement · Tadbuy</div>
+      <div className="text-label uppercase tracking-wider text-[#FF8C00] mb-1">Sponsored placement · Tadbuy</div>
       <p className="text-gray-400 leading-snug mb-2">
         Need ASICs for this site cluster? Browse certified miners sized to your generator output.
       </p>

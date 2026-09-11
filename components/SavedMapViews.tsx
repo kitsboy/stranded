@@ -30,7 +30,7 @@ export default function SavedMapViews({ getCurrentState, onLoad, className = '' 
 
   return (
     <div className={`rounded-xl border border-white/10 p-3 ${className}`} data-testid="saved-map-views">
-      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Saved views</div>
+      <div className="text-micro uppercase tracking-widest text-gray-400 mb-2">Saved views</div>
       <div className="flex gap-1 mb-2">
         <input
           value={name}
@@ -62,7 +62,7 @@ export default function SavedMapViews({ getCurrentState, onLoad, className = '' 
             </button>
           </li>
         ))}
-        {!views.length && <li className="text-[10px] text-gray-500">No saved views yet</li>}
+        {!views.length && <li className="text-micro text-gray-500">No saved views yet</li>}
       </ul>
     </div>
   )

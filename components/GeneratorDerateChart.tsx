@@ -41,7 +41,7 @@ export default function GeneratorDerateChart({
           </div>
         ))}
       </div>
-      <p className="text-[9px] text-gray-400 mt-1">H₂S / treatment derate vs rated kW ({gensetId})</p>
+      <p className="text-micro text-gray-400 mt-1">H₂S / treatment derate vs rated kW ({gensetId})</p>
     </div>
   )
 }

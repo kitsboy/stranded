@@ -41,14 +41,14 @@ export default function MapHud({
             <button
               type="button"
               onClick={onResetFilters}
-              className="ml-2 px-2 py-0.5 text-[10px] rounded bg-[#FF8C00] text-black font-medium hover:bg-orange-400"
+              className="ml-2 px-2 py-0.5 text-micro rounded bg-[#FF8C00] text-black font-medium hover:bg-orange-400"
             >
               {t('mapShowAll')}
             </button>
           )}
           {activeFilterCount > 0 && (
             <span
-              className="ml-1 px-2 py-0.5 text-[10px] rounded-full bg-[#5BC0BE]/15 border border-[#5BC0BE]/40 text-[#5BC0BE] font-medium"
+              className="ml-1 px-2 py-0.5 text-micro rounded-full bg-[#5BC0BE]/15 border border-[#5BC0BE]/40 text-[#5BC0BE] font-medium"
               data-testid="hud-active-filter-count"
             >
               {tf(locale, 'mapActiveFilters', { count: String(activeFilterCount) })}
@@ -60,7 +60,7 @@ export default function MapHud({
           type="button"
           data-testid="geolocate-btn"
           onClick={onGeolocate}
-          className="text-[10px] px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 shrink-0"
+          className="text-micro px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 shrink-0"
           aria-label={t('mapGeolocate')}
         >
           {t('mapGeolocate')}

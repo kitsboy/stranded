@@ -89,7 +89,7 @@ export default function MissionPanel({
           <Zap className="text-[#FF8C00]" size={18} />
           <div>
             <div className="font-semibold tracking-tight">{t('missionActive')}</div>
-            <div className="text-[10px] text-gray-400 -mt-0.5">{tf(locale, 'missionSitesSelected', { count: portfolio.length })}</div>
+            <div className="text-label text-gray-400 -mt-0.5">{tf(locale, 'missionSitesSelected', { count: portfolio.length })}</div>
           </div>
         </div>
         <button type="button" onClick={onClear} className="text-xs text-gray-400 hover:text-red-400 flex items-center gap-1" aria-label="Clear mission portfolio">
@@ -99,7 +99,7 @@ export default function MissionPanel({
 
       {onApplyTemplate && allSites.length > 0 && (
         <div className="mb-4 pb-3 border-b border-white/10">
-          <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">Mission templates</div>
+          <div className="text-label uppercase tracking-widest text-gray-400 mb-2">Mission templates</div>
           <div className="flex flex-wrap gap-1.5">
             {MISSION_TEMPLATES.map(tpl => (
               <button
@@ -115,7 +115,7 @@ export default function MissionPanel({
                   onApplyTemplate(picked)
                   toast.success(`${tpl.name}: ${picked.length} sites loaded`)
                 }}
-                className="text-[10px] px-2 py-1 rounded-full border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+                className="text-label px-2 py-1 rounded-full border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
               >
                 {tpl.name}
               </button>
@@ -126,26 +126,26 @@ export default function MissionPanel({
 
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400 flex items-center gap-1"><TrendingUp size={13} /> {t('missionDailyYield')}</div>
+          <div className="text-label text-gray-400 flex items-center gap-1"><TrendingUp size={13} /> {t('missionDailyYield')}</div>
           <div className="text-2xl font-semibold text-[#FF8C00] tabular-nums mt-0.5">C${totalPotential.toLocaleString()}</div>
         </div>
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400 flex items-center gap-1"><Leaf size={13} /> {t('missionCo2Year')}</div>
+          <div className="text-label text-gray-400 flex items-center gap-1"><Leaf size={13} /> {t('missionCo2Year')}</div>
           <div className="text-2xl font-semibold text-[#5BC0BE] tabular-nums mt-0.5">{(annualCO2 / 1000).toFixed(1)}k t</div>
         </div>
         <div className="mission-stat bg-black/30 rounded-xl p-3">
-          <div className="text-[10px] text-gray-400">{t('missionAvgScore')}</div>
+          <div className="text-label text-gray-400">{t('missionAvgScore')}</div>
           <div className="text-2xl font-semibold tabular-nums mt-0.5">{totalScore}</div>
         </div>
       </div>
-      <div className="text-[10px] text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
-      <div className="text-[10px] text-gray-400 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
-      <div className="text-[10px] text-[#34D399] mt-1">
+      <div className="text-label text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
+      <div className="text-label text-gray-400 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
+      <div className="text-label text-[#34D399] mt-1">
         Est. simple IRR: <span className="font-mono font-semibold">{simpleIrrPct}%</span>
         <span className="text-gray-400 ml-1">(annual net ÷ CapEx, illustrative)</span>
       </div>
 
-      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">{t('missionSelectedSites')}</div>
+      <div className="text-label uppercase tracking-widest text-gray-400 mb-2">{t('missionSelectedSites')}</div>
       <div className="max-h-[148px] overflow-auto space-y-1 pr-1 text-xs">
         {portfolio.map(site => {
           const p = site.properties
@@ -164,32 +164,32 @@ export default function MissionPanel({
         })}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-gray-400">
+      <div className="mt-4 pt-3 border-t border-white/10 text-label text-gray-400">
         {t('missionBtcAtPrice')} <span className="font-mono text-white">≈${Math.round(liveBtcPrice).toLocaleString()}</span><br />
         {t('missionPotentialBtc')} <span className="font-mono text-[#FF8C00]">{dailyBtc.toFixed(4)}</span>
       </div>
 
       <div className="mt-3 pt-3 border-t border-white/10">
-        <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">{t('missionBankPack')}</div>
+        <div className="text-label uppercase tracking-widest text-gray-400 mb-2">{t('missionBankPack')}</div>
         <ExportFormatPicker value={exportFmt} onChange={setExportFmt} className="mb-2" />
         <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
-            className="text-[10px] px-2 py-1 rounded border border-white/20 text-gray-300 hover:border-[#FF8C00]/40"
+            className="text-label px-2 py-1 rounded border border-white/20 text-gray-300 hover:border-[#FF8C00]/40"
             onClick={() => setShowPreview(true)}
           >
             Preview
           </button>
           <button
             type="button"
-            className="text-[10px] px-2 py-1 rounded border border-[#FF8C00]/30 text-[#FF8C00] hover:bg-[#FF8C00]/10"
+            className="text-label px-2 py-1 rounded border border-[#FF8C00]/30 text-[#FF8C00] hover:bg-[#FF8C00]/10"
             onClick={() => runExport(exportFmt)}
           >
             Export {exportFmt.toUpperCase()}
           </button>
           <button
             type="button"
-            className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            className="text-label px-2 py-1 rounded border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
             onClick={() => {
               const rows = projectBtcRevenue(dailyBtc, 10)
               const header = 'year,daily_btc,annual_btc,halving_factor,sites_in_mission,total_emission_kg_day'

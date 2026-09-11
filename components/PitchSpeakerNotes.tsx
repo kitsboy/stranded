@@ -54,7 +54,7 @@ export default function PitchSpeakerNotes({ present = false }: { present?: boole
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="no-print fixed bottom-4 right-4 z-[120] rounded-full border border-white/20 bg-[#0f172a]/90 px-3 py-2 text-[11px] text-gray-300 hover:text-white hover:border-[#5BC0BE]/50"
+        className="no-print fixed bottom-4 right-4 z-[120] rounded-full border border-white/20 bg-[#0f172a]/90 px-3 py-2 text-label text-gray-300 hover:text-white hover:border-[#5BC0BE]/50"
         data-testid="pitch-speaker-notes-toggle"
       >
         Speaker notes
@@ -67,7 +67,7 @@ export default function PitchSpeakerNotes({ present = false }: { present?: boole
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="no-print fixed bottom-4 right-4 z-[120] rounded-full border border-[#FF8C00]/40 bg-black/70 px-3 py-2 text-[11px] text-[#FF8C00]"
+        className="no-print fixed bottom-4 right-4 z-[120] rounded-full border border-[#FF8C00]/40 bg-black/70 px-3 py-2 text-label text-[#FF8C00]"
       >
         Notes (N)
       </button>
@@ -83,7 +83,7 @@ export default function PitchSpeakerNotes({ present = false }: { present?: boole
       aria-label="Speaker notes"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-widest text-[#FF8C00]">Speaker · {idx + 1}/{NOTES.length}</span>
+        <span className="text-label uppercase tracking-widest text-[#FF8C00]">Speaker · {idx + 1}/{NOTES.length}</span>
         <button type="button" className="text-xs text-gray-400 hover:text-white" onClick={() => setOpen(false)}>
           Close
         </button>

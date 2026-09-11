@@ -37,7 +37,7 @@ export function ScoreTierBadge({ score, className = '' }: ScoreTierBadgeProps) {
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${statusStyles[status]} ${className}`.trim()}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label font-medium border ${statusStyles[status]} ${className}`.trim()}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" aria-hidden />
       {statusLabels[status]}

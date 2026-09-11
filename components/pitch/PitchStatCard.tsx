@@ -35,7 +35,7 @@ export default function PitchStatCard({
         style={{ background: accent }}
       />
       <div className="relative flex items-start justify-between gap-2">
-        <span className="text-[10px] font-medium uppercase leading-snug tracking-[0.14em] text-gray-400 line-clamp-2">
+        <span className="text-label font-medium uppercase leading-snug tracking-[0.14em] text-gray-400 line-clamp-2">
           {label}
         </span>
         {Icon && (
@@ -55,7 +55,7 @@ export default function PitchStatCard({
         <span className="xl:hidden">{compactValue ?? value}</span>
       </div>
       {sub && (
-        <p className="relative mt-auto pt-2.5 text-[10px] leading-snug text-gray-400 line-clamp-2">
+        <p className="relative mt-auto pt-2.5 text-label leading-snug text-gray-400 line-clamp-2">
           {sub}
         </p>
       )}

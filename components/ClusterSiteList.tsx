@@ -27,7 +27,7 @@ export default function ClusterSiteList({ items, title = 'Cluster sites', onClos
       <div className="flex items-start justify-between gap-2 border-b border-white/10 px-3 py-2.5">
         <div>
           <h3 className="text-sm font-semibold text-white">{title}</h3>
-          <p className="text-[10px] text-gray-400">
+          <p className="text-label text-gray-400">
             {summary.count} sites · avg score {summary.avgScore} · {Math.round(summary.totalEmission).toLocaleString()} kg/day
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function ClusterSiteList({ items, title = 'Cluster sites', onClos
             key={s}
             type="button"
             onClick={() => setSort(s)}
-            className={`rounded-md px-2 py-1 text-[10px] capitalize ${sort === s ? 'bg-[#5BC0BE]/20 text-[#5BC0BE]' : 'text-gray-400 hover:bg-white/5'}`}
+            className={`rounded-md px-2 py-1 text-label capitalize ${sort === s ? 'bg-[#5BC0BE]/20 text-[#5BC0BE]' : 'text-gray-400 hover:bg-white/5'}`}
           >
             {s}
           </button>
@@ -57,9 +57,9 @@ export default function ClusterSiteList({ items, title = 'Cluster sites', onClos
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-white truncate">{item.name}</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${scoreTierClass(item.score)}`}>{item.score}</span>
+                <span className={`text-label font-mono px-1.5 py-0.5 rounded ${scoreTierClass(item.score)}`}>{item.score}</span>
               </div>
-              <div className="text-[10px] text-gray-400 mt-0.5">
+              <div className="text-label text-gray-400 mt-0.5">
                 {item.province || '—'} · {Math.round(item.emission).toLocaleString()} kg/day
                 {item.distanceKm != null && <> · {item.distanceKm.toFixed(1)} km</>}
               </div>

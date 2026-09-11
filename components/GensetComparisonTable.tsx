@@ -8,7 +8,7 @@ export default function GensetComparisonTable() {
   return (
     <div className="overflow-x-auto rounded-2xl border border-white/10">
       <table className="w-full text-sm text-left">
-        <thead className="text-[10px] uppercase tracking-wider text-gray-400 border-b border-white/10">
+        <thead className="text-label uppercase tracking-wider text-gray-400 border-b border-white/10">
           <tr>
             <th className="p-3">Genset</th>
             <th className="p-3">Power</th>

@@ -68,7 +68,7 @@ export default function GlobalPage() {
                 <span className="text-2xl">{r.flag}</span>
                 <div className="font-semibold" style={{ color: r.color }}>{r.name}</div>
               </div>
-              <span className="text-[10px] px-2 py-1 rounded-full border border-white/15 text-gray-400">{r.status}</span>
+              <span className="text-label px-2 py-1 rounded-full border border-white/15 text-gray-400">{r.status}</span>
             </div>
             <div className="text-sm text-gray-400 mb-1">{r.sites}</div>
             <div className="text-xs text-gray-400 mb-3">Source: {r.methane}</div>

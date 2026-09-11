@@ -234,7 +234,7 @@ export default function MinerStackCockpit({
             type="button"
             onClick={() => onModeChange('auto')}
             aria-pressed={mode === 'auto'}
-            className={`px-3 min-h-11 md:min-h-0 py-2 text-[11px] font-semibold transition ${mode === 'auto' ? 'bg-[#FF8C00] text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-3 min-h-11 md:min-h-0 py-2 text-micro font-semibold transition ${mode === 'auto' ? 'bg-[#FF8C00] text-black' : 'text-gray-300 hover:text-white'}`}
             data-testid="cockpit-mode-fill"
           >
             Fill the gas
@@ -243,7 +243,7 @@ export default function MinerStackCockpit({
             type="button"
             onClick={() => onModeChange('manual')}
             aria-pressed={mode === 'manual'}
-            className={`px-3 min-h-11 md:min-h-0 py-2 text-[11px] font-semibold transition ${mode === 'manual' ? 'bg-[#5BC0BE] text-black' : 'text-gray-300 hover:text-white'}`}
+            className={`px-3 min-h-11 md:min-h-0 py-2 text-micro font-semibold transition ${mode === 'manual' ? 'bg-[#5BC0BE] text-black' : 'text-gray-300 hover:text-white'}`}
             data-testid="cockpit-mode-mine"
           >
             My build
@@ -258,7 +258,7 @@ export default function MinerStackCockpit({
 
       {/* ---------- the hero number ---------- */}
       <div className="cockpit-hero rounded-2xl px-4 py-3 mb-3" data-testid="cockpit-hero">
-        <div className="text-[10px] uppercase tracking-widest text-[#5BC0BE] flex items-center gap-1.5">
+        <div className="text-micro uppercase tracking-widest text-[#5BC0BE] flex items-center gap-1.5">
           <Sparkles size={11} aria-hidden /> This build produces
         </div>
         <div className="flex items-baseline gap-2 flex-wrap mt-1">
@@ -270,7 +270,7 @@ export default function MinerStackCockpit({
             ≈ {formatMoneyShort(live.usdPerDay, currencySymbol)} / day
           </span>
         </div>
-        <div className="text-[10px] text-gray-400 mt-1.5 tabular-nums">
+        <div className="text-micro text-gray-400 mt-1.5 tabular-nums">
           {formatCount(capacity.miners)} miners · {formatKw(live.kwUsed)} kW of {formatKw(gasCeilingKw)} kW gas · payback {formatPayback(live.paybackDays)}
         </div>
       </div>
@@ -278,11 +278,11 @@ export default function MinerStackCockpit({
       {/* ---------- venting baseline vs your build ---------- */}
       <div className="grid grid-cols-2 gap-2 mb-3" data-testid="cockpit-venting-compare">
         <div className="rounded-xl border border-dashed border-white/15 bg-black/20 px-3 py-2 opacity-80">
-          <div className="text-[10px] text-gray-400 flex items-center gap-1">
+          <div className="text-micro text-gray-400 flex items-center gap-1">
             <TrendingDown size={11} aria-hidden /> Venting today
           </div>
           <div className="text-sm font-semibold text-gray-300 tabular-nums">0 sats/day</div>
-          <div className="text-[10px] text-gray-500 tabular-nums">
+          <div className="text-micro text-gray-500 tabular-nums">
             {formatCount(siteEmissionKgDay)} kg CH₄/day to atmosphere
           </div>
           <svg viewBox="0 0 100 20" className="w-full h-4 mt-1" aria-hidden>
@@ -290,13 +290,13 @@ export default function MinerStackCockpit({
           </svg>
         </div>
         <div className="rounded-xl border border-[#34D399]/35 bg-[#34D399]/10 px-3 py-2">
-          <div className="text-[10px] text-[#34D399] flex items-center gap-1">
+          <div className="text-micro text-[#34D399] flex items-center gap-1">
             <Leaf size={11} aria-hidden /> Your build
           </div>
           <div className="text-sm font-semibold text-white tabular-nums" data-testid="cockpit-venting-gain">
             +{formatMoneyShort(Math.max(0, live.netUsdPerDay), currencySymbol)}/day net
           </div>
-          <div className="text-[10px] text-[#34D399] tabular-nums" data-testid="cockpit-co2e">
+          <div className="text-micro text-[#34D399] tabular-nums" data-testid="cockpit-co2e">
             +{formatCount(co2eAvoidedTonnesPerYear, 0)} t CO₂e avoided/yr
           </div>
           <svg viewBox="0 0 100 20" className="w-full h-4 mt-1" aria-hidden>
@@ -308,12 +308,12 @@ export default function MinerStackCockpit({
       {/* ---------- the miner stack ---------- */}
       <div className="rounded-2xl border border-[#FF8C00]/25 bg-black/25 p-3" data-testid="miner-stack">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-[11px] font-semibold text-[#FF8C00] uppercase tracking-wider">Miner stack</span>
-          <span className="text-[10px] text-gray-400" data-testid="cockpit-block-legend">{blockScaleLabel(capacity.miners)}</span>
+          <span className="text-micro font-semibold text-[#FF8C00] uppercase tracking-wider">Miner stack</span>
+          <span className="text-micro text-gray-400" data-testid="cockpit-block-legend">{blockScaleLabel(capacity.miners)}</span>
         </div>
 
         {/* numeric label first — the bar must read in grayscale and to a colour-blind user */}
-        <div className="flex items-baseline justify-between gap-2 text-[11px] tabular-nums" data-testid="miner-stack-gauge-label">
+        <div className="flex items-baseline justify-between gap-2 text-micro tabular-nums" data-testid="miner-stack-gauge-label">
           <span className="text-white font-semibold">
             {formatCount(capacity.miners)} / {formatCount(capacity.ceilingMiners)} miners
           </span>
@@ -377,7 +377,7 @@ export default function MinerStackCockpit({
         </div>
 
         {/* spare segment carries its own figure */}
-        <div className="flex items-center justify-between gap-2 mt-1 text-[10px] tabular-nums">
+        <div className="flex items-center justify-between gap-2 mt-1 text-micro tabular-nums">
           <span className="text-[#5BC0BE]">▪ your miners ({formatCount(capacity.miners)})</span>
           {capacity.spareMiners > 0 ? (
             <span className="text-amber-300" data-testid="miner-stack-spare-figure">
@@ -394,7 +394,7 @@ export default function MinerStackCockpit({
             <button
               type="button"
               onClick={onAddGenset}
-              className={`inline-flex items-center gap-1.5 rounded-full border border-amber-400/70 bg-amber-400/15 px-3 py-2 min-h-11 text-[11px] font-semibold text-amber-200 hover:bg-amber-400/25 active:scale-[0.97] transition ${nudge ? 'cockpit-nudge' : ''}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-amber-400/70 bg-amber-400/15 px-3 py-2 min-h-11 text-micro font-semibold text-amber-200 hover:bg-amber-400/25 active:scale-[0.97] transition ${nudge ? 'cockpit-nudge' : ''}`}
               data-testid="miner-stack-add-genset"
               aria-label={`Add another ${headGensetName} — raises the gas ceiling so more miners can run`}
             >
@@ -438,7 +438,7 @@ export default function MinerStackCockpit({
                 data-testid="miner-stack-count"
               >
                 <span className="block text-2xl font-bold text-white tabular-nums leading-none">{formatCount(machineCount)}</span>
-                <span className="block text-[10px] text-gray-400 mt-0.5">miners · {mode === 'auto' ? 'Fill the gas' : 'My build'} · tap to type</span>
+                <span className="block text-micro text-gray-400 mt-0.5">miners · {mode === 'auto' ? 'Fill the gas' : 'My build'} · tap to type</span>
               </button>
             )}
           </div>
@@ -454,14 +454,14 @@ export default function MinerStackCockpit({
           </button>
         </div>
 
-        <div className="mt-1.5 text-[10px] text-gray-400">
+        <div className="mt-1.5 text-micro text-gray-400">
           {asic.name} · {asic.hashrate_ths} TH/s @ {asic.power_w} W · drag the bar, tap ±, or type a count
         </div>
 
         {/* genset inventory — the units that set the ceiling */}
         <div className="mt-2 space-y-1" data-testid="miner-stack-gensets">
           {gensets.map(g => (
-            <div key={g.gensetId} className="flex items-center justify-between gap-2 text-[11px] text-gray-300">
+            <div key={g.gensetId} className="flex items-center justify-between gap-2 text-micro text-gray-300">
               <span className="truncate tabular-nums">
                 {g.count} × {GENSET_DATA[g.gensetId]?.name} · {formatKw((GENSET_DATA[g.gensetId]?.powerKW || 0) * g.count)} kW rated
               </span>
@@ -481,13 +481,13 @@ export default function MinerStackCockpit({
         </div>
 
         {ceilingMiners <= 0 && (
-          <div className="mt-2 text-[11px] text-amber-300" data-testid="miner-stack-no-gas">
+          <div className="mt-2 text-micro text-amber-300" data-testid="miner-stack-no-gas">
             No usable gas at this site — the miner stack stays at zero until a genset has gas to burn.
           </div>
         )}
 
         {/* ---- live readout strip ---- */}
-        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-2 text-[11px]" data-testid="cockpit-readout-strip">
+        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-2 text-micro" data-testid="cockpit-readout-strip">
           <div className="min-w-0">
             <div className="text-gray-400">Miners</div>
             <div className="text-white font-semibold tabular-nums">{formatCount(capacity.miners)}</div>
@@ -518,7 +518,7 @@ export default function MinerStackCockpit({
         <button
           type="button"
           onClick={() => setShowAll(v => !v)}
-          className="mt-1 md:hidden text-[11px] text-[#5BC0BE] underline min-h-11"
+          className="mt-1 md:hidden text-micro text-[#5BC0BE] underline min-h-11"
           aria-expanded={showAll}
           data-testid="cockpit-readout-more"
         >
@@ -527,7 +527,7 @@ export default function MinerStackCockpit({
 
         {/* the teaching moment — information, never a scolding */}
         {spareAmber && (
-          <div className="mt-3 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-[11px] leading-snug text-amber-100" data-testid="miner-stack-venting">
+          <div className="mt-3 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-micro leading-snug text-amber-100" data-testid="miner-stack-venting">
             <span className="font-semibold">Left on the table:</span>{' '}
             <span className="tabular-nums">
               {formatCount(unusedKgPerDay)} kg CH₄/day ({formatCount(unusedKgPerDay * 365 / 1000, 1)} t/yr) that this site already has gas for —
@@ -541,10 +541,10 @@ export default function MinerStackCockpit({
 
         {/* ---- honesty: how this number is made ---- */}
         <details className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2" data-testid="cockpit-how">
-          <summary className="text-[11px] font-semibold text-[#5BC0BE] cursor-pointer flex items-center gap-1.5 min-h-11 md:min-h-0">
+          <summary className="text-micro font-semibold text-[#5BC0BE] cursor-pointer flex items-center gap-1.5 min-h-11 md:min-h-0">
             <Info size={12} aria-hidden /> How this number is made
           </summary>
-          <ul className="mt-2 space-y-1.5 text-[10px] text-gray-300 leading-snug">
+          <ul className="mt-2 space-y-1.5 text-micro text-gray-300 leading-snug">
             <li>
               <span className="text-gray-400">Hashprice used:</span>{' '}
               <span className="tabular-nums text-white">${hashprice.usedUsdPerThDay.toFixed(4)} per TH/s per day</span>{' '}

@@ -32,7 +32,7 @@ export default function ScoreSparkline({ values, width = 72, height = 22 }: Prop
         />
       </svg>
       {values.length > 1 && (
-        <span className={`text-[9px] font-mono tabular-nums ${delta >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+        <span className={`text-micro font-mono tabular-nums ${delta >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
           {delta >= 0 ? '+' : ''}{delta}
         </span>
       )}

@@ -23,7 +23,7 @@ export default function ScoreLegend({
 
   return (
     <div
-      className={`rounded-xl border border-white/10 bg-black/50 backdrop-blur text-[10px] ${
+      className={`rounded-xl border border-white/10 bg-black/50 backdrop-blur text-micro ${
         isMapCompact ? 'px-2.5 py-1.5' : compact ? 'px-3 py-2' : 'px-3 py-2 shadow-lg'
       }`}
       role="img"
@@ -32,13 +32,13 @@ export default function ScoreLegend({
     >
       {isMapCompact ? (
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <span className="text-gray-400 font-semibold tracking-wide uppercase text-[9px] shrink-0">
+          <span className="text-gray-400 font-semibold tracking-wide uppercase text-micro shrink-0">
             {t('mapScoreLegendTitle')}
           </span>
           {tiers.map(tier => (
             <div key={tier.cls} className="flex items-center gap-1">
               <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: tier.color }} />
-              <span className={`stranded-score ${tier.cls} text-[9px]`}>{tier.label}</span>
+              <span className={`stranded-score ${tier.cls} text-micro`}>{tier.label}</span>
             </div>
           ))}
         </div>

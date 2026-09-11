@@ -268,14 +268,14 @@ export default function DashboardPage() {
             <div className="grid gap-4 text-sm sm:grid-cols-3">
               {carbonScenarios.map(c => (
                 <div key={c.price} className="rounded-xl border border-white/10 bg-black/20 p-4 text-center">
-                  <div className="text-[10px] uppercase text-gray-400">${c.price}/t CO₂e</div>
+                  <div className="text-label uppercase text-gray-400">${c.price}/t CO₂e</div>
                   <div className="mt-1 text-xl font-bold tabular-nums text-[#34D399]">${c.usd5.toLocaleString()}/yr</div>
                   <div className="mt-1 text-xs text-gray-400">{c.tonnes5.toLocaleString()} t</div>
                 </div>
               ))}
             </div>
           )}
-          <p className="mt-3 text-[10px] text-gray-400">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands.</p>
+          <p className="mt-3 text-label text-gray-400">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands.</p>
         </div>
 
         <div className="dashboard-panel mb-8 rounded-2xl border border-white/10 p-5">
@@ -303,7 +303,7 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-[10px] uppercase tracking-wider text-gray-400">
+                <tr className="border-b border-white/10 text-left text-label uppercase tracking-wider text-gray-400">
                   <th className="pb-2 pr-3">#</th>
                   <th className="pb-2 pr-3">Site</th>
                   <th className="pb-2 pr-3">Province</th>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                         <span className={`stranded-score inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs ${scoreTierClass(s.score)}`}>
                           {s.score}
                           {badge && (
-                            <span className="rounded bg-white/10 px-1 py-px text-[9px] font-normal text-gray-300">
+                            <span className="rounded bg-white/10 px-1 py-px text-label font-normal text-gray-300">
                               {badge}
                             </span>
                           )}
@@ -353,7 +353,7 @@ export default function DashboardPage() {
                   className="rounded-xl border border-white/10 bg-white/[0.02] p-3"
                   style={{ borderColor: `${color}33` }}
                 >
-                  <div className="text-[10px] uppercase tracking-wider text-gray-400">{tier.label.split(' ')[0]}</div>
+                  <div className="text-label uppercase tracking-wider text-gray-400">{tier.label.split(' ')[0]}</div>
                   <div className="mt-1 flex items-baseline gap-2">
                     <span className="text-2xl font-bold tabular-nums" style={{ color }}>
                       {tier.count.toLocaleString('en-CA')}

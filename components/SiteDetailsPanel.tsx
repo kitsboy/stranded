@@ -538,7 +538,7 @@ export default function SiteDetailsPanel({
           <h2 className={`font-bold text-white truncate ${compact ? 'text-[15px] leading-tight' : 'text-xl'}`}>
             {p.name || 'Unknown'}
           </h2>
-          <p className={`text-gray-400 truncate ${compact ? 'text-[11px] mt-0.5' : 'text-sm'}`}>
+          <p className={`text-gray-400 truncate ${compact ? 'text-label mt-0.5' : 'text-sm'}`}>
             {p.city || 'Unknown'},{' '}
             {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
           </p>
@@ -547,8 +547,8 @@ export default function SiteDetailsPanel({
               <span className={`stranded-score ${scoreTierClass(site.strandedScore)} ${compact ? 'text-sm' : ''}`}>
                 <FormulaTip formulaId="score">{site.strandedScore}</FormulaTip>
               </span>
-              <span className={`uppercase tracking-wider text-gray-400 ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{scoreTier(site.strandedScore)}</span>
-              {site.scoreBadge && <span className={`text-[#5BC0BE] ${compact ? 'text-[9px]' : 'text-[10px]'}`}>{site.scoreBadge}</span>}
+              <span className={`uppercase tracking-wider text-gray-400 ${compact ? 'text-label' : 'text-label'}`}>{scoreTier(site.strandedScore)}</span>
+              {site.scoreBadge && <span className={`text-[#5BC0BE] ${compact ? 'text-label' : 'text-label'}`}>{site.scoreBadge}</span>}
               {dataQuality && <DataQualityBadge report={dataQuality} />}
               {!compact && scoreHistory.length > 1 && <ScoreSparkline values={scoreHistory} />}
             </div>
@@ -558,7 +558,7 @@ export default function SiteDetailsPanel({
             <div className="flex items-center gap-1.5 flex-wrap mt-2" data-testid="site-honesty-badges">
               {recency && (
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-label ${
                     recency.tier === 'high'
                       ? 'border-[#34D399]/45 bg-[#34D399]/10 text-[#34D399]'
                       : recency.tier === 'low'
@@ -574,7 +574,7 @@ export default function SiteDetailsPanel({
               )}
               {flux && (
                 <span
-                  className={`rounded-full border px-2 py-0.5 text-[10px] ${
+                  className={`rounded-full border px-2 py-0.5 text-label ${
                     flux.tone === 'flare'
                       ? 'border-[#FF8C00]/50 bg-[#FF8C00]/10 text-[#FF8C00]'
                       : 'border-amber-400/50 bg-amber-400/10 text-amber-200'
@@ -586,7 +586,7 @@ export default function SiteDetailsPanel({
               )}
               {!flux && fluxScopeNotApplicable(p) && (
                 <span
-                  className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] text-gray-300"
+                  className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-label text-gray-300"
                   title={FLUX_NO_SPLIT_HINT}
                   data-testid="site-flux-not-reported"
                 >
@@ -595,7 +595,7 @@ export default function SiteDetailsPanel({
               )}
               <a
                 href="/open-data"
-                className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-gray-300 hover:border-[#5BC0BE]/50 hover:text-[#5BC0BE]"
+                className="rounded-full border border-white/15 px-2 py-0.5 text-label text-gray-300 hover:border-[#5BC0BE]/50 hover:text-[#5BC0BE]"
                 data-testid="site-verify-link"
               >
                 Verify this yourself →
@@ -623,7 +623,7 @@ export default function SiteDetailsPanel({
             <button
               type="button"
               onClick={onExpand}
-              className="flex-1 py-2 text-[11px] font-medium rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+              className="flex-1 py-2 text-label font-medium rounded-xl border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
               data-testid="mobile-site-expand"
             >
               {t('sitePeekExpand')}
@@ -633,7 +633,7 @@ export default function SiteDetailsPanel({
             <button
               type="button"
               onClick={() => onAddToMission(site)}
-              className="flex-1 py-2 text-[11px] font-semibold rounded-xl bg-[#FF8C00] text-black hover:bg-orange-400 transition"
+              className="flex-1 py-2 text-label font-semibold rounded-xl bg-[#FF8C00] text-black hover:bg-orange-400 transition"
             >
               {t('sitePeekMission')}
             </button>
@@ -703,20 +703,20 @@ export default function SiteDetailsPanel({
             onKeyDown={e => { if (e.key === 'Enter') { saveCurrentAsNamed(); } if (e.key === 'Escape') { setShowSaveFleetName(false); setFleetNameInput('') } }}
             placeholder="Template name (e.g. Keele Valley)"
             aria-label="Name for this build"
-            className="flex-1 min-w-0 text-[11px] px-2 py-1.5 rounded border border-white/15 bg-black/30 text-white"
+            className="flex-1 min-w-0 text-label px-2 py-1.5 rounded border border-white/15 bg-black/30 text-white"
           />
           <button
             type="button"
             onClick={saveCurrentAsNamed}
             disabled={!fleetNameInput.trim()}
-            className="text-[11px] px-3 py-1.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] disabled:opacity-40"
+            className="text-label px-3 py-1.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] disabled:opacity-40"
           >
             Save
           </button>
           <button
             type="button"
             onClick={() => { setShowSaveFleetName(false); setFleetNameInput('') }}
-            className="text-[11px] px-2 py-1.5 rounded border border-white/15 text-gray-400"
+            className="text-label px-2 py-1.5 rounded border border-white/15 text-gray-400"
             aria-label="Cancel save"
           >
             ✕
@@ -726,7 +726,7 @@ export default function SiteDetailsPanel({
 
       {/* ---- one obvious next step: the build becomes a sales handoff ---- */}
       <div className="mt-3 rounded-2xl border border-[#FF8C00]/35 bg-[#FF8C00]/10 p-3" data-testid="send-this-build">
-        <div className="text-[11px] text-gray-200 leading-snug">
+        <div className="text-label text-gray-200 leading-snug">
           This build: <span className="text-white font-semibold tabular-nums">{formatCount(capacity.miners)} miners</span> ·{' '}
           <span className="text-[#5BC0BE] font-semibold tabular-nums">{formatKw(capacity.usedKw)} kW</span> ·{' '}
           <span className="text-[#FF8C00] font-semibold tabular-nums">{formatSats(currentPreview.satsPerDay)} sats/day</span> ·{' '}
@@ -741,7 +741,7 @@ export default function SiteDetailsPanel({
         >
           <Send size={15} aria-hidden /> Send this build to the team
         </a>
-        <div className="text-[10px] text-gray-400 mt-1.5 leading-snug">
+        <div className="text-label text-gray-400 mt-1.5 leading-snug">
           Opens the certified application with this fleet link pre-filled, category{' '}
           <span className="text-gray-300">Site application</span>, subject{' '}
           <span className="text-gray-300">“Stranded Energy — Site application: {p.name || site.id}”</span>.
@@ -756,15 +756,15 @@ export default function SiteDetailsPanel({
               <li key={f.id} className="flex justify-between gap-2">
                 <span>
                   {f.label}
-                  {f.inferred && <span className="ml-1 text-[9px] text-amber-400/90">inferred</span>}
-                  <span className="block text-[10px] text-gray-400">{f.detail}</span>
+                  {f.inferred && <span className="ml-1 text-label text-amber-400/90">inferred</span>}
+                  <span className="block text-label text-gray-400">{f.detail}</span>
                 </span>
                 <span className="font-mono text-[#5BC0BE] shrink-0">+{f.points}</span>
               </li>
             ))}
           </ul>
           {scoreExplain.notes.length > 0 && (
-            <p className="mt-2 text-[10px] text-gray-400 leading-snug">{scoreExplain.notes[0]}</p>
+            <p className="mt-2 text-label text-gray-400 leading-snug">{scoreExplain.notes[0]}</p>
           )}
         </details>
       )}
@@ -777,7 +777,7 @@ export default function SiteDetailsPanel({
 
       <div className="mb-4 grid gap-3">
         <VerticalScoreGrid scores={verticalScores} />
-        <p className="text-[10px] text-gray-500">
+        <p className="text-label text-gray-500">
           <FormulaTip formulaId="carbonValue">Carbon abatement @ $50/t</FormulaTip>
           {': '}
           <span className="font-mono text-[#34D399]">${carbonValue.toLocaleString()}/yr</span>
@@ -816,7 +816,7 @@ export default function SiteDetailsPanel({
             {tornado.map(row => (
               <li key={row.param} className="flex justify-between gap-2 text-gray-300">
                 <span className="truncate">{row.param}</span>
-                <span className="font-mono text-[10px] shrink-0">{row.lowImpact.toFixed(2)} → {row.highImpact.toFixed(2)}</span>
+                <span className="font-mono text-label shrink-0">{row.lowImpact.toFixed(2)} → {row.highImpact.toFixed(2)}</span>
               </li>
             ))}
           </ul>
@@ -843,16 +843,16 @@ export default function SiteDetailsPanel({
         <div className="text-xs font-semibold text-gray-400 mb-1.5">Bank pack export</div>
         <ExportFormatPicker value={exportFmt} onChange={setExportFmt} className="mb-2" />
         <div className="flex flex-wrap gap-1.5">
-          <button type="button" onClick={() => setShowBankPreview(true)} className="text-[10px] px-2 py-1 rounded border border-white/15 hover:border-[#5BC0BE]/50">
+          <button type="button" onClick={() => setShowBankPreview(true)} className="text-label px-2 py-1 rounded border border-white/15 hover:border-[#5BC0BE]/50">
             Preview
           </button>
-          <button type="button" onClick={() => downloadBankPack(exportFmt)} className="text-[10px] px-2 py-1 rounded border border-[#FF8C00]/40 text-[#FF8C00]">
+          <button type="button" onClick={() => downloadBankPack(exportFmt)} className="text-label px-2 py-1 rounded border border-[#FF8C00]/40 text-[#FF8C00]">
             Export {exportFmt.toUpperCase()}
           </button>
           <CopyLinkButton url={mapDeepLink} label="Copy link" successMessage="Site deep link copied" />
           <Link
             href={`/compare?a=${encodeURIComponent(site.id)}`}
-            className="text-[10px] px-2 py-1 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            className="text-label px-2 py-1 rounded border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
             data-testid="site-view-compare"
           >
             View on compare
@@ -928,7 +928,7 @@ export default function SiteDetailsPanel({
         <RoiProjectionChart dailyBtc={calculations.effectiveDailyBtc} btcUsd={btcPrice} />
       </div>
       <TadbuyAdHook siteId={site?.id} />
-      <div className="mb-3 flex gap-2 text-[10px]">
+      <div className="mb-3 flex gap-2 text-label">
         <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
       </div>
       <div className="mb-3">
@@ -991,7 +991,7 @@ export default function SiteDetailsPanel({
           <div>
             <label className="text-xs text-gray-400">Miners: {machineCount.toLocaleString()} of {ceilingMiners.toLocaleString()} the gas supports</label>
             <input type="range" min="1" max={Math.max(10000, ceilingMiners)} value={Math.min(machineCount, Math.max(10000, ceilingMiners))} onChange={(e) => { setStackMode('manual'); setMachineCount(Number(e.target.value)) }} className="w-full mt-2 accent-[#5BC0BE]" />
-            <div className="text-[10px] text-gray-400 mt-0.5">Sliding this switches the stack to “My build”. The ceiling only rises when you add a genset.</div>
+            <div className="text-label text-gray-400 mt-0.5">Sliding this switches the stack to “My build”. The ceiling only rises when you add a genset.</div>
           </div>
           <div>
             <label className="text-xs text-gray-400">BTC Price in {selectedFiat} (live default, editable)</label>
@@ -1014,11 +1014,11 @@ export default function SiteDetailsPanel({
           <div>
             <label className="text-xs text-gray-400">Revenue per TH/s / day (BTC) — your assumption, editable</label>
             <input type="number" step="0.0000001" value={revenuePerThPerDayBtc} onChange={(e) => setRevenuePerThPerDayBtc(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
-            <div className={`text-[10px] mt-1 ${isOptimistic ? 'text-amber-300' : 'text-[#34D399]'}`}>
+            <div className={`text-label mt-1 ${isOptimistic ? 'text-amber-300' : 'text-[#34D399]'}`}>
               Network-derived: <span className="tabular-nums">{networkDerived.toFixed(10)}</span> BTC/TH/day ·{' '}
               <span className="tabular-nums">{hashpriceDiffPct >= 0 ? '+' : ''}{hashpriceDiffPct.toFixed(0)}%</span> {isOptimistic ? 'above network — optimistic scenario' : 'in line with / below network'}
             </div>
-            <div className="text-[10px] text-gray-400 mt-1 grid grid-cols-2 gap-2">
+            <div className="text-label text-gray-400 mt-1 grid grid-cols-2 gap-2">
               <label className="text-gray-500">Network hashrate (TH/s)
                 <input type="number" step="10000000" value={networkHashrateThs} onChange={(e) => setNetworkHashrateThs(Number(e.target.value))} className="w-full mt-0.5 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white tabular-nums" />
               </label>
@@ -1026,25 +1026,25 @@ export default function SiteDetailsPanel({
                 <input type="number" step="10" value={networkDailyIssuanceBtc} onChange={(e) => setNetworkDailyIssuanceBtc(Number(e.target.value))} className="w-full mt-0.5 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white tabular-nums" />
               </label>
             </div>
-            <div className="text-[10px] text-gray-400 mt-1.5">Hashprice = network BTC issuance ÷ network hashrate. It moves with price and difficulty; we show both ends rather than claiming one. The shipped default of {NETWORK_ESTIMATE_BTC_PER_TH_DAY.toFixed(7)} is an <span className="text-amber-300">optimistic scenario</span>, not a neutral estimate.</div>
+            <div className="text-label text-gray-400 mt-1.5">Hashprice = network BTC issuance ÷ network hashrate. It moves with price and difficulty; we show both ends rather than claiming one. The shipped default of {NETWORK_ESTIMATE_BTC_PER_TH_DAY.toFixed(7)} is an <span className="text-amber-300">optimistic scenario</span>, not a neutral estimate.</div>
           </div>
 
           <div>
             <label className="text-xs text-gray-400">Power cost (USD/kWh) — editable</label>
             <input type="number" step="0.005" min="0" value={powerCostUsdPerKwh} onChange={(e) => setPowerCostUsdPerKwh(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
-            <div className="text-[10px] text-gray-400 mt-1">
+            <div className="text-label text-gray-400 mt-1">
               A stranded-gas site burns gas with no fuel cost — its electricity-equivalent is O&amp;M only.
             </div>
             <button
               type="button"
               onClick={() => setPowerCostUsdPerKwh(0.015)}
-              className="mt-1.5 text-[10px] px-2 py-1 rounded border border-[#34D399]/40 text-[#34D399] hover:bg-[#34D399]/10"
+              className="mt-1.5 text-label px-2 py-1 rounded border border-[#34D399]/40 text-[#34D399] hover:bg-[#34D399]/10"
               data-testid="preset-stranded-gas-power"
             >
               Stranded gas (O&amp;M only) ≈ 0.015
             </button>
             {calculations && (
-              <div className="text-[10px] text-gray-400 mt-1.5" data-testid="power-cost-before-after">
+              <div className="text-label text-gray-400 mt-1.5" data-testid="power-cost-before-after">
                 Payback: <span className="tabular-nums text-white">{formatPayback(defaultPowerPaybackDays ?? Infinity)}</span> at {DEFAULT_POWER_COST_USD_PER_KWH.toFixed(2)}/kWh →{' '}
                 <span className={`tabular-nums ${powerCostUsdPerKwh < DEFAULT_POWER_COST_USD_PER_KWH ? 'text-[#34D399]' : 'text-white'}`}>{formatPayback(calculations.paybackDays)}</span> at {powerCostUsdPerKwh.toFixed(3)}/kWh
               </div>
@@ -1076,7 +1076,7 @@ export default function SiteDetailsPanel({
             </div>
           </div>
 
-          <div className="text-[10px] text-gray-400 pt-2 border-t border-slate-700">
+          <div className="text-label text-gray-400 pt-2 border-t border-slate-700">
             These advanced inputs make the model more realistic. Fixed costs mean payback improves with scale. All values are estimates only — see disclaimer below.
           </div>
         </div>
@@ -1088,7 +1088,7 @@ export default function SiteDetailsPanel({
       </div>
       <details className="mt-1 mb-2">
         <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-200">All raw properties from dataset ({Object.keys(p).length} fields)</summary>
-        <pre className="text-[10px] mt-1 p-2 bg-black/40 rounded overflow-auto max-h-44 text-gray-300 whitespace-pre-wrap break-all">{JSON.stringify(p, null, 2)}</pre>
+        <pre className="text-label mt-1 p-2 bg-black/40 rounded overflow-auto max-h-44 text-gray-300 whitespace-pre-wrap break-all">{JSON.stringify(p, null, 2)}</pre>
       </details>
 
       {onAddToMission && (
@@ -1132,7 +1132,7 @@ export default function SiteDetailsPanel({
         </button>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-700 text-[10px] text-gray-400 leading-snug">
+      <div className="mt-4 pt-3 border-t border-slate-700 text-label text-gray-400 leading-snug">
         <strong>Important Honesty Note:</strong> This is a simplified model for educational purposes only. 
         Real Bitcoin mining revenue varies constantly with network difficulty, transaction fees, hardware degradation, 
         actual gas composition, weather, maintenance downtime, and local regulations. Power costs, hardware prices, 

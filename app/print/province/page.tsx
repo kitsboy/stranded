@@ -68,9 +68,9 @@ function ProvincePrintContent() {
 
       <header className="border-b-2 border-[#FF8C00] pb-4 mb-6" data-testid="print-province-header">
         <div className="flex items-center justify-between gap-4">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400">Stranded Value · Executive One-Pager</div>
+          <div className="text-label uppercase tracking-[0.2em] text-gray-400">Stranded Value · Executive One-Pager</div>
           {ecccYear != null && (
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE]" data-testid="print-eccc-year">
+            <span className="text-label font-mono px-2 py-0.5 rounded border border-[#5BC0BE]/40 text-[#5BC0BE]" data-testid="print-eccc-year">
               ECCC {ecccYear}
             </span>
           )}
@@ -79,7 +79,7 @@ function ProvincePrintContent() {
         <div className="text-sm text-gray-600 mt-1">
           {provinceCode(provinceName)} · {provinceSites.length.toLocaleString()} sites · avg score {avgScore}
         </div>
-        <div className="text-[10px] text-gray-400 mt-2" data-testid="print-eccc-line">
+        <div className="text-label text-gray-400 mt-2" data-testid="print-eccc-line">
           {ecccYear != null
             ? `ECCC GHGRP ${ecccYear} open methane reporting · Stranded Score™ model enrichments`
             : t('printEcccLine')}
@@ -89,15 +89,15 @@ function ProvincePrintContent() {
       <section className="grid grid-cols-3 gap-4 mb-8 text-center">
         <div className="rounded-lg border border-gray-200 p-3">
           <div className="text-2xl font-bold text-[#FF8C00]">{provinceSites.length}</div>
-          <div className="text-[10px] uppercase text-gray-400">Sites</div>
+          <div className="text-label uppercase text-gray-400">Sites</div>
         </div>
         <div className="rounded-lg border border-gray-200 p-3">
           <div className="text-2xl font-bold text-[#5BC0BE]">{totalEmission.toLocaleString()}</div>
-          <div className="text-[10px] uppercase text-gray-400">kg CH₄/day</div>
+          <div className="text-label uppercase text-gray-400">kg CH₄/day</div>
         </div>
         <div className="rounded-lg border border-gray-200 p-3">
           <div className="text-2xl font-bold">{avgScore}</div>
-          <div className="text-[10px] uppercase text-gray-400">Avg Score</div>
+          <div className="text-label uppercase text-gray-400">Avg Score</div>
         </div>
       </section>
 
@@ -118,7 +118,7 @@ function ProvincePrintContent() {
                 <td className="py-2 pr-2 text-gray-400">{i + 1}</td>
                 <td className="py-2 pr-2">
                   <div className="font-medium">{s.properties.name || s.id}</div>
-                  <div className="text-[10px] text-gray-400">{s.properties.source_type} · {s.properties.city || 'Remote'}</div>
+                  <div className="text-label text-gray-400">{s.properties.source_type} · {s.properties.city || 'Remote'}</div>
                 </td>
                 <td className="py-2 pr-2 text-right font-mono font-bold text-[#FF8C00]">
                   {s.strandedScore}
@@ -130,7 +130,7 @@ function ProvincePrintContent() {
         </table>
       </section>
 
-      <footer className="mt-10 pt-4 border-t border-gray-200 text-[10px] text-gray-400 leading-relaxed">
+      <footer className="mt-10 pt-4 border-t border-gray-200 text-label text-gray-400 leading-relaxed">
         Data: ECCC open methane reporting. Stranded Score™, genset, and ROI fields are model enrichments by Stranded Value — optimistic scenarios labelled.
         Not investment advice. Generated {new Date().toLocaleDateString('en-CA')} · stranded.giveabit.io
       </footer>

@@ -66,7 +66,7 @@ export default function VerticalsPage() {
             <span className="text-3xl">{v.icon}</span>
             <div>
               <h2 className="text-xl font-semibold" style={{ color: v.color }}>{v.section.headline}</h2>
-              <span className="text-[10px] uppercase px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">{v.status}</span>
+              <span className="text-label uppercase px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">{v.status}</span>
             </div>
           </div>
           <ul className="space-y-2 text-sm text-gray-300 mb-4">
@@ -103,14 +103,14 @@ export default function VerticalsPage() {
                 <span className="text-3xl">{v.icon}</span>
                 <div>
                   <div className="font-semibold" style={{ color: v.color }}>{v.name}</div>
-                  <span className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${v.status === 'live' ? 'bg-green-500/20 text-green-400' : v.status === 'beta' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>{v.status}</span>
+                  <span className={`text-label uppercase px-2 py-0.5 rounded-full ${v.status === 'live' ? 'bg-green-500/20 text-green-400' : v.status === 'beta' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'}`}>{v.status}</span>
                 </div>
               </div>
               <p className="text-sm text-gray-400 mb-4">{v.description}</p>
 
               {v.id === 'methane' && methaneTiers.length > 0 && (
                 <div className="text-xs space-y-1.5 mb-4 rounded-xl border border-[#FF8C00]/20 bg-[#FF8C00]/5 p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-[#FF8C00]">Emission tiers (live)</div>
+                  <div className="text-label uppercase tracking-wider text-[#FF8C00]">Emission tiers (live)</div>
                   {methaneTiers.slice(0, 4).map(t => (
                     <div key={t.key} className="flex justify-between text-gray-300">
                       <span>{t.label}</span>
@@ -122,7 +122,7 @@ export default function VerticalsPage() {
 
               {v.id !== 'methane' && provinceData.length > 0 && (
                 <div className="text-xs space-y-1.5 mb-4 rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-gray-400">Province proxy (live methane map)</div>
+                  <div className="text-label uppercase tracking-wider text-gray-400">Province proxy (live methane map)</div>
                   {provinceData.map(p => (
                     <div key={p.name} className="flex justify-between text-gray-300">
                       <span>{p.name}</span>

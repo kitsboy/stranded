@@ -19,7 +19,7 @@ export default function ConfidenceBandBar({ score, low, high, band = 'medium', r
 
   return (
     <div className={className} data-testid="confidence-band-bar">
-      <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+      <div className="flex justify-between text-micro text-gray-400 mb-1">
         <span>Score confidence ({band})</span>
         <span className="font-mono">
           {low}–{high}
@@ -36,7 +36,7 @@ export default function ConfidenceBandBar({ score, low, high, band = 'medium', r
           title={`Score ${score}`}
         />
       </div>
-      {reason && <p className="mt-1 text-[10px] text-gray-500">{reason}</p>}
+      {reason && <p className="mt-1 text-micro text-gray-500">{reason}</p>}
     </div>
   )
 }

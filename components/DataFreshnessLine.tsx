@@ -43,7 +43,7 @@ export default function DataFreshnessLine({ className = '' }: { className?: stri
   return (
     <p
       data-testid="data-freshness-line"
-      className={`min-h-[15px] text-[10px] leading-snug tabular-nums text-gray-400 ${className}`}
+      className={`min-h-[15px] text-label leading-snug tabular-nums text-gray-400 ${className}`}
       title={
         freshness
           ? `Live-stats snapshot generated ${freshness.generatedAt}${freshness.buildId ? ` · build ${freshness.buildId}` : ''}`

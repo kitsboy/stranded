@@ -39,27 +39,27 @@ export default function MapStatsBar({ stats, className = '' }: Props) {
         <div className="flex items-center gap-2 min-w-0">
           <Target size={14} className="text-[#FF8C00] shrink-0" aria-hidden />
           <div className="min-w-0">
-            <div className="text-[9px] uppercase tracking-wider text-gray-400">{t('mapStatsAvgScore')}</div>
+            <div className="text-micro uppercase tracking-wider text-gray-400">{t('mapStatsAvgScore')}</div>
             <div className="font-mono font-semibold text-white tabular-nums">{stats.avgScore}</div>
           </div>
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <Droplets size={14} className="text-[#5BC0BE] shrink-0" aria-hidden />
           <div className="min-w-0">
-            <div className="text-[9px] uppercase tracking-wider text-gray-400">{t('mapStatsEmission')}</div>
+            <div className="text-micro uppercase tracking-wider text-gray-400">{t('mapStatsEmission')}</div>
             <div className="font-mono font-semibold text-[#5BC0BE] tabular-nums truncate" title={`${stats.totalEmissionKgDay.toLocaleString()} kg/day`}>
-              {emissionLabel} <span className="text-[9px] text-gray-400 font-normal">kg/d</span>
+              {emissionLabel} <span className="text-micro text-gray-400 font-normal">kg/d</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <MapPin size={14} className="text-emerald-400 shrink-0" aria-hidden />
           <div className="min-w-0">
-            <div className="text-[9px] uppercase tracking-wider text-gray-400">{t('mapStatsTopProvince')}</div>
+            <div className="text-micro uppercase tracking-wider text-gray-400">{t('mapStatsTopProvince')}</div>
             <div className="font-semibold text-white truncate" title={stats.topProvince ?? undefined}>
               {stats.topProvince ?? '—'}
               {stats.topProvince && (
-                <span className="text-[9px] text-gray-400 font-normal ml-1">
+                <span className="text-micro text-gray-400 font-normal ml-1">
                   ({tf(locale, 'mapStatsProvinceCount', { count: stats.topProvinceCount })})
                 </span>
               )}
@@ -67,7 +67,7 @@ export default function MapStatsBar({ stats, className = '' }: Props) {
           </div>
         </div>
       </div>
-      <div className="mt-1.5 flex items-center gap-1 text-[9px] text-gray-400">
+      <div className="mt-1.5 flex items-center gap-1 text-micro text-gray-400">
         <BarChart3 size={10} aria-hidden />
         <span>{tf(locale, 'mapStatsFiltered', { count: stats.count.toLocaleString() })}</span>
       </div>

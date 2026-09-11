@@ -12,12 +12,12 @@ const LABELS: { key: keyof VerticalScores; label: string; color: string }[] = [
 export default function VerticalScoreGrid({ scores, className = '' }: { scores: VerticalScores; className?: string }) {
   return (
     <div className={`space-y-2 ${className}`} data-testid="vertical-score-grid">
-      <div className="text-[10px] uppercase tracking-widest text-gray-400">Multi-vertical fit</div>
+      <div className="text-label uppercase tracking-widest text-gray-400">Multi-vertical fit</div>
       {LABELS.map(({ key, label, color }) => {
         const v = scores[key]
         return (
           <div key={key}>
-            <div className="mb-0.5 flex justify-between text-[11px]">
+            <div className="mb-0.5 flex justify-between text-label">
               <span className="text-gray-300">{label}</span>
               <span className="font-mono text-gray-400">{v}</span>
             </div>

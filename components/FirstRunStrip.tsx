@@ -51,10 +51,10 @@ export default function FirstRunStrip({ onOpenSearch, commandHint = '⌘K' }: Pr
       aria-label="Getting started"
     >
       <div className="flex items-start gap-3">
-        <ol className="flex-1 flex flex-col sm:flex-row gap-2 sm:gap-4 text-[11px] text-gray-300">
+        <ol className="flex-1 flex flex-col sm:flex-row gap-2 sm:gap-4 text-micro text-gray-300">
           {steps.map((s, i) => (
             <li key={s.title} className="flex items-start gap-2 min-w-0">
-              <span className="mt-0.5 shrink-0 h-5 w-5 rounded-full bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 text-[#5BC0BE] flex items-center justify-center text-[10px] font-bold">
+              <span className="mt-0.5 shrink-0 h-5 w-5 rounded-full bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 text-[#5BC0BE] flex items-center justify-center text-micro font-bold">
                 {i + 1}
               </span>
               <span className="min-w-0">
@@ -74,7 +74,7 @@ export default function FirstRunStrip({ onOpenSearch, commandHint = '⌘K' }: Pr
           <X className="mx-auto" size={14} aria-hidden />
         </button>
       </div>
-      <div className="mt-2 pt-2 border-t border-white/10 text-[10px] text-gray-400">
+      <div className="mt-2 pt-2 border-t border-white/10 text-micro text-gray-400">
         Tip: press{' '}
         <button
           type="button"

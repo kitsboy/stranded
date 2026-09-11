@@ -128,14 +128,14 @@ export default function OpenDataPage() {
 
         <dl className="mt-4 space-y-3 text-sm">
           <div>
-            <dt className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Data file SHA-256 — stranded-sites-REAL.geojson</dt>
-            <dd className="mt-1 break-all font-mono text-[11px] sm:text-xs text-[#5BC0BE]">
+            <dt className="text-label uppercase tracking-[0.14em] text-gray-400">Data file SHA-256 — stranded-sites-REAL.geojson</dt>
+            <dd className="mt-1 break-all font-mono text-label sm:text-xs text-[#5BC0BE]">
               {geo?.sha256 || 'not published in this build'}
             </dd>
           </div>
           <div>
-            <dt className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Dataset digest — all published files</dt>
-            <dd className="mt-1 break-all font-mono text-[11px] sm:text-xs text-gray-200">
+            <dt className="text-label uppercase tracking-[0.14em] text-gray-400">Dataset digest — all published files</dt>
+            <dd className="mt-1 break-all font-mono text-label sm:text-xs text-gray-200">
               {manifest?.sha256 || 'not published in this build'}
             </dd>
           </div>
@@ -143,26 +143,26 @@ export default function OpenDataPage() {
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <div className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Sites</div>
+            <div className="text-label uppercase tracking-[0.14em] text-gray-400">Sites</div>
             <div className="mt-1 font-semibold text-gray-100">{manifest?.siteCount?.toLocaleString('en-CA') ?? '—'}</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <div className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Newest year</div>
+            <div className="text-label uppercase tracking-[0.14em] text-gray-400">Newest year</div>
             <div className="mt-1 font-semibold text-gray-100">{manifest?.newestReferenceYear ?? '—'}</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <div className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Digest published</div>
+            <div className="text-label uppercase tracking-[0.14em] text-gray-400">Digest published</div>
             <div className="mt-1 font-semibold text-gray-100">{fmtDate(manifest?.generatedAt) ?? '—'}</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-            <div className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Data snapshot</div>
+            <div className="text-label uppercase tracking-[0.14em] text-gray-400">Data snapshot</div>
             <div className="mt-1 font-semibold text-gray-100">{fmtDate(manifest?.dataSnapshotAt) ?? fmtDate(manifest?.generatedAt) ?? '—'}</div>
           </div>
         </div>
 
         {/* Timestamp state — never claim a proof we do not have */}
         <div className="mt-4 rounded-xl border border-white/10 bg-[#0E1B2A]/40 p-4 text-sm">
-          <div className="text-[11px] uppercase tracking-[0.14em] text-gray-400">Timestamp for the data file</div>
+          <div className="text-label uppercase tracking-[0.14em] text-gray-400">Timestamp for the data file</div>
           <div className="mt-1">
             {proof && proof.status === 'confirmed' ? (
               <p className="text-gray-200">

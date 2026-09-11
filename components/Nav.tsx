@@ -85,7 +85,7 @@ export default function Nav() {
           />
           <div className="leading-none">
             <span className="nav-logo-text font-bold text-xl tracking-tight text-[#FF8C00] transition-all duration-250">Stranded</span>
-            <div className="nav-logo-sub text-[9px] text-[#FF8C00] -mt-0.5 tracking-[1px] transition-all duration-250">Value</div>
+            <div className="nav-logo-sub text-label text-[#FF8C00] -mt-0.5 tracking-[1px] transition-all duration-250">Value</div>
           </div>
         </Link>
 
@@ -112,7 +112,7 @@ export default function Nav() {
           >
             <Search size={15} />
             <span className="font-mono">{t('search')}</span>
-            <span className="ml-1 text-[10px] opacity-90 flex items-center gap-px">⌘K</span>
+            <span className="ml-1 text-label opacity-90 flex items-center gap-px">⌘K</span>
           </button>
           <div className="hidden md:flex items-center gap-2 text-gray-400">
             <span className="font-mono">2,611</span> {t('sitesCount')}

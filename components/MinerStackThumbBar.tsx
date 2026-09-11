@@ -37,7 +37,7 @@ export default function MinerStackThumbBar({
         className="w-full text-left"
         aria-label="Scroll to the miner stack"
       >
-        <div className="flex items-baseline justify-between gap-2 text-[11px] tabular-nums">
+        <div className="flex items-baseline justify-between gap-2 text-micro tabular-nums">
           <span className="text-white font-semibold">
             {formatCount(count)} / {formatCount(ceilingMiners)} miners
           </span>
@@ -47,7 +47,7 @@ export default function MinerStackThumbBar({
           <div className="h-full bg-gradient-to-r from-[#7fe3e1] to-[#3f9c99]" style={{ width: `${filledPct}%` }} />
           {filledPct < 100 && <div className="h-full cockpit-spare cockpit-spare--amber flex-1" />}
         </div>
-        <div className="text-[10px] text-gray-400 mt-0.5 tabular-nums">
+        <div className="text-micro text-gray-400 mt-0.5 tabular-nums">
           {formatKw(usedKw)} kW of {formatKw(gasCeilingKw)} kW · {atCeiling ? 'gas ceiling reached' : 'gas still spare'}
         </div>
       </button>

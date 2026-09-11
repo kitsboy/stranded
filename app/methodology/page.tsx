@@ -40,12 +40,12 @@ export default function MethodologyPage() {
       <p>Daily mining revenue is driven by <em>hashprice</em>: what 1 TH/s earns per day. We show both ends instead of claiming one.</p>
       <div className="not-prose grid gap-3 my-4 md:grid-cols-2">
         <div className="rounded-2xl border border-[#FF8C00]/25 bg-[#FF8C00]/5 p-4">
-          <div className="text-[10px] uppercase tracking-widest text-[#FF8C00]">App default · optimistic scenario</div>
+          <div className="text-label uppercase tracking-widest text-[#FF8C00]">App default · optimistic scenario</div>
           <div className="text-2xl font-bold text-white tabular-nums mt-1">0.0000009 BTC / TH / day</div>
           <p className="text-xs text-gray-400 mt-2">Editable in the site panel. Roughly <strong>2.2×</strong> the network-derived figure — every payback that relies on it is an optimistic scenario, labelled as such in the panel, education page and all exports.</p>
         </div>
         <div className="rounded-2xl border border-[#34D399]/30 bg-[#34D399]/5 p-4">
-          <div className="text-[10px] uppercase tracking-widest text-[#34D399]">Network-derived reference</div>
+          <div className="text-label uppercase tracking-widest text-[#34D399]">Network-derived reference</div>
           <div className="text-2xl font-bold text-white tabular-nums mt-1">≈ 0.00000041 BTC / TH / day</div>
           <p className="text-xs text-gray-400 mt-2">Derived live from the two editable inputs in the site panel: daily BTC issuance (≈450 BTC/day subsidy + fees) ÷ network hashrate (≈1.1 ZH/s). Moves with price and difficulty.</p>
         </div>

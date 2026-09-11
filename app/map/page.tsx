@@ -1128,7 +1128,7 @@ function StrandedCommandCenter() {
           <div className="pointer-events-auto glass px-4 py-2 rounded-2xl border border-[#FF8C00]/40 text-xs flex flex-wrap items-center justify-center gap-3 max-w-[92vw]">
             <span className="text-[#FF8C00] shrink-0">{tf(locale, 'mapRadius', { km: radiusFilter.radiusKm })}</span>
             <label className="flex items-center gap-2 text-gray-400 min-w-[140px]">
-              <span className="text-[10px] shrink-0">{t('mapRadiusAdjust')}</span>
+              <span className="text-label shrink-0">{t('mapRadiusAdjust')}</span>
               <input
                 type="range"
                 min={5}
@@ -1211,7 +1211,7 @@ function StrandedCommandCenter() {
                 />
                 <button
                   type="button"
-                  className="mt-2 w-full rounded-lg border border-white/15 py-1.5 text-[11px] text-gray-300 hover:bg-white/5"
+                  className="mt-2 w-full rounded-lg border border-white/15 py-1.5 text-label text-gray-300 hover:bg-white/5"
                   onClick={() => {
                     const items: ClusterListItem[] = filteredSites.slice(0, 40).map(s => ({
                       id: s.id,
@@ -1243,7 +1243,7 @@ function StrandedCommandCenter() {
                 <div>
                   <div className="flex justify-between text-xs mb-1.5 text-gray-400 items-center gap-2">
                     <div>{t('mapEmissionRange')}</div>
-                    <label className="flex items-center gap-1 text-[10px] cursor-pointer">
+                    <label className="flex items-center gap-1 text-label cursor-pointer">
                       <input
                         type="checkbox"
                         checked={emissionLogScale}
@@ -1253,7 +1253,7 @@ function StrandedCommandCenter() {
                       {t('mapEmissionLogScale')}
                     </label>
                   </div>
-                  <div className="flex justify-between text-[10px] font-mono text-white mb-1.5">
+                  <div className="flex justify-between text-label font-mono text-white mb-1.5">
                     <button
                       type="button"
                       onClick={() => handleEmissionLabelTap('min')}
@@ -1307,7 +1307,7 @@ function StrandedCommandCenter() {
                         key={preset.label}
                         type="button"
                         onClick={() => setMinScore(preset.v)}
-                        className={`text-[10px] px-2 py-0.5 rounded-full border ${minScore === preset.v ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400'}`}
+                        className={`text-label px-2 py-0.5 rounded-full border ${minScore === preset.v ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10' : 'border-white/15 text-gray-400'}`}
                       >
                         {preset.label}
                       </button>
@@ -1318,7 +1318,7 @@ function StrandedCommandCenter() {
                 <div>
                   <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
                     <span>{t('mapProvinces')}</span>
-                    <div className="flex items-center gap-2 text-[10px] normal-case tracking-normal">
+                    <div className="flex items-center gap-2 text-label normal-case tracking-normal">
                       <button type="button" onClick={() => setSelectedProvinces(new Set(provinces))} className="text-[#5BC0BE] hover:underline">
                         {t('mapSelectAll')}
                       </button>
@@ -1343,14 +1343,14 @@ function StrandedCommandCenter() {
                     ))}
                   </div>
                   {!showAllProvinces && provinces.length > 6 && (
-                    <div className="text-[9px] text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
+                    <div className="text-label text-gray-400 mt-0.5">+{provinces.length - 6} more (territories &amp; provinces)</div>
                   )}
                 </div>
 
                 <div>
                   <div className="text-xs uppercase tracking-widest mb-2 text-gray-400 flex items-center justify-between gap-2">
                     <span>{t('mapSourceType')}</span>
-                    <div className="flex items-center gap-2 text-[10px] normal-case tracking-normal">
+                    <div className="flex items-center gap-2 text-label normal-case tracking-normal">
                       <button type="button" onClick={() => setSelectedSources(new Set(sourceTypes))} className="text-[#5BC0BE] hover:underline">
                         {t('mapSelectAll')}
                       </button>
@@ -1372,7 +1372,7 @@ function StrandedCommandCenter() {
                 <div data-testid="map-recency-filter">
                   <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
                     <span>DATA RECENCY</span>
-                    <span className="text-[10px] normal-case tracking-normal text-gray-400">
+                    <span className="text-label normal-case tracking-normal text-gray-400">
                       {statsReady
                         ? (recencyStats.newestYear ? `newest ${recencyStats.newestYear}` : 'no year data')
                         : 'loading dataset…'}
@@ -1393,13 +1393,13 @@ function StrandedCommandCenter() {
                           className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${recencyFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                           data-testid={`recency-filter-${f.id}`}
                         >
-                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
+                          {f.label} <span className="text-label text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
                         </button>
                       )
                     })}
                   </div>
                   {recencyFilter === 'older' && (
-                    <p className="text-[9px] text-amber-200/80 mt-1">
+                    <p className="text-label text-amber-200/80 mt-1">
                       These sites last filed before 2023 — treat the figures as historic, not current.
                     </p>
                   )}
@@ -1408,7 +1408,7 @@ function StrandedCommandCenter() {
                 <div data-testid="map-flux-filter">
                   <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
                     <span>FLUX STATUS</span>
-                    <span className="text-[10px] normal-case tracking-normal text-gray-400">
+                    <span className="text-label normal-case tracking-normal text-gray-400">
                       {statsReady ? `${fluxStats.flaring} of ${fluxStats.covered} with a fugitive split` : 'loading dataset…'}
                     </span>
                   </div>
@@ -1426,13 +1426,13 @@ function StrandedCommandCenter() {
                           className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${fluxFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                           data-testid={`flux-filter-${f.id}`}
                         >
-                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
+                          {f.label} <span className="text-label text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
                         </button>
                       )
                     })}
                   </div>
                   {statsReady && (
-                    <p className="text-[9px] text-gray-400 mt-1">
+                    <p className="text-label text-gray-400 mt-1">
                       From ECCC &ldquo;Emissions by Source&rdquo;. Sites that already flare have the permits and
                       destruction equipment in place — fastest to deploy.{' '}
                       <strong className="text-gray-300">Only {fluxStats.covered} of {allSites.length} sites have a
@@ -1454,7 +1454,7 @@ function StrandedCommandCenter() {
                     <button
                       type="button"
                       onClick={saveMapBookmark}
-                      className="text-[10px] px-2 py-1 rounded-lg bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 text-[#5BC0BE] flex items-center gap-1"
+                      className="text-label px-2 py-1 rounded-lg bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 text-[#5BC0BE] flex items-center gap-1"
                     >
                       <Bookmark size={11} /> {t('mapViewBookmark')}
                     </button>
@@ -1465,7 +1465,7 @@ function StrandedCommandCenter() {
                         <button
                           type="button"
                           onClick={() => loadMapBookmark(b)}
-                          className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 hover:border-[#FF8C00]/50"
+                          className="text-label px-2 py-0.5 rounded-full border border-white/15 hover:border-[#FF8C00]/50"
                         >
                           {b.name}
                         </button>
@@ -1476,7 +1476,7 @@ function StrandedCommandCenter() {
                             setMapBookmarks(getMapViewBookmarks())
                             toast.message(t('mapViewBookmarkDeleted'))
                           }}
-                          className="text-[9px] text-gray-400 hover:text-white px-0.5"
+                          className="text-label text-gray-400 hover:text-white px-0.5"
                           aria-label={`Delete ${b.name}`}
                         >
                           ✕
@@ -1487,14 +1487,14 @@ function StrandedCommandCenter() {
                   <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">{t('mapFilterPresets')}</div>
                   {recentPresets.length > 0 && (
                     <div className="mb-3">
-                      <div className="text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
+                      <div className="text-label uppercase tracking-widest text-gray-400 mb-1.5">{t('mapRecentPresets')}</div>
                       <div className="flex flex-wrap gap-1">
                         {recentPresets.map(p => (
                           <button
                             key={`recent-${p.name}`}
                             type="button"
                             onClick={() => applyPreset(p)}
-                            className="text-[10px] px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+                            className="text-label px-2 py-0.5 rounded-full border border-[#5BC0BE]/40 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
                             data-testid={`recent-preset-${p.name}`}
                           >
                             {p.name}
@@ -1505,13 +1505,13 @@ function StrandedCommandCenter() {
                   )}
                   <div className="flex gap-1 mb-2">
                     <input value={presetName} onChange={e => setPresetName(e.target.value)} placeholder={t('mapPresetName')} className="flex-1 text-xs px-2 py-1 rounded-lg bg-black/30 border border-white/15" />
-                    <button type="button" onClick={saveCurrentPreset} disabled={!presetName.trim()} className="text-[10px] px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
-                    <button type="button" onClick={shareCurrentPreset} className="text-[10px] px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
+                    <button type="button" onClick={saveCurrentPreset} disabled={!presetName.trim()} className="text-label px-2 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/40 text-[#FF8C00] disabled:opacity-40 disabled:cursor-not-allowed">{t('mapSave')}</button>
+                    <button type="button" onClick={shareCurrentPreset} className="text-label px-2 py-1 rounded-lg border border-[#5BC0BE]/40 text-[#5BC0BE]">{t('mapShare')}</button>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {savedPresets.map(p => (
                       <span key={p.name} className="inline-flex items-center gap-0.5">
-                        <button type="button" onClick={() => applyPreset(p)} className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 hover:border-[#5BC0BE]/50">{p.name}</button>
+                        <button type="button" onClick={() => applyPreset(p)} className="text-label px-2 py-0.5 rounded-full border border-white/15 hover:border-[#5BC0BE]/50">{p.name}</button>
                         <button
                           type="button"
                           onClick={() => handleDeletePreset(p.name)}
@@ -1561,7 +1561,7 @@ function StrandedCommandCenter() {
         <Filter size={14} className="text-[#FF8C00]" />
         {t('mapFilters')}
         {activeFilterCount > 0 && (
-          <span className="px-1.5 py-px rounded-full bg-[#FF8C00] text-black text-[10px] font-bold">
+          <span className="px-1.5 py-px rounded-full bg-[#FF8C00] text-black text-label font-bold">
             {activeFilterCount}
           </span>
         )}
@@ -1752,18 +1752,18 @@ function StrandedCommandCenter() {
 
         {portfolio.length > 0 && (
           <div className="flex flex-wrap gap-1.5 justify-end">
-            <button onClick={exportMission} className="text-[10px] flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 border border-white/10"><Download size={11} /> JSON</button>
-            <button onClick={exportMissionCsv} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">CSV</button>
-            <button onClick={exportMissionPdf} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">PDF</button>
-            <button onClick={shareMission} className="text-[10px] px-2 py-1 rounded-full bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 text-[#5BC0BE]">Share</button>
-            <button onClick={emailMission} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">Email</button>
-            <button onClick={exportKml} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">KML</button>
-            <button onClick={exportGeo} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">GeoJSON</button>
-            <button onClick={saveMissionProfile} className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10">Save profile</button>
+            <button onClick={exportMission} className="text-label flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 border border-white/10"><Download size={11} /> JSON</button>
+            <button onClick={exportMissionCsv} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">CSV</button>
+            <button onClick={exportMissionPdf} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">PDF</button>
+            <button onClick={shareMission} className="text-label px-2 py-1 rounded-full bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 text-[#5BC0BE]">Share</button>
+            <button onClick={emailMission} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">Email</button>
+            <button onClick={exportKml} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">KML</button>
+            <button onClick={exportGeo} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">GeoJSON</button>
+            <button onClick={saveMissionProfile} className="text-label px-2 py-1 rounded-full bg-white/5 border border-white/10">Save profile</button>
           </div>
         )}
         {selectedSite && (
-          <button onClick={watchSite} className="text-[10px] self-end text-gray-400 hover:text-[#5BC0BE]">Watch site (local alert)</button>
+          <button onClick={watchSite} className="text-label self-end text-gray-400 hover:text-[#5BC0BE]">Watch site (local alert)</button>
         )}
         {compareSites.length >= 2 && (
           <div className="flex flex-col gap-2 w-full">
@@ -1778,7 +1778,7 @@ function StrandedCommandCenter() {
             </button>
             <Link
               href={`/compare?a=${compareSites[0]?.id}&b=${compareSites[1]?.id}${compareSites[2] ? `&c=${compareSites[2].id}` : ''}`}
-              className="text-center text-[10px] text-[#5BC0BE] hover:underline"
+              className="text-center text-label text-[#5BC0BE] hover:underline"
             >
               Open full compare page →
             </Link>
@@ -1823,7 +1823,7 @@ function StrandedCommandCenter() {
               <button
                 type="button"
                 onClick={() => setChoroplethMode('emission')}
-                className={`flex-1 text-[10px] px-2 py-1 rounded-lg border transition ${
+                className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
                   choroplethMode === 'emission'
                     ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
                     : 'border-white/15 text-gray-400 hover:text-white'
@@ -1834,7 +1834,7 @@ function StrandedCommandCenter() {
               <button
                 type="button"
                 onClick={() => setChoroplethMode('revenue')}
-                className={`flex-1 text-[10px] px-2 py-1 rounded-lg border transition ${
+                className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
                   choroplethMode === 'revenue'
                     ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
                     : 'border-white/15 text-gray-400 hover:text-white'
@@ -1874,7 +1874,7 @@ function StrandedCommandCenter() {
             <button
               type="button"
               onClick={() => setShowLayersPanel(true)}
-              className="w-full text-[10px] px-4 py-2.5 text-gray-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 border-t border-white/10"
+              className="w-full text-label px-4 py-2.5 text-gray-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 border-t border-white/10"
               data-testid="layers-panel-reopen"
             >
               <Layers size={12} /> {t('mapLayers')}

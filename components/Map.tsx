@@ -115,9 +115,9 @@ export function siteTeaserHtml(site: EnrichedSite, btcUsd: number): string {
     : 'No usable gas measured at this site'
   return (
     `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div>`
-    + `<div class="text-[10px] text-gray-300 mt-0.5">${kg} kg CH₄/day · Stranded Score <span class="text-[#FF8C00] font-mono">${escapeHtml(site.strandedScore)}</span></div>`
-    + `<div class="text-[10px] font-semibold text-[#FF8C00] mt-1">${minerLine}</div>`
-    + `<div class="text-[10px] text-gray-400 mt-0.5">Click to build it →</div>`
+    + `<div class="text-micro text-gray-300 mt-0.5">${kg} kg CH₄/day · Stranded Score <span class="text-[#FF8C00] font-mono">${escapeHtml(site.strandedScore)}</span></div>`
+    + `<div class="text-micro font-semibold text-[#FF8C00] mt-1">${minerLine}</div>`
+    + `<div class="text-micro text-gray-400 mt-0.5">Click to build it →</div>`
   )
 }
 
@@ -281,9 +281,9 @@ export default function Map({
         : `${Math.round(emissionSum)} kg`
       showHoverPopup(
         `<div class="text-xs font-semibold">${count} sites</div>`
-        + `<div class="text-[10px] text-gray-300 mt-0.5">Avg score <span class="text-[#FF8C00] font-mono">${avgScore}</span></div>`
-        + `<div class="text-[10px] text-gray-400">Total ~${totalEmission}/day</div>`
-        + `<div class="text-[10px] text-gray-400 mt-0.5">Click to expand cluster</div>`,
+        + `<div class="text-micro text-gray-300 mt-0.5">Avg score <span class="text-[#FF8C00] font-mono">${avgScore}</span></div>`
+        + `<div class="text-micro text-gray-400">Total ~${totalEmission}/day</div>`
+        + `<div class="text-micro text-gray-400 mt-0.5">Click to expand cluster</div>`,
         coords,
       )
     })
@@ -460,7 +460,7 @@ export default function Map({
         const size = Math.min(38, Math.max(16, Math.sqrt(totalEmission) / 9))
         const el = document.createElement('div')
         el.title = `${group.length} sites · avg score ${avgScore} · C$${clusterRevenue.toLocaleString()}/day · ~${(clusterRevenue / liveBtcPrice * 0.0007).toFixed(3)} BTC/d`
-        el.className = `flex items-center justify-center rounded-full border-2 border-white/80 text-[10px] font-bold shadow-xl cursor-pointer ${avgScore > 72 ? 'bg-[#22c55e]' : avgScore > 45 ? 'bg-[#eab308]' : 'bg-[#FF8C00]'}`
+        el.className = `flex items-center justify-center rounded-full border-2 border-white/80 text-micro font-bold shadow-xl cursor-pointer ${avgScore > 72 ? 'bg-[#22c55e]' : avgScore > 45 ? 'bg-[#eab308]' : 'bg-[#FF8C00]'}`
         el.style.width = `${size}px`
         el.style.height = `${size}px`
         el.style.color = '#0f172a'
@@ -1249,14 +1249,14 @@ export default function Map({
             <div className="w-48 h-1.5 rounded-full bg-white/10 overflow-hidden">
               <div className="h-full w-1/3 bg-[#FF8C00]/80 animate-[shimmer_1.4s_ease-in-out_infinite]" />
             </div>
-            <span className="text-[10px] text-gray-400 tracking-widest uppercase">Loading map…</span>
+            <span className="text-micro text-gray-400 tracking-widest uppercase">Loading map…</span>
           </div>
         </div>
       )}
 
       {mapLoaded && sitesLoading && (
         <div
-          className="absolute top-3 right-3 z-[14] glass px-2.5 py-1 rounded-lg border border-white/15 text-[10px] text-gray-400 pointer-events-none font-mono tabular-nums"
+          className="absolute top-3 right-3 z-[14] glass px-2.5 py-1 rounded-lg border border-white/15 text-micro text-gray-400 pointer-events-none font-mono tabular-nums"
           data-testid="map-sites-loading"
           aria-live="polite"
         >
@@ -1267,13 +1267,13 @@ export default function Map({
       )}
 
       {tileFallbackActive && (
-        <div className="absolute top-3 left-3 z-[14] glass px-2 py-1 rounded-lg border border-amber-500/35 text-[9px] text-amber-200/90 pointer-events-none max-w-[10rem]" data-testid="map-tile-fallback">
+        <div className="absolute top-3 left-3 z-[14] glass px-2 py-1 rounded-lg border border-amber-500/35 text-micro text-amber-200/90 pointer-events-none max-w-[10rem]" data-testid="map-tile-fallback">
           {tileFallbackLabel}
         </div>
       )}
 
       {webglUnsupported && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[16] glass px-3 py-2 rounded-xl border border-amber-500/40 text-[10px] text-amber-200 flex items-center gap-2 max-w-[90vw]">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[16] glass px-3 py-2 rounded-xl border border-amber-500/40 text-micro text-amber-200 flex items-center gap-2 max-w-[90vw]">
           <AlertTriangle size={14} className="shrink-0" />
           <span>WebGL is unavailable — map rendering may be limited. Try updating your browser or enabling hardware acceleration.</span>
         </div>
@@ -1285,7 +1285,7 @@ export default function Map({
         aria-label="Map coordinates and view state"
       >
         <div
-          className={`map-coord-readout px-2 py-1 rounded-lg border text-[10px] font-mono tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5 ${
+          className={`map-coord-readout px-2 py-1 rounded-lg border text-micro font-mono tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5 ${
             copyFlash ? 'map-coord-readout--copied text-[#5BC0BE]' : 'border-white/15 text-gray-300'
           }`}
           title={coordCopyLabel}
@@ -1316,7 +1316,7 @@ export default function Map({
         href={tileFallbackActive ? 'https://www.openstreetmap.org/copyright' : 'https://carto.com/attributions'}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-3 left-3 z-[12] text-[9px] leading-none rounded bg-[#0f172a]/70 px-1.5 py-1 text-gray-300 hover:text-[#5BC0BE] transition pointer-events-auto"
+        className="absolute top-3 left-3 z-[12] text-micro leading-none rounded bg-[#0f172a]/70 px-1.5 py-1 text-gray-300 hover:text-[#5BC0BE] transition pointer-events-auto"
         data-testid="map-attribution"
       >
         {tileFallbackActive ? '© OSM' : attributionLabel}
@@ -1338,7 +1338,7 @@ export default function Map({
 
       {showHeatmap && (
         <div className="map-heat-legend absolute bottom-[10.5rem] left-3 z-[12] px-2.5 py-2 rounded-lg border border-white/15 pointer-events-none hidden sm:block w-[7.5rem]">
-          <div className="text-[9px] uppercase tracking-wider text-gray-400 mb-1">Emission density</div>
+          <div className="text-micro uppercase tracking-wider text-gray-400 mb-1">Emission density</div>
           <div className="map-heat-legend__bar w-full" />
           <div className="map-heat-legend__labels">
             <span>Low</span>

@@ -172,7 +172,7 @@ function CompareContent() {
                   {active.map(({ slot, site }) => (
                     <th key={slot} className="p-4" style={{ color: slotColors[slot] }}>
                       <div>{site.properties.name?.slice(0, 20) || slot.toUpperCase()}</div>
-                      <Link href={`/map?site=${site.id}`} className="text-[10px] font-normal text-[#5BC0BE] hover:underline">
+                      <Link href={`/map?site=${site.id}`} className="text-label font-normal text-[#5BC0BE] hover:underline">
                         Map →
                       </Link>
                     </th>
@@ -200,7 +200,7 @@ function CompareContent() {
                         >
                           {row.values[slot]}
                           {isProfitRow && dailyProfitWinner === slot && (
-                            <span className="ml-1 text-[10px] uppercase tracking-wider text-[#FF8C00]">winner</span>
+                            <span className="ml-1 text-label uppercase tracking-wider text-[#FF8C00]">winner</span>
                           )}
                         </td>
                       ))}
@@ -221,7 +221,7 @@ function CompareContent() {
                   return (
                     <div key={site.id} className="rounded-xl border border-white/10 p-4 bg-white/[0.02]">
                       <div className="text-xs text-gray-400 mb-2">{site.properties.name}</div>
-                      <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Same province &amp; source</div>
+                      <div className="text-label uppercase tracking-wider text-gray-400 mb-1">Same province &amp; source</div>
                       <ul className="space-y-1 mb-3">
                         {peers.length ? peers.map(p => (
                           <li key={p.id} className="flex justify-between gap-2">
@@ -230,7 +230,7 @@ function CompareContent() {
                           </li>
                         )) : <li className="text-gray-400">No close peers</li>}
                       </ul>
-                      <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Similar emission (±25%)</div>
+                      <div className="text-label uppercase tracking-wider text-gray-400 mb-1">Similar emission (±25%)</div>
                       <ul className="space-y-1">
                         {similar.map(p => (
                           <li key={p.id} className="flex justify-between gap-2">

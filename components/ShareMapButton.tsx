@@ -39,7 +39,7 @@ export default function ShareMapButton({ state, className = '', label = 'Share v
     <button
       type="button"
       onClick={share}
-      className={`inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-[11px] text-gray-300 hover:text-white hover:border-[#5BC0BE]/40 transition ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-label text-gray-300 hover:text-white hover:border-[#5BC0BE]/40 transition ${className}`}
       data-testid="share-map-button"
     >
       {copied ? <Check size={12} className="text-[#34D399]" /> : <Link2 size={12} />}

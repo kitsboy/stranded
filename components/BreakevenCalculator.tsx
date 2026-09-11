@@ -44,17 +44,17 @@ export default function BreakevenCalculator({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 text-center">
         <div className="rounded-xl border border-[#FF8C00]/30 bg-[#FF8C00]/10 p-3">
-          <div className="text-[10px] uppercase text-gray-400">Breakeven</div>
+          <div className="text-label uppercase text-gray-400">Breakeven</div>
           <div className="text-2xl font-bold text-[#FF8C00] tabular-nums">
             {Number.isFinite(result.months) ? `${result.months.toFixed(1)} mo` : '—'}
           </div>
         </div>
         <div className="rounded-xl border border-white/10 p-3">
-          <div className="text-[10px] uppercase text-gray-400">Net daily</div>
+          <div className="text-label uppercase text-gray-400">Net daily</div>
           <div className="text-2xl font-bold text-[#5BC0BE] tabular-nums">C${Math.round(result.dailyNet).toLocaleString()}</div>
         </div>
       </div>
-      <p className="text-[10px] text-gray-400 mt-3">Simple payback: CapEx ÷ (net daily × 30). Illustrative — excludes debt service &amp; halving.</p>
+      <p className="text-label text-gray-400 mt-3">Simple payback: CapEx ÷ (net daily × 30). Illustrative — excludes debt service &amp; halving.</p>
     </div>
   )
 }

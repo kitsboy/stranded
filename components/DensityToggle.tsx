@@ -22,7 +22,7 @@ export default function DensityToggle({ className = '' }: { className?: string }
     <button
       type="button"
       onClick={toggle}
-      className={`px-2 py-1.5 rounded-lg border border-white/15 text-[10px] text-gray-400 hover:text-white hover:bg-white/5 transition ${className}`}
+      className={`px-2 py-1.5 rounded-lg border border-white/15 text-label text-gray-400 hover:text-white hover:bg-white/5 transition ${className}`}
       title="Toggle UI density"
       aria-label={`Density: ${mode}`}
       data-testid="density-toggle"

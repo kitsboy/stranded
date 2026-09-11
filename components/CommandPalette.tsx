@@ -227,7 +227,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
           </div>
 
           <div className="px-5 py-2 border-t border-white/10">
-            <div className="text-[10px] text-gray-400 mb-2">PAGES</div>
+            <div className="text-micro text-gray-400 mb-2">PAGES</div>
             <div className="flex flex-wrap gap-2">
               {routes.map(r => (
                 <button key={r.href} onClick={() => runRoute(r.href, r.label)} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 text-[#FF8C00]">
@@ -235,7 +235,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
                 </button>
               ))}
             </div>
-            <div className="text-[10px] text-gray-400 mb-2 mt-3">TOOLS &amp; CALCULATORS</div>
+            <div className="text-micro text-gray-400 mb-2 mt-3">TOOLS &amp; CALCULATORS</div>
             <div className="flex flex-wrap gap-2">
               {calcCommands.map(r => (
                 <button key={r.label} onClick={() => runRoute(r.href, r.label)} className="text-xs px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/30 text-[#5BC0BE]">
@@ -246,14 +246,14 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
           </div>
 
           <div className="px-5 py-2 border-t border-white/10">
-            <div className="text-[10px] text-gray-400 mb-2">PROVINCES (13)</div>
+            <div className="text-micro text-gray-400 mb-2">PROVINCES (13)</div>
             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-auto">
               {provinceJumps.map(p => (
                 <button
                   key={p.href}
                   type="button"
                   onClick={() => runRoute(p.href, p.label)}
-                  className="text-[10px] px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/25 text-[#5BC0BE]"
+                  className="text-micro px-2 py-1 bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 rounded border border-[#5BC0BE]/25 text-[#5BC0BE]"
                 >
                   {p.label}
                 </button>
@@ -262,7 +262,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
           </div>
 
           <div className="px-5 py-3 border-t border-white/10">
-            <div className="text-[10px] text-gray-400 mb-2">QUICK PRESETS</div>
+            <div className="text-micro text-gray-400 mb-2">QUICK PRESETS</div>
             <div className="flex flex-wrap gap-2 mb-3">
               {presets.map((p, i) => (
                 <button key={i} onClick={() => {
@@ -277,7 +277,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
 
             {bookmarkSites.length > 0 && (
               <>
-                <div className="text-[10px] text-gray-400 mb-2">BOOKMARKS</div>
+                <div className="text-micro text-gray-400 mb-2">BOOKMARKS</div>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {bookmarkSites.slice(0, 5).map(site => (
                     <button key={site.id} onClick={() => handleSelect(site)} className="text-xs px-2 py-1 bg-[#FF8C00]/10 hover:bg-[#FF8C00]/20 rounded border border-[#FF8C00]/30 truncate max-w-[140px]">
@@ -302,7 +302,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
 
             {recentCommands.length > 0 && (
               <>
-                <div className="text-[10px] text-gray-400 mb-2">RECENT COMMANDS</div>
+                <div className="text-micro text-gray-400 mb-2">RECENT COMMANDS</div>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {recentCommands.map(cmd => (
                     <button
@@ -318,7 +318,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
                           if (site) handleSelect(site)
                         }
                       }}
-                      className="text-[10px] px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10 truncate max-w-[160px]"
+                      className="text-micro px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10 truncate max-w-[160px]"
                     >
                       {cmd.label}
                     </button>
@@ -329,7 +329,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
 
             {recent.length > 0 && (
               <>
-                <div className="text-[10px] text-gray-400 mb-2">LEGACY RECENT</div>
+                <div className="text-micro text-gray-400 mb-2">LEGACY RECENT</div>
                 <div className="flex flex-wrap gap-2">
                   {recent.map((site, i) => (
                     <button key={i} onClick={() => handleSelect(site)} className="text-xs px-2 py-1 bg-white/5 hover:bg-[#FF8C00]/20 rounded border border-white/10 truncate max-w-[140px]">
@@ -341,7 +341,7 @@ export default function CommandPalette({ sites, onSelectSite, open, onClose, loa
             )}
           </div>
 
-          <div className="px-5 py-3 border-t border-white/10 text-[10px] text-gray-400 flex items-center gap-2">
+          <div className="px-5 py-3 border-t border-white/10 text-micro text-gray-400 flex items-center gap-2">
             <div>Press <kbd className="px-1.5 py-px bg-white/10 rounded">↑↓</kbd> to navigate • <kbd className="px-1.5 py-px bg-white/10 rounded">⏎</kbd> to fly to site</div>
             <div className="flex-1" />
             <div>ESC to close</div>

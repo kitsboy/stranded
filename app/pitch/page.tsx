@@ -405,8 +405,8 @@ function PitchContent() {
               style={{ backgroundColor: `${COLORS[idx % COLORS.length]}22`, borderColor: `${COLORS[idx % COLORS.length]}66` }}
             >
               <div className="text-base font-bold tabular-nums md:text-lg">{p.count}</div>
-              <div className="truncate text-[9px] text-gray-300 md:text-[10px]">{p.name.split(' ')[0]}</div>
-              <div className="text-[8px] text-gray-400 md:text-[9px]">{p.pct}%</div>
+              <div className="truncate text-label text-gray-300 md:text-label">{p.name.split(' ')[0]}</div>
+              <div className="text-label text-gray-400 md:text-label">{p.pct}%</div>
             </motion.div>
           ))}
         </div>
@@ -495,7 +495,7 @@ function PitchContent() {
               </button>
             ))}
           </div>
-          <p className="mb-2 text-[10px] text-gray-400">{SENSITIVITY_PRESETS[activePreset].description}</p>
+          <p className="mb-2 text-label text-gray-400">{SENSITIVITY_PRESETS[activePreset].description}</p>
           <label className="text-xs text-gray-400">
             {tf(locale, 'pitchBtcScenario', { pct: String(btcSensitivity), price: adjustedBtc.toLocaleString() })}
           </label>
@@ -625,7 +625,7 @@ function PitchContent() {
           <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchSherpacarta')}</a>
           <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchEccc')}</a>
         </div>
-        <p className="mt-10 text-[10px] text-gray-600">
+        <p className="mt-10 text-label text-gray-600">
           Stats generated {new Date(stats.generatedAt).toLocaleString('en-CA')} · Not financial advice
         </p>
       </section>

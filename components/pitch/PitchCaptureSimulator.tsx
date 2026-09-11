@@ -87,7 +87,7 @@ export default function PitchCaptureSimulator({
             className="pitch-range w-full accent-[#FF8C00]"
             aria-label="Portfolio capture percentage"
           />
-          <div className="mt-1 flex justify-between text-[10px] text-gray-600">
+          <div className="mt-1 flex justify-between text-label text-gray-600">
             <span>1%</span>
             <span>50%</span>
             <span>100%</span>
@@ -104,7 +104,7 @@ export default function PitchCaptureSimulator({
                 transition={{ delay: i * 0.04 }}
               >
                 <tile.icon className="mb-2 h-4 w-4 opacity-60" style={{ color: tile.accent }} />
-                <div className="text-[10px] uppercase tracking-wider text-gray-400">{tile.label}</div>
+                <div className="text-label uppercase tracking-wider text-gray-400">{tile.label}</div>
                 <div
                   className="mt-1 text-lg font-bold tabular-nums sm:text-xl"
                   style={{ color: tile.accent }}

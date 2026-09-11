@@ -219,7 +219,7 @@ export default function AllSitesExplorer() {
 
       {activeChips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="text-[10px] uppercase tracking-wider text-gray-400">Active filters</span>
+          <span className="text-label uppercase tracking-wider text-gray-400">Active filters</span>
           {activeChips.map(chip => (
             <button
               key={chip.key}
@@ -234,7 +234,7 @@ export default function AllSitesExplorer() {
           <button
             type="button"
             onClick={() => { setSearch(''); setProvinceFilter(''); setSourceFilter(''); setMinScoreFilter(0); setRecencyFilter('any'); setFluxFilter('any') }}
-            className="text-[10px] text-gray-400 hover:text-white underline"
+            className="text-label text-gray-400 hover:text-white underline"
           >
             Clear all
           </button>
@@ -354,7 +354,7 @@ export default function AllSitesExplorer() {
                       <div className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>
                         {site.strandedScore}
                       </div>
-                      {site.scoreBadge && <div className="text-[9px] text-[#5BC0BE] mt-0.5">{site.scoreBadge}</div>}
+                      {site.scoreBadge && <div className="text-label text-[#5BC0BE] mt-0.5">{site.scoreBadge}</div>}
                     </div>
                   </div>
                 </div>
@@ -369,7 +369,7 @@ export default function AllSitesExplorer() {
                     const stale = y != null && y < 2023
                     return (
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] ${
+                        className={`rounded-full border px-2 py-0.5 text-label ${
                           stale
                             ? 'border-amber-400/45 bg-amber-400/10 text-amber-200'
                             : 'border-white/15 text-gray-300'
@@ -381,18 +381,18 @@ export default function AllSitesExplorer() {
                     )
                   })()}
                   {isFlaringSite(p) && (
-                    <span className="rounded-full border border-[#FF8C00]/50 bg-[#FF8C00]/10 px-2 py-0.5 text-[10px] text-[#FF8C00]" title="Reports CH₄ sent to flare — permits and equipment already in place">
+                    <span className="rounded-full border border-[#FF8C00]/50 bg-[#FF8C00]/10 px-2 py-0.5 text-label text-[#FF8C00]" title="Reports CH₄ sent to flare — permits and equipment already in place">
                       Currently flaring
                     </span>
                   )}
                   {!isFlaringSite(p) && isVentingSite(p) && (
-                    <span className="rounded-full border border-amber-400/50 bg-amber-400/10 px-2 py-0.5 text-[10px] text-amber-200" title="Reports vented CH₄ — nothing sent to flare in the published split">
+                    <span className="rounded-full border border-amber-400/50 bg-amber-400/10 px-2 py-0.5 text-label text-amber-200" title="Reports vented CH₄ — nothing sent to flare in the published split">
                       Venting
                     </span>
                   )}
                   {fluxScopeNotApplicable(p) && (
                     <span
-                      className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] text-gray-300"
+                      className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-label text-gray-300"
                       title={FLUX_NO_SPLIT_HINT}
                       data-testid="sites-flux-not-reported"
                     >
@@ -404,11 +404,11 @@ export default function AllSitesExplorer() {
                 <div className="mt-auto flex items-baseline justify-between">
                   <div>
                     <div className="text-3xl font-semibold text-[#FF8C00] tabular-nums">{site.emission.toLocaleString()}</div>
-                    <div className="text-[10px] -mt-1 text-gray-400">kg CH₄ / day</div>
+                    <div className="text-label -mt-1 text-gray-400">kg CH₄ / day</div>
                     {site.emission > 0 ? (
-                      <div className="text-[10px] text-gray-400">Generator: {site.maxGeneratorPowerKW || 'N/A'} kW (rec: {site.recommendedGenset || 'N/A'})</div>
+                      <div className="text-label text-gray-400">Generator: {site.maxGeneratorPowerKW || 'N/A'} kW (rec: {site.recommendedGenset || 'N/A'})</div>
                     ) : (
-                      <div className="text-[10px] text-amber-300" data-testid="sites-no-ch4-not-modelled">No reported CH₄ — not modelled</div>
+                      <div className="text-label text-amber-300" data-testid="sites-no-ch4-not-modelled">No reported CH₄ — not modelled</div>
                     )}
                   </div>
                   <div className="text-right">
@@ -417,7 +417,7 @@ export default function AllSitesExplorer() {
                   </div>
                 </div>
 
-                <div className="mt-4 text-[10px] flex gap-2">
+                <div className="mt-4 text-label flex gap-2">
                   <Link href={`/map?site=${site.id}`} className="flex-1 text-center py-2 rounded-2xl border border-[#5BC0BE]/40 hover:bg-[#5BC0BE]/10">{t('flyToMap')}</Link>
                   <button
                     type="button"
@@ -467,7 +467,7 @@ export default function AllSitesExplorer() {
                       return (
                         <span className={`text-xs ${stale ? 'text-amber-200' : 'text-gray-300'}`} title={stale ? 'Historic filing — may be closed or re-permitted' : undefined}>
                           {y ?? '—'}
-                          {isFlaringSite(site.properties) && <span className="ml-2 text-[10px] text-[#FF8C00]">flaring</span>}
+                          {isFlaringSite(site.properties) && <span className="ml-2 text-label text-[#FF8C00]">flaring</span>}
                         </span>
                       )
                     })()}
@@ -517,7 +517,7 @@ export default function AllSitesExplorer() {
         </div>
       )}
 
-      <p className="text-center text-[11px] text-gray-400 mt-8">All data 100% from source geojson. Stranded Score is a computed signal for capture attractiveness.</p>
+      <p className="text-center text-label text-gray-400 mt-8">All data 100% from source geojson. Stranded Score is a computed signal for capture attractiveness.</p>
     </div>
   )
 }

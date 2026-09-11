@@ -25,7 +25,7 @@ export default function GasDeclineChart({
     <div className={`rounded-2xl border border-white/10 bg-white/[0.03] p-4 ${className}`} data-testid="gas-decline-chart">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold text-[#FF8C00]">Gas decline scenario</h4>
-        <span className="text-[11px] font-mono text-gray-400">{decline}%/yr</span>
+        <span className="text-micro font-mono text-gray-400">{decline}%/yr</span>
       </div>
       <input
         type="range"
@@ -44,12 +44,12 @@ export default function GasDeclineChart({
               style={{ height: `${(p.emission / maxEm) * 100}%` }}
               title={`Y${p.year}: ${p.emission} kg/day`}
             />
-            <span className="text-[8px] text-gray-500">{p.year}</span>
+            <span className="text-micro text-gray-500">{p.year}</span>
           </div>
         ))}
       </div>
       {cum != null && (
-        <p className="mt-2 text-[10px] text-gray-400">
+        <p className="mt-2 text-micro text-gray-400">
           Cumulative model revenue @ decline: <span className="text-white font-mono">C${cum.toLocaleString()}</span>
         </p>
       )}

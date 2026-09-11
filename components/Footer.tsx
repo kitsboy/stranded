@@ -57,7 +57,7 @@ function FooterCol({
   return (
     <div className="min-w-0">
       <h3
-        className={`text-[10px] uppercase tracking-[0.18em] font-semibold mb-3 ${accentClass}`}
+        className={`text-label uppercase tracking-[0.18em] font-semibold mb-3 ${accentClass}`}
       >
         {title}
       </h3>
@@ -182,7 +182,7 @@ export default function Footer() {
               className="group inline-flex flex-col gap-1.5 mb-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF8C00]/50"
               aria-label="Visit giveabit.io"
             >
-              <span className="text-[10px] uppercase tracking-[0.14em] text-gray-500 group-hover:text-gray-300 transition-colors">
+              <span className="text-label uppercase tracking-[0.14em] text-gray-500 group-hover:text-gray-300 transition-colors">
                 {t('footerBy')}
               </span>
               {/* Prefer wordmark; mark is fallback if wordmark missing later */}
@@ -195,12 +195,12 @@ export default function Footer() {
                   className="h-7 w-auto opacity-85 group-hover:opacity-100 transition-opacity duration-200"
                 />
               </span>
-              <span className="text-[11px] text-gray-500 group-hover:text-[#FF8C00] transition-colors">
+              <span className="text-label text-gray-500 group-hover:text-[#FF8C00] transition-colors">
                 giveabit.io ↗
               </span>
             </a>
 
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-gray-500">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-label text-gray-500">
               <span className="font-mono text-[#FF8C00]/90">v{version}</span>
               <span className="text-white/15">·</span>
               <span>
@@ -252,7 +252,7 @@ export default function Footer() {
               ))}
             </nav>
 
-            <div className="text-[10px] uppercase tracking-[0.14em] text-gray-500 mb-1.5">Suite</div>
+            <div className="text-label uppercase tracking-[0.14em] text-gray-500 mb-1.5">Suite</div>
             <nav className="flex flex-col gap-0.5 mb-5" aria-label="GiveAbit suite">
               {suite.map(link => (
                 <FooterNavLink key={link.href} {...link} />
@@ -279,15 +279,15 @@ export default function Footer() {
                     aria-label="Bitcoin donation QR"
                   >
                     <QRCodeSVG value={`lightning:${lnAddress}`} size={140} level="M" includeMargin />
-                    <p className="mt-2 text-center text-[10px] text-gray-800 font-medium max-w-[140px] break-all">
+                    <p className="mt-2 text-center text-label text-gray-800 font-medium max-w-[140px] break-all">
                       {lnAddress}
                     </p>
-                    <p className="mt-1 text-center text-[9px] text-gray-500 max-w-[140px] break-all">
+                    <p className="mt-1 text-center text-label text-gray-500 max-w-[140px] break-all">
                       {btcAddress}
                     </p>
                     <button
                       type="button"
-                      className="mt-2 w-full text-[10px] text-gray-500 hover:text-gray-800 transition-colors"
+                      className="mt-2 w-full text-label text-gray-500 hover:text-gray-800 transition-colors"
                       onClick={() => setShowQR(false)}
                     >
                       {t('close')}
@@ -321,7 +321,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[10px] text-gray-500">
+        <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-label text-gray-500">
           <p className="leading-relaxed max-w-2xl">
             <span className="text-gray-400">© {new Date().getFullYear()} Stranded Value</span>
             <span className="text-white/15 mx-1.5">·</span>

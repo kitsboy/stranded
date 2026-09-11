@@ -31,7 +31,7 @@ export default function MapFilterSummary({ chips }: MapFilterSummaryProps) {
       data-testid="map-filter-summary"
       aria-label={t('mapFilterSummary')}
     >
-      <div className="text-[9px] uppercase tracking-widest text-gray-400 mb-1.5">{t('mapFilterSummary')}</div>
+      <div className="text-micro uppercase tracking-widest text-gray-400 mb-1.5">{t('mapFilterSummary')}</div>
       <div className="flex flex-wrap gap-1.5">
         <AnimatePresence mode="popLayout" initial={false}>
           {chips.map(chip => (
@@ -44,7 +44,7 @@ export default function MapFilterSummary({ chips }: MapFilterSummaryProps) {
               exit={reducedMotion ? undefined : chipMotion.exit}
               transition={transition}
               onClick={chip.onRemove}
-              className="group inline-flex items-center gap-1 max-w-full text-[10px] px-2.5 py-1 min-h-[32px] sm:min-h-0 rounded-full border border-[#5BC0BE]/35 text-[#5BC0BE] bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 active:scale-[0.94] active:bg-[#5BC0BE]/30 transition-[background-color,transform] touch-manipulation"
+              className="group inline-flex items-center gap-1 max-w-full text-micro px-2.5 py-1 min-h-[32px] sm:min-h-0 rounded-full border border-[#5BC0BE]/35 text-[#5BC0BE] bg-[#5BC0BE]/10 hover:bg-[#5BC0BE]/20 active:scale-[0.94] active:bg-[#5BC0BE]/30 transition-[background-color,transform] touch-manipulation"
               title={t('mapRemoveFilter')}
               data-testid={`filter-chip-${chip.id}`}
             >

@@ -67,7 +67,7 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
           className="pitch-range w-full accent-[#FF8C00]"
           aria-label="Portfolio capture percentage"
         />
-        <div className="mt-1 flex justify-between text-[10px] text-gray-600">
+        <div className="mt-1 flex justify-between text-label text-gray-600">
           <span>1%</span>
           <span>50%</span>
           <span>100%</span>
@@ -84,7 +84,7 @@ export default function DashboardCaptureSlider({ stats, btcUsd }: Props) {
               transition={{ delay: i * 0.04 }}
             >
               <tile.icon className="mb-1.5 h-4 w-4 opacity-60" style={{ color: tile.accent }} aria-hidden />
-              <div className="text-[10px] uppercase tracking-wider text-gray-400">{tile.label}</div>
+              <div className="text-label uppercase tracking-wider text-gray-400">{tile.label}</div>
               <div className="mt-1 text-base font-bold tabular-nums sm:text-lg" style={{ color: tile.accent }}>
                 {tile.value}
               </div>

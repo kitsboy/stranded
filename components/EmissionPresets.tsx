@@ -27,7 +27,7 @@ export default function EmissionPresets({ minEmission, maxEmission, onSelect }: 
           key={preset.id}
           type="button"
           onClick={() => onSelect(preset.min, preset.max)}
-          className={`text-[10px] px-2 py-0.5 rounded-full border transition ${
+          className={`text-label px-2 py-0.5 rounded-full border transition ${
             active === preset.id
               ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10 ring-2 ring-[#FF8C00]/50 ring-offset-1 ring-offset-[#1e293b]'
               : 'border-white/15 text-gray-400 hover:border-white/30 hover:text-gray-200'

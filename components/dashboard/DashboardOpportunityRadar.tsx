@@ -61,13 +61,13 @@ function ReadinessGauge({ score, label, readinessLabel }: { score: number; label
           <span className="text-3xl font-bold tabular-nums" style={{ color }}>
             {score}
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-gray-400">/ 100</span>
+          <span className="text-label uppercase tracking-wider text-gray-400">/ 100</span>
         </div>
       </div>
       <p className="mt-3 text-sm font-semibold" style={{ color }}>
         {label}
       </p>
-      <p className="text-[10px] text-gray-400">{readinessLabel}</p>
+      <p className="text-label text-gray-400">{readinessLabel}</p>
     </div>
   )
 }
@@ -91,13 +91,13 @@ function FactorTile({ icon: Icon, label, value, sub, accent, delay }: FactorTile
       className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-4"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-gray-400">{label}</span>
+        <span className="text-label font-medium uppercase tracking-[0.12em] text-gray-400">{label}</span>
         <Icon className="h-4 w-4 shrink-0 opacity-60" style={{ color: accent }} aria-hidden />
       </div>
       <div className="text-xl font-bold tabular-nums" style={{ color: accent }}>
         {value}
       </div>
-      <p className="mt-1 text-[10px] text-gray-400">{sub}</p>
+      <p className="mt-1 text-label text-gray-400">{sub}</p>
     </motion.div>
   )
 }
@@ -223,7 +223,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                   <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
                     <span className="flex min-w-0 items-center gap-1.5 text-gray-300">
                       <span
-                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold"
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-label font-bold"
                         style={{
                           backgroundColor: `${COLORS[i % COLORS.length]}22`,
                           color: COLORS[i % COLORS.length],
@@ -256,7 +256,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                       transition={{ duration: 0.8, delay: i * 0.05 }}
                     />
                   </div>
-                  <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
+                  <div className="mt-1 flex gap-3 text-label text-gray-400">
                     <span>{p.sites} sites</span>
                     <span>{formatCompactNumber(p.emissionKgDay, 1)} kg/day</span>
                   </div>

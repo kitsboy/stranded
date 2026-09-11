@@ -27,7 +27,7 @@ export default function ExportFormatPicker({
   className = '',
   size = 'sm',
 }: ExportFormatPickerProps) {
-  const sizeClass = size === 'sm' ? 'text-[10px] px-2 py-1' : 'text-xs px-3 py-1.5'
+  const sizeClass = size === 'sm' ? 'text-label px-2 py-1' : 'text-xs px-3 py-1.5'
   const list = FORMATS.filter(f => formats.includes(f.id))
 
   return (

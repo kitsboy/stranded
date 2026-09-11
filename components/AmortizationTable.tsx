@@ -48,13 +48,13 @@ export default function AmortizationTable({
           />
         </label>
       </div>
-      <p className="text-[11px] text-gray-400 mb-2">
+      <p className="text-label text-gray-400 mb-2">
         Annual payment <span className="font-mono text-white">C${result.annualPayment.toLocaleString()}</span>
         {' · '}
         Total interest <span className="font-mono text-amber-300">C${result.totalInterest.toLocaleString()}</span>
       </p>
       <div className="max-h-40 overflow-y-auto rounded-lg border border-white/10">
-        <table className="w-full text-[10px]">
+        <table className="w-full text-label">
           <thead className="text-gray-400 sticky top-0 bg-[#0f172a]">
             <tr>
               <th className="p-1.5 text-left">Yr</th>
@@ -79,7 +79,7 @@ export default function AmortizationTable({
       </div>
       <button
         type="button"
-        className="mt-2 w-full rounded-lg border border-white/15 py-1.5 text-[11px] hover:bg-white/5"
+        className="mt-2 w-full rounded-lg border border-white/15 py-1.5 text-label hover:bg-white/5"
         onClick={() => downloadBlob(exportAmortizationCsv(result.schedule), 'stranded-amortization.csv', 'text/csv')}
       >
         Download CSV
