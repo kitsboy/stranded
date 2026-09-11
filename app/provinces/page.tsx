@@ -95,7 +95,7 @@ function ProvincesContent() {
                     <th className="p-3 text-right">Sites</th>
                     <th className="p-3 text-right">Filed 2024</th>
                     <th className="p-3 text-right">Pre-2023</th>
-                    <th className="p-3 text-right">Flaring</th>
+                    <th className="p-3 text-right" title="Sites whose ECCC source category publishes a venting/flaring split AND report CH₄ sent to flare">Flaring</th>
                     <th className="p-3 text-right">Emission kg/d</th>
                     <th className="p-3 text-right">Est. revenue</th>
                     <th className="p-3 text-right">Avg score</th>
@@ -145,7 +145,7 @@ function ProvincesContent() {
                     <div className="text-[11px] text-gray-400 mt-1">
                       <span className="text-[#5BC0BE]">{p.filed2024}</span> filed 2024 ·{' '}
                       <span className="text-amber-200">{p.filedBefore2023}</span> pre-2023 ·{' '}
-                      <span className="text-[#FF8C00]">{p.flaring}</span> flaring
+                      <span className="text-[#FF8C00]">{p.flaring}</span> report flaring
                     </div>
                   </Link>
                   <Link

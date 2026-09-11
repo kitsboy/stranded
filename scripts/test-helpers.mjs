@@ -292,6 +292,7 @@ const {
   matchesRecency, matchesFlux, recencyBreakdown, fluxBreakdown,
   countActiveMapFilters, buildMapFilterChips,
   isFlaringSite, isVentingSite, fluxNotReported,
+  fluxScopeNotApplicable, FLUX_NO_SPLIT_LABEL, FLUX_NO_SPLIT_HINT,
 } = await import('../lib/map-filters.ts')
 assert.deepEqual(validatePresetName('  elite AB  '), { ok: true, trimmed: 'elite AB' })
 assert.deepEqual(validatePresetName('   '), { ok: false })
@@ -1032,6 +1033,36 @@ assert.equal(
   landfillSites.length - landfillCovered,
   'every landfill without a published split must say not_reported/unknown, never "none"')
 assert.equal(landfillSites.filter(f => ['flaring', 'both'].includes(f.properties.flux_status)).length > 0, true)
+
+// silence must be legible: a no-split site gets an explicit "no split" state,
+// and the state must never be reachable for a site that does have a split
+assert.equal(fluxScopeNotApplicable(essex), true)
+assert.equal(FLUX_NO_SPLIT_LABEL, 'No venting/flaring split')
+assert.ok(FLUX_NO_SPLIT_HINT.includes('Waste'))
+const landfillNoSplit = landfillSites.filter(f => fluxScopeNotApplicable(f.properties))
+assert.ok(landfillNoSplit.length > 80, `most landfills carry no fugitive split: ${landfillNoSplit.length}`)
+for (const f of landfillNoSplit) {
+  const props = f.properties
+  assert.equal(fluxNotReported(props), true, `${props.ghgrp_id} must read as not-reported`)
+  assert.equal(isFlaringSite(props), false, `${props.ghgrp_id} must never assert flaring`)
+  assert.equal(isVentingSite(props), false, `${props.ghgrp_id} must never assert venting`)
+  assert.equal(matchesFlux(props, 'flaring'), false)
+  assert.equal(matchesFlux(props, 'venting'), false)
+  assert.equal(fluxBadge(props), null, `${props.ghgrp_id} shows no flare/vent badge`)
+}
+// the big real-world flarers must be in that no-claim set, not silently "not flaring"
+for (const id of ['G10365', 'G10343', 'G10337', 'G10443']) {
+  const f = geo.features.find(x => String(x.properties.ghgrp_id) === id)
+  assert.ok(f, `site ${id} present`)
+  assert.equal(fluxScopeNotApplicable(f.properties), true, `${id} is not-applicable`)
+}
+// a covered site keeps its real split and is the only place flaring may be asserted
+const keeleSplitProps = geo.features.find(f => String(f.properties.ghgrp_id) === 'G10161').properties
+assert.equal(fluxScopeNotApplicable(keeleSplitProps), false)
+assert.equal(fluxScopeNotApplicable({ flux_scope: 'fugitive' }), false)
+assert.equal(fluxScopeNotApplicable({}), false)
+// coverage counts must stay consistent with the scope field
+assert.equal(fBreak.uncovered, geo.features.filter(f => fluxScopeNotApplicable(f.properties)).length)
 
 // hashprice read: above/below the network-derived estimate, and power break-even
 const hp = hashpriceRead({

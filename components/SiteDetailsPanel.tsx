@@ -20,6 +20,11 @@ import ScoreSparkline from '@/components/ScoreSparkline'
 import TadbuyAdHook from '@/components/TadbuyAdHook'
 import GeneratorDerateChart from '@/components/GeneratorDerateChart'
 import { trackCategory } from '@/lib/analytics'
+import {
+  fluxScopeNotApplicable,
+  FLUX_NO_SPLIT_LABEL,
+  FLUX_NO_SPLIT_HINT,
+} from '@/lib/map-filters'
 import { motion } from 'framer-motion'
 import { Send } from 'lucide-react'
 import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
@@ -554,6 +559,15 @@ export default function SiteDetailsPanel({
                   data-testid="site-flux-badge"
                 >
                   {flux.label}
+                </span>
+              )}
+              {!flux && fluxScopeNotApplicable(p) && (
+                <span
+                  className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] text-gray-300"
+                  title={FLUX_NO_SPLIT_HINT}
+                  data-testid="site-flux-not-reported"
+                >
+                  {FLUX_NO_SPLIT_LABEL}
                 </span>
               )}
               <a

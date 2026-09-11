@@ -5,6 +5,8 @@
 - **Never assert venting/flaring we cannot prove** — the venting/flaring split exists only for facilities that report a fugitive source (oil & gas). Landfill gas is filed under "Waste", so for those sites the flux UI says *no claim* instead of a false "not flaring"; `flux_scope: fugitive | not-applicable` records it
 - **Vented vs flared per site** — `ch4_vented_kg_day`, `ch4_flared_kg_day`, `flare_share_pct` from the Emissions-by-Source file, so an "already flaring" site (permits + destruction equipment in place → fastest to deploy) is findable
 - **Visible recency & flux filters** — Data recency (2024 / 2023 / 2022 or older) and Flux status (already flaring / venting) filters on map, `/sites` and `/provinces`; per-site badges and honest counts with a coverage caveat
+- **Silence is now legible** — the 1,547 sites whose reporting category publishes no venting/flaring split (91 of 111 landfills, incl. Essex-Windsor, Ridge, Walker and Vancouver) carry an explicit **"No venting/flaring split"** chip with a plain-English reason, instead of a blank that a reader could mistake for "this site does not flare"; venting-only sites also get a **"Venting"** chip beside "Currently flaring"
+- **Honest counts everywhere** — every flux count states its coverage (`208 of 1,064 sites with a fugitive split`, ~12.2% of total CH₄); `/provinces` says *"N report flaring"*, never a bare *"N flaring"*
 - `scripts/refresh-eccc-data.js` re-discovers the download URLs at run time (no rotting hard-coded link), parses the CSVs with the Node stdlib (no new deps), never silently drops a site
 
 ## [2.11.0] — 2026-09-11 · Site cockpit: the miner stack explains itself

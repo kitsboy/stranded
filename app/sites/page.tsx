@@ -17,6 +17,10 @@ import {
   matchesFlux,
   siteRecencyYear,
   isFlaringSite,
+  isVentingSite,
+  fluxScopeNotApplicable,
+  FLUX_NO_SPLIT_LABEL,
+  FLUX_NO_SPLIT_HINT,
   RECENCY_FILTERS,
   FLUX_FILTERS,
   type RecencyFilter,
@@ -284,7 +288,7 @@ export default function AllSitesExplorer() {
               : allSites.length
             return (
               <option key={f.id} value={f.id}>
-                {f.id === 'any' ? 'Reported: any year' : `Reported: ${f.label}`} ({count})
+                {f.id === 'any' ? 'Reported: any year' : `Reported: ${f.label}`} ({allSites.length > 0 ? count : '—'})
               </option>
             )
           })}
@@ -302,7 +306,7 @@ export default function AllSitesExplorer() {
               : allSites.length
             return (
               <option key={f.id} value={f.id}>
-                {f.id === 'any' ? 'Flux: any' : `Flux: ${f.label}`} ({count})
+                {f.id === 'any' ? 'Flux: any' : `Flux: ${f.label}`} ({allSites.length > 0 ? count : '—'})
               </option>
             )
           })}
@@ -375,6 +379,20 @@ export default function AllSitesExplorer() {
                   {isFlaringSite(p) && (
                     <span className="rounded-full border border-[#FF8C00]/50 bg-[#FF8C00]/10 px-2 py-0.5 text-[10px] text-[#FF8C00]" title="Reports CH₄ sent to flare — permits and equipment already in place">
                       Currently flaring
+                    </span>
+                  )}
+                  {!isFlaringSite(p) && isVentingSite(p) && (
+                    <span className="rounded-full border border-amber-400/50 bg-amber-400/10 px-2 py-0.5 text-[10px] text-amber-200" title="Reports vented CH₄ — nothing sent to flare in the published split">
+                      Venting
+                    </span>
+                  )}
+                  {fluxScopeNotApplicable(p) && (
+                    <span
+                      className="rounded-full border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] text-gray-300"
+                      title={FLUX_NO_SPLIT_HINT}
+                      data-testid="sites-flux-not-reported"
+                    >
+                      {FLUX_NO_SPLIT_LABEL}
                     </span>
                   )}
                 </div>

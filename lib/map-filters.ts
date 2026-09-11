@@ -123,6 +123,23 @@ export function fluxNotReported(props: unknown): boolean {
   return p.flux_status === 'not_reported' || p.flux_status === 'unknown' || p.flux_status == null
 }
 
+/**
+ * True when the source type itself carries no fugitive venting/flaring split —
+ * landfill gas is filed under ECCC "Waste", not "Fugitives" (oil & gas).
+ * Silence must be legible: these sites get an explicit "no split published"
+ * chip instead of a blank where other sites show a flare/vent badge.
+ */
+export function fluxScopeNotApplicable(props: unknown): boolean {
+  const p = asProps(props)
+  return p?.flux_scope === 'not-applicable'
+}
+
+export const FLUX_NO_SPLIT_LABEL = 'No venting/flaring split'
+export const FLUX_NO_SPLIT_HINT =
+  'ECCC publishes the venting/flaring split for fugitive sources — oil & gas. ' +
+  'Landfill gas is reported under "Waste", so no split exists for this site. ' +
+  'We make no claim either way.'
+
 export function matchesFlux(props: unknown, filter: FluxFilter): boolean {
   if (filter === 'any') return true
   if (filter === 'flaring') return isFlaringSite(props)

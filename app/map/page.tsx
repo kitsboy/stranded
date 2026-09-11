@@ -392,6 +392,9 @@ function StrandedCommandCenter() {
   // How fresh the dataset is overall — drives the labels + counts beside the filters.
   const recencyStats = useMemo(() => recencyBreakdown(allSites), [allSites])
   const fluxStats = useMemo(() => fluxBreakdown(allSites), [allSites])
+  // Never print a coverage count before the dataset is in: "0 of 0 with a
+  // fugitive split" is a false claim, not an empty state.
+  const statsReady = !loading && allSites.length > 0
 
   const activeFilterCount = useMemo(() => countActiveMapFilters(filterState), [filterState])
 
@@ -1329,7 +1332,9 @@ function StrandedCommandCenter() {
                   <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
                     <span>DATA RECENCY</span>
                     <span className="text-[10px] normal-case tracking-normal text-gray-400">
-                      {recencyStats.newestYear ? `newest ${recencyStats.newestYear}` : 'no year data'}
+                      {statsReady
+                        ? (recencyStats.newestYear ? `newest ${recencyStats.newestYear}` : 'no year data')
+                        : 'loading dataset…'}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -1347,7 +1352,7 @@ function StrandedCommandCenter() {
                           className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${recencyFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                           data-testid={`recency-filter-${f.id}`}
                         >
-                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{count}</span>
+                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
                         </button>
                       )
                     })}
@@ -1363,7 +1368,7 @@ function StrandedCommandCenter() {
                   <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
                     <span>FLUX STATUS</span>
                     <span className="text-[10px] normal-case tracking-normal text-gray-400">
-                      {fluxStats.flaring} of {fluxStats.covered} with a fugitive split
+                      {statsReady ? `${fluxStats.flaring} of ${fluxStats.covered} with a fugitive split` : 'loading dataset…'}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -1380,18 +1385,20 @@ function StrandedCommandCenter() {
                           className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${fluxFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
                           data-testid={`flux-filter-${f.id}`}
                         >
-                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{count}</span>
+                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{statsReady ? count : '—'}</span>
                         </button>
                       )
                     })}
                   </div>
-                  <p className="text-[9px] text-gray-400 mt-1">
-                    From ECCC &ldquo;Emissions by Source&rdquo;. Sites that already flare have the permits and
-                    destruction equipment in place — fastest to deploy.{' '}
-                    <strong className="text-gray-300">Only {fluxStats.covered} of {allSites.length} sites have a
-                    published venting/flaring split</strong>; for the rest ({fluxStats.uncovered}, mostly landfills
-                    whose gas ECCC reports under &ldquo;Waste&rdquo;) we do not know and do not claim either way.
-                  </p>
+                  {statsReady && (
+                    <p className="text-[9px] text-gray-400 mt-1">
+                      From ECCC &ldquo;Emissions by Source&rdquo;. Sites that already flare have the permits and
+                      destruction equipment in place — fastest to deploy.{' '}
+                      <strong className="text-gray-300">Only {fluxStats.covered} of {allSites.length} sites have a
+                      published venting/flaring split</strong>; for the rest ({fluxStats.uncovered}, mostly landfills
+                      whose gas ECCC reports under &ldquo;Waste&rdquo;) we do not know and do not claim either way.
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-3 border-t border-white/10">
@@ -1546,17 +1553,17 @@ function StrandedCommandCenter() {
           flux={fluxFilter}
           onRecencyChange={setRecencyFilter}
           onFluxChange={setFluxFilter}
-          recencyCounts={{
+          recencyCounts={statsReady ? {
             any: allSites.length,
             y2024: recencyStats.y2024,
             y2023: recencyStats.y2023,
             older: recencyStats.older,
-          }}
-          fluxCounts={{
+          } : undefined}
+          fluxCounts={statsReady ? {
             any: allSites.length,
             flaring: fluxStats.flaring,
             venting: fluxStats.ventingOnly + fluxStats.both,
-          }}
+          } : undefined}
           onMinEmissionChange={setMinEmission}
           onMaxEmissionChange={setMaxEmission}
           onMinScoreChange={setMinScore}
