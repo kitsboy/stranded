@@ -83,18 +83,18 @@ This file + README.md + the live app + Marketing assets are the primary current 
 **Template Rule:** Every future Give A Bit project must include at least this level of documentation: GitHub source, live URLs (dev + prod), deployment details, key docs list, simple pitch, Git snapshot, mission alignment, gaps, and clean hand-off note.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T15:30:13.169Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T16:04:47.687Z
 
 | Metric | Value |
 |--------|-------|
 | Sites | 2,611 |
 | Provinces | 13 |
-| Daily methane (kg) | 2,053,504 |
-| CH₄ (tonnes/yr) | 749,529 |
-| Avg Stranded Score | 60.4 |
-| High-score sites (≥80) | 108 |
-| 5% CO₂e avoided/yr | 1,049,340 t |
-| Model annual revenue | $15,090,541,726 (@ $85,000 BTC) |
+| Daily methane (kg) | 1,967,567 |
+| CH₄ (tonnes/yr) | 718,162 |
+| Avg Stranded Score | 60.3 |
+| High-score sites (≥80) | 103 |
+| 5% CO₂e avoided/yr | 1,005,427 t |
+| Model annual revenue | $14,458,890,380 (@ $85,000 BTC) |
 
 Full breakdown: [docs/LIVE-STATS.md](./LIVE-STATS.md) · Live JSON: `/data/live-stats.json` · Pitch: [https://stranded.giveabit.io/pitch](https://stranded.giveabit.io/pitch)
 <!-- LIVE-STATS:END -->

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-11T15:30:13.169Z",
+  "generatedAt": "2026-09-11T16:04:47.687Z",
   "version": "2.11.0",
-  "buildId": "20260911153013",
+  "buildId": "20260911160447",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
@@ -9,105 +9,105 @@
       "name": "Alberta",
       "count": 1176,
       "pct": 45,
-      "emissionKgDay": 702538,
-      "ch4TonnesYear": 256426,
-      "estRevenueUsd": 5162729459
+      "emissionKgDay": 692886,
+      "ch4TonnesYear": 252904,
+      "estRevenueUsd": 5091750440
     },
     {
       "name": "Ontario",
       "count": 454,
       "pct": 17.4,
-      "emissionKgDay": 461937,
-      "ch4TonnesYear": 168607,
-      "estRevenueUsd": 3394626659
+      "emissionKgDay": 442053,
+      "ch4TonnesYear": 161349,
+      "estRevenueUsd": 3248473384
     },
     {
       "name": "British Columbia",
       "count": 296,
       "pct": 11.3,
-      "emissionKgDay": 284328,
-      "ch4TonnesYear": 103780,
-      "estRevenueUsd": 2089435610
+      "emissionKgDay": 275851,
+      "ch4TonnesYear": 100686,
+      "estRevenueUsd": 2027124287
     },
     {
       "name": "Saskatchewan",
       "count": 280,
       "pct": 10.7,
-      "emissionKgDay": 225423,
-      "ch4TonnesYear": 82279,
-      "estRevenueUsd": 1656560120
+      "emissionKgDay": 226737,
+      "ch4TonnesYear": 82759,
+      "estRevenueUsd": 1666202747
     },
     {
       "name": "Quebec",
       "count": 243,
       "pct": 9.3,
-      "emissionKgDay": 184166,
-      "ch4TonnesYear": 67221,
-      "estRevenueUsd": 1353380020
+      "emissionKgDay": 150823,
+      "ch4TonnesYear": 55050,
+      "estRevenueUsd": 1108339923
     },
     {
       "name": "Manitoba",
       "count": 50,
       "pct": 1.9,
-      "emissionKgDay": 71216,
-      "ch4TonnesYear": 25994,
-      "estRevenueUsd": 523341421
+      "emissionKgDay": 49691,
+      "ch4TonnesYear": 18137,
+      "estRevenueUsd": 365156913
     },
     {
       "name": "Nova Scotia",
       "count": 37,
       "pct": 1.4,
-      "emissionKgDay": 60449,
-      "ch4TonnesYear": 22064,
-      "estRevenueUsd": 444219649
+      "emissionKgDay": 58239,
+      "ch4TonnesYear": 21257,
+      "estRevenueUsd": 427972342
     },
     {
       "name": "New Brunswick",
       "count": 30,
       "pct": 1.1,
-      "emissionKgDay": 50201,
-      "ch4TonnesYear": 18323,
-      "estRevenueUsd": 368911106
+      "emissionKgDay": 54383,
+      "ch4TonnesYear": 19850,
+      "estRevenueUsd": 399638442
     },
     {
       "name": "Newfoundland and Labrador",
       "count": 18,
       "pct": 0.7,
-      "emissionKgDay": 12508,
-      "ch4TonnesYear": 4565,
-      "estRevenueUsd": 91915090
+      "emissionKgDay": 16325,
+      "ch4TonnesYear": 5959,
+      "estRevenueUsd": 119966400
     },
     {
       "name": "Northwest Territories",
       "count": 10,
       "pct": 0.4,
-      "emissionKgDay": 564,
-      "ch4TonnesYear": 206,
-      "estRevenueUsd": 4140981
+      "emissionKgDay": 339,
+      "ch4TonnesYear": 124,
+      "estRevenueUsd": 2489931
     },
     {
       "name": "Nunavut",
       "count": 8,
       "pct": 0.3,
-      "emissionKgDay": 70,
-      "ch4TonnesYear": 25,
-      "estRevenueUsd": 511468
+      "emissionKgDay": 116,
+      "ch4TonnesYear": 42,
+      "estRevenueUsd": 851043
     },
     {
       "name": "Prince Edward Island",
       "count": 5,
       "pct": 0.2,
-      "emissionKgDay": 41,
-      "ch4TonnesYear": 15,
-      "estRevenueUsd": 304235
+      "emissionKgDay": 56,
+      "ch4TonnesYear": 20,
+      "estRevenueUsd": 409097
     },
     {
       "name": "Yukon",
       "count": 4,
       "pct": 0.2,
-      "emissionKgDay": 63,
-      "ch4TonnesYear": 23,
-      "estRevenueUsd": 465906
+      "emissionKgDay": 70,
+      "ch4TonnesYear": 26,
+      "estRevenueUsd": 515432
     }
   ],
   "sourceTypes": [
@@ -170,31 +170,31 @@
   "gensetRecommendations": [
     {
       "id": "mobile250",
-      "count": 2530,
-      "pct": 96.9
+      "count": 2537,
+      "pct": 97.2
     },
     {
       "id": "jenbacher316",
-      "count": 47,
-      "pct": 1.8
+      "count": 43,
+      "pct": 1.6
     },
     {
       "id": "cat3520",
-      "count": 22,
-      "pct": 0.8
+      "count": 18,
+      "pct": 0.7
     },
     {
       "id": "man",
-      "count": 12,
+      "count": 13,
       "pct": 0.5
     }
   ],
   "emissionTiers": {
-    "mega": 12,
-    "large": 69,
-    "medium": 316,
-    "small": 1055,
-    "micro": 1159
+    "mega": 13,
+    "large": 61,
+    "medium": 315,
+    "small": 1071,
+    "micro": 1151
   },
   "confidenceCounts": {
     "high": 675,
@@ -202,134 +202,116 @@
     "low": 1035
   },
   "totals": {
-    "emissionKgDay": 2053504,
-    "avgEmissionKgDay": 786,
-    "ch4TonnesYear": 749529,
-    "avgStrandedScore": 60.4,
-    "totalGeneratorKW": 9958985,
-    "highScoreSites": 108
+    "emissionKgDay": 1967567,
+    "avgEmissionKgDay": 754,
+    "ch4TonnesYear": 718162,
+    "avgStrandedScore": 60.3,
+    "totalGeneratorKW": 9542215,
+    "highScoreSites": 103
   },
   "impact": {
-    "co2eAvoided5PctTonnes": 1049340,
-    "co2eAvoided100PctTonnes": 20986807,
+    "co2eAvoided5PctTonnes": 1005427,
+    "co2eAvoided100PctTonnes": 20108547,
     "sitesAt5Pct": 131,
     "methaneGwp": 28
   },
   "valueModel": {
     "defaultBtcUsd": 85000,
-    "roughDailyBtc": 511.9994,
-    "annualBtc": 177535.79,
-    "annualRevenueUsd": 15090541726,
+    "roughDailyBtc": 490.5684,
+    "annualBtc": 170104.59,
+    "annualRevenueUsd": 14458890380,
     "note": "Portfolio model uses Jenbacher-class power + ASIC heuristics; live BTC on pitch page."
   },
   "topSites": [
     {
-      "id": "G10161",
-      "name": "Keele Valley Landfill",
-      "province": "Ontario",
-      "emissionKgDay": 56014,
-      "score": 93,
-      "genset": "man",
-      "ch4TonnesYear": 20445
-    },
-    {
       "id": "G12147",
       "name": "Enbridge Gas Inc. - Distribution",
       "province": "Ontario",
-      "emissionKgDay": 37260,
-      "score": 91.7,
+      "emissionKgDay": 39072,
+      "score": 91.9,
       "genset": "man",
-      "ch4TonnesYear": 13600
+      "ch4TonnesYear": 14261
     },
     {
       "id": "G10365",
       "name": "Essex-Windsor Regional Landfill",
       "province": "Ontario",
-      "emissionKgDay": 32856,
+      "emissionKgDay": 32544,
       "score": 90.9,
       "genset": "man",
-      "ch4TonnesYear": 11993
-    },
-    {
-      "id": "G10026",
-      "name": "Brady Road Resource Management Facility",
-      "province": "Manitoba",
-      "emissionKgDay": 48874,
-      "score": 90.4,
-      "genset": "man",
-      "ch4TonnesYear": 17839
-    },
-    {
-      "id": "G10343",
-      "name": "Ridge Landfill",
-      "province": "Ontario",
-      "emissionKgDay": 26786,
-      "score": 90.1,
-      "genset": "man",
-      "ch4TonnesYear": 9777
-    },
-    {
-      "id": "G10337",
-      "name": "Walker Environmental Group Inc. Landfill Sites",
-      "province": "Ontario",
-      "emissionKgDay": 19130,
-      "score": 88.7,
-      "genset": "cat3520",
-      "ch4TonnesYear": 6982
-    },
-    {
-      "id": "G10187",
-      "name": "Mildred Lake and Aurora Plant Sites",
-      "province": "Alberta",
-      "emissionKgDay": 37140,
-      "score": 88.5,
-      "genset": "man",
-      "ch4TonnesYear": 13556
-    },
-    {
-      "id": "G10115",
-      "name": "Fording River Operations",
-      "province": "British Columbia",
-      "emissionKgDay": 32951,
-      "score": 88.2,
-      "genset": "man",
-      "ch4TonnesYear": 12027
-    },
-    {
-      "id": "G10376",
-      "name": "Britannia Sanitary Landfill Site",
-      "province": "Ontario",
-      "emissionKgDay": 16885,
-      "score": 88.2,
-      "genset": "cat3520",
-      "ch4TonnesYear": 6163
-    },
-    {
-      "id": "G10344",
-      "name": "Sainte Sophie Landfill",
-      "province": "Quebec",
-      "emissionKgDay": 18970,
-      "score": 88.1,
-      "genset": "cat3520",
-      "ch4TonnesYear": 6924
+      "ch4TonnesYear": 11879
     },
     {
       "id": "G10762",
       "name": "Twin Creeks Landfill (formerly Warwick Landfill)",
       "province": "Ontario",
-      "emissionKgDay": 16481,
-      "score": 88.1,
-      "genset": "cat3520",
-      "ch4TonnesYear": 6016
+      "emissionKgDay": 31370,
+      "score": 90.7,
+      "genset": "man",
+      "ch4TonnesYear": 11450
     },
     {
-      "id": "G10105",
-      "name": "Elkview Operations",
-      "province": "British Columbia",
-      "emissionKgDay": 27161,
-      "score": 87.5,
+      "id": "G10161",
+      "name": "Keele Valley Landfill",
+      "province": "Ontario",
+      "emissionKgDay": 21810,
+      "score": 89.3,
       "genset": "man",
-      "ch4TonnesYear": 9914
+      "ch4TonnesYear": 7961
+    },
+    {
+      "id": "G10337",
+      "name": "Walker Environmental Group Inc. Landfill Sites",
+      "province": "Ontario",
+      "emissionKgDay": 20160,
+      "score": 88.9,
+      "genset": "man",
+      "ch4TonnesYear": 7358
+    },
+    {
+      "id": "G10115",
+      "name": "Fording River Operations",
+      "province": "British Columbia",
+      "emissionKgDay": 34657,
+      "score": 88.4,
+      "genset": "man",
+      "ch4TonnesYear": 12650
+    },
+    {
+      "id": "G10026",
+      "name": "Brady Road Resource Management Facility",
+      "province": "Manitoba",
+      "emissionKgDay": 27370,
+      "score": 88.1,
+      "genset": "man",
+      "ch4TonnesYear": 9990
+    },
+    {
+      "id": "G10343",
+      "name": "Ridge Landfill",
+      "province": "Ontario",
+      "emissionKgDay": 15788,
+      "score": 87.9,
+      "genset": "cat3520",
+      "ch4TonnesYear": 5763
+    },
+    {
+      "id": "G10376",
+      "name": "Britannia Sanitary Landfill Site",
+      "province": "Ontario",
+      "emissionKgDay": 15191,
+      "score": 87.8,
+      "genset": "cat3520",
+      "ch4TonnesYear": 5545
+    },
+    {
+      "id": "G10187",
+      "name": "Mildred Lake and Aurora Plant Sites",
+      "province": "Alberta",
+      "emissionKgDay": 30134,
+      "score": 87.6,
+      "genset": "man",
+      "ch4TonnesYear": 10999
     },
     {
       "id": "G10558",
@@ -341,22 +323,40 @@
       "ch4TonnesYear": 10412
     },
     {
+      "id": "G10105",
+      "name": "Elkview Operations",
+      "province": "British Columbia",
+      "emissionKgDay": 26639,
+      "score": 87.4,
+      "genset": "man",
+      "ch4TonnesYear": 9723
+    },
+    {
+      "id": "G10443",
+      "name": "Vancouver Landfill",
+      "province": "British Columbia",
+      "emissionKgDay": 14037,
+      "score": 87.4,
+      "genset": "cat3520",
+      "ch4TonnesYear": 5123
+    },
+    {
       "id": "G10471",
       "name": "Green Lane Landfill",
       "province": "Ontario",
-      "emissionKgDay": 13014,
-      "score": 87.1,
+      "emissionKgDay": 13384,
+      "score": 87.3,
       "genset": "cat3520",
-      "ch4TonnesYear": 4750
+      "ch4TonnesYear": 4885
     },
     {
-      "id": "G10193",
-      "name": "Mohawk Street Landfill",
-      "province": "Ontario",
-      "emissionKgDay": 12524,
-      "score": 87,
+      "id": "G10433",
+      "name": "Hartland Landfill",
+      "province": "British Columbia",
+      "emissionKgDay": 13379,
+      "score": 87.2,
       "genset": "cat3520",
-      "ch4TonnesYear": 4571
+      "ch4TonnesYear": 4883
     }
   ],
   "routes": {
@@ -372,7 +372,7 @@
     "github": "https://github.com/kitsboy/stranded",
     "dataSource": "https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
   },
-  "ecccReportingYear": 2023,
+  "ecccReportingYear": 2024,
   "scoreHistogram": [
     {
       "bucket": "0–9",
@@ -392,7 +392,7 @@
     },
     {
       "bucket": "40–49",
-      "count": 262
+      "count": 252
     },
     {
       "bucket": "50–59",
@@ -400,19 +400,19 @@
     },
     {
       "bucket": "60–69",
-      "count": 935
+      "count": 956
     },
     {
       "bucket": "70–79",
-      "count": 264
+      "count": 258
     },
     {
       "bucket": "80–89",
-      "count": 103
+      "count": 100
     },
     {
       "bucket": "90–99",
-      "count": 5
+      "count": 3
     }
   ]
 }
