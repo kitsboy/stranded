@@ -22,8 +22,24 @@ export type StampResult = {
   status: string
   created_at?: string
   ipfs_cid?: string
+  /** Present when the API returns these directly; use findStampByHash() otherwise. */
+  confirmedAt?: string | null
+  bitcoinBlockHeight?: number | null
   verifyUrl: string
   proofUrl: string
+}
+
+/** One record from GET /api/stamps. */
+export type StampRecord = {
+  id: string
+  hash: string
+  status: string
+  filename?: string
+  client_id?: string
+  client?: string
+  created_at?: string
+  confirmed_at?: string | null
+  bitcoin_block_height?: number | null
 }
 
 export type ApiHealth = {
@@ -127,6 +143,8 @@ export async function stampHash(
     status?: string
     created_at?: string
     ipfs_cid?: string
+    confirmed_at?: string | null
+    bitcoin_block_height?: number | null
   }
 
   if (!data.id) {
@@ -140,9 +158,54 @@ export async function stampHash(
     status: data.status ?? 'pending',
     created_at: data.created_at,
     ipfs_cid: data.ipfs_cid,
+    confirmedAt: data.confirmed_at ?? null,
+    bitcoinBlockHeight: data.bitcoin_block_height ?? null,
     verifyUrl: `${SATOHASH_SITE}/verify/${data.id}`,
     proofUrl: `${SATOHASH_API}/api/stamps/${data.id}`,
   }
+}
+
+/**
+ * GET /api/stamps — newest first.
+ *
+ * The endpoint IGNORES filter query params (`?hash=`, `?id=`) and returns the global
+ * list; the response `total` is the system-wide stamp count, not a match count. Always
+ * page and match client-side.
+ */
+export async function listRecentStamps(opts?: {
+  maxPages?: number
+  pageSize?: number
+  signal?: AbortSignal
+  timeoutMs?: number
+}): Promise<StampRecord[]> {
+  const maxPages = Math.max(1, opts?.maxPages ?? 3)
+  const limit = Math.min(100, Math.max(1, opts?.pageSize ?? 100))
+  const out: StampRecord[] = []
+
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await fetch(`${SATOHASH_API}/api/stamps?limit=${limit}&page=${page}`, {
+      method: 'GET',
+      headers: clientHeaders(),
+      signal: withTimeout(opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS, opts?.signal),
+    })
+    if (!res.ok) throw new Error(`Satohash stamps list failed: ${res.status}`)
+    const data = (await res.json()) as { stamps?: StampRecord[] }
+    const stamps = Array.isArray(data.stamps) ? data.stamps : []
+    out.push(...stamps)
+    if (stamps.length < limit) break
+  }
+
+  return out
+}
+
+/** Find one stamp by hash by paging the list (the `?hash=` filter is not honored). */
+export async function findStampByHash(
+  hash: string,
+  opts?: { maxPages?: number; signal?: AbortSignal; timeoutMs?: number },
+): Promise<StampRecord | null> {
+  const clean = hash.trim().toLowerCase()
+  const stamps = await listRecentStamps(opts)
+  return stamps.find((s) => s.hash && s.hash.toLowerCase() === clean) ?? null
 }
 
 /** Public verify page for a stamp id or hash. */

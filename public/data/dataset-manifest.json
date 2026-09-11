@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-11T19:41:29.967Z",
+  "dataSnapshotAt": "2026-09-11T19:41:29.383Z",
+  "buildId": "20260911194129",
+  "appVersion": "2.11.0",
+  "sha256": "dd3dca7160a338226d5ecabc4dc6745ef025129c41717c0a3e0b1b92d8d50484",
+  "sha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson + live-stats.json followed by the bytes of dataset-canonical-payload.json",
+  "dataSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
+  "dataSha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson",
+  "canonicalPayloadFile": {
+    "name": "dataset-canonical-payload.json",
+    "url": "/data/dataset-canonical-payload.json",
+    "bytes": 321,
+    "sha256": "98512dbb07cf5478ac093e04ad856d9da07f1eecc5e12643d0ad3cc34dfc9dd6",
+    "contents": "{\"datasetVersion\":1,\"files\":[{\"bytes\":2847508,\"name\":\"stranded-sites-REAL.geojson\",\"sha256\":\"28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b\"},{\"bytes\":8782,\"name\":\"live-stats.json\",\"sha256\":\"507c8ecae4823ac935d90389f339311e676654ca7697ba9fc24982e22df83822\"}],\"newestReferenceYear\":2024,\"siteCount\":2611}"
+  },
+  "files": [
+    {
+      "name": "stranded-sites-REAL.geojson",
+      "url": "/data/stranded-sites-REAL.geojson",
+      "bytes": 2847508,
+      "sizeMb": 2.72,
+      "gzipBytes": 229183,
+      "sha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b"
+    },
+    {
+      "name": "live-stats.json",
+      "url": "/data/live-stats.json",
+      "bytes": 8782,
+      "sizeMb": 0.01,
+      "gzipBytes": 2170,
+      "sha256": "507c8ecae4823ac935d90389f339311e676654ca7697ba9fc24982e22df83822"
+    }
+  ],
+  "siteCount": 2611,
+  "newestReferenceYear": 2024,
+  "primaryFile": {
+    "name": "stranded-sites-REAL.geojson",
+    "url": "/data/stranded-sites-REAL.geojson",
+    "bytes": 2847508,
+    "sizeMb": 2.72,
+    "gzipBytes": 229183,
+    "sha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b"
+  },
+  "proof": {
+    "targetSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
+    "target": "stranded-sites-REAL.geojson",
+    "durable": true,
+    "id": "74449082-7b9b-4667-b5ff-7ef6e092484b",
+    "filename": "stranded-sites-REAL.geojson",
+    "status": "pending",
+    "submittedAt": "2026-09-11T19:40:30.058Z",
+    "confirmedAt": null,
+    "bitcoinBlockHeight": null,
+    "verifyUrl": "https://satohash.io/verify/74449082-7b9b-4667-b5ff-7ef6e092484b",
+    "checkedAt": "2026-09-11T19:40:30.291Z",
+    "carriedFromPreviousBuild": true
+  },
+  "snapshotProof": null,
+  "proofError": null,
+  "proofHistory": [
+    {
+      "targetSha256": "5a0dc6c4326d2e6441635363991a36da7470f83f14a6cf39f2664f52df07dc6b",
+      "target": "earlier published digest",
+      "durable": false,
+      "id": "4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
+      "status": "confirmed",
+      "submittedAt": "2026-09-11T16:43:02.000Z",
+      "confirmedAt": "2026-09-11T18:03:03.000Z",
+      "bitcoinBlockHeight": 966531,
+      "verifyUrl": "https://satohash.io/verify/4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
+      "superseded": true,
+      "note": "Earlier snapshot digest, superseded by a later build — the timestamp still fixes that version in time."
+    },
+    {
+      "targetSha256": "5a0dc6c4326d2e6441635363991a36da7470f83f14a6cf39f2664f52df07dc6b",
+      "target": "earlier published digest",
+      "durable": false,
+      "id": "4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
+      "status": "confirmed",
+      "submittedAt": "2026-09-11T16:43:02.000Z",
+      "confirmedAt": "2026-09-11T18:03:03.000Z",
+      "bitcoinBlockHeight": 966531,
+      "verifyUrl": "https://satohash.io/verify/4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
+      "superseded": true,
+      "note": "Earlier published digest, superseded by a later build — the timestamp still fixes that version in time."
+    }
+  ],
+  "verifyInstructions": [
+    "Download the files from this page (right-click → Save link as, or use the download links).",
+    "On macOS, Linux or WSL run: sha256sum stranded-sites-REAL.geojson",
+    "Compare that output with the published data-file SHA-256: 28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b. It must match exactly.",
+    "Run: sha256sum live-stats.json and compare with the value listed for that file.",
+    "To reproduce the full dataset digest, download dataset-canonical-payload.json as well, then run: cat stranded-sites-REAL.geojson live-stats.json dataset-canonical-payload.json > stranded-payload.bin",
+    "Then run: sha256sum stranded-payload.bin — it must equal dd3dca7160a338226d5ecabc4dc6745ef025129c41717c0a3e0b1b92d8d50484.",
+    "The canonical payload file is a sorted list of file names, sizes and digests with no timestamps in it, so the full dataset digest depends only on the published data, not on when you run it.",
+    "If a timestamp is published above, open its verification link to see the Bitcoin block that anchors that digest."
+  ]
+}
