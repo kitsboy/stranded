@@ -188,10 +188,11 @@ function buildManifest() {
  */
 function pickProof(previous, sha256, dataSha256) {
   const priorHistory = Array.isArray(previous && previous.proofHistory) ? previous.proofHistory : []
+  const seen = new Set()
   const history = priorHistory
     .filter((h) => h && h.status === 'confirmed')
     .map(normalizeHistoryEntry)
-    .filter((h) => h.targetSha256)
+    .filter((h) => h.targetSha256 && !seen.has(h.targetSha256) && seen.add(h.targetSha256))
     .slice(0, MAX_HISTORY)
 
   let proof = null

@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-11T19:41:29.967Z",
-  "dataSnapshotAt": "2026-09-11T19:41:29.383Z",
-  "buildId": "20260911194129",
+  "generatedAt": "2026-09-11T19:52:42.050Z",
+  "dataSnapshotAt": "2026-09-11T19:52:41.411Z",
+  "buildId": "20260911195241",
   "appVersion": "2.11.0",
-  "sha256": "dd3dca7160a338226d5ecabc4dc6745ef025129c41717c0a3e0b1b92d8d50484",
+  "sha256": "ac6f98b27e38d68dfa3c07fa7f80ee76da714cd079c5cc01d58d5825a4e68ce9",
   "sha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson + live-stats.json followed by the bytes of dataset-canonical-payload.json",
   "dataSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
   "dataSha256Scope": "sha256 of the raw bytes of stranded-sites-REAL.geojson",
@@ -12,8 +12,8 @@
     "name": "dataset-canonical-payload.json",
     "url": "/data/dataset-canonical-payload.json",
     "bytes": 321,
-    "sha256": "98512dbb07cf5478ac093e04ad856d9da07f1eecc5e12643d0ad3cc34dfc9dd6",
-    "contents": "{\"datasetVersion\":1,\"files\":[{\"bytes\":2847508,\"name\":\"stranded-sites-REAL.geojson\",\"sha256\":\"28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b\"},{\"bytes\":8782,\"name\":\"live-stats.json\",\"sha256\":\"507c8ecae4823ac935d90389f339311e676654ca7697ba9fc24982e22df83822\"}],\"newestReferenceYear\":2024,\"siteCount\":2611}"
+    "sha256": "8523c3e94c970ff4bee3f05d0b8e30152e409e1ce5499d26be5d325cd513eece",
+    "contents": "{\"datasetVersion\":1,\"files\":[{\"bytes\":2847508,\"name\":\"stranded-sites-REAL.geojson\",\"sha256\":\"28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b\"},{\"bytes\":8782,\"name\":\"live-stats.json\",\"sha256\":\"2bf80f4f796c90f471da82948f6beaab50ccad19284aadbb136c8cf5ed5c8a4d\"}],\"newestReferenceYear\":2024,\"siteCount\":2611}"
   },
   "files": [
     {
@@ -30,7 +30,7 @@
       "bytes": 8782,
       "sizeMb": 0.01,
       "gzipBytes": 2170,
-      "sha256": "507c8ecae4823ac935d90389f339311e676654ca7697ba9fc24982e22df83822"
+      "sha256": "2bf80f4f796c90f471da82948f6beaab50ccad19284aadbb136c8cf5ed5c8a4d"
     }
   ],
   "siteCount": 2611,
@@ -72,19 +72,6 @@
       "verifyUrl": "https://satohash.io/verify/4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
       "superseded": true,
       "note": "Earlier snapshot digest, superseded by a later build — the timestamp still fixes that version in time."
-    },
-    {
-      "targetSha256": "5a0dc6c4326d2e6441635363991a36da7470f83f14a6cf39f2664f52df07dc6b",
-      "target": "earlier published digest",
-      "durable": false,
-      "id": "4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
-      "status": "confirmed",
-      "submittedAt": "2026-09-11T16:43:02.000Z",
-      "confirmedAt": "2026-09-11T18:03:03.000Z",
-      "bitcoinBlockHeight": 966531,
-      "verifyUrl": "https://satohash.io/verify/4b61c0a3-b7f8-40bd-8e27-6c58dfadf2ed",
-      "superseded": true,
-      "note": "Earlier published digest, superseded by a later build — the timestamp still fixes that version in time."
     }
   ],
   "verifyInstructions": [
@@ -93,7 +80,7 @@
     "Compare that output with the published data-file SHA-256: 28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b. It must match exactly.",
     "Run: sha256sum live-stats.json and compare with the value listed for that file.",
     "To reproduce the full dataset digest, download dataset-canonical-payload.json as well, then run: cat stranded-sites-REAL.geojson live-stats.json dataset-canonical-payload.json > stranded-payload.bin",
-    "Then run: sha256sum stranded-payload.bin — it must equal dd3dca7160a338226d5ecabc4dc6745ef025129c41717c0a3e0b1b92d8d50484.",
+    "Then run: sha256sum stranded-payload.bin — it must equal ac6f98b27e38d68dfa3c07fa7f80ee76da714cd079c5cc01d58d5825a4e68ce9.",
     "The canonical payload file is a sorted list of file names, sizes and digests with no timestamps in it, so the full dataset digest depends only on the published data, not on when you run it.",
     "If a timestamp is published above, open its verification link to see the Bitcoin block that anchors that digest."
   ]
