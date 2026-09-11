@@ -1343,12 +1343,13 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
 .map-command-center .map-top-stack {
   top: 0.75rem;
 }
-/* 359c. A bare <input type="range"> renders ~14px tall — below any thumb-tap
-   guideline. Give every slider a 44px touch box on phones; the track and thumb keep
-   their size and stay vertically centred. The dual-range slider positions its own
-   absolute thumbs, so it is excluded. */
+/* 359c. A bare <input type="range"> renders ~14px tall and a native <select> ~20px
+   — both below any thumb-tap guideline. Give them a 44px touch box on phones; the
+   track, thumb and select chrome keep their size and stay vertically centred. The
+   dual-range slider positions its own absolute thumbs, so it is excluded. */
 @media (max-width: 767px) {
   input[type='range']:not(.dual-range-thumb) { min-height: 2.75rem; }
+  select:not([multiple]) { min-height: 2.75rem; }
 }
 @media (max-width: 900px) {
   .map-command-center .map-top-stack {

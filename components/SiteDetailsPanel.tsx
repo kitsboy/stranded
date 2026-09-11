@@ -613,7 +613,7 @@ export default function SiteDetailsPanel({
               aria-pressed={bookmarked}
             >{bookmarked ? '★' : '☆'}</button>
           )}
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close site details">✕</button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white h-11 w-11 md:h-6 md:w-6 inline-flex items-center justify-center shrink-0" aria-label="Close site details">✕</button>
         </div>
       </div>
 

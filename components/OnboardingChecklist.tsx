@@ -78,7 +78,7 @@ export default function OnboardingChecklist() {
               aria-label={item.label}
             />
             {item.href ? (
-              <Link href={item.href} className="text-gray-200 hover:text-[#5BC0BE]">
+              <Link href={item.href} className="text-gray-200 hover:text-[#5BC0BE] inline-flex items-center min-h-11 md:min-h-0">
                 {item.label}
               </Link>
             ) : (

@@ -22,7 +22,10 @@ test('map loads sites', async ({ page }) => {
 
 test('pitch shows live stats', async ({ page }) => {
   await page.goto('/pitch')
-  await expect(page.getByText('Verified Sites', { exact: true }).first()).toBeVisible({ timeout: 10000 })
+  // The honesty pass retired the "Verified" claim (the stat card label is now
+  // "Mapped Sites", lib/i18n.ts pitchVerifiedSites). Asserting the honest wording
+  // means a regression back to "Verified Sites" fails loudly instead of shipping.
+  await expect(page.getByText('Mapped Sites', { exact: true }).first()).toBeVisible({ timeout: 10000 })
 })
 
 test('pitch stat cards and capture simulator', async ({ page }) => {
