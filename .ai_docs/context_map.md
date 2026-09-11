@@ -91,8 +91,7 @@
 | `typescript` | ^5 | Type system |
 | `tailwindcss` | ^3.4.10 | Utility-first CSS |
 | `framer-motion` | ^12.40.0 | Animations / transitions |
-| `maplibre-gl` | ^5.22.0 | Map rendering (self-hosted, no API key) |
-| `leaflet` / `react-leaflet` | ^1.9.4 / ^4.2.1 | Fallback map component |
+| `maplibre-gl` | ^5.22.0 | Map rendering (self-hosted, no API key) — the **only** map library |
 | `lucide-react` | ^0.577.0 | Icon library |
 | `js-cookie` | ^3.0.5 | Cookie management |
 | `qrcode.react` | ^4.2.0 | QR code generation |
@@ -210,7 +209,7 @@ node scripts/validate-data.js
 - **GitHub**: github.com/kitsboy/stranded.git
 - **Deploy**: Cloudflare Pages git integration ONLY (push to main). `./deploy.sh` builds + verifies, it does not deploy. Verify with `npm run deploy:check`.
 - **Data**: 2,611 ECCC stranded methane emission sites with live BTC pricing
-- **Maps**: MapLibre GL (primary) + Leaflet (react-leaflet, fallback)
+- **Maps**: MapLibre GL only (`components/Map.tsx`). There is no Leaflet fallback — `leaflet`, `react-leaflet` and `@types/leaflet` were removed as dead dependencies; do not re-add them.
 - **PWA**: Yes (manifest.json with shortcuts to /map, /education, /sites)
 - **Routing**: HashRouter on static export (see `_redirects`)
 - **Auth**: PasswordGate component (simple gate, no backend)

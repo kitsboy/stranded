@@ -19,7 +19,7 @@
   "gitRemote": "github.com/kitsboy/stranded.git",
   "githubRepo": "kitsboy/stranded",
   "pwaEnabled": true,
-  "mapLibraries": ["maplibre-gl 5.22.0", "leaflet 1.9.4", "react-leaflet 4.2.1"],
+  "mapLibraries": ["maplibre-gl 5.22.0"],
   "dataSources": [
     {
       "name": "ECCC Stranded Methane Sites",
