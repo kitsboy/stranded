@@ -45,8 +45,10 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
     strandedScore: score,
     potentialDailyProfitCAD,
     emission,
-    recommendedGenset: recommendGenset(emission),
-    maxGeneratorPowerKW: Math.round(computeGeneratorPower(emission)),
+    // Honesty: no reported CH₄ → no generator/ASIC recommendation (emission, hence
+    // power, is unknown). Consumers must render the "not modelled" badge instead.
+    recommendedGenset: emission > 0 ? recommendGenset(emission) : undefined,
+    maxGeneratorPowerKW: emission > 0 ? Math.round(computeGeneratorPower(emission)) : undefined,
   }
 }
 

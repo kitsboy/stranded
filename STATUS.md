@@ -44,7 +44,7 @@ npm run deploy:check   # optional post-deploy
 | `docs/DEPLOYMENT.md` | Deploy truth |
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T17:43:05.007Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-11T19:17:20.072Z
 
 | Metric | Value |
 |--------|-------|

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-11T17:43:05.007Z",
+  "generatedAt": "2026-09-11T19:17:20.072Z",
   "version": "2.11.0",
-  "buildId": "20260911174305",
+  "buildId": "20260911191720",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
@@ -201,6 +201,8 @@
     "medium": 901,
     "low": 1035
   },
+  "withReportedCh4": 2588,
+  "highConfidenceWithEmission": 675,
   "totals": {
     "emissionKgDay": 1967567,
     "avgEmissionKgDay": 754,
