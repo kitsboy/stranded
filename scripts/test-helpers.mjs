@@ -286,12 +286,40 @@ for (const domain of ['tile.openstreetmap.org', 'basemaps.cartocdn.com', 'demoti
   assert.ok(headers.includes(domain), `_headers must allow ${domain}`)
 }
 
-// map-filters (#388–389)
-const { validatePresetName, shouldShowFilterToast } = await import('../lib/map-filters.ts')
+// map-filters (#388–389) + data-recency / flux filters
+const {
+  validatePresetName, shouldShowFilterToast,
+  matchesRecency, matchesFlux, recencyBreakdown, fluxBreakdown,
+  countActiveMapFilters, buildMapFilterChips,
+  isFlaringSite, isVentingSite, fluxNotReported,
+} = await import('../lib/map-filters.ts')
 assert.deepEqual(validatePresetName('  elite AB  '), { ok: true, trimmed: 'elite AB' })
 assert.deepEqual(validatePresetName('   '), { ok: false })
 assert.equal(shouldShowFilterToast('dedupe-test'), true)
 assert.equal(shouldShowFilterToast('dedupe-test'), false)
+
+// new filters count as active, and appear as removable chips
+const baseState = {
+  minEmission: 0, maxEmission: 100_000, selectedProvinces: new Set(), selectedSources: new Set(),
+  minScore: 0, onlyMissionSites: false, gridLayer: false, internetLayer: false,
+  radiusFilter: null, recency: 'any', flux: 'any',
+}
+assert.equal(countActiveMapFilters(baseState), 0)
+assert.equal(countActiveMapFilters({ ...baseState, recency: 'older' }), 1)
+assert.equal(countActiveMapFilters({ ...baseState, recency: '2024', flux: 'flaring' }), 2)
+const chipHandlers = {
+  resetEmission: () => {}, clearScore: () => {}, clearProvinces: () => {}, clearSources: () => {},
+  clearMissionOnly: () => {}, clearGrid: () => {}, clearInternet: () => {}, clearRadius: () => {},
+  clearRecency: () => {}, clearFlux: () => {},
+}
+const chips = buildMapFilterChips(
+  { ...baseState, recency: 'older', flux: 'flaring' },
+  { emission: 'Emission', score: 'Score', provinces: 'Provinces', sources: 'Sources', missionOnly: 'Mission', grid: 'Grid', internet: 'Internet', radius: 'Radius', recency: 'Reported', flux: 'Flux' },
+  chipHandlers,
+)
+assert.equal(chips.length, 2)
+assert.ok(chips.find(c => c.id === 'recency')?.label.includes('2022 or older'))
+assert.ok(chips.find(c => c.id === 'flux')?.label.includes('Already flaring'))
 
 // pitch-metrics (v2.6.5)
 const { provinceOpportunities, portfolioCaptureProjection } = await import('../lib/pitch-metrics.ts')
@@ -640,7 +668,11 @@ const { computeGeneratorPower, GENSET_DATA } = await import('../lib/sites.ts')
 const keeleProps = geo.features.find(f => String(f.properties.ghgrp_id) === 'G10161').properties
 const keele = { id: 'G10161', emission: keeleProps.emission_rate_kg_day, properties: keeleProps }
 assert.equal(keeleProps.name, 'Keele Valley Landfill')
-assert.equal(keeleProps.emission_rate_kg_day, 56013.9)
+// Numbers move whenever the ECCC dataset is refreshed, so assert the *contract*, not a snapshot:
+// emission kg/day is the annual CH4 tonnes spread over the year, at the site's freshest filing.
+assert.ok(Math.abs(keeleProps.emission_rate_kg_day - (keeleProps.ch4_tonnes_year * 1000) / 365) < 0.5)
+assert.equal(keeleProps.reference_year, keeleProps.last_reported_year)
+assert.ok(keeleProps.last_reported_year >= 2023, `Keele should still be filing, got ${keeleProps.last_reported_year}`)
 
 // presets must key on source types that really exist in the dataset
 const datasetSourceTypes = new Set(geo.features.map(f => f.properties.source_type))
@@ -666,7 +698,7 @@ assert.equal(fleetPresetForSourceType(''), undefined)
 
 // gas ceiling = sum of genset capacity at this site's gas (same function the panel uses)
 const oneJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 1 }])
-assert.ok(Math.abs(oneJ316 - computeGeneratorPower(56013.9, 'jenbacher316')) < 1e-6)
+assert.ok(Math.abs(oneJ316 - computeGeneratorPower(keeleProps.emission_rate_kg_day, 'jenbacher316')) < 1e-6)
 const twoJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 2 }])
 assert.ok(Math.abs(twoJ316 - 2 * oneJ316) < 1e-6)
 assert.equal(siteGasCeilingKw(keele, []), 0)
@@ -694,7 +726,7 @@ assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: 500 }, kee
 const halfFleet = capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: Math.floor(ceiling / 2) }, keele)
 const unused = unusedCapacity(keele, halfFleet)
 assert.ok(unused.unusedKw > 0)
-assert.ok(Math.abs(unused.unusedKgPerDay - 56013.9 / 2) < 5, `expected ~half the gas, got ${unused.unusedKgPerDay}`)
+assert.ok(Math.abs(unused.unusedKgPerDay - keeleProps.emission_rate_kg_day / 2) < 5, `expected ~half the gas, got ${unused.unusedKgPerDay}`)
 assert.ok(Math.abs(unused.unusedTPerYear - (unused.unusedKgPerDay * 365) / 1000) < 1e-9)
 const fullFleet = unusedCapacity(keele, capFleetToSite(autoTpl, keele))
 // at the ceiling the only remainder is the floor() of the last machine
@@ -752,7 +784,8 @@ assert.deepEqual(rescaleToSite(shapeTpl, bigSite, bigSite).gensets, shapeTpl.gen
 const autoRescaled = rescaleToSite({ ...shapeTpl, mode: 'auto', minerCount: 0 }, bigSite, smallSite)
 assert.equal(autoRescaled.minerCount, minerCeiling(siteGasCeilingKw(smallSite, autoRescaled.gensets), 4050))
 // median-gas match, not the first or min
-assert.equal(referenceSiteForPreset(MINER_STACK_PRESETS[0], [smallSite, bigSite, keele]).emission, 50000)
+const midSite = { emission: 20000, properties: { source_type: 'landfill_waste' } }
+assert.equal(referenceSiteForPreset(MINER_STACK_PRESETS[0], [smallSite, bigSite, midSite]).emission, 20000)
 assert.equal(referenceSiteForPreset(MINER_STACK_PRESETS[0], [{ emission: 400, properties: { source_type: 'refinery' } }]), null)
 
 // map URL carries the fleet additively; nothing else changes
@@ -946,13 +979,59 @@ assert.ok(vent.capturedFraction > 0.89 && vent.capturedFraction < 0.9)
 
 // honesty badges: render from real fields, degrade to null when absent
 const recency = dataRecencyBadge(keeleProps)
-assert.ok(recency && recency.label.includes('ECCC') && recency.label.includes('2023'))
+assert.ok(recency && recency.label.includes('ECCC') && recency.label.includes(String(keeleProps.last_reported_year)))
 assert.equal(recency.detail, 'high confidence')
+assert.equal(recency.stale, false)
 assert.equal(dataRecencyBadge({}), null)
 assert.equal(dataRecencyBadge(null), null)
-assert.equal(fluxBadge(keeleProps), null) // dataset carries no flux field today
+// a pre-2023 filing must announce itself instead of looking current
+const staleBadge = dataRecencyBadge({ data_source: 'ECCC-GHGRP', last_reported_year: 2011, confidence: 'high' })
+assert.ok(staleBadge && staleBadge.stale === true && staleBadge.tier === 'low')
+assert.ok(staleBadge.detail.includes('stale'))
+assert.equal(fluxBadge(keeleProps).label, 'Currently flaring') // Keele filed 77 t CH4 to flare in the refreshed data
 assert.equal(fluxBadge({ flux_status: 'Currently flaring' }).label, 'Currently flaring')
 assert.equal(fluxBadge({ flux_status: 'venting' }).tone, 'vent')
+assert.equal(fluxBadge({ flux_status: 'both' }).label, 'Flaring + venting')
+assert.equal(fluxBadge({ flux_status: 'none' }), null)
+assert.equal(fluxBadge({ flux_status: 'unknown' }), null)
+
+// recency + flux filters select the right sites against the live dataset
+assert.equal(matchesRecency({ last_reported_year: 2024 }, '2024'), true)
+assert.equal(matchesRecency({ last_reported_year: 2011 }, '2024'), false)
+assert.equal(matchesRecency({ last_reported_year: 2011 }, 'older'), true)
+assert.equal(matchesRecency({ reference_year: 2023 }, '2023'), true)
+assert.equal(matchesRecency({}, 'older'), false)
+assert.equal(matchesFlux({ flux_status: 'both' }, 'flaring'), true)
+assert.equal(matchesFlux({ flux_status: 'both' }, 'venting'), true)
+assert.equal(matchesFlux({ flux_status: 'venting' }, 'flaring'), false)
+assert.equal(matchesFlux({ ch4_flared_kg_day: 12 }, 'flaring'), true)
+const rBreak = recencyBreakdown(geo.features)
+assert.equal(rBreak.y2024 + rBreak.y2023 + rBreak.older + rBreak.unknown, geo.features.length)
+assert.ok(rBreak.y2024 > 1000 && rBreak.newestYear >= 2024, JSON.stringify(rBreak))
+const fBreak = fluxBreakdown(geo.features)
+assert.equal(fBreak.flaring + fBreak.ventingOnly + fBreak.noneReported + fBreak.uncovered, geo.features.length)
+assert.equal(fBreak.covered + fBreak.uncovered, geo.features.length)
+assert.equal(fBreak.covered, geo.features.filter(f => f.properties.flux_scope === 'fugitive').length)
+assert.ok(fBreak.flaring > 100 && fBreak.both > 0 && fBreak.both <= fBreak.flaring, JSON.stringify(fBreak))
+
+// flux coverage: an uncovered landfill must never be reported as flaring or venting
+const essex = geo.features.find(f => String(f.properties.ghgrp_id) === 'G10365').properties
+assert.equal(essex.flux_scope, 'not-applicable')
+assert.equal(essex.flux_status, 'not_reported')
+assert.equal(essex.ch4_flared_kg_day, null)
+assert.equal(isFlaringSite(essex), false)
+assert.equal(isVentingSite(essex), false)
+assert.equal(fluxNotReported(essex), true)
+assert.equal(matchesFlux(essex, 'flaring'), false)
+assert.equal(fluxBadge(essex), null)
+const landfillSites = geo.features.filter(f => f.properties.source_type === 'landfill_waste')
+const landfillCovered = landfillSites.filter(f => f.properties.flux_scope === 'fugitive').length
+assert.ok(landfillCovered < landfillSites.length, 'most landfills have no published fugitive split')
+assert.equal(
+  landfillSites.filter(f => ['not_reported', 'unknown'].includes(f.properties.flux_status)).length,
+  landfillSites.length - landfillCovered,
+  'every landfill without a published split must say not_reported/unknown, never "none"')
+assert.equal(landfillSites.filter(f => ['flaring', 'both'].includes(f.properties.flux_status)).length > 0, true)
 
 // hashprice read: above/below the network-derived estimate, and power break-even
 const hp = hashpriceRead({

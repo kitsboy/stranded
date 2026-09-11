@@ -537,7 +537,7 @@ export default function SiteDetailsPanel({
                         ? 'border-amber-400/45 bg-amber-400/10 text-amber-200'
                         : 'border-[#5BC0BE]/40 bg-[#5BC0BE]/10 text-[#5BC0BE]'
                   }`}
-                  title={`Source: ${p.data_source || 'dataset'} · reference year ${p.reference_year ?? 'not stated'} · confidence ${p.confidence || 'not stated'}`}
+                  title={`Source: ${p.data_source || 'dataset'} · last reported ${p.last_reported_year ?? p.reference_year ?? 'not stated'} · confidence ${p.confidence || 'not stated'}`}
                   data-testid="site-data-recency"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />

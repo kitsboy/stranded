@@ -4,6 +4,7 @@ import { Filter, RefreshCw, ChevronDown, X, Trash2 } from 'lucide-react'
 import DualRangeSlider from '@/components/DualRangeSlider'
 import type { FilterPreset } from '@/lib/bookmarks'
 import type { MapViewMode } from '@/components/Map'
+import { RECENCY_FILTERS, FLUX_FILTERS, type RecencyFilter, type FluxFilter } from '@/lib/map-filters'
 
 export type MapFiltersPanelProps = {
   minEmission: number
@@ -20,6 +21,14 @@ export type MapFiltersPanelProps = {
   savedPresets: FilterPreset[]
   recentPresets: FilterPreset[]
   layersGrid: boolean
+  /** Site counts per recency bucket, shown beside each chip. */
+  recencyCounts?: { any: number; y2024: number; y2023: number; older: number }
+  /** Site counts per flux bucket, shown beside each chip. */
+  fluxCounts?: { any: number; flaring: number; venting: number }
+  recency: RecencyFilter
+  flux: FluxFilter
+  onRecencyChange: (v: RecencyFilter) => void
+  onFluxChange: (v: FluxFilter) => void
   onMinEmissionChange: (v: number) => void
   onMaxEmissionChange: (v: number) => void
   onMinScoreChange: (v: number) => void
@@ -54,6 +63,12 @@ export default function MapFiltersPanel({
   savedPresets,
   recentPresets,
   layersGrid,
+  recencyCounts,
+  fluxCounts,
+  recency,
+  flux,
+  onRecencyChange,
+  onFluxChange,
   onMinEmissionChange,
   onMaxEmissionChange,
   onMinScoreChange,
@@ -161,6 +176,63 @@ export default function MapFiltersPanel({
               {s}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="mb-4" data-testid="mobile-recency-filter">
+        <div className="text-xs uppercase tracking-widest mb-2 text-gray-400 flex items-center justify-between gap-2">
+          <span>DATA RECENCY</span>
+          <span className="text-[10px] normal-case tracking-normal text-gray-400">
+            last reported year
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {RECENCY_FILTERS.map(f => {
+            const count = f.id === '2024' ? recencyCounts?.y2024
+              : f.id === '2023' ? recencyCounts?.y2023
+              : f.id === 'older' ? recencyCounts?.older
+              : recencyCounts?.any
+            return (
+              <button
+                key={f.id}
+                type="button"
+                title={f.hint}
+                onClick={() => onRecencyChange(f.id)}
+                className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${recency === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
+                data-testid={`mobile-recency-${f.id}`}
+              >
+                {f.label}{typeof count === 'number' && <span className="text-[9px] text-gray-400 tabular-nums"> {count}</span>}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="mb-4" data-testid="mobile-flux-filter">
+        <div className="text-xs uppercase tracking-widest mb-2 text-gray-400 flex items-center justify-between gap-2">
+          <span>FLUX STATUS</span>
+          <span className="text-[10px] normal-case tracking-normal text-gray-400">
+            {typeof fluxCounts?.flaring === 'number' ? `${fluxCounts.flaring} flare` : 'venting vs flaring'}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {FLUX_FILTERS.map(f => {
+            const count = f.id === 'flaring' ? fluxCounts?.flaring
+              : f.id === 'venting' ? fluxCounts?.venting
+              : fluxCounts?.any
+            return (
+              <button
+                key={f.id}
+                type="button"
+                title={f.hint}
+                onClick={() => onFluxChange(f.id)}
+                className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${flux === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
+                data-testid={`mobile-flux-${f.id}`}
+              >
+                {f.label}{typeof count === 'number' && <span className="text-[9px] text-gray-400 tabular-nums"> {count}</span>}
+              </button>
+            )
+          })}
         </div>
       </div>
 

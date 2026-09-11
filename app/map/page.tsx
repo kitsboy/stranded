@@ -56,6 +56,14 @@ import {
   matchScorePresetLabel,
   shouldShowFilterToast,
   validatePresetName,
+  matchesRecency,
+  matchesFlux,
+  recencyBreakdown,
+  fluxBreakdown,
+  RECENCY_FILTERS,
+  FLUX_FILTERS,
+  type RecencyFilter,
+  type FluxFilter,
 } from '@/lib/map-filters'
 import {
   getMapViewBookmarks,
@@ -112,6 +120,9 @@ function StrandedCommandCenter() {
   const [selectedProvinces, setSelectedProvinces] = useState<Set<string>>(new Set())
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set())
   const [minScore, setMinScore] = useState(0)
+  // Honesty filters — how fresh the filing is, and whether the site already flares.
+  const [recencyFilter, setRecencyFilter] = useState<RecencyFilter>('any')
+  const [fluxFilter, setFluxFilter] = useState<FluxFilter>('any')
   const [showAllProvinces, setShowAllProvinces] = useState(false)
   const [filtersCollapsed, setFiltersCollapsed] = useState(false)
   const [onlyMissionSites, setOnlyMissionSites] = useState(false)
@@ -334,6 +345,15 @@ function StrandedCommandCenter() {
       minScore,
     })
 
+    // Data recency + flux status: never let a 2011 filing look current, and let
+    // the user pull out the sites that already flare (fastest to deploy).
+    if (recencyFilter !== 'any') {
+      result = result.filter(s => matchesRecency(s.properties, recencyFilter))
+    }
+    if (fluxFilter !== 'any') {
+      result = result.filter(s => matchesFlux(s.properties, fluxFilter))
+    }
+
     // Grid / connectivity layers use Score v3 measured-or-inferred distance & internet
     if (layers.grid) {
       result = result.filter(s => effectiveGridKm(s) < 18)
@@ -353,7 +373,7 @@ function StrandedCommandCenter() {
       result = result.filter(s => missionIds.has(s.id))
     }
     return result
-  }, [allSites, minEmission, maxEmission, selectedProvinces, selectedSources, minScore, layers, radiusFilter, onlyMissionSites, portfolio])
+  }, [allSites, minEmission, maxEmission, selectedProvinces, selectedSources, minScore, recencyFilter, fluxFilter, layers, radiusFilter, onlyMissionSites, portfolio])
 
   const filterState = useMemo(() => ({
     minEmission,
@@ -365,7 +385,13 @@ function StrandedCommandCenter() {
     gridLayer: layers.grid,
     internetLayer: layers.internet,
     radiusFilter,
-  }), [minEmission, maxEmission, selectedProvinces, selectedSources, minScore, onlyMissionSites, layers.grid, layers.internet, radiusFilter])
+    recency: recencyFilter,
+    flux: fluxFilter,
+  }), [minEmission, maxEmission, selectedProvinces, selectedSources, minScore, onlyMissionSites, layers.grid, layers.internet, radiusFilter, recencyFilter, fluxFilter])
+
+  // How fresh the dataset is overall — drives the labels + counts beside the filters.
+  const recencyStats = useMemo(() => recencyBreakdown(allSites), [allSites])
+  const fluxStats = useMemo(() => fluxBreakdown(allSites), [allSites])
 
   const activeFilterCount = useMemo(() => countActiveMapFilters(filterState), [filterState])
 
@@ -431,6 +457,8 @@ function StrandedCommandCenter() {
       grid: t('mapGrid'),
       internet: 'Internet',
       radius: t('mapRadius').replace('{km}', '').trim(),
+      recency: 'Reported',
+      flux: 'Flux',
     },
     {
       resetEmission: () => { setMinEmission(0); setMaxEmission(DEFAULT_MAX_EMISSION) },
@@ -441,6 +469,8 @@ function StrandedCommandCenter() {
       clearGrid: () => setLayers(l => ({ ...l, grid: false })),
       clearInternet: () => setLayers(l => ({ ...l, internet: false })),
       clearRadius: () => setRadiusFilter(null),
+      clearRecency: () => setRecencyFilter('any'),
+      clearFlux: () => setFluxFilter('any'),
     },
   ), [filterState, t])
 
@@ -803,6 +833,8 @@ function StrandedCommandCenter() {
     setSelectedProvinces(new Set())
     setSelectedSources(new Set())
     setMinScore(0)
+    setRecencyFilter('any')
+    setFluxFilter('any')
     setOnlyMissionSites(false)
     setViewMode(filteredSites.length > 180 ? 'native-clusters' : 'precise')
     setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
@@ -1292,6 +1324,76 @@ function StrandedCommandCenter() {
                   </div>
                 </div>
 
+                {/* Data recency + flux status — the honesty filters */}
+                <div data-testid="map-recency-filter">
+                  <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
+                    <span>DATA RECENCY</span>
+                    <span className="text-[10px] normal-case tracking-normal text-gray-400">
+                      {recencyStats.newestYear ? `newest ${recencyStats.newestYear}` : 'no year data'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {RECENCY_FILTERS.map(f => {
+                      const count = f.id === '2024' ? recencyStats.y2024
+                        : f.id === '2023' ? recencyStats.y2023
+                        : f.id === 'older' ? recencyStats.older
+                        : allSites.length
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          title={f.hint}
+                          onClick={() => setRecencyFilter(f.id)}
+                          className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${recencyFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
+                          data-testid={`recency-filter-${f.id}`}
+                        >
+                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{count}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {recencyFilter === 'older' && (
+                    <p className="text-[9px] text-amber-200/80 mt-1">
+                      These sites last filed before 2023 — treat the figures as historic, not current.
+                    </p>
+                  )}
+                </div>
+
+                <div data-testid="map-flux-filter">
+                  <div className="text-xs uppercase tracking-widest mb-1.5 text-gray-400 flex items-center justify-between gap-2">
+                    <span>FLUX STATUS</span>
+                    <span className="text-[10px] normal-case tracking-normal text-gray-400">
+                      {fluxStats.flaring} of {fluxStats.covered} with a fugitive split
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {FLUX_FILTERS.map(f => {
+                      const count = f.id === 'flaring' ? fluxStats.flaring
+                        : f.id === 'venting' ? fluxStats.ventingOnly + fluxStats.both
+                        : allSites.length
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          title={f.hint}
+                          onClick={() => setFluxFilter(f.id)}
+                          className={`filter-chip text-xs px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-px rounded-full border touch-manipulation active:scale-[0.96] ${fluxFilter === f.id ? 'active border-[#FF8C00]' : 'border-white/20 hover:border-white/40'}`}
+                          data-testid={`flux-filter-${f.id}`}
+                        >
+                          {f.label} <span className="text-[9px] text-gray-400 tabular-nums">{count}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-[9px] text-gray-400 mt-1">
+                    From ECCC &ldquo;Emissions by Source&rdquo;. Sites that already flare have the permits and
+                    destruction equipment in place — fastest to deploy.{' '}
+                    <strong className="text-gray-300">Only {fluxStats.covered} of {allSites.length} sites have a
+                    published venting/flaring split</strong>; for the rest ({fluxStats.uncovered}, mostly landfills
+                    whose gas ECCC reports under &ldquo;Waste&rdquo;) we do not know and do not claim either way.
+                  </p>
+                </div>
+
                 <div className="pt-3 border-t border-white/10">
                   <div className="text-xs uppercase tracking-widest mb-2 text-gray-400">MAP VIEW BOOKMARKS</div>
                   <div className="flex gap-1 mb-2">
@@ -1440,6 +1542,21 @@ function StrandedCommandCenter() {
           savedPresets={savedPresets}
           recentPresets={recentPresets}
           layersGrid={layers.grid}
+          recency={recencyFilter}
+          flux={fluxFilter}
+          onRecencyChange={setRecencyFilter}
+          onFluxChange={setFluxFilter}
+          recencyCounts={{
+            any: allSites.length,
+            y2024: recencyStats.y2024,
+            y2023: recencyStats.y2023,
+            older: recencyStats.older,
+          }}
+          fluxCounts={{
+            any: allSites.length,
+            flaring: fluxStats.flaring,
+            venting: fluxStats.ventingOnly + fluxStats.both,
+          }}
           onMinEmissionChange={setMinEmission}
           onMaxEmissionChange={setMaxEmission}
           onMinScoreChange={setMinScore}

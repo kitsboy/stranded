@@ -295,7 +295,7 @@ function buildSourceIndex(rows) {
 
     if (!byId.has(id)) byId.set(id, new Map())
     const years = byId.get(id)
-    if (!years.has(year)) years.set(year, { venting: 0, flaring: 0, fugitive: 0, reported: 0 })
+    if (!years.has(year)) years.set(year, { venting: 0, flaring: 0, fugitive: 0, reported: 0, fluxRows: 0 })
     const rec = years.get(year)
     rec.reported++
 
@@ -304,6 +304,7 @@ function buildSourceIndex(rows) {
       if (/vent|flar|fugitive|leak/i.test(String(srcName))) unknownFluxLike++
       continue
     }
+    rec.fluxRows++
     rec[kind] += num(row[I.ch4]) || 0
   }
   return { byId, categories, unknownFluxLike }
@@ -315,14 +316,30 @@ const TONNES_PER_YEAR_TO_KG_PER_DAY = 1000 / 365
 
 function round2(n) { return Math.round(n * 100) / 100 }
 
-function fluxStatus(venting, flaring, hasSourceRows) {
-  if (!hasSourceRows) return 'unknown'
+/* ------------------------------------------------------------------ */
+/* Flux coverage — the venting/flaring split is NOT universal          */
+/* ------------------------------------------------------------------ */
+/*
+ * ECCC publishes EC_VentingEmissions / EC_FlaringEmissions / EC_FugitiveEmissions
+ * for facilities that report a fugitive source. Landfill gas is reported under
+ * EC_WasteEmissions instead, so most landfills have NO fugitive split upstream —
+ * 88 of our 111 landfills. Rows missing for a facility therefore mean "not
+ * reported for this source type", never "reports no venting or flaring".
+ * We keep that distinction in the data so the UI cannot assert a falsehood.
+ */
+
+const FLUX_STATUS_UNKNOWN = 'unknown'        // no Emissions-by-Source rows at all
+const FLUX_STATUS_NOT_REPORTED = 'not_reported' // rows exist, but no fugitive split for this facility
+const FLUX_SCOPE_FUGITIVE = 'fugitive'       // facility reports the fugitive split
+const FLUX_SCOPE_NOT_APPLICABLE = 'not-applicable'
+
+function fluxStatus(venting, flaring) {
   const v = venting > 0
   const f = flaring > 0
   if (v && f) return 'both'
   if (v) return 'venting'
   if (f) return 'flaring'
-  return 'none'
+  return 'none' // reports the fugitive category, with zero venting and zero flaring
 }
 
 function rebuild({ gas, source, canonical, dryRun }) {
@@ -370,23 +387,37 @@ function rebuild({ gas, source, canonical, dryRun }) {
     out.last_reported_year = lastReportedYear
 
     // Flux breakdown (venting / flaring) from the Emissions-by-Source file.
+    // Only meaningful for facilities that actually report a fugitive source.
     const srcYears = id ? source.byId.get(id) : null
     let fluxYear = null
     let flux = null
+    let hasSourceRows = false
     if (srcYears && srcYears.size) {
-      fluxYear = Math.max(...srcYears.keys())
-      flux = srcYears.get(fluxYear)
+      hasSourceRows = true
+      const fluxYears = [...srcYears.entries()].filter(([, v]) => v.fluxRows > 0).map(([y]) => y)
+      if (fluxYears.length) {
+        fluxYear = Math.max(...fluxYears)
+        flux = srcYears.get(fluxYear)
+      }
     }
     const venting = flux ? flux.venting : 0
     const flaring = flux ? flux.flaring : 0
-    out.ch4_vented_kg_day = flux ? Math.round(venting * TONNES_PER_YEAR_TO_KG_PER_DAY * 100) / 100 : 0
-    out.ch4_flared_kg_day = flux ? Math.round(flaring * TONNES_PER_YEAR_TO_KG_PER_DAY * 100) / 100 : 0
-    out.flux_status = fluxStatus(venting, flaring, !!flux)
+    out.flux_scope = flux ? FLUX_SCOPE_FUGITIVE : FLUX_SCOPE_NOT_APPLICABLE
+    // null (not 0) when the split is not reported — 0 would read as "has none".
+    out.ch4_vented_kg_day = flux ? Math.round(venting * TONNES_PER_YEAR_TO_KG_PER_DAY * 100) / 100 : null
+    out.ch4_flared_kg_day = flux ? Math.round(flaring * TONNES_PER_YEAR_TO_KG_PER_DAY * 100) / 100 : null
+    out.flux_status = flux
+      ? fluxStatus(venting, flaring)
+      : hasSourceRows ? FLUX_STATUS_NOT_REPORTED : FLUX_STATUS_UNKNOWN
     out.flare_share_pct = flux && venting + flaring > 0
       ? Math.round((flaring / (venting + flaring)) * 1000) / 10
-      : 0
+      : null
     out.flux_reference_year = fluxYear
-    if (!flux) warnings.push('no Emissions-by-Source rows')
+    if (!flux) {
+      warnings.push(hasSourceRows
+        ? 'no venting/flaring split published for this facility (source type not covered)'
+        : 'no Emissions-by-Source rows')
+    }
 
     if (warnings.length) out._refresh_warnings = warnings
     else delete out._refresh_warnings
@@ -415,8 +446,12 @@ function rebuild({ gas, source, canonical, dryRun }) {
     notes:
       `Primary data from ECCC GHGRP. last_reported_year is the facility's most recent reporting year; ` +
       `ch4_vented_kg_day / ch4_flared_kg_day / flux_status / flare_share_pct come from the ECCC "Emissions by Source" ` +
-      `file (EC_VentingEmissions / EC_FlaringEmissions, flux_reference_year says which year). Sites absent from the ` +
-      `newest year keep their last known figures — check last_reported_year before treating a figure as current.`,
+      `file (EC_VentingEmissions / EC_FlaringEmissions, flux_reference_year says which year). ` +
+      `IMPORTANT: that venting/flaring split only exists for facilities reporting a fugitive source — ` +
+      `flux_scope='not-applicable' with flux_status='not_reported' means ECCC publishes no split for this facility ` +
+      `(landfill gas is reported under "Waste"), NOT that the site does not flare. Never render a venting/flaring ` +
+      `claim for those sites. Sites absent from the newest year keep their last known figures — check ` +
+      `last_reported_year before treating a figure as current.`,
   }
 
   const out = { type: 'FeatureCollection', metadata: meta, features: refreshed }
@@ -446,7 +481,9 @@ function summarise(features) {
   const s = {
     count: features.length,
     years: {},
-    flux: { venting: 0, flaring: 0, both: 0, none: 0, unknown: 0 },
+    flux: { venting: 0, flaring: 0, both: 0, none: 0, not_reported: 0, unknown: 0 },
+    fluxScope: { fugitive: 0, 'not-applicable': 0 },
+    bySourceType: {},
     stale: 0,
     with2024: 0,
     newestYear: 0,
@@ -466,6 +503,13 @@ function summarise(features) {
     }
     const st = p.flux_status || 'unknown'
     if (s.flux[st] != null) s.flux[st]++
+    const scope = p.flux_scope || 'not-applicable'
+    s.fluxScope[scope] = (s.fluxScope[scope] || 0) + 1
+    const t = p.source_type || 'unknown'
+    if (!s.bySourceType[t]) s.bySourceType[t] = { sites: 0, fugitiveSplit: 0, flaring: 0 }
+    s.bySourceType[t].sites++
+    if (scope === 'fugitive') s.bySourceType[t].fugitiveSplit++
+    if (st === 'flaring' || st === 'both') s.bySourceType[t].flaring++
     const em = p.emission_rate_kg_day || 0
     s.totalCh4 += p.ch4_tonnes_year || 0
     if (p.confidence === 'high') s.highConfidence++
@@ -563,8 +607,21 @@ function printReport(report, args) {
   row('total CH4 (t/yr)', before.totalCh4, after.totalCh4)
   row('Batten-class (>=36000 kg/d)', before.battenClass, after.battenClass)
   console.log('\n=== FLUX STATUS (after) ===')
-  for (const k of ['venting', 'flaring', 'both', 'none', 'unknown']) {
-    console.log(`  ${k.padEnd(10)} ${after.flux[k]}`)
+  for (const k of ['venting', 'flaring', 'both', 'none', 'not_reported', 'unknown']) {
+    console.log(`  ${k.padEnd(14)} ${after.flux[k]}`)
+  }
+  console.log(`  fugitive split reported for ${after.fluxScope.fugitive} sites · not reported for ${after.fluxScope['not-applicable']}`)
+  console.log('\n=== FLUX COVERAGE BY SOURCE TYPE ===')
+  console.log('  source_type            sites  with-split  flaring')
+  for (const [t, v] of Object.entries(after.bySourceType).sort((a, b) => b[1].sites - a[1].sites)) {
+    console.log(`  ${t.padEnd(22)} ${String(v.sites).padStart(5)} ${String(v.fugitiveSplit).padStart(9)} ${String(v.flaring).padStart(8)}`)
+  }
+  const lf = after.bySourceType.landfill_waste
+  if (lf) {
+    const beforeLf = before.bySourceType.landfill_waste || { sites: 0, flaring: 0 }
+    console.log(`\n  LANDFILLS: ${lf.sites} sites · venting/flaring split published for ${lf.fugitiveSplit} · ` +
+      `asserted flaring ${beforeLf.flaring} → ${lf.flaring} (before → after). ` +
+      `The rest are "not_reported", NOT "not flaring" — landfill gas is reported under ECCC "Waste".`)
   }
   console.log('\n=== RECENCY HISTOGRAM (after) ===')
   Object.entries(after.years).sort((a, b) => b[0] - a[0]).forEach(([y, n]) => console.log(`  ${y}: ${n}`))

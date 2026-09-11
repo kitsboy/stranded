@@ -39,22 +39,27 @@ export interface StrandedSite {
     confidence?: 'high' | 'medium' | 'low'
 
     // Flux breakdown (ECCC "Emissions by Source")
-    /** Fugitive CH₄ reported as venting, kg/day (0 when the facility reports none). */
-    ch4_vented_kg_day?: number
-    /** Fugitive CH₄ sent to flare, kg/day (0 when the facility reports none). */
-    ch4_flared_kg_day?: number
     /**
-     * venting | flaring | both | none | unknown
-     * 'none' = the facility files Emissions-by-Source rows but reports no
-     * venting and no flaring (it may still report fugitive/leakage, which ECCC
-     * publishes as the separate EC_FugitiveEmissions category).
-     * 'unknown' = the facility has no Emissions-by-Source rows at all (the file
-     * only covers 2022-present, so stale sites are legitimately unknown).
+     * Whether ECCC publishes a venting/flaring split for this facility at all.
+     * 'not-applicable' = no fugitive source is reported for it (landfill gas is
+     * reported under "Waste"), so a venting/flaring claim must NEVER be rendered.
      */
-    flux_status?: 'venting' | 'flaring' | 'both' | 'none' | 'unknown'
-    /** Share of reported venting+flaring CH₄ sent to flare, 0-100. */
-    flare_share_pct?: number
-    /** Reporting year the venting/flaring figures come from; null when unknown. */
+    flux_scope?: 'fugitive' | 'not-applicable'
+    /** Fugitive CH₄ reported as venting, kg/day. null when the split is not published. */
+    ch4_vented_kg_day?: number | null
+    /** Fugitive CH₄ sent to flare, kg/day. null when the split is not published. */
+    ch4_flared_kg_day?: number | null
+    /**
+     * venting | flaring | both      — the facility reports the fugitive split
+     * none                          — reports the fugitive category, zero venting and zero flaring
+     * not_reported                  — ECCC publishes no split for this facility (flux_scope 'not-applicable')
+     * unknown                       — no Emissions-by-Source rows at all
+     * Only venting/flaring/both may be shown to a user as a flaring/venting claim.
+     */
+    flux_status?: 'venting' | 'flaring' | 'both' | 'none' | 'not_reported' | 'unknown'
+    /** Share of reported venting+flaring CH₄ sent to flare, 0-100. null when not published. */
+    flare_share_pct?: number | null
+    /** Reporting year the venting/flaring figures come from; null when not published. */
     flux_reference_year?: number | null
 
     // Infrastructure

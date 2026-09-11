@@ -10,6 +10,18 @@ import { bankPackCsv, bankPackMarkdown, bankPackTsv } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
 import { exportSitesFullCsv } from '@/lib/sites-export'
 import { searchSites } from '@/lib/site-search'
+import {
+  recencyBreakdown,
+  fluxBreakdown,
+  matchesRecency,
+  matchesFlux,
+  siteRecencyYear,
+  isFlaringSite,
+  RECENCY_FILTERS,
+  FLUX_FILTERS,
+  type RecencyFilter,
+  type FluxFilter,
+} from '@/lib/map-filters'
 import { addSitesToMission } from '@/lib/portfolio'
 import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
@@ -25,6 +37,8 @@ export default function AllSitesExplorer() {
   const [provinceFilter, setProvinceFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
   const [minScoreFilter, setMinScoreFilter] = useState(0)
+  const [recencyFilter, setRecencyFilter] = useState<RecencyFilter>('any')
+  const [fluxFilter, setFluxFilter] = useState<FluxFilter>('any')
   const [view, setView] = useState<'table' | 'cards'>('cards')
   const [sortBy, setSortBy] = useState<'score' | 'revenue'>('score')
   const [liveStats, setLiveStats] = useState<LiveStats | null>(null)
@@ -66,12 +80,17 @@ export default function AllSitesExplorer() {
     if (provinceFilter) res = res.filter(s => s.properties.province === provinceFilter)
     if (sourceFilter) res = res.filter(s => s.properties.source_type === sourceFilter)
     if (minScoreFilter > 0) res = res.filter(s => s.strandedScore >= minScoreFilter)
+    if (recencyFilter !== 'any') res = res.filter(s => matchesRecency(s.properties, recencyFilter))
+    if (fluxFilter !== 'any') res = res.filter(s => matchesFlux(s.properties, fluxFilter))
     return res.sort((a, b) =>
       sortBy === 'revenue'
         ? b.potentialDailyProfitCAD - a.potentialDailyProfitCAD
         : b.strandedScore - a.strandedScore,
     )
-  }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter, sortBy])
+  }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter, recencyFilter, fluxFilter, sortBy])
+
+  const recencyStats = useMemo(() => recencyBreakdown(allSites), [allSites])
+  const fluxStats = useMemo(() => fluxBreakdown(allSites), [allSites])
 
   const provinceRevenueHint = useMemo(() => {
     if (!provinceFilter || !liveStats) return null
@@ -95,8 +114,16 @@ export default function AllSitesExplorer() {
     if (provinceFilter) chips.push({ key: 'province', label: provinceFilter, clear: () => setProvinceFilter('') })
     if (sourceFilter) chips.push({ key: 'source', label: sourceFilter, clear: () => setSourceFilter('') })
     if (minScoreFilter > 0) chips.push({ key: 'score', label: `Score ≥ ${minScoreFilter}`, clear: () => setMinScoreFilter(0) })
+    if (recencyFilter !== 'any') {
+      const label = RECENCY_FILTERS.find(f => f.id === recencyFilter)?.label ?? recencyFilter
+      chips.push({ key: 'recency', label: `Reported: ${label}`, clear: () => setRecencyFilter('any') })
+    }
+    if (fluxFilter !== 'any') {
+      const label = FLUX_FILTERS.find(f => f.id === fluxFilter)?.label ?? fluxFilter
+      chips.push({ key: 'flux', label: `Flux: ${label}`, clear: () => setFluxFilter('any') })
+    }
     return chips
-  }, [search, provinceFilter, sourceFilter, minScoreFilter])
+  }, [search, provinceFilter, sourceFilter, minScoreFilter, recencyFilter, fluxFilter])
 
   const exportFiltered = () => {
     const blob = new Blob([JSON.stringify(filtered.map(s => ({...s.properties, strandedScore: s.strandedScore, id: s.id})), null, 2)], {type: 'application/json'})
@@ -167,6 +194,18 @@ export default function AllSitesExplorer() {
         <ScoreLegend />
       </div>
 
+      {!loading && allSites.length > 0 && (
+        <p className="text-xs text-gray-400 mb-4" data-testid="sites-recency-split">
+          <span className="text-[#5BC0BE]">{recencyStats.y2024.toLocaleString()}</span> of {allSites.length.toLocaleString()} sites filed for{' '}
+          {recencyStats.newestYear ?? '—'} · <span className="text-white">{recencyStats.y2023.toLocaleString()}</span> last filed 2023 ·{' '}
+          <span className="text-amber-200">{recencyStats.older.toLocaleString()}</span> last filed before 2023 — their figures are historic, not current ·{' '}
+          <span className="text-[#FF8C00]">{fluxStats.flaring.toLocaleString()}</span> report flaring
+          {fluxStats.covered < allSites.length && (
+            <> · venting/flaring is published for {fluxStats.covered.toLocaleString()} of {allSites.length.toLocaleString()} sites only (landfill gas is filed under &ldquo;Waste&rdquo;) — for the other {fluxStats.uncovered.toLocaleString()} we make no claim</>
+          )}
+        </p>
+      )}
+
       {provinceRevenueHint && (
         <p className="text-xs text-[#5BC0BE] mb-3" data-testid="province-revenue-hint">
           {provinceFilter}: ~{provinceRevenueHint.label} modeled annual revenue · {provinceRevenueHint.sites} sites ({provinceRevenueHint.pct}% of portfolio) — from live-stats
@@ -189,7 +228,7 @@ export default function AllSitesExplorer() {
           ))}
           <button
             type="button"
-            onClick={() => { setSearch(''); setProvinceFilter(''); setSourceFilter(''); setMinScoreFilter(0) }}
+            onClick={() => { setSearch(''); setProvinceFilter(''); setSourceFilter(''); setMinScoreFilter(0); setRecencyFilter('any'); setFluxFilter('any') }}
             className="text-[10px] text-gray-400 hover:text-white underline"
           >
             Clear all
@@ -230,6 +269,43 @@ export default function AllSitesExplorer() {
           <option value={65}>{t('scoreHighPlus')}</option>
           <option value={80}>{t('score80')}</option>
           <option value={85}>{t('score85')}</option>
+        </select>
+        <select
+          data-testid="sites-recency-filter"
+          value={recencyFilter}
+          onChange={e => setRecencyFilter(e.target.value as RecencyFilter)}
+          aria-label="Filter by reporting year"
+          className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[180px]"
+        >
+          {RECENCY_FILTERS.map(f => {
+            const count = f.id === '2024' ? recencyStats.y2024
+              : f.id === '2023' ? recencyStats.y2023
+              : f.id === 'older' ? recencyStats.older
+              : allSites.length
+            return (
+              <option key={f.id} value={f.id}>
+                {f.id === 'any' ? 'Reported: any year' : `Reported: ${f.label}`} ({count})
+              </option>
+            )
+          })}
+        </select>
+        <select
+          data-testid="sites-flux-filter"
+          value={fluxFilter}
+          onChange={e => setFluxFilter(e.target.value as FluxFilter)}
+          aria-label="Filter by venting or flaring"
+          className="glass border border-white/10 rounded-2xl px-4 text-sm min-w-[190px]"
+        >
+          {FLUX_FILTERS.map(f => {
+            const count = f.id === 'flaring' ? fluxStats.flaring
+              : f.id === 'venting' ? fluxStats.ventingOnly + fluxStats.both
+              : allSites.length
+            return (
+              <option key={f.id} value={f.id}>
+                {f.id === 'any' ? 'Flux: any' : `Flux: ${f.label}`} ({count})
+              </option>
+            )
+          })}
         </select>
         <div className="self-center text-xs px-2 text-gray-400 tabular-nums">
           {tf(locale, 'filterShowing', { shown: filtered.length, total: allSites.length })}
@@ -277,7 +353,31 @@ export default function AllSitesExplorer() {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 mt-1 mb-4">{p.province} • {p.city || 'remote'} • {p.source_type}</div>
+                <div className="text-xs text-gray-400 mt-1 mb-2">{p.province} • {p.city || 'remote'} • {p.source_type}</div>
+
+                <div className="flex flex-wrap gap-1.5 mb-3" data-testid="sites-badges">
+                  {(() => {
+                    const y = siteRecencyYear(p)
+                    const stale = y != null && y < 2023
+                    return (
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] ${
+                          stale
+                            ? 'border-amber-400/45 bg-amber-400/10 text-amber-200'
+                            : 'border-white/15 text-gray-300'
+                        }`}
+                        title={stale ? 'Last filed before 2023 — historic figure, the site may be closed' : 'Freshest GHGRP filing year'}
+                      >
+                        {y != null ? `last reported ${y}` : 'reporting year not stated'}
+                      </span>
+                    )
+                  })()}
+                  {isFlaringSite(p) && (
+                    <span className="rounded-full border border-[#FF8C00]/50 bg-[#FF8C00]/10 px-2 py-0.5 text-[10px] text-[#FF8C00]" title="Reports CH₄ sent to flare — permits and equipment already in place">
+                      Currently flaring
+                    </span>
+                  )}
+                </div>
 
                 <div className="mt-auto flex items-baseline justify-between">
                   <div>
@@ -321,6 +421,7 @@ export default function AllSitesExplorer() {
               <tr>
                 <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Name</th>
                 <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Province</th>
+                <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Last reported</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Emission</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Daily CAD</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Generator kW</th>
@@ -333,6 +434,18 @@ export default function AllSitesExplorer() {
                 <tr key={site.id} className="hover:bg-white/5 cursor-pointer" onClick={() => setSelected(site)}>
                   <td className="p-4 font-medium">{site.properties.name}</td>
                   <td className="p-4 text-[#5BC0BE]">{site.properties.province}</td>
+                  <td className="p-4">
+                    {(() => {
+                      const y = siteRecencyYear(site.properties)
+                      const stale = y != null && y < 2023
+                      return (
+                        <span className={`text-xs ${stale ? 'text-amber-200' : 'text-gray-300'}`} title={stale ? 'Historic filing — may be closed or re-permitted' : undefined}>
+                          {y ?? '—'}
+                          {isFlaringSite(site.properties) && <span className="ml-2 text-[10px] text-[#FF8C00]">flaring</span>}
+                        </span>
+                      )
+                    })()}
+                  </td>
                   <td className="p-4 text-right font-mono text-[#FF8C00]">{site.emission.toLocaleString()}</td>
                   <td className="p-4 text-right font-mono text-[#5BC0BE]">C${site.potentialDailyProfitCAD.toLocaleString()}</td>
                   <td className="p-4 text-right font-mono">{site.maxGeneratorPowerKW || 'N/A'} kW</td>

@@ -47,6 +47,12 @@ export type MapFilterChip = {
   onRemove: () => void
 }
 
+/** Data-recency filter — how old the site's freshest GHGRP filing is. */
+export type RecencyFilter = 'any' | '2024' | '2023' | 'older'
+
+/** Flux-status filter — does the site already burn its methane, or just vent it? */
+export type FluxFilter = 'any' | 'flaring' | 'venting'
+
 export type MapFilterState = {
   minEmission: number
   maxEmission: number
@@ -57,6 +63,127 @@ export type MapFilterState = {
   gridLayer: boolean
   internetLayer: boolean
   radiusFilter: { lat: number; lng: number; radiusKm: number } | null
+  recency: RecencyFilter
+  flux: FluxFilter
+}
+
+/* ------------------------------------------------------------------ */
+/* Data recency + flux status (ECCC GHGRP)                             */
+/* ------------------------------------------------------------------ */
+
+/** Accepts a properties bag from any site shape (typed or not). */
+function asProps(props: unknown): Record<string, unknown> | null {
+  return props && typeof props === 'object' ? (props as Record<string, unknown>) : null
+}
+
+/** The year the site's figures actually come from; null when the dataset omits it. */
+export function siteRecencyYear(props: unknown): number | null {
+  const p = asProps(props)
+  if (!p) return null
+  const y = Number(p.last_reported_year ?? p.reference_year)
+  return Number.isFinite(y) && y > 1990 ? y : null
+}
+
+export function matchesRecency(props: unknown, filter: RecencyFilter): boolean {
+  if (filter === 'any') return true
+  const year = siteRecencyYear(props)
+  if (year == null) return false
+  if (filter === '2024') return year >= 2024
+  if (filter === '2023') return year === 2023
+  return year < 2023
+}
+
+/**
+ * True when the facility reports CH₄ sent to flare (alone or alongside venting).
+ * Never true when ECCC publishes no venting/flaring split for the facility —
+ * "not reported" must not be rendered as "does not flare".
+ */
+export function isFlaringSite(props: unknown): boolean {
+  const p = asProps(props)
+  if (!p) return false
+  if (p.flux_scope === 'not-applicable') return false
+  if (p.flux_status === 'flaring' || p.flux_status === 'both') return true
+  return Number(p.ch4_flared_kg_day) > 0
+}
+
+/** True when the facility reports vented CH₄ (alone or alongside flaring). */
+export function isVentingSite(props: unknown): boolean {
+  const p = asProps(props)
+  if (!p) return false
+  if (p.flux_scope === 'not-applicable') return false
+  if (p.flux_status === 'venting' || p.flux_status === 'both') return true
+  return Number(p.ch4_vented_kg_day) > 0
+}
+
+/** True when ECCC publishes no venting/flaring split for this facility's source type. */
+export function fluxNotReported(props: unknown): boolean {
+  const p = asProps(props)
+  if (!p) return true
+  if (p.flux_scope === 'not-applicable') return true
+  return p.flux_status === 'not_reported' || p.flux_status === 'unknown' || p.flux_status == null
+}
+
+export function matchesFlux(props: unknown, filter: FluxFilter): boolean {
+  if (filter === 'any') return true
+  if (filter === 'flaring') return isFlaringSite(props)
+  return isVentingSite(props)
+}
+
+export const RECENCY_FILTERS: { id: RecencyFilter; label: string; hint: string }[] = [
+  { id: 'any', label: 'Any year', hint: 'Every site, whatever year it last filed' },
+  { id: '2024', label: '2024', hint: 'Freshest GHGRP year published' },
+  { id: '2023', label: '2023', hint: 'Last reported in 2023' },
+  { id: 'older', label: '2022 or older', hint: 'Last filed before 2023 — may be closed or re-permitted' },
+]
+
+export const FLUX_FILTERS: { id: FluxFilter; label: string; hint: string }[] = [
+  { id: 'any', label: 'Any', hint: 'No filter on venting vs flaring' },
+  { id: 'flaring', label: 'Already flaring', hint: 'Reports CH₄ sent to flare — permits and equipment already in place' },
+  { id: 'venting', label: 'Venting', hint: 'Reports vented CH₄' },
+]
+
+/** Counts by recency bucket — used to expose the split on /sites and /provinces. */
+export function recencyBreakdown(
+  sites: { properties: unknown }[],
+): { y2024: number; y2023: number; older: number; unknown: number; newestYear: number | null } {
+  let y2024 = 0
+  let y2023 = 0
+  let older = 0
+  let unknown = 0
+  let newestYear = 0
+  for (const s of sites) {
+    const y = siteRecencyYear(s.properties)
+    if (y == null) { unknown++; continue }
+    if (y > newestYear) newestYear = y
+    if (y >= 2024) y2024++
+    else if (y === 2023) y2023++
+    else older++
+  }
+  return { y2024, y2023, older, unknown, newestYear: newestYear || null }
+}
+
+/**
+ * Counts by flux status. `covered` is how many sites actually have a published
+ * venting/flaring split — the honest denominator for any "already flaring" claim.
+ */
+export function fluxBreakdown(
+  sites: { properties: unknown }[],
+): { flaring: number; ventingOnly: number; both: number; noneReported: number; uncovered: number; covered: number } {
+  let flaring = 0
+  let ventingOnly = 0
+  let both = 0
+  let noneReported = 0
+  let uncovered = 0
+  for (const s of sites) {
+    const p = asProps(s.properties)
+    const st = p?.flux_status
+    if (fluxNotReported(p)) { uncovered++; continue }
+    if (st === 'both') { both++; flaring++ }
+    else if (st === 'flaring') flaring++
+    else if (st === 'venting') ventingOnly++
+    else noneReported++
+  }
+  return { flaring, ventingOnly, both, noneReported, uncovered, covered: sites.length - uncovered }
 }
 
 export function isDefaultEmissionRange(min: number, max: number): boolean {
@@ -83,6 +210,8 @@ export function countActiveMapFilters(state: MapFilterState): number {
   if (state.gridLayer) n++
   if (state.internetLayer) n++
   if (state.radiusFilter) n++
+  if (state.recency && state.recency !== 'any') n++
+  if (state.flux && state.flux !== 'any') n++
   return n
 }
 
@@ -114,6 +243,8 @@ type ChipLabels = {
   grid: string
   internet: string
   radius: string
+  recency: string
+  flux: string
 }
 
 export function buildMapFilterChips(
@@ -128,6 +259,8 @@ export function buildMapFilterChips(
     clearGrid: () => void
     clearInternet: () => void
     clearRadius: () => void
+    clearRecency: () => void
+    clearFlux: () => void
   },
 ): MapFilterChip[] {
   const chips: MapFilterChip[] = []
@@ -179,6 +312,14 @@ export function buildMapFilterChips(
       label: `${labels.radius} ${state.radiusFilter.radiusKm} km`,
       onRemove: handlers.clearRadius,
     })
+  }
+  if (state.recency && state.recency !== 'any') {
+    const label = RECENCY_FILTERS.find(f => f.id === state.recency)?.label ?? state.recency
+    chips.push({ id: 'recency', label: `${labels.recency}: ${label}`, onRemove: handlers.clearRecency })
+  }
+  if (state.flux && state.flux !== 'any') {
+    const label = FLUX_FILTERS.find(f => f.id === state.flux)?.label ?? state.flux
+    chips.push({ id: 'flux', label: `${labels.flux}: ${label}`, onRemove: handlers.clearFlux })
   }
 
   return chips

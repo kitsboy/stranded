@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import type { LiveStats } from '@/types/live-stats'
+import { recencyBreakdown, fluxBreakdown } from '@/lib/map-filters'
 
 function fmtUsd(n: number) {
   if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
@@ -45,6 +46,8 @@ function ProvincesContent() {
     })
     return Object.entries(m).map(([name, list]) => {
       const live = liveByProvince.get(name)
+      const recency = recencyBreakdown(list)
+      const flux = fluxBreakdown(list)
       return {
         name,
         count: list.length,
@@ -52,10 +55,17 @@ function ProvincesContent() {
         avgScore: +(list.reduce((a, x) => a + x.strandedScore, 0) / list.length).toFixed(1),
         emissionKgDay: live?.emissionKgDay,
         estRevenueUsd: live?.estRevenueUsd,
+        filed2024: recency.y2024,
+        filedBefore2023: recency.older,
+        flaring: flux.flaring,
         top: [...list].sort((a, b) => b.strandedScore - a.strandedScore)[0],
       }
     }).sort((a, b) => b.count - a.count)
   }, [sites, liveByProvince])
+
+  // Portfolio-wide honesty numbers — the split the old page buried.
+  const datasetRecency = useMemo(() => recencyBreakdown(sites), [sites])
+  const datasetFlux = useMemo(() => fluxBreakdown(sites), [sites])
 
   const filtered = selected ? sites.filter(s => s.properties.province === selected).sort((a, b) => b.strandedScore - a.strandedScore).slice(0, 20) : []
 
@@ -63,7 +73,16 @@ function ProvincesContent() {
     <div className="max-w-6xl mx-auto px-6 py-10">
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Dashboard', href: '/dashboard' }, { label: selected || 'Provinces' }]} />
       <h1 className="text-4xl font-bold tracking-tighter mb-2">Provincial Intelligence</h1>
-      <p className="text-gray-400 mb-8">{provinces.length} provinces & territories · click for top sites</p>
+      <p className="text-gray-400 mb-3">{provinces.length} provinces &amp; territories · click for top sites</p>
+      {!loading && sites.length > 0 && (
+        <p className="text-xs text-gray-400 mb-8" data-testid="provinces-recency-split">
+          Data recency: <span className="text-[#5BC0BE]">{datasetRecency.y2024.toLocaleString()}</span> sites filed for {datasetRecency.newestYear ?? '—'} ·{' '}
+          <span className="text-white">{datasetRecency.y2023.toLocaleString()}</span> last filed in 2023 ·{' '}
+          <span className="text-amber-200">{datasetRecency.older.toLocaleString()}</span> last filed before 2023 (historic figures, not current) ·{' '}
+          <span className="text-[#FF8C00]">{datasetFlux.flaring.toLocaleString()}</span> report flaring (published for{' '}
+          {datasetFlux.covered.toLocaleString()} of {sites.length.toLocaleString()} sites — no venting/flaring claim is made for the rest)
+        </p>
+      )}
 
       {loading ? <div className="text-gray-400">Loading…</div> : (
         <>
@@ -74,6 +93,9 @@ function ProvincesContent() {
                   <tr className="border-b border-white/10 text-left text-xs uppercase text-gray-400">
                     <th className="p-3">Province</th>
                     <th className="p-3 text-right">Sites</th>
+                    <th className="p-3 text-right">Filed 2024</th>
+                    <th className="p-3 text-right">Pre-2023</th>
+                    <th className="p-3 text-right">Flaring</th>
                     <th className="p-3 text-right">Emission kg/d</th>
                     <th className="p-3 text-right">Est. revenue</th>
                     <th className="p-3 text-right">Avg score</th>
@@ -89,6 +111,9 @@ function ProvincesContent() {
                         </Link>
                       </td>
                       <td className="p-3 text-right font-mono text-[#FF8C00]">{p.count}</td>
+                      <td className="p-3 text-right font-mono text-[#5BC0BE]">{p.filed2024}</td>
+                      <td className="p-3 text-right font-mono text-amber-200">{p.filedBefore2023}</td>
+                      <td className="p-3 text-right font-mono text-[#FF8C00]">{p.flaring}</td>
                       <td className="p-3 text-right font-mono text-[#5BC0BE]">
                         {(p.emissionKgDay ?? p.totalEmission).toLocaleString()}
                       </td>
@@ -117,6 +142,11 @@ function ProvincesContent() {
                     <div className="font-semibold text-lg">{p.name}</div>
                     <div className="text-3xl font-bold text-[#FF8C00] mt-1">{p.count}</div>
                     <div className="text-xs text-gray-400 mt-2">{p.totalEmission.toLocaleString()} kg/day · avg score {p.avgScore}</div>
+                    <div className="text-[11px] text-gray-400 mt-1">
+                      <span className="text-[#5BC0BE]">{p.filed2024}</span> filed 2024 ·{' '}
+                      <span className="text-amber-200">{p.filedBefore2023}</span> pre-2023 ·{' '}
+                      <span className="text-[#FF8C00]">{p.flaring}</span> flaring
+                    </div>
                   </Link>
                   <Link
                     href={`/map?province=${encodeURIComponent(p.name)}`}

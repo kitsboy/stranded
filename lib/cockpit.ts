@@ -192,7 +192,15 @@ export function ventingComparison(input: {
 // Honesty visuals — data recency, flux, hashprice
 // ---------------------------------------------------------------------------
 
-export type DataRecencyBadge = { label: string; detail: string; tier: 'high' | 'medium' | 'low' }
+export type DataRecencyBadge = {
+  label: string
+  detail: string
+  tier: 'high' | 'medium' | 'low'
+  /** True when the facility has not filed since 2022 — its figures are historic, not current. */
+  stale: boolean
+  /** The year the figures come from (last_reported_year, falling back to reference_year). */
+  year: number | null
+}
 
 const SOURCE_LABEL: Record<string, string> = {
   'ECCC-GHGRP': 'ECCC',
@@ -200,37 +208,55 @@ const SOURCE_LABEL: Record<string, string> = {
   ECCC: 'ECCC',
 }
 
+/** The newest GHGRP reporting year we treat as "current". Older = stale. */
+export const CURRENT_REPORTING_YEAR = 2023
+
 /**
- * "ECCC 2023 · high confidence" — rendered only when the dataset actually carries
- * the fields. A site with none of them simply shows no badge (graceful degrade).
+ * "ECCC 2024 · high confidence" — or, for an old filing, "ECCC 2011 · stale filing · high confidence".
+ * Rendered only when the dataset actually carries the fields; a site with none of them shows no badge.
  */
 export function dataRecencyBadge(props: Record<string, unknown> | null | undefined): DataRecencyBadge | null {
   if (!props) return null
   const rawSource = typeof props.data_source === 'string' ? props.data_source : ''
   const source = SOURCE_LABEL[rawSource] || rawSource
-  const year = Number(props.reference_year)
+  const rawYear = props.last_reported_year ?? props.reference_year
+  const year = Number(rawYear)
   const yearOk = Number.isFinite(year) && year > 1990 && year < 2100
   const confidence = typeof props.confidence === 'string' ? props.confidence.toLowerCase() : ''
   const confOk = ['high', 'medium', 'low'].includes(confidence)
   if (!source && !yearOk && !confOk) return null
+  const stale = yearOk && year < CURRENT_REPORTING_YEAR
   const label = [source, yearOk ? String(year) : null].filter(Boolean).join(' ')
-  const tier: DataRecencyBadge['tier'] = confOk ? (confidence as DataRecencyBadge['tier']) : 'medium'
+  const confDetail = confOk ? `${confidence} confidence` : 'confidence not stated'
   return {
     label: label || 'Source data',
-    detail: confOk ? `${confidence} confidence` : 'confidence not stated',
-    tier,
+    detail: stale ? `stale filing · ${confDetail}` : confDetail,
+    tier: stale ? 'low' : confOk ? (confidence as DataRecencyBadge['tier']) : 'medium',
+    stale,
+    year: yearOk ? year : null,
   }
 }
 
 export type FluxBadge = { label: string; tone: 'flare' | 'vent' }
 
-/** Flux state when the dataset carries it; absent today, so callers must tolerate null. */
+/**
+ * Flux state from the ECCC "Emissions by Source" breakdown. Returns null when the
+ * dataset does not say — including `flux_scope: 'not-applicable'`, where ECCC
+ * publishes no venting/flaring split at all (landfill gas is reported as "Waste").
+ * Never render "not reported" as "does not flare".
+ */
 export function fluxBadge(props: Record<string, unknown> | null | undefined): FluxBadge | null {
   if (!props) return null
+  if (props.flux_scope === 'not-applicable') return null
   const raw = [props.flux_status, props.flare_status, props.emission_status, props.venting_status]
     .find(v => typeof v === 'string' && v.trim()) as string | undefined
   if (!raw) return null
   const key = raw.toLowerCase()
+  if (key === 'flaring') return { label: 'Currently flaring', tone: 'flare' }
+  if (key === 'both') return { label: 'Flaring + venting', tone: 'flare' }
+  if (key === 'venting') return { label: 'Venting', tone: 'vent' }
+  if (key === 'none' || key === 'not_reported' || key === 'unknown' || key === 'n/a') return null
+  // Tolerate free-text values from older exports.
   if (key.includes('flare') || key.includes('combust')) return { label: 'Currently flaring', tone: 'flare' }
   if (key.includes('vent') || key.includes('release')) return { label: 'Venting', tone: 'vent' }
   return { label: raw, tone: 'vent' }
