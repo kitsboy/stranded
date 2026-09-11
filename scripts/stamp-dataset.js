@@ -9,6 +9,8 @@
  *                                          (this is what `prebuild` runs — no network)
  *   npm run stamp:dataset                  offline step + submit the digests to the
  *                                          Satohash proof API (OpenTimestamps → Bitcoin)
+ *   npm run stamp:dataset:refresh          re-read the status of proofs already submitted
+ *                                          (GET only — never creates a new stamp)
  *
  * The network step is deliberately NOT part of the build: a flaky or down proof API must
  * never block a deploy. When submission fails the manifest still gets written with
@@ -51,6 +53,7 @@ const DATASET_VERSION = 1
 const MAX_HISTORY = 5
 
 const withStamp = process.argv.includes('--stamp')
+const withRefresh = process.argv.includes('--refresh')
 
 function sha256Hex(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex')
@@ -357,12 +360,60 @@ async function submitProofs(manifest) {
   }
 }
 
+/**
+ * Refresh the recorded status of proofs we already submitted — GET only, no new stamps.
+ * Safe to run often (cron-friendly): it never creates a duplicate submission.
+ */
+async function refreshProofs(manifest) {
+  let satohash
+  try {
+    satohash = require('../lib/satohash.ts')
+  } catch (e) {
+    return { ...manifest, proofError: `stamp client unavailable: ${short(e)}` }
+  }
+
+  const refresh = async (record) => {
+    if (!record || !record.targetSha256) return record
+    const live = await satohash.findStampByHash(record.targetSha256).catch(() => null)
+    if (!live) return record
+    const next = {
+      ...record,
+      status: live.status || record.status,
+      confirmedAt: toIso(live.confirmed_at) || record.confirmedAt,
+      bitcoinBlockHeight: live.bitcoin_block_height || record.bitcoinBlockHeight,
+      checkedAt: new Date().toISOString(),
+    }
+    if (live.id) next.verifyUrl = `${satohash.SATOHASH_SITE}/verify/${live.id}`
+    console.log(
+      `→ ${record.target} status ${record.status} → ${next.status}` +
+        (next.bitcoinBlockHeight ? ` · block ${next.bitcoinBlockHeight}` : ''),
+    )
+    return next
+  }
+
+  const proof = await refresh(manifest.proof)
+  const snapshotProof = await refresh(manifest.snapshotProof)
+  const history = await collectConfirmedHistory(satohash, manifest, [manifest.dataSha256, manifest.sha256]).catch(
+    () => manifest.proofHistory || [],
+  )
+
+  return { ...manifest, proof, snapshotProof, proofHistory: history, proofError: null }
+}
+
 async function main() {
   const manifest = buildManifest()
   console.log(
     `✓ dataset-manifest.json — snapshot sha256 ${manifest.sha256.slice(0, 16)}… · data file sha256 ${manifest.dataSha256.slice(0, 16)}…`,
   )
   console.log(`  ${manifest.siteCount} sites · newest reference year ${manifest.newestReferenceYear}`)
+
+  if (withRefresh) {
+    const refreshed = await refreshProofs(manifest)
+    fs.writeFileSync(MANIFEST_PATH, JSON.stringify(refreshed, null, 2) + '\n')
+    const state = refreshed.proof ? `${refreshed.proof.status}${refreshed.proof.bitcoinBlockHeight ? ` · block ${refreshed.proof.bitcoinBlockHeight}` : ''}` : 'no proof on record'
+    console.log(`✓ proof status refreshed — ${state}`)
+    return
+  }
 
   if (!withStamp) {
     console.log('  offline mode — no network submission (run `npm run stamp:dataset` to timestamp)')
