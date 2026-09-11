@@ -620,5 +620,154 @@ assert.equal(bandClamp.low, 0)
 const bandTop = scoreConfidenceBand({ score: 99, confidence: 'low' })
 assert.equal(bandTop.high, 100)
 
+// --- fleet templates (editable miner stack) ---
+const {
+  ASIC_MACHINES,
+  MINER_STACK_PRESETS,
+  DEFAULT_FLEET_ASSUMPTIONS,
+  siteGasCeilingKw,
+  minerCeiling,
+  capFleetToSite,
+  rescaleToSite,
+  unusedCapacity,
+  encodeFleet,
+  decodeFleet,
+  fleetPresetForSourceType,
+  referenceSiteForPreset,
+} = await import('../lib/fleet-template.ts')
+const { computeGeneratorPower, GENSET_DATA } = await import('../lib/sites.ts')
+
+const keeleProps = geo.features.find(f => String(f.properties.ghgrp_id) === 'G10161').properties
+const keele = { id: 'G10161', emission: keeleProps.emission_rate_kg_day, properties: keeleProps }
+assert.equal(keeleProps.name, 'Keele Valley Landfill')
+assert.equal(keeleProps.emission_rate_kg_day, 56013.9)
+
+// presets must key on source types that really exist in the dataset
+const datasetSourceTypes = new Set(geo.features.map(f => f.properties.source_type))
+assert.equal(MINER_STACK_PRESETS.length, 5)
+assert.equal(new Set(MINER_STACK_PRESETS.map(p => p.id)).size, 5)
+const PRESET_IDS = ['landfill-basic', 'oilgas-modular', 'wastewater-small', 'coalmine-large', 'pulp-power']
+for (const id of PRESET_IDS) assert.ok(MINER_STACK_PRESETS.some(p => p.id === id), `missing preset ${id}`)
+for (const preset of MINER_STACK_PRESETS) {
+  assert.ok(preset.sourceTypes.length > 0, `${preset.id} needs source types`)
+  for (const st of preset.sourceTypes) assert.ok(datasetSourceTypes.has(st), `${preset.id}: '${st}' not in dataset`)
+  assert.ok(ASIC_MACHINES.some(a => a.id === preset.asicId), `${preset.id} asicId`)
+  assert.ok(preset.gensets.length > 0 && GENSET_DATA[preset.gensets[0].gensetId], `${preset.id} gensets`)
+  assert.ok(['auto', 'manual'].includes(preset.mode))
+  assert.equal(typeof preset.assumptions.btcPriceUsd, 'number')
+}
+assert.equal(fleetPresetForSourceType('landfill_waste').id, 'landfill-basic')
+assert.equal(fleetPresetForSourceType('coal_mining').id, 'coalmine-large')
+assert.equal(fleetPresetForSourceType('oil_gas_extraction').id, 'oilgas-modular')
+assert.equal(fleetPresetForSourceType('pulp_paper').id, 'pulp-power')
+assert.equal(fleetPresetForSourceType('power_generation').id, 'wastewater-small')
+assert.equal(fleetPresetForSourceType('nope'), undefined)
+assert.equal(fleetPresetForSourceType(''), undefined)
+
+// gas ceiling = sum of genset capacity at this site's gas (same function the panel uses)
+const oneJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 1 }])
+assert.ok(Math.abs(oneJ316 - computeGeneratorPower(56013.9, 'jenbacher316')) < 1e-6)
+const twoJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 2 }])
+assert.ok(Math.abs(twoJ316 - 2 * oneJ316) < 1e-6)
+assert.equal(siteGasCeilingKw(keele, []), 0)
+assert.equal(minerCeiling(1000, 3500), 285)
+assert.equal(minerCeiling(0, 3500), 0)
+assert.equal(minerCeiling(1000, 0), 0)
+
+// cap: auto fills to the ceiling, manual can never exceed it
+const autoTpl = {
+  id: 'landfill-basic',
+  name: 'Landfill — Basic Capture',
+  sourceTypes: ['landfill_waste'],
+  asicId: 's21xp',
+  minerCount: 0,
+  mode: 'auto',
+  gensets: [{ gensetId: 'jenbacher316', count: 1 }],
+  assumptions: { ...DEFAULT_FLEET_ASSUMPTIONS },
+}
+const ceiling = minerCeiling(oneJ316, 4050)
+assert.equal(capFleetToSite(autoTpl, keele).minerCount, ceiling)
+assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: ceiling * 3 }, keele).minerCount, ceiling)
+assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: 500 }, keele).minerCount, 500)
+
+// unusedCapacity: under-filled stack leaves real gas on the table, full stack leaves none
+const halfFleet = capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: Math.floor(ceiling / 2) }, keele)
+const unused = unusedCapacity(keele, halfFleet)
+assert.ok(unused.unusedKw > 0)
+assert.ok(Math.abs(unused.unusedKgPerDay - 56013.9 / 2) < 5, `expected ~half the gas, got ${unused.unusedKgPerDay}`)
+assert.ok(Math.abs(unused.unusedTPerYear - (unused.unusedKgPerDay * 365) / 1000) < 1e-9)
+const fullFleet = unusedCapacity(keele, capFleetToSite(autoTpl, keele))
+// at the ceiling the only remainder is the floor() of the last machine
+assert.ok(fullFleet.unusedKw < 4.05 && fullFleet.unusedKgPerDay < 1, JSON.stringify(fullFleet))
+assert.deepEqual(unusedCapacity(keele, { ...autoTpl, gensets: [] }), { unusedKw: 0, unusedKgPerDay: 0, unusedTPerYear: 0 })
+
+// readable share params — no base64
+const shareTpl = { ...autoTpl, minerCount: 468, gensets: [{ gensetId: 'jenbacher316', count: 2 }] }
+const query = encodeFleet(shareTpl)
+assert.equal(query, 'miners=468&asic=s21xp&gensets=j316:2&mode=auto&tpl=landfill-basic')
+const decoded = decodeFleet(new URLSearchParams(query))
+assert.equal(decoded.id, 'landfill-basic')
+assert.equal(decoded.name, 'Landfill — Basic Capture')
+assert.equal(decoded.asicId, 's21xp')
+assert.equal(decoded.minerCount, 468)
+assert.equal(decoded.mode, 'auto')
+assert.deepEqual(decoded.gensets, [{ gensetId: 'jenbacher316', count: 2 }])
+assert.equal(encodeFleet(decoded), query)
+assert.deepEqual(decoded.assumptions, DEFAULT_FLEET_ASSUMPTIONS)
+
+assert.equal(decodeFleet(new URLSearchParams('')), null)
+assert.equal(decodeFleet(new URLSearchParams('site=G10161&minScore=40')), null)
+
+const manualTpl = {
+  ...shareTpl,
+  id: 'pulp-power',
+  mode: 'manual',
+  minerCount: 1234,
+  gensets: [{ gensetId: 'jenbacher316', count: 2 }, { gensetId: 'mobile250', count: 1 }],
+}
+const manualQuery = encodeFleet(manualTpl)
+assert.ok(manualQuery.includes('gensets=j316:2,m250:1'), manualQuery)
+const manualBack = decodeFleet(new URLSearchParams(manualQuery))
+assert.deepEqual(manualBack.gensets, manualTpl.gensets)
+assert.equal(manualBack.minerCount, 1234)
+assert.equal(manualBack.mode, 'manual')
+// miners without a mode are an explicit count, not auto
+assert.equal(decodeFleet(new URLSearchParams('miners=99&asic=s21')).mode, 'manual')
+// junk tokens fall back instead of throwing
+const junk = decodeFleet(new URLSearchParams('tpl=nope&asic=nope&gensets=zzz:3'))
+assert.equal(junk.id, 'nope')
+assert.ok(ASIC_MACHINES.some(a => a.id === junk.asicId))
+assert.deepEqual(junk.gensets, [{ gensetId: 'jenbacher316', count: 1 }])
+
+// rescaleToSite keeps the genset mix shape, scaled to the target site's gas
+const smallSite = { emission: 500, properties: { source_type: 'landfill_waste' } }
+const bigSite = { emission: 50000, properties: { source_type: 'landfill_waste' } }
+const shapeTpl = { ...manualTpl, minerCount: 10, gensets: [{ gensetId: 'jenbacher316', count: 2 }, { gensetId: 'mobile250', count: 2 }] }
+const rescaled = rescaleToSite(shapeTpl, smallSite, bigSite)
+assert.deepEqual(rescaled.gensets.map(g => g.gensetId), ['jenbacher316', 'mobile250'])
+assert.ok(rescaled.gensets[0].count > shapeTpl.gensets[0].count)
+assert.equal(rescaled.mode, 'manual')
+assert.ok(rescaled.minerCount <= minerCeiling(siteGasCeilingKw(bigSite, rescaled.gensets), 4050))
+assert.deepEqual(rescaleToSite(shapeTpl, bigSite, bigSite).gensets, shapeTpl.gensets)
+const autoRescaled = rescaleToSite({ ...shapeTpl, mode: 'auto', minerCount: 0 }, bigSite, smallSite)
+assert.equal(autoRescaled.minerCount, minerCeiling(siteGasCeilingKw(smallSite, autoRescaled.gensets), 4050))
+// median-gas match, not the first or min
+assert.equal(referenceSiteForPreset(MINER_STACK_PRESETS[0], [smallSite, bigSite, keele]).emission, 50000)
+assert.equal(referenceSiteForPreset(MINER_STACK_PRESETS[0], [{ emission: 400, properties: { source_type: 'refinery' } }]), null)
+
+// map URL carries the fleet additively; nothing else changes
+const fleetMapUrl = buildMapUrl({ site: 'G10161', fleet: manualTpl })
+assert.ok(fleetMapUrl.startsWith('/map?site=G10161&'))
+assert.ok(fleetMapUrl.includes('miners=1234'))
+const parsedFleet = parseMapUrl(new URLSearchParams(fleetMapUrl.split('?')[1]))
+assert.equal(parsedFleet.site, 'G10161')
+assert.equal(parsedFleet.fleet.minerCount, 1234)
+assert.deepEqual(parsedFleet.fleet.gensets, manualTpl.gensets)
+assert.equal(parsedFleet.fleet.mode, 'manual')
+assert.equal(buildMapUrl({ site: 'G10161', minScore: 40, provinces: ['Alberta'] }), '/map?site=G10161&minScore=40&provinces=Alberta')
+const noFleet = parseMapUrl(new URLSearchParams('site=G10161&minScore=40&sources=landfill_waste'))
+assert.equal(noFleet.fleet, undefined)
+assert.equal(noFleet.minScore, 40)
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

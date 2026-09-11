@@ -21,6 +21,7 @@ import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnect
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialCad, scalePotentialCad } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl, buildMapUrl, buildMapShareUrl, haversineKm, type MapUrlState } from '@/lib/map-url-state'
+import { capFleetToSite, rescaleToSite, referenceSiteForPreset, type FleetTemplate } from '@/lib/fleet-template'
 import {
   getFilterPresets,
   saveFilterPreset,
@@ -86,6 +87,8 @@ function StrandedCommandCenter() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSite, setSelectedSite] = useState<EnrichedSite | null>(null)
+  /** Fleet template decoded from the share link, bound to the site it came with */
+  const [fleetUrlState, setFleetUrlState] = useState<{ siteId: string; template: FleetTemplate } | null>(null)
   const [portfolio, setPortfolio] = useState<EnrichedSite[]>([])
   const [viewMode, setViewMode] = useState<MapViewMode>('precise')
   const didAutoCluster = useRef(false)
@@ -188,6 +191,15 @@ function StrandedCommandCenter() {
         const match = sites.find(s => s.id === siteId || String(s.properties.ghgrp_id) === siteId)
         if (match) {
           recordRecentSite(match)
+          if (urlState.fleet) {
+            // tpl-only links carry a preset: scale it from its typical site to this one
+            let template = urlState.fleet
+            if (searchParams.get('tpl') && !searchParams.get('gensets')) {
+              const reference = referenceSiteForPreset(template, sites)
+              if (reference) template = rescaleToSite(template, reference, match)
+            }
+            setFleetUrlState({ siteId: match.id, template: capFleetToSite(template, match) })
+          }
           setTimeout(() => {
             setSelectedSite(match)
             // ensure province of deep-linked site is not filtered out
@@ -1545,6 +1557,7 @@ function StrandedCommandCenter() {
                 onAddToMission={addToPortfolio}
                 liveBtcPrice={liveBtcPrice}
                 allSites={allSites}
+                initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
               />
             </div>
           </motion.div>
@@ -1563,6 +1576,7 @@ function StrandedCommandCenter() {
               onAddToMission={addToPortfolio}
               liveBtcPrice={liveBtcPrice}
               allSites={allSites}
+              initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
             />
           )}
         </AnimatePresence>

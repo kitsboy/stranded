@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { GENSET_DATA, computeGeneratorPower, GensetId, EnrichedSite } from '@/lib/sites'
+import { GENSET_DATA, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks } from '@/lib/bookmarks'
 import { getSiteNote, setSiteNote } from '@/lib/site-notes'
@@ -38,19 +38,22 @@ import FormulaTip from '@/components/FormulaTip'
 import CaseStudyExport from '@/components/CaseStudyExport'
 import CapexFxControls from '@/components/CapexFxControls'
 import AmortizationTable from '@/components/AmortizationTable'
-
-const ASIC_MACHINES = [
-  { id: 's21xp', name: 'Antminer S21 XP', hashrate_ths: 300, power_w: 4050, efficiency_j_th: 13.5, cost_cad: 8500, manufacturer: 'Bitmain' },
-  { id: 's21', name: 'Antminer S21', hashrate_ths: 200, power_w: 3500, efficiency_j_th: 17.5, cost_cad: 5500, manufacturer: 'Bitmain' },
-  { id: 's19kpro', name: 'Antminer S19k Pro', hashrate_ths: 136, power_w: 3264, efficiency_j_th: 24.0, cost_cad: 3200, manufacturer: 'Bitmain' },
-  { id: 's19xp', name: 'Antminer S19 XP', hashrate_ths: 140, power_w: 3010, efficiency_j_th: 21.5, cost_cad: 3800, manufacturer: 'Bitmain' },
-  { id: 'm50s', name: 'WhatsMiner M50S++', hashrate_ths: 150, power_w: 3276, efficiency_j_th: 21.8, cost_cad: 3600, manufacturer: 'MicroBT' },
-  { id: 'm60s', name: 'WhatsMiner M60S', hashrate_ths: 186, power_w: 3348, efficiency_j_th: 18.0, cost_cad: 4800, manufacturer: 'MicroBT' },
-  { id: 't21', name: 'Antminer T21', hashrate_ths: 190, power_w: 3610, efficiency_j_th: 19.0, cost_cad: 4200, manufacturer: 'Bitmain' },
-  { id: 's19apro', name: 'Antminer S19a Pro', hashrate_ths: 110, power_w: 3250, efficiency_j_th: 29.5, cost_cad: 2400, manufacturer: 'Bitmain' },
-  { id: 'm30s', name: 'WhatsMiner M30S++', hashrate_ths: 112, power_w: 3472, efficiency_j_th: 31.0, cost_cad: 2200, manufacturer: 'MicroBT' },
-  { id: 's19', name: 'Antminer S19', hashrate_ths: 95, power_w: 3250, efficiency_j_th: 34.2, cost_cad: 1800, manufacturer: 'Bitmain' }
-]
+import {
+  ASIC_MACHINES,
+  MINER_STACK_PRESETS,
+  DEFAULT_FLEET_ASSUMPTIONS,
+  capFleetToSite,
+  encodeFleet,
+  fleetPresetForSourceType,
+  minerCeiling,
+  referenceSiteForPreset,
+  rescaleToSite,
+  siteGasCeilingKw,
+  unusedCapacity,
+  type FleetGenset,
+  type FleetSite,
+  type FleetTemplate,
+} from '@/lib/fleet-template'
 
 const FIAT_OPTIONS = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -63,6 +66,14 @@ const FIAT_OPTIONS = [
 type FiatCode = typeof FIAT_OPTIONS[number]['code']
 type BtcPriceMap = Record<Lowercase<FiatCode>, number>
 
+/** Human label for a genset inventory: "2 × INNIO Jenbacher J316 GS-B.L + 1 × …" */
+function gensetStackLabel(stack: FleetGenset[]): string {
+  const parts = (stack || [])
+    .filter(g => GENSET_DATA[g.gensetId] && (g.count || 0) > 0)
+    .map(g => `${g.count} × ${GENSET_DATA[g.gensetId].name}`)
+  return parts.length ? parts.join(' + ') : 'no genset'
+}
+
 export default function SiteDetailsPanel({ 
   site, 
   onClose, 
@@ -71,6 +82,7 @@ export default function SiteDetailsPanel({
   allSites = [],
   compact = false,
   onExpand,
+  initialFleet = null,
 }: { 
   site: any
   onClose: () => void
@@ -80,6 +92,8 @@ export default function SiteDetailsPanel({
   /** Mobile peek mode — header summary only */
   compact?: boolean
   onExpand?: () => void
+  /** Fleet template restored from a share link (already capped to this site) */
+  initialFleet?: FleetTemplate | null
 }) {
   const { t } = useLocale()
   const p = site?.properties || {}
@@ -88,15 +102,33 @@ export default function SiteDetailsPanel({
   const { fiats: sharedFiats } = useBtcPrice()
   const [selectedFiat, setSelectedFiat] = useState<FiatCode>('USD')
   const [btcPrices, setBtcPrices] = useState<BtcPriceMap>({ usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 })
-  const [selectedASIC, setSelectedASIC] = useState(ASIC_MACHINES[0])
-  const [machineCount, setMachineCount] = useState(100)
+  const [selectedASIC, setSelectedASIC] = useState(
+    () => ASIC_MACHINES.find(m => m.id === initialFleet?.asicId) || ASIC_MACHINES[0],
+  )
+  const [machineCount, setMachineCount] = useState(() => {
+    if (initialFleet) return Math.max(1, initialFleet.minerCount || 1)
+    return 100
+  })
   const [overclockPercent, setOverclockPercent] = useState(0)
   const [advancedMode, setAdvancedMode] = useState(false)
   const [btcPrice, setBtcPrice] = useState(85000) // Price of 1 BTC in the *selected* fiat (BTC is always the base)
   const [uptimePercent, setUptimePercent] = useState(95)
 
   // Generator integration for real per-site Value (CapEx on production side)
-  const [selectedGenset, setSelectedGenset] = useState<GensetId>('jenbacher316')
+  const [selectedGenset, setSelectedGenset] = useState<GensetId>(
+    () => initialFleet?.gensets?.[0]?.gensetId || 'jenbacher316',
+  )
+  /** Miner-stack genset inventory — the gas ceiling is the sum of these units */
+  const [gensetStack, setGensetStack] = useState<FleetGenset[]>(() =>
+    initialFleet?.gensets?.length
+      ? initialFleet.gensets.map(g => ({ ...g }))
+      : [{ gensetId: 'jenbacher316', count: 1 }],
+  )
+  /** auto = "Fill the gas" (miners fill the ceiling, max capture); manual = "My build" */
+  const [stackMode, setStackMode] = useState<'auto' | 'manual'>(
+    () => initialFleet?.mode || 'auto',
+  )
+  const [fleetId, setFleetId] = useState<string>(() => initialFleet?.id || 'custom')
   const [debtPercent, setDebtPercent] = useState(60)
   const [interestRate, setInterestRate] = useState(8)
 
@@ -154,10 +186,10 @@ export default function SiteDetailsPanel({
     const adjustedPower = selectedASIC.power_w * overclockMultiplier * (1 + overclockPercent / 200)
     const totalPowerKw = (adjustedPower * machineCount) / 1000
 
-    // Generator integration: limit power from site's real emission using chosen genset
-    const generatorPowerKw = computeGeneratorPower(siteEmission, selectedGenset)
+    // Generator integration: limit power from site's real emission using the genset stack (gas ceiling)
+    const generatorPowerKw = siteGasCeilingKw(site, gensetStack)
     const effectivePowerKw = Math.min(totalPowerKw, generatorPowerKw)
-    const effectiveMachineCount = Math.min(machineCount, Math.floor(generatorPowerKw * 1000 / selectedASIC.power_w ))
+    const effectiveMachineCount = Math.min(machineCount, minerCeiling(generatorPowerKw, selectedASIC.power_w))
 
     // Honest revenue: use editable per-TH/day BTC rate (accounts for current difficulty, fees, etc.)
     const dailyBtcGross = adjustedHashrate * effectiveMachineCount * revenuePerThPerDayBtc
@@ -185,8 +217,12 @@ export default function SiteDetailsPanel({
     const dailyProfitBtc = dailyRevenueBtc - dailyPowerCostBtc - dailyMaintBtc
     const dailyProfitFiat = dailyProfitBtc * btcPriceInFiat
 
-    // Generator CapEx (production side, real from dataset)
-    const gensetCapexCad = GENSET_DATA[selectedGenset].powerKW * GENSET_DATA[selectedGenset].capexPerKW
+    // Generator CapEx (production side, real from dataset) — summed across the genset stack
+    const gensetCapexCad = gensetStack.reduce((sum, g) => {
+      const spec = GENSET_DATA[g.gensetId]
+      if (!spec) return sum
+      return sum + spec.powerKW * spec.capexPerKW * Math.max(0, Math.floor(g.count || 0))
+    }, 0)
     const gensetCapexBtc = gensetCapexCad / cadBtcPrice
     const gensetCapexFiat = gensetCapexBtc * btcPriceInFiat
 
@@ -241,9 +277,16 @@ export default function SiteDetailsPanel({
       methaneLossDailyBtc: methaneLossDailyBtc || 0,
       financedPaybackDays: financedPaybackDays,
       effectiveMachineCount: effectiveMachineCount || 0,
-      gensetName: GENSET_DATA[selectedGenset]?.name ?? String(selectedGenset)
+      gensetName: gensetStackLabel(gensetStack)
     }
-  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, selectedGenset, debtPercent, interestRate, siteEmission, site])
+  }, [selectedASIC, machineCount, overclockPercent, btcPrice, uptimePercent, btcPrices, fixedSetupCostCad, poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, gensetStack, debtPercent, interestRate, siteEmission, site])
+
+  // Auto mode: the miner stack always fills the gas ceiling (maximum capture)
+  useEffect(() => {
+    if (stackMode !== 'auto') return
+    const ceiling = minerCeiling(siteGasCeilingKw(site, gensetStack), selectedASIC.power_w)
+    if (ceiling > 0) setMachineCount(ceiling)
+  }, [stackMode, gensetStack, selectedASIC, site])
 
   const fmt = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'
@@ -310,6 +353,96 @@ export default function SiteDetailsPanel({
   }
 
   const mapDeepLink = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
+
+  // ---- Editable miner stack (fleet template) ----------------------------------
+  const siteAsFleet: FleetSite = site as FleetSite
+  const ceilingMiners = minerCeiling(calculations.generatorPowerKw, selectedASIC.power_w)
+  const atGasCeiling = ceilingMiners > 0 && machineCount >= ceilingMiners
+  const headGenset = (gensetStack[0]?.gensetId || selectedGenset) as GensetId
+  const usdBtcPrice = btcPrices.usd || 85000
+
+  const fleetTemplate: FleetTemplate = {
+    id: fleetId,
+    name: MINER_STACK_PRESETS.find(x => x.id === fleetId)?.name || 'Custom fleet',
+    sourceTypes: p.source_type ? [p.source_type] : [],
+    asicId: selectedASIC.id,
+    minerCount: machineCount,
+    mode: stackMode,
+    gensets: gensetStack,
+    assumptions: {
+      ...DEFAULT_FLEET_ASSUMPTIONS,
+      btcPriceUsd: usdBtcPrice,
+      revenuePerThPerDayBtc,
+      uptimePct: uptimePercent,
+      poolFeePct: poolFeePercent,
+      maintenancePct: maintenanceAnnualPercent,
+      fixedSetupCostCad,
+    },
+  }
+
+  const unused = unusedCapacity(siteAsFleet, fleetTemplate)
+  const capturedKgPerDay = Math.max(0, siteEmission - unused.unusedKgPerDay)
+  const capturedPct = siteEmission > 0 ? Math.min(100, (capturedKgPerDay / siteEmission) * 100) : 0
+  const unminedUsdPerDay =
+    (unused.unusedKw / selectedASIC.power_w) *
+    selectedASIC.hashrate_ths *
+    revenuePerThPerDayBtc *
+    usdBtcPrice *
+    (1 - poolFeePercent / 100)
+  const suggestedPreset = fleetPresetForSourceType(p.source_type || '')
+  const fleetShareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${encodeURIComponent(site.id)}&${encodeFleet(fleetTemplate)}`
+  const gaugePct = Math.min(100, Math.round((machineCount / Math.max(1, ceilingMiners)) * 100))
+  const usedPowerKw = Math.min(calculations.totalPowerKw, calculations.generatorPowerKw)
+  const sparePct = Math.max(0, 100 - gaugePct)
+  const modeLabel = stackMode === 'auto' ? 'Fill the gas' : 'My build'
+
+  const decMiners = () => {
+    setStackMode('manual')
+    setMachineCount(c => Math.max(1, c - 1))
+  }
+  const incMiners = () => {
+    setStackMode('manual')
+    setMachineCount(c => (ceilingMiners > 0 ? Math.min(c + 1, ceilingMiners) : c + 1))
+  }
+  const addGensetUnit = () => {
+    setGensetStack(prev => {
+      if (!prev.length) return [{ gensetId: 'jenbacher316', count: 1 }]
+      const next = prev.map(g => ({ ...g }))
+      next[0] = { ...next[0], count: Math.max(1, next[0].count) + 1 }
+      return next
+    })
+    // the tap the ceiling blocked: one more miner, now that the ceiling has risen
+    setMachineCount(c => c + 1)
+  }
+  const ceilingWithout = (gensetId: GensetId): number => {
+    const reduced = gensetStack
+      .map(g => (g.gensetId === gensetId ? { ...g, count: g.count - 1 } : { ...g }))
+      .filter(g => g.count > 0)
+    if (!reduced.length) return 0
+    return minerCeiling(siteGasCeilingKw(siteAsFleet, reduced), selectedASIC.power_w)
+  }
+  const canRemoveGenset = (gensetId: GensetId) => ceilingWithout(gensetId) >= machineCount
+  const removeGensetUnit = (gensetId: GensetId) => {
+    setGensetStack(prev => {
+      const reduced = prev
+        .map(g => (g.gensetId === gensetId ? { ...g, count: g.count - 1 } : { ...g }))
+        .filter(g => g.count > 0)
+      if (!reduced.length) return prev
+      return minerCeiling(siteGasCeilingKw(siteAsFleet, reduced), selectedASIC.power_w) >= machineCount ? reduced : prev
+    })
+  }
+  const applyTemplate = (template: FleetTemplate) => {
+    const reference = referenceSiteForPreset(template, allSites)
+    const scaled = capFleetToSite(reference ? rescaleToSite(template, reference, siteAsFleet) : template, siteAsFleet)
+    setGensetStack(scaled.gensets.map(g => ({ ...g })))
+    const head = scaled.gensets[0]?.gensetId
+    if (head) setSelectedGenset(head)
+    const asic = ASIC_MACHINES.find(m => m.id === scaled.asicId)
+    if (asic) setSelectedASIC(asic)
+    setFleetId(scaled.id)
+    setStackMode(scaled.mode)
+    if (scaled.mode === 'manual') setMachineCount(Math.max(1, scaled.minerCount || 1))
+  }
 
   return (
     <motion.div
@@ -515,6 +648,163 @@ export default function SiteDetailsPanel({
         <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{calculations.hardwareCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span></div>
       </div>
+      {/* ---- Miner stack: add/subtract miners at this location ---- */}
+      <div className="mb-4 rounded-lg border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-3" data-testid="miner-stack">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-sm font-semibold text-[#FF8C00]">Miner stack</span>
+          <div className="flex rounded-lg overflow-hidden border border-white/15" role="group" aria-label="Miner stack mode">
+            <button
+              type="button"
+              onClick={() => setStackMode('auto')}
+              aria-pressed={stackMode === 'auto'}
+              title="Miners fill the gas ceiling — maximum methane capture"
+              className={`px-2 py-1 text-[11px] ${stackMode === 'auto' ? 'bg-[#FF8C00] text-black font-semibold' : 'text-gray-300'}`}
+              data-testid="miner-stack-auto"
+            >
+              Fill the gas
+            </button>
+            <button
+              type="button"
+              onClick={() => setStackMode('manual')}
+              aria-pressed={stackMode === 'manual'}
+              title="Keep your own miner count"
+              className={`px-2 py-1 text-[11px] ${stackMode === 'manual' ? 'bg-[#5BC0BE] text-black font-semibold' : 'text-gray-300'}`}
+              data-testid="miner-stack-manual"
+            >
+              My build
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={decMiners}
+            aria-label="Remove one miner"
+            className="h-12 w-12 min-w-[44px] min-h-[44px] rounded-xl border border-white/20 text-white text-2xl leading-none hover:bg-[#5BC0BE]/20 active:scale-95 transition"
+            data-testid="miner-stack-dec"
+          >
+            −
+          </button>
+          <div className="min-w-[5.5rem] text-center">
+            <div className="text-2xl font-bold text-white font-mono" data-testid="miner-stack-count">
+              {machineCount.toLocaleString()}
+            </div>
+            <div className="text-[10px] text-gray-400">miners · {modeLabel}</div>
+          </div>
+          <button
+            type="button"
+            onClick={incMiners}
+            aria-label="Add one miner"
+            className="h-12 w-12 min-w-[44px] min-h-[44px] rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] text-2xl leading-none hover:bg-[#FF8C00]/20 active:scale-95 transition"
+            data-testid="miner-stack-inc"
+          >
+            +
+          </button>
+        </div>
+
+        <div className="text-center text-[11px] text-gray-400 mt-1">
+          {selectedASIC.name} · {selectedASIC.hashrate_ths} TH/s @ {selectedASIC.power_w} W
+        </div>
+
+        {/* Capacity gauge — filled = your miners, amber = spare gas on the table */}
+        <div className="mt-3">
+          <div className="flex justify-between gap-2 text-[10px] text-gray-300">
+            <span className="font-mono" data-testid="miner-stack-gauge-label">
+              {machineCount.toLocaleString()} / {ceilingMiners.toLocaleString()} miners · {usedPowerKw.toLocaleString(undefined, { maximumFractionDigits: 0 })} kW of {calculations.generatorPowerKw.toLocaleString(undefined, { maximumFractionDigits: 0 })} kW
+            </span>
+            <span className="truncate text-gray-400" title={gensetStackLabel(gensetStack)}>
+              {gensetStackLabel(gensetStack)}
+            </span>
+          </div>
+          <div
+            className="h-2.5 w-full rounded bg-white/10 mt-1 overflow-hidden flex"
+            role="progressbar"
+            aria-valuenow={gaugePct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${machineCount} of ${ceilingMiners} miners, gas ceiling`}
+          >
+            <div className="h-full bg-[#5BC0BE]" style={{ width: `${gaugePct}%` }} />
+            {sparePct > 0 && <div className="h-full bg-amber-400/80" style={{ width: `${sparePct}%` }} />}
+          </div>
+          <div className="flex justify-between text-[9px] text-gray-400 mt-0.5">
+            <span>■ your miners</span>
+            <span>{sparePct > 0 ? `▨ spare gas (${sparePct}%)` : 'no spare gas'}</span>
+          </div>
+        </div>
+
+        {atGasCeiling && (
+          <div className="mt-2 text-[11px] text-amber-400 flex items-center gap-2 flex-wrap" data-testid="miner-stack-gas-limit">
+            <span>{stackMode === 'manual' ? 'Gas limit reached —' : 'Full capture —'}</span>
+            <button
+              type="button"
+              onClick={addGensetUnit}
+              className="rounded-full border border-amber-400/60 px-2 py-1 font-semibold hover:bg-amber-400/10"
+              data-testid="miner-stack-add-genset"
+            >
+              + Add another {GENSET_DATA[headGenset]?.name}
+            </button>
+          </div>
+        )}
+
+        {stackMode === 'manual' && machineCount < ceilingMiners && siteEmission > 0 && (
+          <div className="mt-2 text-[11px] text-amber-400 leading-snug" data-testid="miner-stack-venting">
+            Venting left on the table: {unused.unusedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day (
+            {unused.unusedTPerYear.toLocaleString(undefined, { maximumFractionDigits: 1 })} t/yr CH₄) ≈ ${unminedUsdPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })}/day unmined
+          </div>
+        )}
+
+        {/* Genset inventory — stack units to raise the ceiling */}
+        <div className="mt-3 space-y-1" data-testid="miner-stack-gensets">
+          {gensetStack.map(g => (
+            <div key={g.gensetId} className="flex items-center justify-between gap-2 text-[11px] text-gray-300">
+              <span className="truncate">{g.count} × {GENSET_DATA[g.gensetId]?.name}</span>
+              <button
+                type="button"
+                onClick={() => removeGensetUnit(g.gensetId)}
+                disabled={!canRemoveGenset(g.gensetId)}
+                title={canRemoveGenset(g.gensetId) ? 'Remove one unit' : 'Remove miners first — they need this unit'}
+                aria-label={`Remove one ${GENSET_DATA[g.gensetId]?.name}`}
+                className="h-6 w-6 shrink-0 rounded border border-white/20 text-gray-300 disabled:opacity-30"
+              >
+                −
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Live readouts — every tap updates these on the same render tick */}
+        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+          <div className="flex justify-between"><span className="text-gray-400">Miners</span><span className="text-white font-mono">{machineCount.toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Total power</span><span className="text-[#5BC0BE] font-mono">{calculations.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Sats/day</span><span className="text-[#FF8C00] font-mono">{Math.round(calculations.effectiveDailyBtc * 1e8).toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">CH₄ captured</span><span className="text-[#34D399] font-mono">{capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/d ({capturedPct.toFixed(0)}%)</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Payback</span><span className="text-white font-mono">{isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays).toLocaleString() + ' d' : 'N/A'}</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Ceiling</span><span className="text-gray-300 font-mono">{ceilingMiners.toLocaleString()}</span></div>
+        </div>
+
+        {suggestedPreset && (
+          <button
+            type="button"
+            onClick={() => applyTemplate(suggestedPreset)}
+            className="mt-3 w-full text-left text-[10px] px-2 py-1.5 rounded border border-[#5BC0BE]/30 text-[#5BC0BE] hover:bg-[#5BC0BE]/10"
+            data-testid="miner-stack-preset"
+          >
+            Apply template: {suggestedPreset.name} · {gensetStackLabel(suggestedPreset.gensets)}
+          </button>
+        )}
+
+        <div className="mt-3 flex">
+          <CopyLinkButton
+            url={fleetShareUrl}
+            label="Copy fleet link"
+            successMessage="Fleet link copied — miners, gensets and mode included"
+            className="w-full justify-center"
+          />
+        </div>
+      </div>
+
       <div className="mb-4">
         <label className="text-sm font-semibold text-[#5BC0BE]">ASIC Model</label>
         <select value={selectedASIC.id} onChange={(e) => setSelectedASIC(ASIC_MACHINES.find(m => m.id === e.target.value) || ASIC_MACHINES[0])} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
@@ -522,14 +812,13 @@ export default function SiteDetailsPanel({
         </select>
       </div>
       <div className="mb-4">
-        <label className="text-sm font-semibold text-[#5BC0BE]">Machines: {machineCount.toLocaleString()} (capped by generator power: {calculations.generatorPowerKw.toFixed(0)} kW from site gas)</label>
-        <input type="range" min="1" max="10000" value={machineCount} onChange={(e) => setMachineCount(Number(e.target.value))} className="w-full mt-2 accent-[#5BC0BE]" />
-      </div>
-
-      {/* Generator integration + Financing for real CapEx / methane loss ROI */}
-      <div className="mb-4">
         <label className="text-sm font-semibold text-[#5BC0BE]">Generator Model (production side from real site gas)</label>
-        <select value={selectedGenset} onChange={(e) => setSelectedGenset(e.target.value as GensetId)} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
+        <select value={selectedGenset} onChange={(e) => {
+          const id = e.target.value as GensetId
+          setSelectedGenset(id)
+          // one genset model in the stack, keeping the unit count
+          setGensetStack(prev => [{ gensetId: id, count: Math.max(1, prev.reduce((s, g) => s + (g.count || 0), 0)) }])
+        }} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
           {Object.keys(GENSET_DATA).map(id => <option key={id} value={id}>{GENSET_DATA[id as GensetId].name}</option>)}
         </select>
       </div>
@@ -616,6 +905,11 @@ export default function SiteDetailsPanel({
       <button onClick={() => setAdvancedMode(!advancedMode)} className="w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors">{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
       {advancedMode && (
         <div className="space-y-4 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm">
+          <div>
+            <label className="text-xs text-gray-400">Miners: {machineCount.toLocaleString()} of {ceilingMiners.toLocaleString()} the gas supports</label>
+            <input type="range" min="1" max={Math.max(10000, ceilingMiners)} value={Math.min(machineCount, Math.max(10000, ceilingMiners))} onChange={(e) => { setStackMode('manual'); setMachineCount(Number(e.target.value)) }} className="w-full mt-2 accent-[#5BC0BE]" />
+            <div className="text-[10px] text-gray-400 mt-0.5">Sliding this switches the stack to “My build”. The ceiling only rises when you add a genset.</div>
+          </div>
           <div>
             <label className="text-xs text-gray-400">BTC Price in {selectedFiat} (live default, editable)</label>
             <input 

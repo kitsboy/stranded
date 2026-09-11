@@ -1,3 +1,5 @@
+import { decodeFleet, encodeFleet, type FleetTemplate } from './fleet-template'
+
 export type MapUrlState = {
   site?: string
   /** Comma-separated site IDs for compare tray */
@@ -13,6 +15,8 @@ export type MapUrlState = {
   radius?: number
   lat?: number
   lng?: number
+  /** Editable fleet template carried by the URL (miners/asic/gensets/mode/tpl) */
+  fleet?: FleetTemplate
 }
 
 const DEFAULT_MAX_EMISSION = 100_000
@@ -60,6 +64,9 @@ export function parseMapUrl(params: URLSearchParams): MapUrlState {
   }
   if (lat) state.lat = +lat
   if (lng) state.lng = +lng
+  // Fleet params ride along with site deep links — additive, never required
+  const fleet = decodeFleet(params)
+  if (fleet) state.fleet = fleet
   return state
 }
 
@@ -82,6 +89,11 @@ export function buildMapUrl(state: MapUrlState): string {
     p.set('lng', String(state.lng))
   }
   const q = p.toString()
+  if (state.fleet) {
+    // append the fleet params verbatim so the link stays human-readable (j316:2)
+    const fleetQuery = encodeFleet(state.fleet)
+    return `/map?${q ? `${q}&` : ''}${fleetQuery}`
+  }
   return q ? `/map?${q}` : '/map'
 }
 
