@@ -114,7 +114,7 @@ export default function LandingPage() {
             <Link
               href="/dashboard"
               data-testid="home-readiness-badge"
-              className="inline-flex items-center gap-2 rounded-full border border-[#34D399]/30 bg-[#34D399]/10 px-3 py-1 text-xs text-[#34D399] hover:border-[#34D399]/50 transition"
+              className="inline-flex items-center gap-2 rounded-full border border-[#34D399]/30 bg-[#34D399]/10 px-3 py-1 text-xs text-[#34D399] hover:border-[#34D399]/50 transition [@media(pointer:coarse)]:min-h-11"
             >
               <Gauge size={14} aria-hidden />
               <span>Deploy readiness <strong className="tabular-nums">{readiness.score}</strong>/100</span>

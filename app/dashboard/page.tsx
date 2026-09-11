@@ -320,7 +320,7 @@ export default function DashboardPage() {
                     <tr key={s.id} className="border-b border-white/5 hover:bg-white/[0.02]">
                       <td className="py-2 pr-3 text-gray-400">{i + 1}</td>
                       <td className="py-2 pr-3">
-                        <Link href={`/map?site=${s.id}`} className="block max-w-[200px] truncate text-[#5BC0BE] hover:underline">{s.name}</Link>
+                        <Link href={`/map?site=${s.id}`} className="block max-w-[200px] truncate text-[#5BC0BE] hover:underline [@media(pointer:coarse)]:min-h-11">{s.name}</Link>
                       </td>
                       <td className="py-2 pr-3 text-gray-400">{s.province}</td>
                       <td className="py-2 pr-3">

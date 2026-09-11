@@ -56,7 +56,7 @@ export default function RecentSites({ onSelect, compact = false, max = 5 }: Rece
             key={r.id}
             type="button"
             onClick={() => onSelect?.(r)}
-            className="text-xs px-2 py-1 bg-white/5 hover:bg-[#5BC0BE]/15 rounded border border-white/10 truncate max-w-[160px]"
+            className="text-xs px-2 py-1 bg-white/5 hover:bg-[#5BC0BE]/15 rounded border border-white/10 truncate max-w-[160px] [@media(pointer:coarse)]:min-h-11"
             title={r.province}
           >
             {r.name}

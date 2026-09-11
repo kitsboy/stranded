@@ -1883,6 +1883,14 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     align-items: center;
   }
 
+  /* Footer CTAs (Donate Bitcoin, Marketing Hub, Open Map, Pitch) and the
+     link list: 30-42px pills on phones, 44px here. Anchors that are pure
+     inline text ignore min-height, so nothing in running text moves. */
+  footer a,
+  footer button {
+    min-height: 44px;
+  }
+
   /* Page-level controls: real buttons / selects / disclosure summaries get the
      44px touch box. Inline links in running prose are deliberately NOT
      included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on
