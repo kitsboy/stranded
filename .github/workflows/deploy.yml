@@ -1,23 +1,78 @@
-name: Deploy stranded to Cloudflare Pages
+# ─────────────────────────────────────────────────────────────────────────────
+# SINGLE-DEPLOYER RULE — read this before editing.
+#
+# Cloudflare Pages is the ONLY deployer for stranded.giveabit.io: the Pages
+# project "strandedbuild" builds this repo through its git integration, on
+# every push to main (that is why Cam never has to click anything).
+#
+# Do NOT add `wrangler pages deploy`, `wrangler deploy`, or any other second
+# deploy step here. Two builders racing for one URL is what produced the
+# "push looks deployed but the old build is still being served" (stale build
+# tag) class of bug. There is exactly one deployer: Cloudflare Pages.
+#
+# This workflow's job is to VERIFY the deploy, not to perform one: it builds
+# the pushed commit locally, then waits for the live site to serve that build
+# and goes red if it never does. The check itself lives in
+# scripts/deploy-check.sh so it can also be run by hand (`npm run deploy:check`).
+#
+# This workflow holds no Cloudflare credentials. Nothing here needs a secret
+# except the optional Slack webhook.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Stranded — verify live deploy
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 jobs:
+  # Job id kept as "deploy" so existing status-check references stay valid.
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          cache: npm
+
       - name: Install
         run: npm ci || npm install
-      - name: Build
-        run: BUILD_STATIC=true npx next build
-      - name: Deploy to CF Pages
+
+      # Deterministic reference build of the pushed commit. `npm run build`
+      # runs the prebuild hook (regenerates public/data/live-stats.json) and
+      # emits the static site to dist/.
+      - name: Build the pushed commit
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx --yes wrangler@4 pages deploy ./dist --project-name=strandedbuild --branch=main
+          NODE_OPTIONS: --max-old-space-size=1536
+        run: npm run build
+
+      # Waits (up to 15 min) for Cloudflare Pages to publish this commit and
+      # fails red if it never does. `--dist dist` additionally checks that the
+      # data payload the live site serves is the one this build produced.
+      # All of the logic lives in scripts/deploy-check.sh — run the same script
+      # by hand with `npm run deploy:check`.
+      - name: Verify the live site is serving this commit
+        run: bash scripts/deploy-check.sh --wait --timeout 900 --interval 20 --dist dist
+
+      - name: Notify on success
+        if: success() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ Stranded deploy verified live — ${{ github.sha }}\"}" \
+            "$SLACK_WEBHOOK_URL" || true
+
+      - name: Notify on failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"❌ Stranded deploy NOT verified — the live site is not serving ${{ github.sha }}. Check the Cloudflare Pages build for project strandedbuild: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "$SLACK_WEBHOOK_URL" || true

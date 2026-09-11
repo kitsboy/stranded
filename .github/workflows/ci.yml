@@ -23,7 +23,45 @@ jobs:
 
       - run: npm run validate
 
-      - run: npm run docs:sync
+      # Read-only docs check. The previous version ran `npm run docs:sync` and
+      # let it rewrite tracked files inside CI, which could never fail — the
+      # step was cosmetic. We now snapshot the tracked outputs it owns,
+      # regenerate them, and fail if anything other than the by-design build
+      # clock changed.
+      #
+      # A plain `git diff --exit-code` cannot be used here: the generator stamps
+      # generatedAt/buildId (the build time) into every file it writes
+      # (scripts/generate-live-stats.js, scripts/sync-docs.js), so a byte-diff
+      # is dirty after every single run and the check would be permanently red.
+      # Real content drift — a changed dataset that was never regenerated —
+      # still shows up, because only timestamps/build ids are normalised away.
+      - name: Docs in sync (read-only check)
+        run: |
+          set -euo pipefail
+          FILES="public/data/live-stats.json public/status.json docs/LIVE-STATS.md docs/SOURCE-OF-TRUTH.md docs/DOCUMENTATION.md STATUS.md README.md"
+          rm -rf /tmp/docs-before && mkdir -p /tmp/docs-before
+          for f in $FILES; do
+            mkdir -p "/tmp/docs-before/$(dirname "$f")"
+            cp "$f" "/tmp/docs-before/$f"
+          done
+
+          npm run docs:sync
+
+          normalise() {
+            sed -E \
+              -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z/<timestamp>/g' \
+              -e 's/"buildId": *"[0-9]+"/"buildId": "<id>"/g' "$1"
+          }
+
+          failed=0
+          for f in $FILES; do
+            if ! diff -u <(normalise "/tmp/docs-before/$f") <(normalise "$f") > /tmp/docs-diff.txt; then
+              echo "::error file=$f::generated docs are out of date — run 'npm run docs:sync' locally and commit the result"
+              cat /tmp/docs-diff.txt
+              failed=1
+            fi
+          done
+          exit $failed
 
       - run: npm run lint
 
