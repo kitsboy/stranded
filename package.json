@@ -18,7 +18,8 @@
     "e2e": "playwright test",
     "deploy:check": "bash scripts/deploy-check.sh",
     "refresh-data": "node scripts/refresh-eccc-data.js",
-    "nightly": "bash scripts/nightly-docs-sync.sh"
+    "nightly": "bash scripts/nightly-docs-sync.sh",
+    "version": "node scripts/generate-live-stats.js && node scripts/sync-docs.js && git add public/data/live-stats.json public/status.json docs/LIVE-STATS.md docs/SOURCE-OF-TRUTH.md docs/DOCUMENTATION.md STATUS.md README.md"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

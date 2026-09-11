@@ -1,3 +1,31 @@
+## Session — 2026-09-11 · CI true-positive fix: stale generated outputs (2.10.0 → 2.11.0)
+
+**Problem:** CI run #119 on `main@9f71954` failed the read-only `Docs in sync` check.
+`public/data/live-stats.json` and `public/status.json` were still the 2026-08-23
+generation, stamped `version 2.10.0`, while `package.json` had moved to 2.11.0
+(`fda485c` bumped the version without regenerating the generated files). The check
+was a **true positive** — `version` is derived from `package.json` and the site
+serves these files — so it was **not** relaxed (`.github/workflows/ci.yml` untouched).
+
+**Fix:**
+- Regenerated and committed all seven generated outputs the check owns
+  (`public/data/live-stats.json public/status.json docs/LIVE-STATS.md
+  docs/SOURCE-OF-TRUTH.md docs/DOCUMENTATION.md STATUS.md README.md`); the only
+  non-clock change was the version field. `package-lock.json`'s root version was
+  equally stale and is now aligned at 2.11.0.
+- Added an npm `version` lifecycle hook in `package.json` that runs
+  `node scripts/generate-live-stats.js && node scripts/sync-docs.js` and `git add`s
+  exactly those seven files, so a version bump and the regeneration travel together.
+  Verified on a scratch clone: `npm version 2.11.1` produced a commit containing all
+  seven regenerated files, left a clean working tree, and the check's normalised diff
+  was empty. The scratch clone was never pushed.
+
+**Rule:** any commit that changes `package.json`'s `version` must regenerate these
+outputs, or CI will (correctly) go red. Prefer `npm version <x.y.z>`; if you bump by
+hand, run `npm run docs:sync` and commit all seven files in the same commit.
+
+---
+
 > **Deploy note (2026-09-11):** entries below that mention `wrangler pages deploy`,
 > `rsync` + wrangler, or `CLOUDFLARE_API_TOKEN` are **historical**. Cloudflare Pages git
 > integration is now the *only* deployer — push to `main` deploys, `npm run deploy:check`
