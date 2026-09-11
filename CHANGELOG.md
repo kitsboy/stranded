@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0] — 2026-09-11 · Data refresh to the 2024 GHGRP year + honest recency/flux
+- **Data is current** — refreshed from ECCC GHGRP's 2024 reporting year (1,745 sites now on 2024 filings, newest `reference_year` 2024); a site's `last_reported_year` is stored and shown so a 2011 figure is never presented as current
+- **Never assert venting/flaring we cannot prove** — the venting/flaring split exists only for facilities that report a fugitive source (oil & gas). Landfill gas is filed under "Waste", so for those sites the flux UI says *no claim* instead of a false "not flaring"; `flux_scope: fugitive | not-applicable` records it
+- **Vented vs flared per site** — `ch4_vented_kg_day`, `ch4_flared_kg_day`, `flare_share_pct` from the Emissions-by-Source file, so an "already flaring" site (permits + destruction equipment in place → fastest to deploy) is findable
+- **Visible recency & flux filters** — Data recency (2024 / 2023 / 2022 or older) and Flux status (already flaring / venting) filters on map, `/sites` and `/provinces`; per-site badges and honest counts with a coverage caveat
+- `scripts/refresh-eccc-data.js` re-discovers the download URLs at run time (no rotting hard-coded link), parses the CSVs with the Node stdlib (no new deps), never silently drops a site
+
 ## [2.11.0] — 2026-09-11 · Site cockpit: the miner stack explains itself
 - **Hover before click** — a pin hover now teaches: name, measured CH₄/day, Stranded Score and *"Gas supports up to 468 miners ≈ $/day"*, computed with the same helpers the cockpit uses (vector pins **and** DOM markers)
 - **Click → a cockpit, not a form** — header badges first (data recency `ECCC 2023 · high confidence`, flux when the dataset carries it, "verify this yourself"), then **one big number** (sats/day + $/day), then the miner-stack visual, then the readout strip, then **"How this number is made"** (hashprice used, above/below the network-derived estimate, power-cost assumption, data year)
