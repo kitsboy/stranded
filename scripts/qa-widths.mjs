@@ -25,7 +25,9 @@
  *      class of bug, caught numerically)
  *   5. visible text below 11px
  *   6. smallest *control* target at mobile widths (inline links in prose are listed
- *      separately — WCAG 2.5.5 exempts them, and flagging them buries the real one)
+ *      separately — WCAG 2.5.5 exempts them, and flagging them buries the real one).
+ *      For a form control wrapped in its own <label>, the LABEL is measured: the
+ *      target is the row you can tap, not the glyph inside it (WCAG 2.5.5).
  *   7. implausible magnitudes (a unit bug looks perfectly fine in a screenshot)
  */
 import { chromium } from 'playwright'
@@ -113,9 +115,23 @@ async function probe(browser, width, { slug, path }) {
       const nodes = [...document.querySelectorAll('button, a, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])')]
         .filter(vis)
         .map(el => {
-          const r = el.getBoundingClientRect()
+          const r0 = el.getBoundingClientRect()
           const cs = getComputedStyle(el)
           const inlineLink = el.tagName === 'A' && (cs.display === 'inline' || cs.display === 'inline-block') && !el.getAttribute('aria-label')
+          // EFFECTIVE TARGET SIZE for label-wrapped form controls.
+          // WCAG 2.5.5 talks about the *target*, not the glyph: a 13px checkbox
+          // inside its own 44px <label> row is a 44px target — the whole row is
+          // clickable. Measuring the input's own rect reported that as a 13px
+          // control, which is a measurement artifact, not a touch failure.
+          // (Same rule the onboarding checklist relies on.)
+          let r = r0
+          if (el.tagName === 'INPUT') {
+            const lab = el.closest('label')
+            if (lab) {
+              const lr = lab.getBoundingClientRect()
+              if (lr.width >= r0.width && lr.height >= r0.height) r = lr
+            }
+          }
           return {
             label: desc(el), inline: inlineLink,
             px: Math.round(Math.min(r.width, r.height)),

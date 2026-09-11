@@ -30,7 +30,7 @@ export default function PortfolioRollup({ sites, className = '' }: { sites?: Sit
       <div className={`rounded-2xl border border-white/10 bg-white/[0.03] p-5 ${className}`} data-testid="portfolio-rollup">
         <h3 className="font-semibold text-[#5BC0BE] mb-1">Mission portfolio</h3>
         <p className="text-sm text-gray-400 mb-3">No sites in mission yet.</p>
-        <Link href="/map" className="text-sm text-[#FF8C00] hover:underline">
+        <Link href="/map" className="text-sm text-[#FF8C00] hover:underline inline-flex items-center min-h-11 sm:min-h-0">
           Open map to build a mission →
         </Link>
       </div>

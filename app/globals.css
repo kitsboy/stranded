@@ -1860,6 +1860,29 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     padding-bottom: 0.25rem;
   }
 
+  /* Layer toggles: the 13px checkbox is wrapped in its row <label>, so the row
+     — not the glyph — is the real target. Grow the row, not the box. */
+  .map-command-center .map-layer-stack label {
+    min-height: 44px;
+  }
+  /* Map footer links (ECCC dataset) sit on one line under the map. */
+  .map-command-center .map-footer-bar a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* The OSM/CARTO attribution chip floats over the canvas and is deliberately
+     small — but small means un-tappable on a thumb. On a coarse pointer it
+     becomes a real 44px-tall chip instead of a 19px one: a 25px taller credit
+     in the corner is a fair trade for a target you can actually hit (and the
+     credit must stay visible at every width — see the responsive pass). */
+  .map-command-center .map-attribution {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
   /* Page-level controls: real buttons / selects / disclosure summaries get the
      44px touch box. Inline links in running prose are deliberately NOT
      included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on

@@ -234,7 +234,7 @@ export default function DashboardOpportunityRadar({ stats }: Props) {
                       <MapPin className="h-3 w-3 shrink-0 text-gray-400" aria-hidden />
                       <Link
                         href={`/provinces?name=${encodeURIComponent(p.name)}`}
-                        className="truncate hover:text-[#5BC0BE] hover:underline"
+                        className="truncate hover:text-[#5BC0BE] hover:underline inline-flex items-center min-h-11 sm:min-h-0"
                       >
                         {p.name}
                       </Link>
