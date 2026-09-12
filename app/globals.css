@@ -1900,6 +1900,14 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     align-items: center;
   }
 
+  /* Icon-only dismiss/close buttons: a 44px target is 44x44, not 26x44. These
+     are square glyph buttons in a header row, so the extra width costs nothing. */
+  button[aria-label^='Dismiss'],
+  button[aria-label^='Close'] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   /* Page-level controls: real buttons / selects / disclosure summaries get the
      44px touch box. Inline links in running prose are deliberately NOT
      included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on
