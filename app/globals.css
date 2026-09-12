@@ -1877,7 +1877,7 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
      becomes a real 44px-tall chip instead of a 19px one: a 25px taller credit
      in the corner is a fair trade for a target you can actually hit (and the
      credit must stay visible at every width — see the responsive pass). */
-  .map-command-center .map-attribution {
+  .map-command-center [data-testid='map-attribution'] {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
