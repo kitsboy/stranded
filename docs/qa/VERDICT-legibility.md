@@ -243,6 +243,17 @@ Measured live 2026-09-12 against the deployed build, touch-emulated
 | `Learn more in Education →` | 214×19 → **214×49** | 214×19 (unchanged) |
 | `ECCC Open Data` | 118×16 → **118×46** | 118×16 (unchanged) |
 | footer `ECCC` source · `Part of the Give A Bit family` | 14–16px tall → **44px** | unchanged |
+| cockpit prose `Verify this yourself →` (`/map`, inside the *"how this is made"* disclosure) | 115×13 → **115×45** | unchanged |
+
+**The cockpit link was invisible to every earlier sweep** because it lives inside a
+collapsed `<details>` inside the **mobile bottom sheet** (`mobile-site-sheet`) — it
+measures 0×0 until a tap opens the sheet and then the disclosure. A harness that
+does not tap a real user's path cannot see it, which is why three automated sweeps
+reported it "not found" before it was measured by clicking through. `padding-block`
+is 1rem, not 15px: on this link's 13px text box, 15px each side landed at **43px —
+one pixel short** — which is exactly the kind of near-miss a "≥44px" rule must
+fail on rather than round up.
+
 
 ### Why `footer a { min-height: 44px }` did not already cover these
 
