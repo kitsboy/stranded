@@ -622,7 +622,7 @@ function PitchContent() {
           >
             Share on Nostr
           </a>
-          <a href="https://sherpacarta.giveabit.io?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchSherpacarta')}</a>
+          <a href="https://sherpacarta.org?ref=stranded&ctx=pitch" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchSherpacarta')}</a>
           <a href={stats.urls.dataSource} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[#5BC0BE]/40 px-6 py-3 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">{t('pitchEccc')}</a>
         </div>
         <p className="mt-10 text-label text-gray-600">

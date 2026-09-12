@@ -11,7 +11,7 @@ export const INTEGRATIONS = {
   sherpacarta: {
     name: 'Sherpacarta',
     tagline: 'Land-use & methane capture legal templates',
-    url: 'https://sherpacarta.giveabit.io',
+    url: 'https://sherpacarta.org',
     cta: 'Download partnership MOU',
     mapPlacement: 'mission-export-legal',
   },
