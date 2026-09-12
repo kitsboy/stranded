@@ -242,6 +242,28 @@ Measured live 2026-09-12 against the deployed build, touch-emulated
 | `Check it` | 49×14 → **49×44** | 49×14 (unchanged) |
 | `Learn more in Education →` | 214×19 → **214×49** | 214×19 (unchanged) |
 | `ECCC Open Data` | 118×16 → **118×46** | 118×16 (unchanged) |
+| footer `ECCC` source · `Part of the Give A Bit family` | 14–16px tall → **44px** | unchanged |
+
+### Why `footer a { min-height: 44px }` did not already cover these
+
+`min-height` is **ignored by an inline box**. The footer rule is correct for the
+pill CTAs (`inline-flex`), and inert for bare inline anchors — which is how
+`Part of the Give A Bit family` survived at 166×14 on a touch device. The three
+prose links and these two footer anchors now carry `hit-area-inline`
+(`padding-block`), which works on inline boxes.
+
+### The checkbox question — settled empirically, do not re-open
+
+`Open the live map` is a 24×24 checkbox inside a 44×44
+`<label class="hit-area-44">`. The **target is 44px**; only the glyph is 24px.
+It cannot be done any other way: author padding and `box-sizing` are **ignored on
+native checkboxes** — measured in Chromium, `padding` computes to `0px` on
+`width:44px;padding:10px` (border-box) and on `content-box` alike. Enlarging the
+box means `appearance: none` and hand-drawing the control, which trades a
+correct native widget (and its keyboard/AT behaviour) for cosmetics.
+So: the wrapper label IS the mechanism. An audit that reports the inner `input`
+as a sub-44px target is measuring the glyph, not the target.
+
 
 Desktop values are identical before and after — that identity is the proof there
 is no reflow. **Lesson for the next auditor:** measure a hit target by its

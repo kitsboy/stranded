@@ -330,7 +330,7 @@ export default function Footer() {
               href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
+              className="hit-area-inline text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
             >
               {t('footerEccc')}
             </a>
@@ -344,7 +344,7 @@ export default function Footer() {
               href="https://giveabit.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[#FF8C00] transition-colors duration-200"
+              className="hit-area-inline hover:text-[#FF8C00] transition-colors duration-200"
             >
               Part of the Give A Bit family
             </a>
