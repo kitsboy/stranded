@@ -1891,6 +1891,15 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     min-height: 44px;
   }
 
+  /* A link styled as a pill (rounded-full + horizontal padding + border) is a
+     CONTROL, not prose — 2.5.5's inline-text exemption does not cover it. The
+     site-details "Verify this yourself" chip measured 23px on a phone. */
+  .map-command-center a[class*='rounded-full'][class*='px-'] {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
   /* Page-level controls: real buttons / selects / disclosure summaries get the
      44px touch box. Inline links in running prose are deliberately NOT
      included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on
