@@ -161,7 +161,7 @@ silent patch.
 
 | item | measured | why it stays | WCAG |
 |---|---|---|---|
-| `Check it` (`/open-data`), `Learn more in Education →` (`/`), `Verify this yourself →` (`/map`), `ECCC Open` / `Part of the Give A Bit family` (`/dashboard`) | 14–19px tall | Inline links inside a sentence. Growing them would push running text apart and make it *harder* to read; the criterion exempts them by name. `qa-widths.mjs` lists them under "Inline text links under 44px — listed, not failures". | 2.5.5 (AAA) & 2.5.8 (AA) inline exception |
+| `Check it` (`/open-data`), `Learn more in Education →` (`/`), `Verify this yourself →` (`/map`), `ECCC Open` / `Part of the Give A Bit family` (`/dashboard`) | 14–19px tall | **SUPERSEDED 2026-09-12 — fixed, see addendum below.** Inline links inside a sentence. Growing them would push running text apart and make it *harder* to read; the criterion exempts them by name. `qa-widths.mjs` lists them under "Inline text links under 44px — listed, not failures". | 2.5.5 (AAA) & 2.5.8 (AA) inline exception |
 | Native range inputs — capture slider, `Minimum/Maximum emission`, `Number of top sites` | 8–24px track | The track is **drawn by the browser**; the whole row is the drag surface, and the previous pass already gave bare ranges a 44px touch box on phones. Resizing the UA control would be restyling, not targeting. | 2.5.5 exemption: "target is determined by the user agent" |
 | `Skip to main content` | 1×1 until focused | Visually-hidden skip link — it is a keyboard affordance; it becomes a normal target the moment it is focused. | 2.5.5 focus-visible convention |
 | Desktop-only controls at 1280–1920 (`Collapse` 13×13, `RESET` 71×17, `Dev` summary, `Select all`) | 13–22px | The touch floor is applied with `@media (pointer: coarse)` only: these are mouse-sized affordances on a layout that has room for them, and the same components are ≥44px on a phone. | 2.5.5 applies to pointer input; the phone variant is the one that matters |
@@ -216,4 +216,38 @@ in the table above — they are decisions, not backlog. If the family wants the
 44px bar to extend to inline prose links too, that is a copy/layout change and
 should be its own card: it trades reading comfort for tap size and the WCAG
 criterion explicitly permits the current state.
+
+---
+
+## Addendum — 2026-09-12: inline prose links fixed, and the trade-off above was avoidable
+
+Cam asked for the inline-link remainder to be fixed. The reasoning recorded above
+was **right about layout and wrong about touch**: it assumed a 44px target must
+come from a bigger line box. It need not.
+
+An **inline** box's vertical padding does not contribute to line-box height, so
+`padding-block` grows the hit area to 44px while the text reflows by *zero*
+pixels. Implemented as `a.hit-area-inline` inside the existing
+`@media (pointer: coarse)` block (`app/globals.css`), applied to:
+
+- `Check it` (`/open-data`)
+- `Learn more in Education →` (`/`)
+- `ECCC Open Data` (`/docs/api`)
+
+Measured live 2026-09-12 against the deployed build, touch-emulated
+(`hasTouch`/`isMobile`) versus desktop:
+
+| link | phone (coarse) | desktop (fine) |
+|---|---|---|
+| `Check it` | 49×14 → **49×44** | 49×14 (unchanged) |
+| `Learn more in Education →` | 214×19 → **214×49** | 214×19 (unchanged) |
+| `ECCC Open Data` | 118×16 → **118×46** | 118×16 (unchanged) |
+
+Desktop values are identical before and after — that identity is the proof there
+is no reflow. **Lesson for the next auditor:** measure a hit target by its
+*interactive* box, not by the inner glyph. A 24×24 checkbox inside a 44×44
+`<label class="hit-area-44">` is a 44px target; reporting the inner input as a
+failure is a harness bug, and that is exactly what happened to `Open the live map`
+in the orchestrator's sweep.
+
 
