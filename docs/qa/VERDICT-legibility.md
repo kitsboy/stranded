@@ -117,8 +117,24 @@ compact layout:
 | onboarding checklist checkbox | 24×24 | 44×44 |
 | **OSM/CARTO attribution chip** | 100×19 | 100×44 |
 | map footer `ECCC dataset ↗` | 91×17 | 44 tall |
+| footer CTAs (`Donate Bitcoin`, `Marketing Hub`, `Open Map`, `Pitch`) | 30–42px | 44 tall |
+| home readiness badge | 26–42px | 44 tall |
+| command-palette recent-site chips | 160×26 | 44 tall |
+| dashboard top-sites table links | 200×20 | 44 tall |
+| cockpit `Verify this yourself →` pill | 23px | 44 tall |
+| icon-only buttons (theme / density toggles, overlay dismiss) | 28×44, 26×44 | 44×44 |
+| map layer-toggle checkbox click targets | 13×14 glyph | 44px row label |
 
-Two mechanisms:
+## One process note worth keeping
+
+The first version of the attribution rule targeted `.map-attribution` — a class
+that **does not exist** on the element (it carries
+`data-testid="map-attribution"`). It built fine, deployed fine, and looked like
+a fix in the diff; the live harness then reported the same 19px control as
+before. A CSS rule that matches nothing is a silent patch: the only proof a
+target fix landed is a measurement of the live element afterwards.
+
+## Two mechanisms
 
 - **`.hit-area-44`** — `padding: .625rem` + `margin: -.625rem`, a layout-neutral
   way to buy a 44px target without moving a pixel or repainting anything. Used
@@ -168,5 +184,36 @@ node scripts/qa-legibility.mjs http://localhost:3011
 CI=1 PLAYWRIGHT_BASE_URL=http://localhost:3011 npx playwright test tests/e2e/legibility.spec.ts
 ```
 
-Live build verified: **`<BUILD-ID>`** (version `<VERSION>`, commit `<SHA>`) —
-see the completion note on the card for the `deploy:check` output.
+## Live verification (the build the site actually serves)
+
+```
+bash scripts/deploy-check.sh --dist dist
+✅ DEPLOY VERIFIED after 1 attempt(s)
+   live commit  : d7ecf097b5c7b85ef8e8c917585331e93551e165
+   live buildId : 20260912010543 (generated 2026-09-12T01:05:43Z)
+   live version : 2.11.0 (matches package.json)
+   served data payload matches dist/data/live-stats.json
+```
+
+Against that build:
+
+- `qa-legibility.mjs` — **0 text nodes below 11px** across 5 pages × 4 widths
+  (390/430/768/1440). Before: 11,747.
+- `qa-widths.mjs` — **no "tiny text" finding at any of the 7 widths** (390 →
+  1920, 35 checks); **no undersized-control finding** on any page; the
+  remaining findings are (a) the map's centre-point occlusion flags, where a
+  docked panel sits over the canvas by design, and (b) console errors from the
+  CoinGecko price CDN rate-limiting the harness host — both named as
+  non-findings on this card and reproduced against the bare endpoints.
+- `tests/e2e/legibility.spec.ts` in **CI**: green on the commit that introduced
+  it (the `E2E smoke tests` step ran `playwright test` over `tests/e2e/`,
+  including the new spec).
+
+## What is still open (deliberately)
+
+Nothing on this card's two residuals. The items below are the named exemptions
+in the table above — they are decisions, not backlog. If the family wants the
+44px bar to extend to inline prose links too, that is a copy/layout change and
+should be its own card: it trades reading comfort for tap size and the WCAG
+criterion explicitly permits the current state.
+
