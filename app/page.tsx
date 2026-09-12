@@ -228,7 +228,7 @@ export default function LandingPage() {
               <li className="flex gap-3"><span className="text-[#FF8C00]">→</span> Zero additional load on the electrical grid</li>
             </ul>
             <div className="mt-6">
-              <Link href="/education" className="text-[#5BC0BE] hover:underline">Learn more in Education →</Link>
+              <Link href="/education" className="hit-area-inline text-[#5BC0BE] hover:underline">Learn more in Education →</Link>
             </div>
           </div>
         </div>

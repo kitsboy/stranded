@@ -228,7 +228,7 @@ export default function OpenDataPage() {
               {confirmedHistory.verifyUrl && (
                 <>
                   {' '}
-                  <a href={confirmedHistory.verifyUrl} target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] underline">
+                  <a href={confirmedHistory.verifyUrl} target="_blank" rel="noopener noreferrer" className="hit-area-inline text-[#5BC0BE] underline">
                     Check it
                   </a>
                   .

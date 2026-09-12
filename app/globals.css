@@ -1935,6 +1935,16 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   .nav-root a {
     touch-action: manipulation;
   }
+
+  /* Inline links in running prose.
+     A previous pass deliberately excluded these to protect line rhythm, which
+     was right about LAYOUT and wrong about TOUCH: vertical padding on an
+     INLINE box does not contribute to line-box height, so the whole line does
+     not move by a single pixel while the thumb target grows to 44px.
+     Coarse pointers only — desktop prose stays exactly as it was. */
+  a.hit-area-inline {
+    padding-block: 0.9375rem;
+  }
 }
 
 /* Effective hit area without moving a pixel: pad the box, pull the layout

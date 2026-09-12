@@ -154,7 +154,7 @@ curl -sS https://stranded.giveabit.io/status.json | jq '.'`}
           </pre>
         </section>
 
-        <p className="text-gray-400">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="text-[#5BC0BE]">ECCC Open Data</a></p>
+        <p className="text-gray-400">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="hit-area-inline text-[#5BC0BE]">ECCC Open Data</a></p>
         <Link href="/map" className="inline-block text-[#FF8C00] hover:underline">Try it on the map →</Link>
       </div>
     </div>
