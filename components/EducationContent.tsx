@@ -9,7 +9,7 @@ import {
   Target, Award, Lightbulb, BarChart3, Clock, Users as UsersIcon, Award as AwardIcon, CheckCircle, TrendingUp as TrendingUpIcon, Globe as GlobeIcon, Zap as ZapIcon,
   Filter, MapPin, Cpu, DollarSign, Percent
 } from 'lucide-react'
-import { loadSites, EnrichedSite, GENSET_DATA, computeGeneratorPower, GensetId } from '@/lib/sites'
+import { loadSites, EnrichedSite, GENSET_DATA, computeGeneratorPower, methaneNm3DayToKw, GensetId } from '@/lib/sites'
 import { USED_ASIC_MARKET } from '@/lib/roi-model'
 import { markEduSection, getEduProgress } from '@/lib/bookmarks'
 import { loadEduQuizProgress, saveEduQuizProgress, clearEduQuizProgress } from '@/lib/edu-quiz'
@@ -330,7 +330,9 @@ export default function EducationContent() {
     // Real integration with Generator data (production side)
     const g = (gensetData as any)[selectedGenset] || (gensetData as any).jenbacher316
     const methanePerDayNm3 = dailyMethane / 0.717  // rough kg to Nm3 for CH4
-    const maxPowerKW = (methanePerDayNm3 / g.methaneNm3h) * g.powerKW * (advEfficiency / 100) * numUnits
+    // ÷24 lives in methaneNm3DayToKw (daily energy → average kW). Duplicating this
+    // formula inline is how the 24× inflation survived here twice.
+    const maxPowerKW = methaneNm3DayToKw(methanePerDayNm3, selectedGenset as GensetId, advEfficiency / 100) * numUnits
     const gensetEffBonus = g.eff / 0.35   // relative to baseline
     const baseBtc = dailyMethane / 24000 * 0.0009 * 365 * (liveBtc / 85000) * gensetEffBonus
     const adjustedBtc = (baseBtc * (0.04 / advPowerPrice)).toFixed(2)
@@ -792,7 +794,8 @@ export default function EducationContent() {
               const g = (gensetData as any)[realSiteGenset] || (gensetData as any).jenbacher316
               // Honest gas to power using real emission_rate_kg_day and genset data
               const dailyM3 = dailyMethaneKg / 0.717
-              const powerKW = (dailyM3 / g.methaneNm3h) * g.powerKW * (site.emission > 10000 ? 0.95 : 0.85) * (p.confidence === 'high' ? 1 : p.confidence === 'medium' ? 0.92 : 0.85)
+              // ÷24 lives in methaneNm3DayToKw (daily energy → average kW)
+              const powerKW = methaneNm3DayToKw(dailyM3, realSiteGenset as GensetId, (site.emission > 10000 ? 0.95 : 0.85) * (p.confidence === 'high' ? 1 : p.confidence === 'medium' ? 0.92 : 0.85))
               const asic = ASIC_MACHINES.find(a => a.id === selectedAsicId) || ASIC_MACHINES[0]
               const numAsics = Math.max(1, Math.floor(powerKW * 1000 / asic.power_w))
               const dailyBtcRevenue = numAsics * asic.hashrate_ths * 0.0000009 * liveBtc

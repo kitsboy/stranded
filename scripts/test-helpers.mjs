@@ -730,8 +730,13 @@ assert.ok(unused.unusedKw > 0)
 assert.ok(Math.abs(unused.unusedKgPerDay - keeleProps.emission_rate_kg_day / 2) < 5, `expected ~half the gas, got ${unused.unusedKgPerDay}`)
 assert.ok(Math.abs(unused.unusedTPerYear - (unused.unusedKgPerDay * 365) / 1000) < 1e-9)
 const fullFleet = unusedCapacity(keele, capFleetToSite(autoTpl, keele))
-// at the ceiling the only remainder is the floor() of the last machine
-assert.ok(fullFleet.unusedKw < 4.05 && fullFleet.unusedKgPerDay < 1, JSON.stringify(fullFleet))
+// At the ceiling the only remainder is the floor() of the last machine, so the
+// unused gas must be LESS THAN ONE MINER'S SHARE (emission / ceiling). The old
+// bound here was a hard "< 1 kg/day", which only held because the methane→kW
+// conversion was inflated 24× — it made each miner's share ~0.8 kg/day. The
+// invariant is relative, not absolute; do not re-hardcode a round number.
+const perMinerKg = keeleProps.emission_rate_kg_day / ceiling
+assert.ok(fullFleet.unusedKw < 4.05 && fullFleet.unusedKgPerDay < perMinerKg, JSON.stringify({ ...fullFleet, perMinerKg }))
 assert.deepEqual(unusedCapacity(keele, { ...autoTpl, gensets: [] }), { unusedKw: 0, unusedKgPerDay: 0, unusedTPerYear: 0 })
 
 // readable share params — no base64

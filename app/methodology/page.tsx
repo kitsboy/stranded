@@ -36,6 +36,14 @@ export default function MethodologyPage() {
       <h2>ROI model</h2>
       <p>Advanced ROI applies H₂S derate, seasonal uptime by province, gas treatment, carbon credits, CETA-style incentives, fleet decline, and halving-adjusted BTC revenue. See <Link href="/education">Education</Link> for genset specs. Site panel shows a sensitivity tornado and peer cohort when available.</p>
 
+      <h2 id="gaspower">Gas → power, and the 24-hour bound</h2>
+      <p>A site&apos;s methane becomes an <em>average</em> electrical power in four steps:</p>
+      <pre className="not-prose text-xs bg-white/5 border border-white/10 rounded-xl p-3 overflow-x-auto">{`kg CH₄/day ÷ 0.717              = Nm³/day
+Nm³/day ÷ genset Nm³/hour       = full-power HOURS per day   ← cannot exceed 24
+hours/day × genset kW × derate  = kWh/day  (a day of energy)
+kWh/day ÷ 24                    = average kW`}</pre>
+      <p>That last <code>÷ 24</code> is the one that matters. Skip it and the model quietly assumes a generator runs <strong>138 hours in a day</strong> — which is how a single landfill can appear to host ~105 MW and ~26,000 machines when its measured methane supports about <strong>4.4 MW and ~1,100</strong>. Every figure here (generator kW, miner ceiling, sats/day, capex, payback) derives from this conversion, so it lives in one place — <code>methaneNm3DayToKw()</code> in <code>lib/sites.ts</code> — and is asserted in <code>scripts/test-helpers.mjs</code>. Cross-check it yourself: 21,810 kg CH₄/day ÷ 0.717 ÷ 220 Nm³/h = 138 genset-hours, i.e. 5.8 × 850 kW J316 units, × 0.9 derate = 4,407 kW.</p>
+
       <h2 id="hashprice">Hashprice — two honest ends</h2>
       <p>Daily mining revenue is driven by <em>hashprice</em>: what 1 TH/s earns per day. We show both ends instead of claiming one.</p>
       <div className="not-prose grid gap-3 my-4 md:grid-cols-2">

@@ -100,11 +100,30 @@ export const GENSET_DATA = {
 
 export type GensetId = keyof typeof GENSET_DATA
 
-// Compute generator power from daily methane kg using genset
-export function computeGeneratorPower(dailyMethaneKg: number, gensetId: GensetId = 'jenbacher316', derate = 0.9): number {
+/**
+ * Nm³ of CH₄ per DAY → average electrical kW.
+ *
+ * The ÷24 is the whole point: Nm³/day ÷ Nm³/hour yields full-power HOURS PER
+ * DAY, and kW × hours = kWh (daily ENERGY), not power. Dividing by 24 turns
+ * that daily energy into an average power. Omitting it inflates every
+ * downstream figure — generator kW, miner ceiling, sats/day, capex — by 24×,
+ * and silently produced "138 hours per day" for a 21,810 kg/day site.
+ * Route every methane→power conversion through here (or computeGeneratorPower).
+ */
+export function methaneNm3DayToKw(
+  nm3PerDay: number,
+  gensetId: GensetId = 'jenbacher316',
+  derate = 0.9,
+): number {
   const g = GENSET_DATA[gensetId]
+  if (!g || !(g.methaneNm3h > 0) || !(nm3PerDay > 0)) return 0
+  return ((nm3PerDay / g.methaneNm3h) * g.powerKW * derate) / 24
+}
+
+// Compute generator power (average kW) from daily methane kg using genset
+export function computeGeneratorPower(dailyMethaneKg: number, gensetId: GensetId = 'jenbacher316', derate = 0.9): number {
   const dailyM3 = dailyMethaneKg / 0.717 // approx kg CH4 to Nm3
-  return (dailyM3 / g.methaneNm3h) * g.powerKW * derate
+  return methaneNm3DayToKw(dailyM3, gensetId, derate)
 }
 
 // Recommend genset based on emission (larger for bigger sites)

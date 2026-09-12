@@ -296,11 +296,13 @@ function dominantGenset(gensets: FleetGenset[]): FleetGenset | undefined {
   )
 }
 
-/** Invert computeGeneratorPower: kW → kg CH₄/day for one genset model. */
+/** Invert computeGeneratorPower: kW → kg CH₄/day for one genset model.
+ *  The ×24 mirrors the ÷24 in methaneNm3DayToKw — a day of energy at that
+ *  average power. Omitting it (as this once did) breaks the round-trip by 576×. */
 export function methaneKgPerDayForPower(kw: number, gensetId: GensetId, derate: number = DEFAULT_GENSET_DERATE): number {
   const g = GENSET_DATA[gensetId]
   if (!g || !(g.powerKW > 0) || !(derate > 0) || !(kw > 0)) return 0
-  return (kw * 0.717 * g.methaneNm3h) / (g.powerKW * derate)
+  return (kw * 24 * 0.717 * g.methaneNm3h) / (g.powerKW * derate)
 }
 
 /**
