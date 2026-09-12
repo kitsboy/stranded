@@ -2,17 +2,15 @@
   "schema": "gab.product-metrics.v1",
   "productId": "stranded",
   "name": "Stranded",
-  "updatedAt": "2026-07-21T22:00:00Z",
+  "updatedAt": "2026-09-12T00:57:03.857Z",
   "window": {
     "label": "all",
     "from": "2025-01-01T00:00:00Z",
-    "to": "2026-07-21T22:00:00Z"
+    "to": "2026-09-12T00:57:03.857Z"
   },
   "health": {
     "status": "green",
-    "message": "Static product metrics live on stranded.giveabit.io — dataset KPIs from ECCC/site inventory + generator models",
-    "latencyMs": null,
-    "uptimePct24h": null,
+    "message": "Build-refreshed on 2026-09-12T00:57:03.857Z (commit 816ffca) from public/data/live-stats.json — dataset KPIs (sites mapped, province mix) regenerate on every deploy; curated KPIs (Bitcoin-potential sites, generator catalog, education articles) refresh by hand. No live uptime probe on this static origin, so uptimePct24h/latencyMs are omitted rather than reported as null.",
     "dependencies": [
       {
         "id": "site-dataset",
@@ -44,7 +42,7 @@
       "unit": "sites",
       "format": "number",
       "priority": 1,
-      "hint": "Verified Canadian stranded energy / methane sites in the public inventory."
+      "hint": "Verified Canadian stranded energy / methane sites in the public inventory (regenerated from data/stranded-sites-REAL.geojson on every deploy)."
     },
     {
       "key": "sites_bitcoin_potential",
@@ -97,37 +95,60 @@
   "segments": [
     {
       "id": "top_provinces",
-      "label": "Top provinces (site share)",
+      "label": "Top provinces (site share, 2611 mapped sites)",
       "rows": [
         {
           "id": "AB",
           "label": "Alberta",
-          "value": 35,
-          "meta": { "share_pct": 35 }
-        },
-        {
-          "id": "BC",
-          "label": "British Columbia",
-          "value": 22,
-          "meta": { "share_pct": 22 }
-        },
-        {
-          "id": "QC",
-          "label": "Quebec",
-          "value": 18,
-          "meta": { "share_pct": 18 }
+          "value": 1176,
+          "meta": {
+            "share_pct": 45,
+            "emission_kg_day": 692886
+          }
         },
         {
           "id": "ON",
           "label": "Ontario",
-          "value": 15,
-          "meta": { "share_pct": 15 }
+          "value": 454,
+          "meta": {
+            "share_pct": 17.4,
+            "emission_kg_day": 442053
+          }
+        },
+        {
+          "id": "BC",
+          "label": "British Columbia",
+          "value": 296,
+          "meta": {
+            "share_pct": 11.3,
+            "emission_kg_day": 275851
+          }
+        },
+        {
+          "id": "SK",
+          "label": "Saskatchewan",
+          "value": 280,
+          "meta": {
+            "share_pct": 10.7,
+            "emission_kg_day": 226737
+          }
+        },
+        {
+          "id": "QC",
+          "label": "Quebec",
+          "value": 243,
+          "meta": {
+            "share_pct": 9.3,
+            "emission_kg_day": 150823
+          }
         },
         {
           "id": "Others",
           "label": "Others",
-          "value": 10,
-          "meta": { "share_pct": 10 }
+          "value": 162,
+          "meta": {
+            "share_pct": 6.2
+          }
         }
       ]
     }
@@ -136,22 +157,28 @@
     {
       "id": "site_intelligence",
       "title": "Stranded site intelligence",
-      "for": ["*"],
+      "for": [
+        "*"
+      ],
       "status": "ga",
       "hint": "2,611-site map + filters + portfolio tools"
     },
     {
       "id": "generator_roi",
       "title": "Generator + ASIC ROI models",
-      "for": ["*"],
+      "for": [
+        "*"
+      ],
       "status": "ga",
       "hint": "CapEx, methane-loss ROI, financing"
     },
     {
       "id": "metrics_v1",
       "title": "Product metrics v1",
-      "for": ["hq"],
-      "status": "live",
+      "for": [
+        "hq"
+      ],
+      "status": "ga",
       "endpoint": "GET /metrics.json",
       "hint": "Published at stranded.giveabit.io origin"
     }
@@ -202,6 +229,25 @@
       "avg_mw_per_site": 4.8,
       "education_articles": 45
     },
-    "note": "Origin /metrics.json for HQ. Dataset KPIs are static ground truth from the site inventory; visitor analytics need public Umami (analytics.giveabit.io → THOR:3002)."
+    "note": "Origin /metrics.json for HQ. Dataset KPIs are regenerated at build from public/data/live-stats.json (see raw.buildRefreshed); curated values are hand-maintained. Visitor analytics need public Umami (analytics.giveabit.io → THOR:3002).",
+    "buildRefreshed": {
+      "generatedAt": "2026-09-12T00:57:03.857Z",
+      "commit": "816ffcaddcb04b8181e2cf83933ff9bb127bd8f5",
+      "version": "2.11.0",
+      "source": "public/data/live-stats.json (scripts/generate-live-stats.js on prebuild)",
+      "refreshedKeys": [
+        "updatedAt",
+        "window.to",
+        "health.status",
+        "health.message",
+        "kpis.sites_mapped",
+        "segments.top_provinces"
+      ],
+      "siteCount": 2611,
+      "provinceCount": 13,
+      "withReportedCh4": 2588,
+      "confidenceHigh": 675,
+      "ecccReportingYear": 2024
+    }
   }
 }
