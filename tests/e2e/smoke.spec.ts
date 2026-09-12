@@ -224,7 +224,7 @@ test('empty right column does not render ghost bar over map', async ({ page }) =
     if (!zoom) return { ok: true }
     const z = zoom.getBoundingClientRect()
     const nodes = document.querySelectorAll('.map-command-center *')
-    for (const el of nodes) {
+    for (const el of Array.from(nodes)) {
       if (el === zoom || zoom.contains(el) || el.contains(zoom)) continue
       const r = el.getBoundingClientRect()
       if (r.width < 280 || r.height < 6 || r.height > 48) continue

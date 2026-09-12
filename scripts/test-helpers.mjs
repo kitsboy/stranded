@@ -701,7 +701,7 @@ assert.equal(fleetPresetForSourceType(''), undefined)
 
 // gas ceiling = sum of genset capacity at this site's gas (same function the panel uses)
 const oneJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 1 }])
-assert.ok(Math.abs(oneJ316 - computeGeneratorPower(keeleProps.emission_rate_kg_day, 'jenbacher316')) < 1e-6)
+assert.equal(oneJ316, 850 * 0.9) // Installed unit cap, not the whole site's gas-equivalent potential.
 
 // CROSS-CHECK: the prebuild script uses a plain-JS copy of this conversion
 // (scripts/lib/methane-power.js, no TS loader available there). If the two ever
@@ -755,13 +755,14 @@ const autoTpl = {
 const ceiling = minerCeiling(oneJ316, 4050)
 assert.equal(capFleetToSite(autoTpl, keele).minerCount, ceiling)
 assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: ceiling * 3 }, keele).minerCount, ceiling)
-assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: 500 }, keele).minerCount, 500)
+assert.equal(capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: 50 }, keele).minerCount, 50)
 
 // unusedCapacity: under-filled stack leaves real gas on the table, full stack leaves none
 const halfFleet = capFleetToSite({ ...autoTpl, mode: 'manual', minerCount: Math.floor(ceiling / 2) }, keele)
 const unused = unusedCapacity(keele, halfFleet)
 assert.ok(unused.unusedKw > 0)
-assert.ok(Math.abs(unused.unusedKgPerDay - keeleProps.emission_rate_kg_day / 2) < 5, `expected ~half the gas, got ${unused.unusedKgPerDay}`)
+assert.ok(Math.abs(unused.unusedKgPerDay - 3785.76 / 2) < 25, `expected ~half one unit's fuel capacity, got ${unused.unusedKgPerDay}`)
+assert.ok(unused.unconvertedKgPerDay > unused.unusedKgPerDay, 'equipment-limited gas must remain unconverted')
 assert.ok(Math.abs(unused.unusedTPerYear - (unused.unusedKgPerDay * 365) / 1000) < 1e-9)
 const fullFleet = unusedCapacity(keele, capFleetToSite(autoTpl, keele))
 // At the ceiling the only remainder is the floor() of the last machine, so the
@@ -771,7 +772,7 @@ const fullFleet = unusedCapacity(keele, capFleetToSite(autoTpl, keele))
 // invariant is relative, not absolute; do not re-hardcode a round number.
 const perMinerKg = keeleProps.emission_rate_kg_day / ceiling
 assert.ok(fullFleet.unusedKw < 4.05 && fullFleet.unusedKgPerDay < perMinerKg, JSON.stringify({ ...fullFleet, perMinerKg }))
-assert.deepEqual(unusedCapacity(keele, { ...autoTpl, gensets: [] }), { unusedKw: 0, unusedKgPerDay: 0, unusedTPerYear: 0 })
+assert.deepEqual(unusedCapacity(keele, { ...autoTpl, gensets: [] }), { unusedKw: 0, unusedKgPerDay: 0, unusedTPerYear: 0, consumedKgPerDay: 0, unconvertedKgPerDay: keele.emission, capacityLimitedKgPerDay: keele.emission })
 
 // readable share params — no base64
 const shareTpl = { ...autoTpl, minerCount: 468, gensets: [{ gensetId: 'jenbacher316', count: 2 }] }

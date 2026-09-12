@@ -87,7 +87,7 @@ export function capacityModel(input: {
 }): CapacityModel {
   const ceiling = Math.max(0, Math.floor(input.ceilingMiners || 0))
   const raw = Math.max(0, Math.floor(Number.isFinite(input.count) ? input.count : 0))
-  const miners = ceiling > 0 ? Math.min(raw, ceiling) : raw
+  const miners = Math.min(raw, ceiling)
   const filledPct = ceiling > 0 ? Math.min(100, (miners / ceiling) * 100) : 0
   const sparePct = Math.max(0, 100 - filledPct)
   const spareMiners = Math.max(0, ceiling - miners)

@@ -14,7 +14,7 @@
     "stamp:dataset": "node --import tsx scripts/stamp-dataset.js --stamp",
     "stamp:dataset:refresh": "node --import tsx scripts/stamp-dataset.js --refresh",
     "test": "npm run validate && npm run test:helpers",
-    "test:helpers": "node --import tsx scripts/test-helpers.mjs",
+    "test:helpers": "node --import tsx scripts/test-helpers.mjs && node --import tsx scripts/test-fuel-budget.mjs",
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",

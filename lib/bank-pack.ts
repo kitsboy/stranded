@@ -21,8 +21,24 @@ function esc(s: string) {
   return `"${String(s ?? '').replace(/"/g, '""')}"`
 }
 
+/** An explicit build export must not silently substitute portfolio estimates. */
+function fleetTable(fleet: FleetExportBlock, separator: string): string {
+  const d = fleetBlockData(fleet)
+  const fields = {
+    template: d.name, asic: d.asicName, gensets: d.gensetLabel,
+    installed_miners: d.minerCount, powered_miners: d.poweredMinerCount,
+    unsupported_miners: d.unsupportedMinerCount, gas_supported_kw: d.gasCeilingKw,
+    used_kw: d.usedPowerKw, converted_kg_day: d.capturedKgPerDay,
+    unconverted_kg_day: d.unconvertedKgPerDay, vented_kg_day: 'unknown',
+    payback_days: d.paybackDays ?? 'unavailable',
+  }
+  const cell = (v: unknown) => separator === ',' ? esc(String(v)) : String(v).replace(/[\t\r\n]/g, ' ')
+  return [Object.keys(fields).join(separator), Object.values(fields).map(cell).join(separator)].join('\n')
+}
+
 /** Tab-separated values — opens cleanly in Excel / Numbers without a library */
 export function bankPackTsv(sites: EnrichedSite[], opts: BankPackOptions = {}): string {
+  if (opts.fleet) return fleetTable(opts.fleet, '\t')
   const btc = opts.liveBtcUsd ?? 85000
   const headers = [
     'id', 'name', 'province', 'city', 'source_type', 'confidence', 'reference_year',
@@ -67,6 +83,7 @@ export function bankPackTsv(sites: EnrichedSite[], opts: BankPackOptions = {}): 
 }
 
 export function bankPackCsv(sites: EnrichedSite[], opts: BankPackOptions = {}): string {
+  if (opts.fleet) return fleetTable(opts.fleet, ',')
   const btc = opts.liveBtcUsd ?? 85000
   const headers = [
     'id', 'name', 'province', 'source_type', 'emission_kg_day', 'stranded_score',

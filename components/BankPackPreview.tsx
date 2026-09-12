@@ -40,8 +40,8 @@ export default function BankPackPreview({
 
   const preview = useMemo(() => {
     if (!sites.length) return ''
-    if (format === 'csv') return bankPackCsv(sites, { liveBtcUsd }).split('\n').slice(0, 8).join('\n')
-    if (format === 'tsv') return bankPackTsv(sites, { liveBtcUsd }).split('\n').slice(0, 8).join('\n')
+    if (format === 'csv') return bankPackCsv(sites, { liveBtcUsd, fleet }).split('\n').slice(0, 8).join('\n')
+    if (format === 'tsv') return bankPackTsv(sites, { liveBtcUsd, fleet }).split('\n').slice(0, 8).join('\n')
     if (format === 'json') return JSON.stringify(bankPackJson(sites, { liveBtcUsd, fleet }), null, 2).slice(0, 1200)
     if (format === 'html') return bankPackHtml(sites, { liveBtcUsd, title, fleet }).replace(/<[^>]+>/g, ' ').slice(0, 900)
     return bankPackMarkdown(sites, allSites, { liveBtcUsd, title, fleet }).slice(0, 1200)
@@ -50,8 +50,8 @@ export default function BankPackPreview({
   const exportPack = () => {
     const base = `stranded-bank-pack-${sites.length}`
     if (format === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd, title, fleet }), `${base}.md`, 'text/markdown')
-    else if (format === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd }), `${base}.csv`, 'text/csv')
-    else if (format === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd }), `${base}.tsv`, 'text/tab-separated-values')
+    else if (format === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd, fleet }), `${base}.csv`, 'text/csv')
+    else if (format === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd, fleet }), `${base}.tsv`, 'text/tab-separated-values')
     else if (format === 'html') {
       const w = window.open('', '_blank')
       if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd, title, fleet })); w.document.close(); w.print() }

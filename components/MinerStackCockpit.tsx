@@ -47,8 +47,7 @@ type Props = {
   fiatCode: string
   siteEmissionKgDay: number
   capturedKgPerDay: number
-  /** Tonnes of CO₂e avoided per year versus venting this gas (GWP100). */
-  co2eAvoidedTonnesPerYear: number
+  unconvertedKgPerDay: number
   unusedKgPerDay: number
   unusedUsdPerDay: number
   hashprice: HashpriceRead
@@ -98,7 +97,7 @@ export default function MinerStackCockpit({
   fiatCode,
   siteEmissionKgDay,
   capturedKgPerDay,
-  co2eAvoidedTonnesPerYear,
+  unconvertedKgPerDay,
   unusedKgPerDay,
   unusedUsdPerDay,
   hashprice,
@@ -139,9 +138,7 @@ export default function MinerStackCockpit({
 
   const clamp = useCallback(
     (n: number) => {
-      const floor = ceilingMiners > 0 ? Math.min(1, ceilingMiners) : 1
-      const top = ceilingMiners > 0 ? ceilingMiners : Math.max(1, n)
-      return Math.max(floor, Math.min(Math.floor(n), top))
+      return Math.max(0, Math.min(Math.floor(n), ceilingMiners))
     },
     [ceilingMiners],
   )
@@ -217,7 +214,7 @@ export default function MinerStackCockpit({
     const v = Number(typed.replace(/[^0-9]/g, ''))
     setTyping(false)
     setTyped('')
-    if (!Number.isFinite(v) || v <= 0) return
+    if (!Number.isFinite(v) || v < 0) return
     onModeChange('manual')
     onCountChange(clamp(v))
   }
@@ -279,11 +276,11 @@ export default function MinerStackCockpit({
       <div className="grid grid-cols-2 gap-2 mb-3" data-testid="cockpit-venting-compare">
         <div className="rounded-xl border border-dashed border-white/15 bg-black/20 px-3 py-2 opacity-80">
           <div className="text-micro text-gray-400 flex items-center gap-1">
-            <TrendingDown size={11} aria-hidden /> Venting today
+            <TrendingDown size={11} aria-hidden /> Reported methane
           </div>
-          <div className="text-sm font-semibold text-gray-300 tabular-nums">0 sats/day</div>
+          <div className="text-sm font-semibold text-gray-300 tabular-nums">{formatCount(siteEmissionKgDay)} kg/day</div>
           <div className="text-micro text-gray-500 tabular-nums">
-            {formatCount(siteEmissionKgDay)} kg CH₄/day to atmosphere
+            Existing capture / flare / vent split unknown
           </div>
           <svg viewBox="0 0 100 20" className="w-full h-4 mt-1" aria-hidden>
             <line x1="0" y1="18" x2="100" y2="18" stroke="rgba(148,163,184,0.5)" strokeWidth="1" strokeDasharray="3 3" />
@@ -294,10 +291,10 @@ export default function MinerStackCockpit({
             <Leaf size={11} aria-hidden /> Your build
           </div>
           <div className="text-sm font-semibold text-white tabular-nums" data-testid="cockpit-venting-gain">
-            +{formatMoneyShort(Math.max(0, live.netUsdPerDay), currencySymbol)}/day net
+            {formatMoneyShort(live.netUsdPerDay, currencySymbol)}/day model net
           </div>
           <div className="text-micro text-[#34D399] tabular-nums" data-testid="cockpit-co2e">
-            +{formatCount(co2eAvoidedTonnesPerYear, 0)} t CO₂e avoided/yr
+            Avoided emissions: baseline not established
           </div>
           <svg viewBox="0 0 100 20" className="w-full h-4 mt-1" aria-hidden>
             <polyline points="0,18 20,14 40,10 60,7 80,4 100,2" fill="none" stroke="#34D399" strokeWidth="1.5" />
@@ -388,7 +385,7 @@ export default function MinerStackCockpit({
           )}
         </div>
 
-        {/* ---- the only honest way past the ceiling ---- */}
+        {/* Additional equipment cannot increase the site's methane budget. */}
         {atCeiling && ceilingMiners > 0 && (
           <div className="mt-2 flex justify-end" data-testid="miner-stack-gas-limit">
             <button
@@ -396,7 +393,7 @@ export default function MinerStackCockpit({
               onClick={onAddGenset}
               className={`inline-flex items-center gap-1.5 rounded-full border border-amber-400/70 bg-amber-400/15 px-3 py-2 min-h-11 text-micro font-semibold text-amber-200 hover:bg-amber-400/25 active:scale-[0.97] transition ${nudge ? 'cockpit-nudge' : ''}`}
               data-testid="miner-stack-add-genset"
-              aria-label={`Add another ${headGensetName} — raises the gas ceiling so more miners can run`}
+              aria-label={`Add another ${headGensetName} — adds equipment, not gas`}
             >
               <Plus size={13} aria-hidden /> Add another {headGensetName}
             </button>
@@ -408,7 +405,7 @@ export default function MinerStackCockpit({
           <button
             type="button"
             onClick={() => step(-1)}
-            disabled={capacity.miners <= 1}
+            disabled={capacity.miners <= 0}
             aria-label={`Remove one miner — currently ${formatCount(machineCount)}`}
             className="h-12 w-12 shrink-0 rounded-xl border border-white/20 bg-black/20 text-white text-2xl leading-none hover:bg-[#5BC0BE]/20 active:scale-95 transition disabled:opacity-35"
             data-testid="miner-stack-dec"
@@ -445,7 +442,7 @@ export default function MinerStackCockpit({
           <button
             type="button"
             onClick={() => step(1)}
-            disabled={ceilingMiners > 0 && capacity.miners >= ceilingMiners}
+            disabled={capacity.miners >= ceilingMiners}
             aria-label={`Add one miner — currently ${formatCount(machineCount)} of ${formatCount(ceilingMiners)} the gas supports`}
             className="h-12 w-12 shrink-0 rounded-xl border border-[#FF8C00]/50 bg-black/20 text-[#FF8C00] text-2xl leading-none hover:bg-[#FF8C00]/20 active:scale-95 transition disabled:opacity-35"
             data-testid="miner-stack-inc"
@@ -525,12 +522,18 @@ export default function MinerStackCockpit({
           {showAll ? 'Show less' : 'Show all figures'}
         </button>
 
+        <p className="mt-2 text-micro text-gray-400" data-testid="fleet-fuel-budget">
+          {formatCount(unconvertedKgPerDay)} kg CH₄/day not converted by this build. Existing treatment is unknown.
+          {' '}More equipment adds capacity, not gas.
+          {machineCount > ceilingMiners && <span className="text-amber-300"> {formatCount(machineCount - ceilingMiners)} installed miners are unsupported and earn nothing.</span>}
+        </p>
+
         {/* the teaching moment — information, never a scolding */}
         {spareAmber && (
           <div className="mt-3 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-micro leading-snug text-amber-100" data-testid="miner-stack-venting">
             <span className="font-semibold">Left on the table:</span>{' '}
             <span className="tabular-nums">
-              {formatCount(unusedKgPerDay)} kg CH₄/day ({formatCount(unusedKgPerDay * 365 / 1000, 1)} t/yr) that this site already has gas for —
+              {formatCount(unusedKgPerDay)} kg CH₄/day ({formatCount(unusedKgPerDay * 365 / 1000, 1)} t/yr) of spare installed conversion —
               about {formatMoneyShort(unusedUsdPerDay, currencySymbol)}/day unmined, {formatMoneyShort(ventingUsdPerYear, currencySymbol)}/year.
             </span>
             <button type="button" onClick={() => onModeChange('auto')} className="ml-1 inline-flex items-center min-h-11 underline font-semibold hover:text-white">

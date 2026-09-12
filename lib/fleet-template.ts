@@ -3,8 +3,8 @@
  *
  * A template is gensets × miners, never a bare miner counter: the miner count at
  * a site is bounded by the gas the installed gensets can convert
- * (`ceiling = floor(generatorPowerKw * 1000 / asicWatts)`), and the only way past
- * the ceiling is to add another genset.
+ * (`ceiling = floor(generatorPowerKw * 1000 / asicWatts)`). More gensets can
+ * relieve an equipment bottleneck, but never multiply the site's fuel supply.
  *
  * Pure module: no React, no new dependencies. Unit-tested by scripts/test-helpers.mjs.
  * ASIC ids here are the canonical ones used by the map site panel
@@ -63,6 +63,8 @@ export type FleetTemplate = {
   /** 0 = auto (fill to gas ceiling) */
   minerCount: number
   mode: FleetMode
+  /** Optional for backwards-compatible saved/share builds. */
+  overclockPercent?: number
   gensets: FleetGenset[]
   assumptions: FleetAssumptions
 }
@@ -223,20 +225,66 @@ export function siteEmissionKgDay(site: FleetSite | null | undefined): number {
   return typeof raw === 'number' && isFinite(raw) && raw > 0 ? raw : 0
 }
 
-/** Installed genset capacity (kW) at a site's gas flow — the gas ceiling. */
+/**
+ * One site, one fuel budget. Dispatch highest electrical kW per Nm³ first,
+ * using powerKW / methaneNm3h (not the separate nominal eff field), then ID
+ * for ties. Each unit is capped at rated power × derate. Continuous part-load
+ * conversion is a screening assumption; no minimum-load/start-up losses here.
+ * A finite demand dispatches only the fuel needed for that electrical load.
+ */
+export function dispatchSiteGas(
+  site: FleetSite | null | undefined,
+  gensets: FleetGenset[],
+  derate = DEFAULT_GENSET_DERATE,
+  demandKw = Infinity,
+) {
+  const availableKgPerDay = siteEmissionKgDay(site)
+  const factor = Number.isFinite(derate) ? Math.max(0, Math.min(1, derate)) : 0
+  const counts = new Map<GensetId, number>()
+  for (const g of gensets || []) {
+    if (!g || !GENSET_DATA[g.gensetId] || !Number.isFinite(g.count)) continue
+    counts.set(g.gensetId, (counts.get(g.gensetId) || 0) + Math.max(0, Math.floor(g.count)))
+  }
+  const ordered = Array.from(counts.entries()).sort(([a], [b]) =>
+    GENSET_DATA[b].powerKW / GENSET_DATA[b].methaneNm3h
+    - GENSET_DATA[a].powerKW / GENSET_DATA[a].methaneNm3h || a.localeCompare(b))
+  let remaining = availableKgPerDay
+  let demand = demandKw === Infinity ? Infinity : Math.max(0, Number.isFinite(demandKw) ? demandKw : 0)
+  let powerKw = 0
+  let installedDeratedKw = 0
+  const allocations = ordered.map(([gensetId, count]) => {
+    const g = GENSET_DATA[gensetId]
+    const capacityKw = g.powerKW * count * factor
+    const kwPerKgDay = computeGeneratorPower(1, gensetId, factor)
+    const suppliedKw = Math.min(capacityKw, remaining * kwPerKgDay, demand)
+    const fuelKgPerDay = kwPerKgDay > 0 ? Math.min(remaining, suppliedKw / kwPerKgDay) : 0
+    remaining = Math.max(0, remaining - fuelKgPerDay)
+    demand = Math.max(0, demand - suppliedKw)
+    powerKw += suppliedKw
+    installedDeratedKw += capacityKw
+    return { gensetId, count, capacityKw, powerKw: suppliedKw, fuelKgPerDay }
+  })
+  return { availableKgPerDay, powerKw, installedDeratedKw, consumedKgPerDay: availableKgPerDay - remaining, unconvertedKgPerDay: remaining, allocations }
+}
+
+/** Gas-supported electrical capacity, capped by the actual installed fleet. */
 export function siteGasCeilingKw(
   site: FleetSite | null | undefined,
   gensets: FleetGenset[],
   derate: number = DEFAULT_GENSET_DERATE,
 ): number {
-  const kg = siteEmissionKgDay(site)
-  if (!kg) return 0
-  return (gensets || []).reduce((sum, g) => {
-    if (!g || !GENSET_DATA[g.gensetId]) return sum
-    const count = Math.max(0, Math.floor(g.count || 0))
-    if (!count) return sum
-    return sum + computeGeneratorPower(kg, g.gensetId, derate) * count
-  }, 0)
+  return dispatchSiteGas(site, gensets, derate).powerKw
+}
+
+/** Preview and Apply keep the explicit inventory; no guessed median-site scaling. */
+export function resolveFleetForSite(template: FleetTemplate, site: FleetSite): FleetTemplate {
+  return capFleetToSite({ ...template, gensets: template.gensets.map(g => ({ ...g })) }, site)
+}
+
+/** The saved/share template carries its electrical operating point. */
+export function fleetAsicWatts(template: FleetTemplate): number {
+  const oc = Number.isFinite(template.overclockPercent) ? Math.max(0, Math.min(50, template.overclockPercent!)) : 0
+  return asicWatts(template.asicId) * (1 + oc / 100) * (1 + oc / 200)
 }
 
 /** How many miners the ceiling can power. 0 when there is no gas. */
@@ -249,7 +297,7 @@ export function minerCeiling(ceilingKw: number, asicWatts: number): number {
 export function capFleetToSite(template: FleetTemplate, site: FleetSite): FleetTemplate {
   const ceiling = minerCeiling(
     siteGasCeilingKw(site, template.gensets),
-    asicWatts(template.asicId),
+    fleetAsicWatts(template),
   )
   const minerCount =
     template.mode === 'auto'
@@ -272,28 +320,19 @@ export function rescaleToSite(
   const ratio = fromGas > 0 && toGas > 0 ? toGas / fromGas : 1
   const gensets: FleetGenset[] = (template.gensets || []).map(g => ({
     gensetId: g.gensetId,
-    count: Math.max(1, Math.round((g.count || 1) * ratio)),
+    count: g.count > 0 ? Math.max(1, Math.round(g.count * ratio)) : 0,
   }))
   const scaled: FleetTemplate = { ...template, gensets }
   const capped = capFleetToSite(scaled, toSite)
   if (capped.mode === 'auto') return capped
 
-  const ceiling = minerCeiling(siteGasCeilingKw(toSite, gensets), asicWatts(template.asicId))
-  const sourceCeiling = minerCeiling(siteGasCeilingKw(fromSite, template.gensets), asicWatts(template.asicId))
+  const ceiling = minerCeiling(siteGasCeilingKw(toSite, gensets), fleetAsicWatts(template))
+  const sourceCeiling = minerCeiling(siteGasCeilingKw(fromSite, template.gensets), fleetAsicWatts(template))
   const minerCount =
     sourceCeiling > 0
       ? Math.max(0, Math.min(ceiling, Math.round((template.minerCount || 0) * (ceiling / sourceCeiling))))
       : capped.minerCount
   return { ...capped, minerCount }
-}
-
-/** Largest installed genset in the stack (by total rated kW) — used to invert gas→power. */
-function dominantGenset(gensets: FleetGenset[]): FleetGenset | undefined {
-  const valid = (gensets || []).filter(g => g && GENSET_DATA[g.gensetId] && (g.count || 0) > 0)
-  if (!valid.length) return undefined
-  return valid.reduce((best, g) =>
-    GENSET_DATA[g.gensetId].powerKW * g.count > GENSET_DATA[best.gensetId].powerKW * best.count ? g : best,
-  )
 }
 
 /** Invert computeGeneratorPower: kW → kg CH₄/day for one genset model.
@@ -305,35 +344,35 @@ export function methaneKgPerDayForPower(kw: number, gensetId: GensetId, derate: 
   return (kw * 24 * 0.717 * g.methaneNm3h) / (g.powerKW * derate)
 }
 
-/**
- * Gas the installed gensets could still convert but the miner stack is not using —
- * i.e. methane venting because too few miners were bought (not because no genset exists).
+/** Distinguish spare installed conversion from gas not converted by this build.
+ * Neither quantity proves venting: the site's existing gas treatment is unknown.
  */
-export function unusedCapacity(
-  site: FleetSite,
-  template: FleetTemplate,
-): { unusedKw: number; unusedKgPerDay: number; unusedTPerYear: number } {
-  const ceilingKw = siteGasCeilingKw(site, template.gensets)
-  const minedKw = Math.max(0, (template.minerCount || 0) * asicWatts(template.asicId)) / 1000
-  const unusedKw = Math.max(0, ceilingKw - minedKw)
-  const genset = dominantGenset(template.gensets)
-  const unusedKgPerDay = genset ? methaneKgPerDayForPower(unusedKw, genset.gensetId) : 0
+export function unusedCapacity(site: FleetSite, template: FleetTemplate, usedPowerKw?: number) {
+  const ceiling = dispatchSiteGas(site, template.gensets)
+  const watts = fleetAsicWatts(template)
+  const poweredMiners = Math.min(Math.max(0, Math.floor(template.minerCount || 0)), minerCeiling(ceiling.powerKw, watts))
+  const used = dispatchSiteGas(site, template.gensets, DEFAULT_GENSET_DERATE, usedPowerKw ?? poweredMiners * watts / 1000)
+  const unusedKgPerDay = Math.max(0, ceiling.consumedKgPerDay - used.consumedKgPerDay)
   return {
-    unusedKw,
+    unusedKw: Math.max(0, ceiling.powerKw - used.powerKw),
     unusedKgPerDay,
     unusedTPerYear: (unusedKgPerDay * 365) / 1000,
+    consumedKgPerDay: used.consumedKgPerDay,
+    unconvertedKgPerDay: used.unconvertedKgPerDay,
+    capacityLimitedKgPerDay: ceiling.unconvertedKgPerDay,
   }
 }
 
 /** Readable share params — no base64: miners=468&asic=s21xp&gensets=j316:2&mode=auto&tpl=landfill-basic */
 export function encodeFleet(template: FleetTemplate): string {
   const parts: string[] = []
-  if (template.minerCount > 0) parts.push(`miners=${Math.floor(template.minerCount)}`)
+  if (template.minerCount > 0 || template.mode === 'manual') parts.push(`miners=${Math.max(0, Math.floor(template.minerCount))}`)
   if (template.asicId) parts.push(`asic=${encodeURIComponent(template.asicId)}`)
   const gensets = (template.gensets || [])
     .filter(g => g && GENSET_DATA[g.gensetId] && Math.floor(g.count || 0) > 0)
     .map(g => `${gensetToken(g.gensetId)}:${Math.floor(g.count)}`)
-  if (gensets.length) parts.push(`gensets=${gensets.join(',')}`)
+  parts.push(`gensets=${gensets.join(',')}`)
+  if (template.overclockPercent) parts.push(`oc=${template.overclockPercent}`)
   parts.push(`mode=${template.mode}`)
   if (template.id) parts.push(`tpl=${encodeURIComponent(template.id)}`)
   return parts.join('&')
@@ -397,9 +436,10 @@ export function decodeFleet(params: URLSearchParams): FleetTemplate | null {
     id: tpl || base.id,
     name: preset ? preset.name : base.name,
     asicId: asic && asicById(asic) ? asic : base.asicId,
-    gensets: parsedGensets.length ? parsedGensets : base.gensets.map(g => ({ ...g })),
+    gensets: gensetsRaw === '' ? [] : parsedGensets.length ? parsedGensets : base.gensets.map(g => ({ ...g })),
     mode,
     minerCount,
+    ...(params.has('oc') && Number.isFinite(Number(params.get('oc'))) ? { overclockPercent: Math.max(0, Math.min(50, Number(params.get('oc')))) } : {}),
     assumptions: { ...base.assumptions },
   }
 }
@@ -520,16 +560,18 @@ function fleetGensetLabel(gensets: FleetGenset[]): string {
 
 /** A payback estimate (days) from the template's assumptions — mirrors the panel's model. */
 export function estimateFleetPaybackDays(f: FleetExportBlock): number | null {
-  if (f.paybackDays != null) return isFinite(f.paybackDays) ? f.paybackDays : null
+  if (f.paybackDays !== undefined) return f.paybackDays !== null && isFinite(f.paybackDays) ? f.paybackDays : null
   const t = f.template
   const a = t.assumptions
   const asic = asicById(t.asicId)
   if (!asic) return null
   const minerCount = Math.max(0, Math.floor(t.minerCount || 0))
   if (!minerCount) return null
-  const powerKw = (minerCount * asic.power_w) / 1000
+  const watts = fleetAsicWatts(t)
+  const poweredMiners = Math.min(minerCount, minerCeiling(siteGasCeilingKw(f.site, t.gensets), watts))
+  const powerKw = (poweredMiners * watts) / 1000
   const dailyBtc =
-    asic.hashrate_ths * minerCount * a.revenuePerThPerDayBtc
+    asic.hashrate_ths * (1 + (t.overclockPercent || 0) / 100) * poweredMiners * a.revenuePerThPerDayBtc
     * (1 - a.poolFeePct / 100) * (a.uptimePct / 100)
   const usdBtc = a.btcPriceUsd || 1
   const dailyPowerBtc = (powerKw * 24 * a.powerCostUsdPerKwh) / usdBtc
@@ -550,15 +592,13 @@ export function fleetBlockData(f: FleetExportBlock) {
   const t = f.template
   const asic = asicById(t.asicId)
   const minerCount = Math.max(0, Math.floor(t.minerCount || 0))
-  const asicW = asic ? asic.power_w : ASIC_MACHINES[0].power_w
+  const asicW = fleetAsicWatts(t)
   const totalPowerKw = (minerCount * asicW) / 1000
   const gasCeilingKw = siteGasCeilingKw(f.site, t.gensets)
   const ceilingMiners = minerCeiling(gasCeilingKw, asicW)
   const unused = unusedCapacity(f.site || {}, t)
-  const ventedKgPerDay = Math.max(0, unused.unusedKgPerDay)
-  const capturedKgPerDay = f.site
-    ? Math.max(0, siteEmissionKgDay(f.site) - ventedKgPerDay)
-    : 0
+  const unconvertedKgPerDay = unused.unconvertedKgPerDay
+  const capturedKgPerDay = unused.consumedKgPerDay
   const capturedPct = f.site && siteEmissionKgDay(f.site) > 0
     ? Math.min(100, (capturedKgPerDay / siteEmissionKgDay(f.site)) * 100)
     : 0
@@ -568,12 +608,19 @@ export function fleetBlockData(f: FleetExportBlock) {
     asicName: asic ? asic.name : t.asicId,
     asicId: t.asicId,
     minerCount,
+    poweredMinerCount: Math.min(minerCount, ceilingMiners),
+    unsupportedMinerCount: Math.max(0, minerCount - ceilingMiners),
+    usedPowerKw: Math.min(minerCount, ceilingMiners) * asicW / 1000,
     totalPowerKw,
     gasCeilingKw,
     ceilingMiners,
     gensetLabel: fleetGensetLabel(t.gensets),
-    ventedKgPerDay,
-    ventedTPerYear: (ventedKgPerDay * 365) / 1000,
+    // Legacy keys retained as unknown, never mislabel unconverted gas as vented.
+    ventedKgPerDay: null,
+    ventedTPerYear: null,
+    unconvertedKgPerDay,
+    unusedConversionKgPerDay: unused.unusedKgPerDay,
+    capacityLimitedKgPerDay: unused.capacityLimitedKgPerDay,
     capturedKgPerDay,
     capturedPct,
     paybackDays: estimateFleetPaybackDays(f),
@@ -586,8 +633,9 @@ export function fleetBlockMarkdown(f: FleetExportBlock): string {
     `**Fleet template: ${d.name}**`,
     `- Mode: **${d.mode === 'auto' ? 'Fill the gas' : 'My build'}** · ASIC: ${d.asicName} · Miners: ${d.minerCount.toLocaleString()}`,
     `- Gensets: ${d.gensetLabel}`,
+    `- Powered miners: ${d.poweredMinerCount.toLocaleString()} · unsupported installed miners: ${d.unsupportedMinerCount.toLocaleString()} (earn nothing)`,
     `- Miner load: **${d.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW** of ${d.gasCeilingKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW gas ceiling (${d.ceilingMiners.toLocaleString()} miners max)`,
-    `- Methane: **${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day captured (${d.capturedPct.toFixed(0)}%)** · ${d.ventedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day vented`,
+    `- Methane: **${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day captured (${d.capturedPct.toFixed(0)}%)** · ${d.unconvertedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day not converted (existing treatment unknown)`,
     d.paybackDays != null
       ? `- Payback (model): **${Math.round(d.paybackDays).toLocaleString()} days**`
       : null,
@@ -603,11 +651,12 @@ export function fleetBlockHtml(f: FleetExportBlock): string {
     <tbody>
       ${row('Mode', d.mode === 'auto' ? 'Fill the gas' : 'My build')}
       ${row('ASIC', escapeHtmlStr(d.asicName))}
-      ${row('Miners', d.minerCount.toLocaleString())}
+      ${row('Miners installed / powered', `${d.minerCount.toLocaleString()} / ${d.poweredMinerCount.toLocaleString()}`)}
+      ${row('Unsupported (earn nothing)', d.unsupportedMinerCount.toLocaleString())}
       ${row('Gensets', escapeHtmlStr(d.gensetLabel))}
       ${row('Miner load', `${d.totalPowerKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW of ${d.gasCeilingKw.toLocaleString(undefined, { maximumFractionDigits: 1 })} kW ceiling`)}
       ${row('Methane captured', `${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day (${d.capturedPct.toFixed(0)}%)`)}
-      ${row('Vented', `${d.ventedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day`)}
+      ${row('Not converted (treatment unknown)', `${d.unconvertedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day`)}
       ${d.paybackDays != null ? row('Payback (model)', `${Math.round(d.paybackDays).toLocaleString()} days`) : ''}
     </tbody>
   </table>`

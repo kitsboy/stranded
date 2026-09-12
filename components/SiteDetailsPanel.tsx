@@ -48,12 +48,10 @@ import {
   ASIC_MACHINES,
   MINER_STACK_PRESETS,
   DEFAULT_FLEET_ASSUMPTIONS,
-  capFleetToSite,
   encodeFleet,
   fleetPresetForSourceType,
   minerCeiling,
-  referenceSiteForPreset,
-  rescaleToSite,
+  resolveFleetForSite,
   siteGasCeilingKw,
   unusedCapacity,
   saveNamedFleet,
@@ -77,7 +75,6 @@ import {
   formatSats,
   hashpriceRead,
   satsPerDay,
-  ventingComparison,
 } from '@/lib/cockpit'
 import MinerStackCockpit, { type CockpitPreview } from '@/components/MinerStackCockpit'
 import MinerStackThumbBar from '@/components/MinerStackThumbBar'
@@ -137,10 +134,10 @@ export default function SiteDetailsPanel({
     () => ASIC_MACHINES.find(m => m.id === initialFleet?.asicId) || ASIC_MACHINES[0],
   )
   const [machineCount, setMachineCount] = useState(() => {
-    if (initialFleet) return Math.max(1, initialFleet.minerCount || 1)
+    if (initialFleet) return Math.max(0, initialFleet.minerCount || 0)
     return 100
   })
-  const [overclockPercent, setOverclockPercent] = useState(0)
+  const [overclockPercent, setOverclockPercent] = useState(initialFleet?.overclockPercent || 0)
   const [advancedMode, setAdvancedMode] = useState(false)
   const [btcPrice, setBtcPrice] = useState(85000) // Price of 1 BTC in the *selected* fiat (BTC is always the base)
   const [uptimePercent, setUptimePercent] = useState(95)
@@ -149,9 +146,9 @@ export default function SiteDetailsPanel({
   const [selectedGenset, setSelectedGenset] = useState<GensetId>(
     () => initialFleet?.gensets?.[0]?.gensetId || 'jenbacher316',
   )
-  /** Miner-stack genset inventory — the gas ceiling is the sum of these units */
+  /** Installed inventory shares one site-wide fuel budget. */
   const [gensetStack, setGensetStack] = useState<FleetGenset[]>(() =>
-    initialFleet?.gensets?.length
+    initialFleet
       ? initialFleet.gensets.map(g => ({ ...g }))
       : [{ gensetId: 'jenbacher316', count: 1 }],
   )
@@ -278,9 +275,10 @@ export default function SiteDetailsPanel({
   // Auto mode: the miner stack always fills the gas ceiling (maximum capture)
   useEffect(() => {
     if (stackMode !== 'auto') return
-    const ceiling = minerCeiling(siteGasCeilingKw(site, gensetStack), selectedASIC.power_w)
-    if (ceiling > 0) setMachineCount(ceiling)
-  }, [stackMode, gensetStack, selectedASIC, site])
+    const watts = selectedASIC.power_w * (1 + overclockPercent / 100) * (1 + overclockPercent / 200)
+    const ceiling = minerCeiling(siteGasCeilingKw(site, gensetStack), watts)
+    setMachineCount(ceiling)
+  }, [stackMode, gensetStack, selectedASIC, site, overclockPercent])
 
   const fmt = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'
@@ -336,13 +334,11 @@ export default function SiteDetailsPanel({
 
   const downloadBankPack = (fmt: 'md' | 'csv' | 'tsv' | 'html' | 'json') => {
     const sites = [site as EnrichedSite]
-    const fleet: FleetExportBlock | undefined = fleetTemplate?.minerCount > 0
-      ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
-      : undefined
+    const fleet: FleetExportBlock = { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
     const base = `stranded-bank-pack-${(p.name || site.id || 'site').toString().replace(/[^\w-]+/g, '_').slice(0, 40)}`
     if (fmt === 'md') downloadBlob(bankPackMarkdown(sites, allSites, { liveBtcUsd: liveBtcPrice, fleet }), `${base}.md`, 'text/markdown')
-    else if (fmt === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.csv`, 'text/csv')
-    else if (fmt === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd: liveBtcPrice }), `${base}.tsv`, 'text/tab-separated-values')
+    else if (fmt === 'csv') downloadBlob(bankPackCsv(sites, { liveBtcUsd: liveBtcPrice, fleet }), `${base}.csv`, 'text/csv')
+    else if (fmt === 'tsv') downloadBlob(bankPackTsv(sites, { liveBtcUsd: liveBtcPrice, fleet }), `${base}.tsv`, 'text/tab-separated-values')
     else if (fmt === 'html') {
       const w = window.open('', '_blank')
       if (w) { w.document.write(bankPackHtml(sites, { liveBtcUsd: liveBtcPrice, fleet })); w.document.close() }
@@ -353,7 +349,7 @@ export default function SiteDetailsPanel({
 
   // ---- Editable miner stack (fleet template) ----------------------------------
   const siteAsFleet: FleetSite = site as FleetSite
-  const ceilingMiners = minerCeiling(calculations.generatorPowerKw, selectedASIC.power_w)
+  const ceilingMiners = calculations.ceilingMiners
   const atGasCeiling = ceilingMiners > 0 && machineCount >= ceilingMiners
   const headGenset = (gensetStack[0]?.gensetId || selectedGenset) as GensetId
   const usdBtcPrice = btcPrices.usd || 85000
@@ -364,6 +360,7 @@ export default function SiteDetailsPanel({
     sourceTypes: p.source_type ? [p.source_type] : [],
     asicId: selectedASIC.id,
     minerCount: machineCount,
+    overclockPercent,
     mode: stackMode,
     gensets: gensetStack,
     assumptions: {
@@ -374,18 +371,15 @@ export default function SiteDetailsPanel({
       poolFeePct: poolFeePercent,
       maintenancePct: maintenanceAnnualPercent,
       fixedSetupCostCad,
+      powerCostUsdPerKwh,
     },
   }
 
-  const unused = unusedCapacity(siteAsFleet, fleetTemplate)
-  const capturedKgPerDay = Math.max(0, siteEmission - unused.unusedKgPerDay)
+  const unused = unusedCapacity(siteAsFleet, fleetTemplate, calculations.usedPowerKw)
+  const capturedKgPerDay = unused.consumedKgPerDay
   const capturedPct = siteEmission > 0 ? Math.min(100, (capturedKgPerDay / siteEmission) * 100) : 0
-  const unminedUsdPerDay =
-    (unused.unusedKw / selectedASIC.power_w) *
-    selectedASIC.hashrate_ths *
-    revenuePerThPerDayBtc *
-    usdBtcPrice *
-    (1 - poolFeePercent / 100)
+  const fullLoadModel = computeFleetModel({ ...modelInput, machineCount: ceilingMiners })
+  const unminedUsdPerDay = Math.max(0, fullLoadModel.dailyRevenueFiat - calculations.dailyRevenueFiat)
   const suggestedPreset = fleetPresetForSourceType(p.source_type || '')
   const fleetShareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${encodeURIComponent(site.id)}&${encodeFleet(fleetTemplate)}`
   const gaugePct = Math.min(100, Math.round((machineCount / Math.max(1, ceilingMiners)) * 100))
@@ -396,12 +390,6 @@ export default function SiteDetailsPanel({
   // ---- Cockpit inputs (lib/cockpit.ts is pure + unit-tested) ------------------
   const recency = dataRecencyBadge(p)
   const flux = fluxBadge(p)
-  const venting = ventingComparison({
-    siteEmissionKgDay: siteEmission,
-    capturedKgPerDay,
-    dailyProfitFiat: calculations.dailyProfitFiat,
-    unusedKgPerDay: unused.unusedKgPerDay,
-  })
   const hashprice = hashpriceRead({
     usedBtcPerThDay: revenuePerThPerDayBtc,
     usdBtcPrice,
@@ -426,18 +414,16 @@ export default function SiteDetailsPanel({
   const isOptimistic = hashpriceDiffPct > 1
 
   /** One place that turns a template into "this template at this site" — cards and apply agree. */
-  const resolveTemplateForSite = (template: FleetTemplate): FleetTemplate => {
-    const reference = referenceSiteForPreset(template, allSites)
-    return capFleetToSite(reference ? rescaleToSite(template, reference, siteAsFleet) : template, siteAsFleet)
-  }
+  const resolveTemplateForSite = (template: FleetTemplate): FleetTemplate => resolveFleetForSite(template, siteAsFleet)
   const shelfResultFor = (template: FleetTemplate): ShelfResult => {
     const scaled = resolveTemplateForSite(template)
     const asic = ASIC_MACHINES.find(m => m.id === scaled.asicId) || selectedASIC
-    const m = computeFleetModel({ ...modelInput, asic, gensets: scaled.gensets, machineCount: scaled.minerCount })
+    const m = computeFleetModel({ ...modelInput, asic, gensets: scaled.gensets, machineCount: scaled.minerCount, overclockPercent: scaled.overclockPercent || 0 })
     return {
       minerCount: m.effectiveMachineCount,
       satsPerDay: satsPerDay(m.effectiveDailyBtc),
       ceilingKw: m.generatorPowerKw,
+      template: scaled,
     }
   }
 
@@ -456,17 +442,16 @@ export default function SiteDetailsPanel({
     setMachineCount(next)
   }
   const stepMiners = (delta: number) => {
-    const top = ceilingMiners > 0 ? ceilingMiners : Number.MAX_SAFE_INTEGER
-    setCountManually(Math.max(1, Math.min(machineCount + delta, top)))
+    setCountManually(Math.max(0, Math.min(machineCount + delta, ceilingMiners)))
   }
 
   const decMiners = () => {
     setStackMode('manual')
-    setMachineCount(c => Math.max(1, c - 1))
+    setMachineCount(c => Math.max(0, c - 1))
   }
   const incMiners = () => {
     setStackMode('manual')
-    setMachineCount(c => (ceilingMiners > 0 ? Math.min(c + 1, ceilingMiners) : c + 1))
+    setMachineCount(c => Math.min(c + 1, ceilingMiners))
   }
   const addGensetUnit = () => {
     setGensetStack(prev => {
@@ -475,10 +460,8 @@ export default function SiteDetailsPanel({
       next[0] = { ...next[0], count: Math.max(1, next[0].count) + 1 }
       return next
     })
-    // the tap the ceiling blocked: one more miner, now that the ceiling has risen
-    setStackMode('manual')
+    // Add installed capacity only. The shared fuel budget may already be exhausted.
     setFleetId('custom')
-    setMachineCount(c => c + 1)
   }
   const ceilingWithout = (gensetId: GensetId): number => {
     const reduced = gensetStack
@@ -506,7 +489,8 @@ export default function SiteDetailsPanel({
     if (asic) setSelectedASIC(asic)
     setFleetId(scaled.id)
     setStackMode(scaled.mode)
-    if (scaled.mode === 'manual') setMachineCount(Math.max(1, scaled.minerCount || 1))
+    setMachineCount(scaled.minerCount)
+    setOverclockPercent(scaled.overclockPercent || 0)
     toast.success(`Applied “${scaled.name}” at this site`)
   }
 
@@ -652,7 +636,7 @@ export default function SiteDetailsPanel({
         onModeChange={setStackMode}
         ceilingMiners={ceilingMiners}
         gasCeilingKw={calculations.generatorPowerKw}
-        asic={selectedASIC}
+        asic={{ ...selectedASIC, power_w: selectedASIC.power_w * (1 + overclockPercent / 100) * (1 + overclockPercent / 200) }}
         gensets={gensetStack}
         headGensetName={GENSET_DATA[headGenset]?.name || 'generator'}
         headGensetId={headGenset}
@@ -664,7 +648,7 @@ export default function SiteDetailsPanel({
         fiatCode={selectedFiat}
         siteEmissionKgDay={siteEmission}
         capturedKgPerDay={capturedKgPerDay}
-        co2eAvoidedTonnesPerYear={venting.co2eAvoidedTonnesPerYear}
+        unconvertedKgPerDay={unused.unconvertedKgPerDay}
         unusedKgPerDay={unused.unusedKgPerDay}
         unusedUsdPerDay={unminedUsdPerDay}
         hashprice={hashprice}
@@ -801,9 +785,7 @@ export default function SiteDetailsPanel({
             confidence: p.confidence,
             company: p.company,
             potentialDailyCad: site.potentialDailyProfitCAD,
-            fleet: fleetTemplate?.minerCount > 0
-              ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
-              : undefined,
+            fleet: { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null },
           }}
           liveBtc={liveBtcPrice}
         />
@@ -866,9 +848,7 @@ export default function SiteDetailsPanel({
         allSites={allSites}
         liveBtcUsd={liveBtcPrice}
         title={`Bank pack — ${p.name || site.id}`}
-        fleet={fleetTemplate?.minerCount > 0
-          ? { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }
-          : undefined}
+        fleet={{ template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }}
       />
       {/* Currency dropdown - BTC always the base/denominator */}
       <div className="mb-4">
@@ -991,7 +971,7 @@ export default function SiteDetailsPanel({
           <div>
             <label className="text-xs text-gray-400">Miners: {machineCount.toLocaleString()} of {ceilingMiners.toLocaleString()} the gas supports</label>
             <input type="range" min="1" max={Math.max(10000, ceilingMiners)} value={Math.min(machineCount, Math.max(10000, ceilingMiners))} onChange={(e) => { setStackMode('manual'); setMachineCount(Number(e.target.value)) }} className="w-full mt-2 accent-[#5BC0BE]" />
-            <div className="text-label text-gray-400 mt-0.5">Sliding this switches the stack to “My build”. The ceiling only rises when you add a genset.</div>
+            <div className="text-label text-gray-400 mt-0.5">Sliding this switches to “My build”. Extra equipment only helps if gas remains; unsupported miners earn nothing.</div>
           </div>
           <div>
             <label className="text-xs text-gray-400">BTC Price in {selectedFiat} (live default, editable)</label>

@@ -119,13 +119,14 @@ export function computeFleetModel(input: FleetModelInput): FleetModel {
   const overclockMultiplier = 1 + (overclockPercent / 100)
   const adjustedHashrate = asic.hashrate_ths * overclockMultiplier
   const adjustedPower = asic.power_w * overclockMultiplier * (1 + overclockPercent / 200)
-  const totalPowerKw = (adjustedPower * machineCount) / 1000
+  const installedMachineCount = Number.isFinite(machineCount) ? Math.max(0, Math.floor(machineCount)) : 0
+  const totalPowerKw = (adjustedPower * installedMachineCount) / 1000
 
-  // Generator integration: limit power from site's real emission using the genset stack (gas ceiling)
+  // One shared fuel budget, capped by installed equipment and actual ASIC draw.
   const generatorPowerKw = siteGasCeilingKw(site, gensets)
-  const effectivePowerKw = Math.min(totalPowerKw, generatorPowerKw)
-  const ceilingMiners = minerCeiling(generatorPowerKw, asic.power_w)
-  const effectiveMachineCount = Math.min(machineCount, minerCeiling(generatorPowerKw, asic.power_w))
+  const ceilingMiners = minerCeiling(generatorPowerKw, adjustedPower)
+  const effectiveMachineCount = Math.min(installedMachineCount, ceilingMiners)
+  const effectivePowerKw = effectiveMachineCount * adjustedPower / 1000
 
   // Honest revenue: use editable per-TH/day BTC rate (accounts for current difficulty, fees, etc.)
   const dailyBtcGross = adjustedHashrate * effectiveMachineCount * revenuePerThPerDayBtc
@@ -145,7 +146,7 @@ export function computeFleetModel(input: FleetModelInput): FleetModel {
 
   // Maintenance as annual % of hardware investment (realistic opex)
   const cadBtcPrice = btcPrices.cad || 115000
-  const hardwareCostBtc = (asic.cost_cad * effectiveMachineCount) / cadBtcPrice
+  const hardwareCostBtc = (asic.cost_cad * installedMachineCount) / cadBtcPrice
   const hardwareCostFiat = hardwareCostBtc * btcPriceInFiat
   const dailyMaintBtc = hardwareCostBtc * (maintenanceAnnualPercent / 100) / 365
   const dailyMaintFiat = dailyMaintBtc * btcPriceInFiat

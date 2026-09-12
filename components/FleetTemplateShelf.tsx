@@ -7,7 +7,7 @@ import { formatCount } from '@/lib/cockpit'
 
 /** One-line promise per industry preset — what a landfill owner reads first. */
 const PRESET_PROMISE: Record<string, string> = {
-  'landfill-basic': 'Proven at Keele Valley — one genset, one switchgear skid.',
+  'landfill-basic': 'One genset — a screening configuration, not a verified installation.',
   'oilgas-modular': 'Modular skid, fast to permit, moves when the well does.',
   'wastewater-small': 'Small footprint — fits inside an existing plant fence.',
   'coalmine-large': 'Large capture for a mine-scale gas flow.',
@@ -17,8 +17,9 @@ const PRESET_PROMISE: Record<string, string> = {
 export type ShelfResult = {
   minerCount: number
   satsPerDay: number
-  /** kW of gas the preset's gensets would install at this site. */
+  /** Gas-supported electrical kW from one site fuel budget. */
   ceilingKw: number
+  template: FleetTemplate
 }
 
 type Props = {
@@ -89,7 +90,7 @@ function TemplateCard({
       <div className="rounded-xl bg-black/30 px-2 py-1.5">
         <div className="text-label uppercase tracking-wider text-gray-500">At this site</div>
         <div className="text-label text-white tabular-nums">
-          {gensetLabel(template)} · {formatCount(result.ceilingKw)} kW gas
+          {gensetLabel(result.template)} · {formatCount(result.ceilingKw)} kW supported
         </div>
         <div className="text-label text-[#FF8C00] font-semibold tabular-nums">
           {formatCount(result.minerCount)} miners · {formatCount(result.satsPerDay)} sats/day

@@ -1,4 +1,35 @@
-## Session — 2026-09-11 · CI true-positive fix: stale generated outputs (2.10.0 → 2.11.0)
+## Session — 2026-09-12 · shared gas budget + truthful preset previews (Astra/Ziggy repair 1)
+
+**Done:** G12350 Mission no longer claims 41,354/218,831 kW from ~2,636 kg CH₄/day.
+- `lib/fleet-template.ts`: new `dispatchSiteGas` — ONE site-wide methane budget; deterministic
+  efficiency-first allocation (rated kW per Nm³/h, ID tie-break); every unit capped at rated kW × 0.9;
+  extra gensets add equipment, never gas. `siteGasCeilingKw`, `unusedCapacity`, exports, `rescaleToSite`
+  rewritten on it. `resolveFleetForSite` = preview and Apply share the explicit inventory (no median-site
+  rescale guess). `overclockPercent` is now part of saved/share templates (`oc=` param) and caps ceilings.
+- `lib/fleet-model.ts`: installed-miner capex is honest for unsupported miners (they earn nothing);
+  ceiling uses overclock draw; single fuel budget.
+- UI: shelf labels show the template's actual counts with "kW supported"; "Venting today" and
+  "t CO₂e avoided/yr" removed (unknown flare/capture split — never implied avoided emissions or baseline);
+  unconverted gas reported as such; spare = installed conversion only.
+- Exports: md/html/json/CSV/TSV carry powered vs unsupported miners and never call unconverted gas
+  "vented"; explicit build exports carry payback=unavailable rather than substituted estimates.
+- Tests: `scripts/test-fuel-budget.mjs` (0/1/many/mixed gensets, every preset at G12350, preview=apply,
+  no-gas, saved/share/overclock/export round-trips, thermal bound) + `tests/e2e/fuel-budget.spec.ts`
+  (desktop 1400 and mobile 390, rendered DOM, screenshots, raw readouts). `ci.yml` now runs the full
+  `npm test` (helpers + validate + new fuel tests). Methodology page corrected (aggregate genset-hours
+  can exceed 24; screening ≠ bankable).
+
+**Live numbers (G12350, 2635.62 kg/day, preserved /24):** landfill-basic 533 kW/131 miners,
+oilgas 530/151, wastewater 225/68, coalmine 574/141, pulp-power 533/152. All under the site's
+~1830 kW thermal maximum; efficiency ≈ 29–31%.
+
+**Deferred (handoff card t_e9e28d17):** `lib/roi-model.ts` carbon revenue (t×28×$45×0.3, no verified
+baseline/additionality), `computeSiteValue` FX, CAD/USD constant, saved-vs-active financial
+assumptions contract. No universal bankable claims.
+
+**Git State:** commit `<SHA>` on `origin/main`; unpushed: none. LIVE verified via deploy check after CF Pages.
+
+---
 
 **Problem:** CI run #119 on `main@9f71954` failed the read-only `Docs in sync` check.
 `public/data/live-stats.json` and `public/status.json` were still the 2026-08-23

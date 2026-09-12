@@ -106,8 +106,9 @@ export type GensetId = keyof typeof GENSET_DATA
  * The ÷24 is the whole point: Nm³/day ÷ Nm³/hour yields full-power HOURS PER
  * DAY, and kW × hours = kWh (daily ENERGY), not power. Dividing by 24 turns
  * that daily energy into an average power. Omitting it inflates every
- * downstream figure — generator kW, miner ceiling, sats/day, capex — by 24×,
- * and silently produced "138 hours per day" for a 21,810 kg/day site.
+ * downstream figure — generator kW, miner ceiling, sats/day, capex — by 24×.
+ * Aggregate genset-hours can exceed 24: this helper is gas-equivalent fleet
+ * potential, NOT one installed machine. Use dispatchSiteGas for an inventory cap.
  * Route every methane→power conversion through here (or computeGeneratorPower).
  */
 export function methaneNm3DayToKw(

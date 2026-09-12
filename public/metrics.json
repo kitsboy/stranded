@@ -2,15 +2,15 @@
   "schema": "gab.product-metrics.v1",
   "productId": "stranded",
   "name": "Stranded",
-  "updatedAt": "2026-09-12T00:57:03.857Z",
+  "updatedAt": "2026-09-12T21:19:48.762Z",
   "window": {
     "label": "all",
     "from": "2025-01-01T00:00:00Z",
-    "to": "2026-09-12T00:57:03.857Z"
+    "to": "2026-09-12T21:19:48.762Z"
   },
   "health": {
     "status": "green",
-    "message": "Build-refreshed on 2026-09-12T00:57:03.857Z (commit 816ffca) from public/data/live-stats.json — dataset KPIs (sites mapped, province mix) regenerate on every deploy; curated KPIs (Bitcoin-potential sites, generator catalog, education articles) refresh by hand. No live uptime probe on this static origin, so uptimePct24h/latencyMs are omitted rather than reported as null.",
+    "message": "Build-refreshed on 2026-09-12T21:19:48.762Z (commit b8fafa1) from public/data/live-stats.json — dataset KPIs (sites mapped, province mix) regenerate on every deploy; curated KPIs (Bitcoin-potential sites, generator catalog, education articles) refresh by hand. No live uptime probe on this static origin, so uptimePct24h/latencyMs are omitted rather than reported as null.",
     "dependencies": [
       {
         "id": "site-dataset",
@@ -231,8 +231,8 @@
     },
     "note": "Origin /metrics.json for HQ. Dataset KPIs are regenerated at build from public/data/live-stats.json (see raw.buildRefreshed); curated values are hand-maintained. Visitor analytics need public Umami (analytics.giveabit.io → THOR:3002).",
     "buildRefreshed": {
-      "generatedAt": "2026-09-12T00:57:03.857Z",
-      "commit": "816ffcaddcb04b8181e2cf83933ff9bb127bd8f5",
+      "generatedAt": "2026-09-12T21:19:48.762Z",
+      "commit": "b8fafa1e024dd6afe78268de247720ec1b3df81d",
       "version": "2.11.0",
       "source": "public/data/live-stats.json (scripts/generate-live-stats.js on prebuild)",
       "refreshedKeys": [
