@@ -1908,6 +1908,13 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     min-height: 44px;
   }
 
+  /* An icon-only button (nav toggles, overlay close buttons) gets a SQUARE
+     44px box: 28x44 is tall enough but not wide enough to be a 44px target. */
+  .nav-root button,
+  #main-content button:has(svg):not(:has(span)) {
+    min-width: 44px;
+  }
+
   /* Page-level controls: real buttons / selects / disclosure summaries get the
      44px touch box. Inline links in running prose are deliberately NOT
      included — WCAG 2.5.5 and 2.5.8 both exempt them, and forcing 44px rows on
