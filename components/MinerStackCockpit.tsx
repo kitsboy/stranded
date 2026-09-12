@@ -568,7 +568,7 @@ export default function MinerStackCockpit({
               <span className="tabular-nums text-white">{dataYear ? String(dataYear) : 'not stated'}</span> — emissions are measured, not modelled.
             </li>
             <li className="pt-1 text-gray-400">
-              Every figure is an estimate. <a href="/open-data" className="underline text-[#5BC0BE]">Verify this yourself →</a>
+              Every figure is an estimate. <a href="/open-data" className="hit-area-inline underline text-[#5BC0BE]">Verify this yourself →</a>
             </li>
           </ul>
         </details>
