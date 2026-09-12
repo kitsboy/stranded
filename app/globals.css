@@ -1943,7 +1943,9 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
      not move by a single pixel while the thumb target grows to 44px.
      Coarse pointers only — desktop prose stays exactly as it was. */
   a.hit-area-inline {
-    padding-block: 0.9375rem;
+    /* 1rem each side clears 44px even on a 12–13px text box (13 + 32 = 45),
+       where a 15px pad landed at 43 on the cockpit's 13px label. */
+    padding-block: 1rem;
   }
 }
 
