@@ -58,10 +58,13 @@ function resolveCommit() {
   return ''
 }
 
-function computeGeneratorPower(dailyMethaneKg, powerKW = 850, methaneNm3h = 220, derate = 0.9) {
-  const dailyM3 = dailyMethaneKg / 0.717
-  return (dailyM3 / methaneNm3h) * powerKW * derate
-}
+/**
+ * Methane → average electrical kW — shared with the app's lib/sites.ts.
+ * Defined in scripts/lib/methane-power.js so the prebuild script and the test
+ * suite use ONE implementation (this file previously carried its own copy that
+ * was missing the ÷24, which inflated every published portfolio figure 24×).
+ */
+const { computeGeneratorPower } = require('./lib/methane-power.js')
 
 function tierLabel(kgDay) {
   if (kgDay >= 20000) return 'mega'

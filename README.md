@@ -94,7 +94,7 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 Built with love for the orange pill and the blue planet.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-12T15:26:42.879Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-09-12T15:36:11.269Z
 
 | Metric | Value |
 |--------|-------|
@@ -105,7 +105,7 @@ Built with love for the orange pill and the blue planet.
 | Avg Stranded Score | 60.3 |
 | High-score sites (≥80) | 103 |
 | 5% CO₂e avoided/yr | 1,005,427 t |
-| Model annual revenue | $14,458,890,380 (@ $85,000 BTC) |
+| Model annual revenue | $601,777,343 (@ $85,000 BTC) |
 
 Full breakdown: [docs/LIVE-STATS.md](./LIVE-STATS.md) · Live JSON: `/data/live-stats.json` · Pitch: [https://stranded.giveabit.io/pitch](https://stranded.giveabit.io/pitch)
 <!-- LIVE-STATS:END -->

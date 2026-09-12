@@ -665,6 +665,8 @@ const {
   referenceSiteForPreset,
 } = await import('../lib/fleet-template.ts')
 const { computeGeneratorPower, GENSET_DATA } = await import('../lib/sites.ts')
+const { GENSET_DATA: GD } = await import('../lib/sites.ts')
+const { computeGeneratorPower: prebuildComputeGeneratorPower } = require('../scripts/lib/methane-power.js')
 
 const keeleProps = geo.features.find(f => String(f.properties.ghgrp_id) === 'G10161').properties
 const keele = { id: 'G10161', emission: keeleProps.emission_rate_kg_day, properties: keeleProps }
@@ -700,6 +702,38 @@ assert.equal(fleetPresetForSourceType(''), undefined)
 // gas ceiling = sum of genset capacity at this site's gas (same function the panel uses)
 const oneJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 1 }])
 assert.ok(Math.abs(oneJ316 - computeGeneratorPower(keeleProps.emission_rate_kg_day, 'jenbacher316')) < 1e-6)
+
+// CROSS-CHECK: the prebuild script uses a plain-JS copy of this conversion
+// (scripts/lib/methane-power.js, no TS loader available there). If the two ever
+// diverge, every published portfolio figure drifts from the app's own maths —
+// which is exactly how a 24× error reached the pitch page. Fail loudly here.
+for (const kg of [250, 1000, 5000, 21810, 56014]) {
+  const a = computeGeneratorPower(kg, 'jenbacher316')
+  const b = prebuildComputeGeneratorPower(kg)
+  assert.ok(Math.abs(a - b) < 1e-6, `methane→power diverged at ${kg} kg/day: app ${a} vs prebuild ${b}`)
+}
+
+// PHYSICAL BOUND — energy conservation, for the whole dataset.
+// A site's claimed generator power can never exceed the thermal energy its
+// methane carries (efficiency ≤ 100%), and should sit in a sane band above it.
+// This is the check that would have caught the 24× error on day one: the old
+// value was 8.4× the thermal maximum, i.e. an efficiency of 840%.
+//   thermal kW = kg/day × 50 MJ/kg ÷ 3.6 ÷ 24
+const effBand = []
+for (const f of geo.features) {
+  const em = f.properties.emission_rate_kg_day || 0
+  if (!em) continue
+  const thermalKw = (em * 50) / 3.6 / 24
+  const claimedKw = computeGeneratorPower(em, 'jenbacher316')
+  const eff = claimedKw / thermalKw
+  effBand.push(eff)
+  assert.ok(eff <= 1.0,
+    `${f.properties.name}: claims ${Math.round(claimedKw)} kW from ${Math.round(thermalKw)} kW of methane (efficiency ${(eff * 100).toFixed(0)}%) — units are wrong`)
+  assert.ok(eff >= 0.20,
+    `${f.properties.name}: only ${(eff * 100).toFixed(0)}% of the methane's energy is claimed — implausibly low`)
+}
+const minEff = Math.min(...effBand), maxEff = Math.max(...effBand)
+console.log(`  methane→power efficiency band across ${effBand.length} sites: ${(minEff * 100).toFixed(1)}%–${(maxEff * 100).toFixed(1)}%`)
 const twoJ316 = siteGasCeilingKw(keele, [{ gensetId: 'jenbacher316', count: 2 }])
 assert.ok(Math.abs(twoJ316 - 2 * oneJ316) < 1e-6)
 assert.equal(siteGasCeilingKw(keele, []), 0)

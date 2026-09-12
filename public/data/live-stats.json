@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-12T15:26:42.879Z",
+  "generatedAt": "2026-09-12T15:36:11.269Z",
   "version": "2.11.0",
-  "buildId": "20260912152642",
-  "commit": "5e28315b9db56b65961da77f78752cacb98c5e50",
-  "commitShort": "5e28315",
+  "buildId": "20260912153611",
+  "commit": "7415a7a858f55cd8aa6e072503e564758ef2192a",
+  "commitShort": "7415a7a",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
@@ -13,7 +13,7 @@
       "pct": 45,
       "emissionKgDay": 692886,
       "ch4TonnesYear": 252904,
-      "estRevenueUsd": 5091750440
+      "estRevenueUsd": 211918064
     },
     {
       "name": "Ontario",
@@ -21,7 +21,7 @@
       "pct": 17.4,
       "emissionKgDay": 442053,
       "ch4TonnesYear": 161349,
-      "estRevenueUsd": 3248473384
+      "estRevenueUsd": 135201086
     },
     {
       "name": "British Columbia",
@@ -29,7 +29,7 @@
       "pct": 11.3,
       "emissionKgDay": 275851,
       "ch4TonnesYear": 100686,
-      "estRevenueUsd": 2027124287
+      "estRevenueUsd": 84368678
     },
     {
       "name": "Saskatchewan",
@@ -37,7 +37,7 @@
       "pct": 10.7,
       "emissionKgDay": 226737,
       "ch4TonnesYear": 82759,
-      "estRevenueUsd": 1666202747
+      "estRevenueUsd": 69347165
     },
     {
       "name": "Quebec",
@@ -45,7 +45,7 @@
       "pct": 9.3,
       "emissionKgDay": 150823,
       "ch4TonnesYear": 55050,
-      "estRevenueUsd": 1108339923
+      "estRevenueUsd": 46128979
     },
     {
       "name": "Manitoba",
@@ -53,7 +53,7 @@
       "pct": 1.9,
       "emissionKgDay": 49691,
       "ch4TonnesYear": 18137,
-      "estRevenueUsd": 365156913
+      "estRevenueUsd": 15197788
     },
     {
       "name": "Nova Scotia",
@@ -61,7 +61,7 @@
       "pct": 1.4,
       "emissionKgDay": 58239,
       "ch4TonnesYear": 21257,
-      "estRevenueUsd": 427972342
+      "estRevenueUsd": 17812159
     },
     {
       "name": "New Brunswick",
@@ -69,7 +69,7 @@
       "pct": 1.1,
       "emissionKgDay": 54383,
       "ch4TonnesYear": 19850,
-      "estRevenueUsd": 399638442
+      "estRevenueUsd": 16632906
     },
     {
       "name": "Newfoundland and Labrador",
@@ -77,7 +77,7 @@
       "pct": 0.7,
       "emissionKgDay": 16325,
       "ch4TonnesYear": 5959,
-      "estRevenueUsd": 119966400
+      "estRevenueUsd": 4992988
     },
     {
       "name": "Northwest Territories",
@@ -85,7 +85,7 @@
       "pct": 0.4,
       "emissionKgDay": 339,
       "ch4TonnesYear": 124,
-      "estRevenueUsd": 2489931
+      "estRevenueUsd": 103631
     },
     {
       "name": "Nunavut",
@@ -93,7 +93,7 @@
       "pct": 0.3,
       "emissionKgDay": 116,
       "ch4TonnesYear": 42,
-      "estRevenueUsd": 851043
+      "estRevenueUsd": 35420
     },
     {
       "name": "Prince Edward Island",
@@ -101,7 +101,7 @@
       "pct": 0.2,
       "emissionKgDay": 56,
       "ch4TonnesYear": 20,
-      "estRevenueUsd": 409097
+      "estRevenueUsd": 17027
     },
     {
       "name": "Yukon",
@@ -109,7 +109,7 @@
       "pct": 0.2,
       "emissionKgDay": 70,
       "ch4TonnesYear": 26,
-      "estRevenueUsd": 515432
+      "estRevenueUsd": 21452
     }
   ],
   "sourceTypes": [
@@ -210,7 +210,7 @@
     "avgEmissionKgDay": 754,
     "ch4TonnesYear": 718162,
     "avgStrandedScore": 60.3,
-    "totalGeneratorKW": 9542215,
+    "totalGeneratorKW": 397592,
     "highScoreSites": 103
   },
   "impact": {
@@ -221,9 +221,9 @@
   },
   "valueModel": {
     "defaultBtcUsd": 85000,
-    "roughDailyBtc": 490.5684,
-    "annualBtc": 170104.59,
-    "annualRevenueUsd": 14458890380,
+    "roughDailyBtc": 20.4174,
+    "annualBtc": 7079.73,
+    "annualRevenueUsd": 601777343,
     "note": "Portfolio model uses Jenbacher-class power + ASIC heuristics; live BTC on pitch page."
   },
   "topSites": [
