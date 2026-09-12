@@ -1,8 +1,10 @@
-# stranded — Last Updated 2026-08-27 by Grok (M3)
+# stranded — Last Updated 2026-09-12 by Ziggy (Astra repair 1)
 
-**Brief:** Footer donate is Breez Spark (`stranded@breez.tips`).
+**Brief:** One shared methane budget per site; truthful preset previews (Mission: 533/530/225/574/533 kW, never 41k/218k).
 
-**Commit:** `4eed1c9`
+**Commit:** `bc6b6d1`
 
-- Lightning: `stranded@breez.tips`
-- On-chain: `bc1pprmp4x7r2c0tz625laewh6h5usn9fupmd3zlg9zunxnvkrmke54qke9q5j`
+- `dispatchSiteGas` — efficiency-first, unit-capped; adding generators never multiplies fuel
+- Preview = Apply (explicit inventory); unsupported miners identified, earn nothing
+- No invented landfill venting baseline or avoided-emissions claims
+- Fuel conservation unit tests + rendered-DOM e2e (1400/390); CI runs `npm test`

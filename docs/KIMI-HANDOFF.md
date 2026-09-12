@@ -27,7 +27,7 @@ oilgas 530/151, wastewater 225/68, coalmine 574/141, pulp-power 533/152. All und
 baseline/additionality), `computeSiteValue` FX, CAD/USD constant, saved-vs-active financial
 assumptions contract. No universal bankable claims.
 
-**Git State:** commit `<SHA>` on `origin/main`; unpushed: none. LIVE verified via deploy check after CF Pages.
+**Git State:** commit `bc6b6d1` on `origin/main`; unpushed: none. LIVE verified via deploy check after CF Pages.
 
 ---
 
