@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import DensityToggle from './DensityToggle'
 import { useLocale } from '@/lib/useLocale'
 
 const LINK_KEYS = [
@@ -33,9 +34,17 @@ export default function MobileNav() {
       if (e.key === 'Escape') setOpen(false)
     }
     document.body.style.overflow = 'hidden'
+    // The map page's chrome (top HUD/toolbar z-70, quick-actions FAB z-78,
+    // mobile filter drawer z-85) lives in a sibling subtree of the ROOT
+    // stacking context, so a drawer inside .nav-root (z-50) was painted UNDER
+    // the map: 12 of the drawer's 13 links were pointer-blocked by map chrome
+    // when it was open. This class lifts the header above that chrome — and
+    // only while the drawer is open — via `body.mobile-nav-open .nav-root`.
+    document.body.classList.add('mobile-nav-open')
     document.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = ''
+      document.body.classList.remove('mobile-nav-open')
       document.removeEventListener('keydown', onKey)
     }
   }, [open])
@@ -59,7 +68,7 @@ export default function MobileNav() {
             onClick={() => setOpen(false)}
           />
           <div
-            className="mobile-nav-drawer absolute top-14 left-0 right-0 bg-[#1e293b]/98 backdrop-blur-xl border-b border-[#5BC0BE]/25 z-50 p-4 shadow-2xl"
+            className="mobile-nav-drawer absolute top-14 left-0 right-0 max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-[#1e293b]/98 backdrop-blur-xl border-b border-[#5BC0BE]/25 z-50 p-4 shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
@@ -79,6 +88,16 @@ export default function MobileNav() {
                   {t(l.key)}
                 </Link>
               ))}
+            </div>
+            {/* Density is the one display preference that does not fit the
+                phone header's min-content budget (56.5px of the 233.9px
+                cluster). It lives here on phones and in the header at ≥md —
+                never both at once. Language stays in the header at every
+                width; duplicating it here would put two identical language
+                buttons in the DOM at 390px. */}
+            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+              <span className="text-label uppercase tracking-wider text-gray-500">{t('navPreferences')}</span>
+              <DensityToggle />
             </div>
           </div>
         </>

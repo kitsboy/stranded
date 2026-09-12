@@ -353,6 +353,16 @@ html.theme-light .site-footer .footer-link:hover {
   .tip-bubble { max-width: calc(100vw - 1.5rem); }
 }
 
+/* Mobile nav drawer must out-rank the map chrome it covers.
+   The map page's overlay stack lives in a SIBLING subtree of the root stacking
+   context — top HUD/toolbar z-70, quick-actions FAB z-78, mobile filter drawer
+   z-85 — so a drawer nested in .nav-root (z-50) was painted UNDER the map and
+   12 of its 13 links were pointer-blocked when it was open. The header rises
+   only while the drawer is open, and stays below real modals (z-200). */
+body.mobile-nav-open .nav-root {
+  z-index: 100;
+}
+
 /* Nav scroll-shrink */
 .nav-root {
   height: var(--nav-height);

@@ -1,3 +1,46 @@
+## Session — 2026-09-13 · mobile layout-viewport inflation + off-screen FAB (Mimi, card t_a81648a3)
+
+**Done:** Phones no longer inflate the layout viewport, so fixed chrome sits where the screen is.
+
+- **BEFORE (measured on live `3f41745`, emulated touch):** device 360 → innerWidth 419 / `documentElement.scrollWidth` 419 / FAB right edge 407; 375 → 419/419/407; 390 → 420/420/408; 430 clean.
+- **Root cause (measured, not assumed):** the header's right cluster was **233.9px** (menu 44 + theme 44
+  + density 56.5 + language 65.4 + gaps) plus brand 129.4 + `px-6` 48 + `gap-4` 16 ≈ **427px of in-flow
+  min-content**. Chromium mobile widens the LAYOUT viewport to min-content, so `position: fixed` chrome
+  anchored to `right-4` of a 419/420px viewport — the quick-actions FAB landed at 407–408 and the bottom
+  sheet (`left-0 right-0`) spanned 420. **The sheet was not the cause**, and neither was the ≥md link
+  strip: the strip is an `overflow-x:auto` scroll container whose automatic minimum size is `0`
+  (measured 0px wide at 390px).
+- **Fix (at the offender — no blanket `overflow:hidden`, no blind `100vw`):**
+  `components/Nav.tsx` — density toggle moves into the MobileNav drawer below `md` (header keeps theme,
+  language and menu); header row tightens to `px-4`/`gap-2` below `md` (`px-6`/`gap-4` at `md+`); the link
+  strip becomes `hidden md:flex` (below `md` it was a ZERO-width scroll box whose 6 links were
+  unreachable) plus `min-w-0`. `components/MobileNav.tsx` + `lib/i18n.ts` — the drawer gains a
+  "Preferences" row holding the density toggle (`navPreferences`, all 4 locales; `t()` falls back to `en`
+  anyway).
+- **Also fixed (pre-existing, found by hit-testing the open drawer):** the drawer was painted UNDER the
+  map chrome — map HUD/toolbar `z-70`, quick-actions FAB `z-78`, mobile filter drawer `z-85`, all in a
+  sibling subtree of the root stacking context, vs `.nav-root` `z-50`. On live **12 of the drawer's 13
+  links were pointer-blocked**. `app/globals.css`: `body.mobile-nav-open .nav-root { z-index: 100 }` —
+  lifts the header only while the drawer is open and stays below real modals (`z-200`).
+- **AFTER:** 360/375/390/430 + 844 landscape → `innerWidth == device width`, `scrollWidth == clientWidth`,
+  FAB fully on-screen (e.g. 390: FAB 330→378, sheet 0→390). Desktop 1440 header box geometry is
+  byte-identical to before (only difference: one extra wrapper element with the same x/w/h as the density
+  button — zero pixels moved).
+- **Regression guard:** new `tests/e2e/mobile-viewport.spec.ts` (8 tests) — viewport identity + FAB
+  on-screen at 5 widths, header controls + drawer density reachable and really toggling, every drawer row
+  pointer-reachable, desktop 1440 preservation. `npm test` + `npm run lint` + `npm run build` green; the
+  tracked e2e set (smoke + legibility + fuel-budget + new spec) is 60/60. Language deliberately STAYS in
+  the phone header — `tests/e2e/legibility.spec.ts` asserts it visible and ≥44px at 390px.
+- **Owned by other cards, untouched here:** `components/Map.tsx` glyph stack (t_42674867),
+  `components/SiteDetailsPanel.tsx` / `TadbuyAdHook.tsx` tap targets (t_ff2b0edd), economics (t_424deeeb).
+- **Residual, measured, routed not guessed:** at 360px the map toolbar pill is 364.1px wide (8 controls ×
+  44px coarse-pointer floor) so its rounded ends clip 2px inside `.map-command-center`'s
+  `overflow-hidden` — no page overflow, and every control is still 44px and reachable. Shrinking those
+  targets would regress `legibility.spec.ts`; the real fix is deciding which toolbar buttons may hide on
+  the narrowest phones — a design call for QA/route, not a CSS guess.
+
+**Git State:** single coherent commit for this card (SHA recorded on card t_a81648a3); live commit marker re-verified after CF Pages.
+
 ## Session — 2026-09-12 · shared gas budget + truthful preset previews (Astra/Ziggy repair 1)
 
 **Done:** G12350 Mission no longer claims 41,354/218,831 kW from ~2,636 kg CH₄/day.
