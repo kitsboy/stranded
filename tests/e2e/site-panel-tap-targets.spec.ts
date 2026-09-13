@@ -172,6 +172,10 @@ async function openPanel(page: Page, expand: boolean) {
   if (expand) {
     await page.locator('[data-testid="mobile-site-expand"]:visible').first().tap()
     await page.waitForTimeout(2500)
+    // The expanded sheet is sectioned (t_152a2036) and the Tadbuy/Sherpacarta
+    // links live in Evidence — the province link is in the always-visible header.
+    await page.locator('[data-testid="site-section-tab-evidence"]:visible').first().tap()
+    await page.waitForTimeout(600)
   }
 }
 

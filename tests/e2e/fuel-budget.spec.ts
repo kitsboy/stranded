@@ -16,6 +16,10 @@ for (const width of [1400, 390]) {
       const expand = page.getByTestId('mobile-site-expand')
       await expect(expand).toBeVisible({ timeout: 45000 })
       await expand.click()
+      // The phone sheet is sectioned (t_152a2036): the cockpit, presets and the
+      // ASIC/genset selectors live in Build.
+      await page.locator('[data-testid="site-section-tab-build"]:visible').first().click()
+      await page.waitForTimeout(600)
     }
     const panel = width < 600 ? page.getByTestId('mobile-site-sheet') : page.getByTestId('map-right-column')
     const cockpit = panel.getByTestId('site-cockpit')

@@ -1,11 +1,12 @@
-# stranded — Last Updated 2026-09-13 by Ziggy (economics repair 2)
+# stranded — Last Updated 2026-09-13 by Mimi (phone-sheet sections)
 
-**Brief:** Carbon baseline honesty, FX contract, and portfolio model alignment (Lenny t_e9e28d17 → repair t_424deeeb).
+**Brief:** mobile Overview / Build / Financials / Evidence workspace in the site sheet (card t_152a2036).
 
-**Commit:** `02bd54d`
+**Commit:** see the tip of `main` from this card (`feat(mobile): site sheet sections …`)
 
-- **Carbon:** credit/abatement revenue is $0 by default and requires an OPTO-IN capture scenario AND a published vent/flare baseline. Sites with `flux_scope: not-applicable` or a null split (e.g. Mission Landfill G12350) show `$0` + "no published baseline". Removed the dual ungrounded panel figures ($50/t ×100% vs $45/t ×30%). GWP=28 everywhere; MissionPanel capex now uses `GENSET.capexPerKW` (not $1,000/kW).
-- **FX:** price produced once (fleet-model pattern) — dropped the `(btc/85000)` production-scaling double-count from `computeAdvancedRoi`, `computeSiteValue` and the education widget; revenue is exactly linear in price. No bare `1.35` in any export path; unit-pure USD opex vs revenue. Removed `CAD_PER_USD` export. Static heuristics use documented `lib/capex-fx.ts` fallbacks derived from the map defaults.
-- **Templates:** equipment + overclock only; `estimateFleetPaybackDays` returns the live session payback or `unavailable` — never a stale stored-assumption estimate.
-- **CO₂e surfaces** relabelled as scenario equivalents (homepage/dashboard/pitch/term-sheet/LIVE-STATS), never "avoided".
-- Verified: `npm test`, `npm run lint` (warnings only), `npm run build`, new economics unit tests, rendered-DOM e2e (45 tests green).
+- **The phone sheet is sectioned.** A sticky four-tab nav (Overview · Build · Financials · Evidence) shows one section at a time; Overview opens by default for a newly selected site and carries a prominent "Configure build →" CTA that routes to Build.
+- **Nothing was removed or duplicated.** Every metric, the ASIC/genset selects, templates, presets, financing/scenario controls, notes and exports are exactly where they were — one copy of each, in their original DOM order. Blocks are gated with a CSS class (`.site-section-off`), so nothing unmounts: form state survives a section switch and no control is rendered twice.
+- **Desktop is untouched.** At xl+ the docked cockpit shows all four sections at once with no tab strip; a 1440px fine-pointer box snapshot (live vs local) diffs clean apart from the wrapper elements (`onlyA: []`).
+- **Hero numbers stay on screen on a phone** via the existing sticky thumb bar (miners / sats/day / kW); the tab strip is sticky at the sheet's top edge, measured flush (no strip of scrolling content above it) and reachable while the section scrolls.
+- **Tabs are 44px targets at 360/375/390/430**, with roving tabindex + Arrow/Home/End and safe-area padding; the layout viewport stays at the device width and the document never scrolls sideways.
+- **Verified:** `npm test`, `npm run lint` (warnings only), `npm run build`, new `tests/e2e/site-sections.spec.ts` (9 tests) plus the existing fuel-budget / tap-target / hit-area / smoke / legibility suites green locally; exact-head CI and the live deploy identity-checked after push.

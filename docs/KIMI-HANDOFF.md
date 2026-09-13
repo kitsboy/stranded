@@ -60,6 +60,61 @@ in-flow flex items whose automatic minimum size (`min-width: auto`) is their min
   same property — this commit does **not** touch it; dedupe rather than land two fixes on the same select.
 
 
+## Session — 2026-09-13 · phone-sheet sections — Overview / Build / Financials / Evidence (Mimi, card t_152a2036)
+
+**Done:** the mobile bottom sheet is no longer one ~9-screen scroll. It carries a sticky, four-tab
+navigation (Overview · Build · Financials · Evidence) and shows one section at a time. **Presentation and
+state navigation only — no financial formula, model input or default was touched** (that contract belongs
+to the economics cards; this card only moves blocks around).
+
+- **Where things live now.** Overview: identity + score + data-quality/source/flux badges (the header,
+  always on screen), "Why this score", confidence band, vertical scores, screening-carbon line, peers, plus
+  a prominent **"Configure build →"** CTA that routes to Build. Build: the miner-stack cockpit
+  (count/±/gas ceiling/gensets), the template shelf (presets, save, share/fleet link), "Send this build",
+  Total/Generator power + hardware cost, the **ASIC** and **generator** selects. Financials: BTC-price
+  currency select, financing sliders, LCOE/incentives/jobs, ROI projection chart, gas-derate, **ROI
+  Summary**, the Advanced assumption block (all of it: miners slider, price, difficulty, revenue/TH, power
+  cost, overclock, fixed setup, pool fee, maintenance), Monte Carlo, gas decline, capex FX, amortization,
+  sensitivity tornado. Evidence: case-study export, bank pack export + preview, the sponsored links, site
+  notes, and the raw dataset properties.
+- **How it is wired (the part that matters for review):** one `sectionOff(id)` helper emits
+  `site-section-<id>` (a permanent marker) and `site-section-off` (the actual gating class) on each block;
+  `.site-section-off { display:none !important }` in `app/globals.css`. **Nothing is unmounted**, so
+  switching sections cannot lose form state, there is still exactly one copy of every control, and the
+  desktop tree keeps its single original block order. The nav is `role="tablist"` + roving tabindex +
+  Arrow/Home/End, `aria-controls` on one `role="tabpanel"` wrapper, and each tab is a ≥44px box
+  (`min-height:44px`, `max(1rem, env(safe-area-inset-*))` padding for notches).
+- **Sticky, measured, and a real bug found there:** `top:0` on a sticky child of a padded scrollport
+  leaves the container's own top padding visible above it (measured: 17px gap, and at rest it overlapped
+  the header's honesty badges — painted OVER the "Verify this yourself" pill). Fixed with `top:-1rem`
+  (`-1.5rem` at ≥640px) so the strip is flush with the sheet's edge; `elementFromPoint` 6px inside the
+  sheet's top edge now returns the nav, not scrolling content.
+- **Desktop is untouched:** 1440px fine-pointer snapshot diff of the panel's element boxes (live vs local)
+  — **zero rows differ**; the only additions are 10 no-style wrapper divs with identical geometry
+  (`onlyA: []`, `rowsA 661 → rowsB 671`, `panelScrollHeight` 6101 both, no nav in the DOM, 0 gated blocks).
+  Tool: `scripts/_mimi-sections-desktop-parity.mjs`. The desktop path also renders **no** tab strip and no
+  CTA — asserted at 1280 and 1440 in the new spec.
+- **New spec `tests/e2e/site-sections.spec.ts` (9 tests, all green locally):** at 360/375/390/430 — tab
+  boxes ≥44×44, tap-at-centre ownership, nav inside the sheet, layout viewport == device width, no
+  document overflow, real taps switch sections, each section's controls visible and the other three
+  hidden, sticky strip with no gap above it; form state survives a round trip (miner count, advanced
+  disclosure open, typed note) with exactly one copy of each control in the panel; the CTA routes to
+  Build and close returns to the map; a newly selected site (in-app, `j`) opens on Overview and its build
+  values equal a fresh load of the same site — no stale values from the previous site; desktop @1280/1440
+  keeps all four sections with zero gating.
+- **Existing specs updated (they now navigate to the section the control lives in — the intent is
+  unchanged):** `fuel-budget` (Build), `site-panel-tap-targets` + `hit-area-links` cockpit + the untracked
+  `mobile-layout` WIP (Evidence / Build). The cockpit "Verify this yourself →" link had to be reachable —
+  it was the one that proved the sections really do gate.
+- **Local e2e (1 worker, this box):** fuel-budget 3/3, hit-area-links 5/5 + cockpit fixed, legibility 14/14,
+  site-panel-tap-targets 12/12, smoke all green, site-sections 9/9. Two known environmental failures remain
+  in **untracked sibling WIP** (`tests/e2e/mobile-layout.spec.ts` adjacent-pages @360, and the uncommitted
+  route sweep inside `mobile-viewport.spec.ts` — both also fail on pristine revisions); neither file is
+  mine and neither is committed here.
+- **Shared tree:** `tests/e2e/mobile-layout.spec.ts` + the route-sweep addition to `mobile-viewport.spec.ts`
+  are other cards' uncommitted work — left in place, not committed. `components/SiteDetailsPanel.tsx`
+  remains the hotspot (sibling QA card t_11607811 reads this panel) — flagged on the card.
+
 ## Session — 2026-09-13 · economics repair 2 — carbon baseline honesty, FX contract, portfolio alignment (Ziggy, card t_424deeeb · commit 02bd54d)
 
 **Done:** closed Lenny's review t_e9e28d17 follow-up. Carbon-credit/abatement revenue is now **$0 by default** and only an opt-in capture scenario on a baseline-bearing (published fugitive split) site produces an *illustrative* figure. The two ungrounded panel numbers ($50/t ×100% vs $45/t ×30%) are gone; `flux_scope: not-applicable` / null-split sites show "$0 — no published baseline". GWP=28 everywhere (MissionPanel 25→28) and MissionPanel genset capex now uses `GENSET.capexPerKW` instead of the $1,000/kW heuristic.

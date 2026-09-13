@@ -1813,6 +1813,84 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
 }
 
+/* ==========================================================================
+   SITE SECTIONS — the phone sheet's Overview / Build / Financials / Evidence
+   navigation (components/SiteDetailsPanel.tsx).
+
+   Why CSS gating instead of "render only the active section": the panel's
+   blocks are shared with the desktop docked cockpit, whose layout is a
+   deliberate design (Cam's) and must not move. The four section blocks are
+   annotated with `data-site-section`, and on the phone sheet only the active
+   one is painted — the DOM keeps its single, original placement and order, so
+   desktop is byte-for-byte the same tree it was, every control still renders
+   once, and a section switch cannot drop form state (nothing unmounts).
+   ========================================================================== */
+.site-section-off { display: none !important; }
+
+.site-section-nav {
+  /* Sticky to the top of the sheet's own scrollport: reachable while the
+     section scrolls, and never over the map (it lives inside the panel, not
+     in the fixed chrome layer). */
+  position: sticky;
+  /* Sticks flush with the sheet's top edge. The sticky rectangle starts at the
+     scrollport's CONTENT box, so the sheet's own top padding (1rem here,
+     1.5rem at sm) must be offset — otherwise a 16px strip of scrolling content
+     stays visible above the strip, which the nav is supposed to cover. */
+  top: -1rem;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+  /* Full-bleed across the sheet's padding WITHOUT a negative block-start
+     margin: a negative top margin would offset the sticky box by the same
+     amount and leave a 16px strip of scrolling content visible above it (and
+     overlap the header at rest). */
+  margin: 0 -1rem 0.75rem;
+  padding: 0.5rem 1rem calc(0.5rem + 1px);
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  background: #0f172a;
+  border-top: 1px solid rgba(91, 192, 190, 0.14);
+  border-bottom: 1px solid rgba(91, 192, 190, 0.30);
+}
+@media (min-width: 640px) {
+  .site-section-nav {
+    top: -1.5rem;
+    margin: 0 -1.5rem 0.75rem;
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+.site-section-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;          /* the thumb floor, enforced by tests/e2e/site-sections.spec.ts */
+  min-width: 0;
+  padding: 0 0.25rem;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+  border-radius: 0.75rem;
+  color: #cbd5e1;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+.site-section-tab:hover { color: #ffffff; border-color: rgba(91, 192, 190, 0.55); }
+.site-section-tab:active { transform: scale(0.98); }
+.site-section-tab[aria-selected='true'] {
+  color: #08222b;
+  background: #5BC0BE;
+  border-color: #7dd3d1;
+}
+.site-section-tab:focus-visible {
+  outline: 2px solid #FF8C00;
+  outline-offset: 2px;
+}
+
 /* Keep the map's own controls clear of the docked cockpit (desktop).
    The toolbar is now a static child of .map-top-stack, so it is nudged with a
    transform instead of an absolute `left`. */

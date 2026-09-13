@@ -235,6 +235,14 @@ test(`cockpit "Verify this yourself" link is a real ${TAP_MIN}px target @${WIDTH
     await page.waitForTimeout(2500)
     await page.locator('[data-testid="mobile-site-expand"]:visible').first().tap()
     await page.waitForTimeout(2500)
+    // The cockpit (and its "Verify this yourself →" prose link) lives in the
+    // phone sheet's Build section (t_152a2036) — the docked desktop cockpit has
+    // no sections, so navigation is a no-op there.
+    const buildTab = page.locator('[data-testid="site-section-tab-build"]:visible')
+    if (await buildTab.count()) {
+      await buildTab.first().tap()
+      await page.waitForTimeout(600)
+    }
     const cockpit = page.locator('[data-testid="cockpit-how"]:visible').first()
     if (await cockpit.count()) {
       const open = await cockpit.evaluate((node) => node.hasAttribute('open'))

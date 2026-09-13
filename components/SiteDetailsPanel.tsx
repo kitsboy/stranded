@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useId, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { GENSET_DATA, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks } from '@/lib/bookmarks'
@@ -99,6 +99,20 @@ function gensetStackLabel(stack: FleetGenset[]): string {
   return parts.length ? parts.join(' + ') : 'no genset'
 }
 
+/**
+ * The phone sheet's four sections. The docked desktop cockpit shows every
+ * block at once — sections are a small-screen affordance, and each block below
+ * is annotated with the section it belongs to (`sectionOff`), so nothing is
+ * rendered twice and nothing is unmounted when the reader switches.
+ */
+const SITE_SECTIONS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'build', label: 'Build' },
+  { id: 'financials', label: 'Financials' },
+  { id: 'evidence', label: 'Evidence' },
+] as const
+type SiteSectionId = (typeof SITE_SECTIONS)[number]['id']
+
 export default function SiteDetailsPanel({ 
   site, 
   onClose, 
@@ -185,11 +199,19 @@ export default function SiteDetailsPanel({
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
   const [exportFmt, setExportFmt] = useState<ExportFormat>('md')
   const [showBankPreview, setShowBankPreview] = useState(false)
+  /** Phone sheet only: which of the four sections is on screen (default Overview). */
+  const [section, setSection] = useState<SiteSectionId>('overview')
+  const sectionPanelId = useId()
+  const panelScrollRef = useRef<HTMLDivElement>(null)
+  const sectionTabRefs = useRef<Partial<Record<SiteSectionId, HTMLButtonElement | null>>>({})
 
   useEffect(() => {
     if (!site) return
     setBookmarked(getBookmarks().includes(site.id))
     setNote(getSiteNote(site.id))
+    // A newly selected site always opens on Overview — never on the section the
+    // previous site was left on.
+    setSection('overview')
     if (typeof site.strandedScore === 'number') {
       recordScoreVisit(site.id, site.strandedScore)
       setScoreHistory(getScoreHistory(site.id))
@@ -505,8 +527,55 @@ export default function SiteDetailsPanel({
     }
   }
 
+  // ---- Mobile sections (phone sheet only; desktop keeps the full cockpit) -----
+  /** Overview / Build / Financials / Evidence exist only in the bottom sheet. */
+  const sectionsEnabled = sheet && !compact
+  /**
+   * Two jobs in one class string:
+   *   - `site-section-<id>` is a permanent marker, so a test (or an audit) can
+   *     say which section a block belongs to without reading the JSX;
+   *   - `site-section-off` is what actually hides it while another section is
+   *     on screen. Nothing is unmounted, so a section switch cannot lose form
+   *     state, and on desktop (no sections) neither class is emitted.
+   */
+  const sectionOff = (id: SiteSectionId) =>
+    ` site-section-${id}${sectionsEnabled && section !== id ? ' site-section-off' : ''}`
+  const activeSection: SiteSectionId = sectionsEnabled ? section : 'overview'
+  const jumpToBuild = () => {
+    setSection('build')
+    // The thumb bar's "jump to stack" must land on the stack, which lives in Build.
+    if (typeof window === 'undefined') return
+    window.requestAnimationFrame(() => {
+      document.querySelector('[data-testid="miner-stack"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+  const selectSection = (id: SiteSectionId, focus = false) => {
+    setSection(id)
+    if (focus) sectionTabRefs.current[id]?.focus()
+    // A section always starts at its top — switching must never drop the reader
+    // halfway down the previous section's scroll offset.
+    const el = panelScrollRef.current
+    if (!el) return
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+  }
+  /** Arrow/Home/End move between tabs, as the tabs pattern expects. */
+  const onSectionKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    const i = SITE_SECTIONS.findIndex(s => s.id === activeSection)
+    if (i < 0) return
+    let next = -1
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % SITE_SECTIONS.length
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + SITE_SECTIONS.length) % SITE_SECTIONS.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = SITE_SECTIONS.length - 1
+    if (next < 0) return
+    e.preventDefault()
+    selectSection(SITE_SECTIONS[next].id, true)
+  }
+
   return (
     <motion.div
+      ref={panelScrollRef}
       initial={{ opacity: 0, x: compact ? 0 : 32, y: compact ? 24 : 0 }}
       animate={{ opacity: 1, x: 0, y: 0 }}
       exit={{ opacity: 0, x: compact ? 0 : 24, y: compact ? 16 : 0 }}
@@ -624,7 +693,67 @@ export default function SiteDetailsPanel({
 
       {!compact && (
       <>
+      {/*
+        Phone-sheet section nav. `role="tablist"` with roving tabindex + arrow
+        keys; every tab is a >=44px box (globals.css `.site-section-tab`). It
+        only exists in the bottom sheet — desktop keeps one continuous cockpit.
+      */}
+      {sectionsEnabled && (
+        <div
+          className="site-section-nav"
+          role="tablist"
+          aria-label="Site sections"
+          data-testid="site-section-nav"
+          onKeyDown={onSectionKeyDown}
+        >
+          {SITE_SECTIONS.map(s => (
+            <button
+              key={s.id}
+              type="button"
+              role="tab"
+              id={`${sectionPanelId}-tab-${s.id}`}
+              aria-selected={activeSection === s.id}
+              aria-controls={sectionPanelId}
+              tabIndex={activeSection === s.id ? 0 : -1}
+              ref={el => { sectionTabRefs.current[s.id] = el }}
+              className="site-section-tab"
+              data-testid={`site-section-tab-${s.id}`}
+              onClick={() => selectSection(s.id)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/*
+        One neutral wrapper so the four sections can share a single tabpanel id.
+        It carries no styles: margins collapse through it exactly as before, so
+        the docked desktop cockpit is visually unchanged.
+      */}
+      <div
+        id={sectionsEnabled ? sectionPanelId : undefined}
+        role={sectionsEnabled ? 'tabpanel' : undefined}
+        aria-labelledby={sectionsEnabled ? `${sectionPanelId}-tab-${activeSection}` : undefined}
+        data-testid="site-section-body"
+      >
+      {/*
+        Overview's one obvious next step: it routes to Build, where the miners,
+        gensets and presets live. Only the phone sheet has sections, so this
+        never appears on the docked desktop cockpit.
+      */}
+      {sectionsEnabled && (
+        <button
+          type="button"
+          onClick={() => selectSection('build')}
+          className={`w-full mb-3 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] px-3 py-3 text-sm font-semibold text-black active:scale-[0.985] transition${sectionOff('overview')}`}
+          data-testid="site-section-cta-build"
+        >
+          Configure build →
+        </button>
+      )}
       {/* ---- THE COCKPIT: hero number, capacity bar with the gas ceiling, live readouts ---- */}
+      <div className={sectionOff('build')}>
       <MinerStackCockpit
         siteId={site.id}
         machineCount={machineCount}
@@ -661,8 +790,10 @@ export default function SiteDetailsPanel({
           />
         </div>
       </MinerStackCockpit>
+      </div>
 
       {/* ---- templates as a shelf, not a form ---- */}
+      <div className={sectionOff('build')}>
       <FleetTemplateShelf
         presets={MINER_STACK_PRESETS}
         saved={namedFleets}
@@ -704,9 +835,10 @@ export default function SiteDetailsPanel({
           </button>
         </div>
       )}
+      </div>
 
       {/* ---- one obvious next step: the build becomes a sales handoff ---- */}
-      <div className="mt-3 rounded-2xl border border-[#FF8C00]/35 bg-[#FF8C00]/10 p-3" data-testid="send-this-build">
+      <div className={`mt-3 rounded-2xl border border-[#FF8C00]/35 bg-[#FF8C00]/10 p-3${sectionOff('build')}`} data-testid="send-this-build">
         <div className="text-label text-gray-200 leading-snug">
           This build: <span className="text-white font-semibold tabular-nums">{formatCount(capacity.miners)} miners</span> ·{' '}
           <span className="text-[#5BC0BE] font-semibold tabular-nums">{formatKw(capacity.usedKw)} kW</span> ·{' '}
@@ -730,7 +862,7 @@ export default function SiteDetailsPanel({
       </div>
 
       {scoreExplain && (
-        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3" open>
+        <details className={`mb-4 rounded-lg border border-white/10 bg-black/20 p-3${sectionOff('overview')}`} data-testid="site-score-why" open>
           <summary className="text-sm font-semibold text-[#FF8C00] cursor-pointer">Why this score ({scoreExplain.score})</summary>
           <ul className="mt-2 space-y-1.5 text-xs text-gray-300">
             {scoreExplain.factors.map(f => (
@@ -751,25 +883,36 @@ export default function SiteDetailsPanel({
       )}
 
       {confBand && (
-        <div className="mb-4">
+        <div className={`mb-4${sectionOff('overview')}`}>
           <ConfidenceBandBar score={site.strandedScore || confBand.low} low={confBand.low} high={confBand.high} band={confBand.band} reason={confBand.reason} />
         </div>
       )}
 
       <div className="mb-4 grid gap-3">
-        <VerticalScoreGrid scores={verticalScores} />
-        <p className="text-label text-gray-500" data-testid="site-carbon-note">
+        <div className={sectionOff('overview')}>
+          <VerticalScoreGrid scores={verticalScores} />
+        </div>
+        <p className={`text-label text-gray-500${sectionOff('overview')}`} data-testid="site-carbon-note">
           <FormulaTip formulaId="carbonValue">Carbon (screening)</FormulaTip>
           {': '}
           <span className="font-mono text-[#34D399]">$0/yr</span>
           {' · '}
           <span className="text-gray-400">{carbonBaselineLabel(p as Record<string, unknown>)}</span>
         </p>
-        <MonteCarloPanel baseDailyUsd={site.potentialDailyProfitUsd || 0} />
-        <GasDeclineChart emissionKgDay={siteEmission} baseDailyUsd={site.potentialDailyProfitUsd || 0} />
-        <CapexFxControls baseCapexUsd={Math.max(250_000, (site.maxGeneratorPowerKW || 500) * 1000)} />
-        <AmortizationTable defaultPrincipal={Math.round(((site.maxGeneratorPowerKW || 500) * 1000) * 0.6)} />
-        <CaseStudyExport
+        <div className={sectionOff('financials')}>
+          <MonteCarloPanel baseDailyUsd={site.potentialDailyProfitUsd || 0} />
+        </div>
+        <div className={sectionOff('financials')}>
+          <GasDeclineChart emissionKgDay={siteEmission} baseDailyUsd={site.potentialDailyProfitUsd || 0} />
+        </div>
+        <div className={sectionOff('financials')}>
+          <CapexFxControls baseCapexUsd={Math.max(250_000, (site.maxGeneratorPowerKW || 500) * 1000)} />
+        </div>
+        <div className={sectionOff('financials')}>
+          <AmortizationTable defaultPrincipal={Math.round(((site.maxGeneratorPowerKW || 500) * 1000) * 0.6)} />
+        </div>
+        <div className={sectionOff('evidence')}>
+          <CaseStudyExport
           site={{
             id: site.id,
             name: p.name,
@@ -786,10 +929,11 @@ export default function SiteDetailsPanel({
           }}
           liveBtc={liveBtcPrice}
         />
+        </div>
       </div>
 
       {tornado.length > 0 && (
-        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">
+        <details className={`mb-4 rounded-lg border border-white/10 bg-black/20 p-3${sectionOff('financials')}`}>
           <summary className="text-sm font-semibold text-[#5BC0BE] cursor-pointer">Sensitivity tornado</summary>
           <ul className="mt-2 space-y-1 text-xs">
             {tornado.map(row => (
@@ -803,7 +947,7 @@ export default function SiteDetailsPanel({
       )}
 
       {peers.length > 0 && (
-        <details className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">
+        <details className={`mb-4 rounded-lg border border-white/10 bg-black/20 p-3${sectionOff('overview')}`} data-testid="site-peers">
           <summary className="text-sm font-semibold text-white cursor-pointer">
             Peers {peerMeta ? `(rank ${peerMeta.rankByScore}/${peers.length + 1} in cohort)` : ''}
           </summary>
@@ -818,7 +962,7 @@ export default function SiteDetailsPanel({
         </details>
       )}
 
-      <div className="mb-4">
+      <div className={`mb-4${sectionOff('evidence')}`} data-testid="site-bank-export">
         <div className="text-xs font-semibold text-gray-400 mb-1.5">Bank pack export</div>
         <ExportFormatPicker value={exportFmt} onChange={setExportFmt} className="mb-2" />
         <div className="flex flex-wrap gap-1.5">
@@ -848,7 +992,7 @@ export default function SiteDetailsPanel({
         fleet={{ template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }}
       />
       {/* Currency dropdown - BTC always the base/denominator */}
-      <div className="mb-4">
+      <div className={`mb-4${sectionOff('financials')}`} data-testid="site-fiat-select">
         <label className="text-sm font-semibold text-[#5BC0BE]">BTC Price in</label>
         <select 
           value={selectedFiat} 
@@ -860,18 +1004,18 @@ export default function SiteDetailsPanel({
           ))}
         </select>
       </div>
-      <div className="space-y-2 text-sm mb-4 p-3 bg-slate-800/50 rounded-lg">
+      <div className={`space-y-2 text-sm mb-4 p-3 bg-slate-800/50 rounded-lg${sectionOff('build')}`} data-testid="site-power-summary">
         <div className="flex justify-between"><span className="text-gray-400">Total Power (ASICs)</span><span className="text-[#5BC0BE]">{calculations.totalPowerKw.toFixed(1)} kW</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{calculations.hardwareCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span></div>
       </div>
-      <div className="mb-4">
+      <div className={`mb-4${sectionOff('build')}`} data-testid="site-asic-select">
         <label className="text-sm font-semibold text-[#5BC0BE]">ASIC Model</label>
         <select value={selectedASIC.id} onChange={(e) => setSelectedASIC(ASIC_MACHINES.find(m => m.id === e.target.value) || ASIC_MACHINES[0])} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm">
           {ASIC_MACHINES.map(m => <option key={m.id} value={m.id}>{m.name} - {m.hashrate_ths} TH/s @ {m.power_w}W</option>)}
         </select>
       </div>
-      <div className="mb-4">
+      <div className={`mb-4${sectionOff('build')}`} data-testid="site-genset-select">
         <label className="text-sm font-semibold text-[#5BC0BE]">Generator Model (production side from real site gas)</label>
         <select value={selectedGenset} onChange={(e) => {
           const id = e.target.value as GensetId
@@ -882,8 +1026,8 @@ export default function SiteDetailsPanel({
           {Object.keys(GENSET_DATA).map(id => <option key={id} value={id}>{GENSET_DATA[id as GensetId].name}</option>)}
         </select>
       </div>
-      <div className="mb-2 text-xs text-gray-400">Financing for total CapEx (generator + mining hardware)</div>
-      <div className="flex gap-3 mb-4">
+      <div className={`mb-2 text-xs text-gray-400${sectionOff('financials')}`}>Financing for total CapEx (generator + mining hardware)</div>
+      <div className={`flex gap-3 mb-4${sectionOff('financials')}`} data-testid="site-financing">
         <div className="flex-1">
           <label className="text-xs">Debt %: {debtPercent}%</label>
           <input type="range" min="0" max="90" value={debtPercent} onChange={e => setDebtPercent(+e.target.value)} className="w-full accent-[#FF8C00]" />
@@ -894,26 +1038,28 @@ export default function SiteDetailsPanel({
         </div>
       </div>
       {advancedRoi && (
-        <div className="mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2">
+        <div className={`mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2${sectionOff('financials')}`}>
           <div><span className="text-gray-400">LCOE</span><div className="font-mono text-white">${advancedRoi.lcoeUsdPerKwh}/kWh</div></div>
           <div title={carbonBaselineLabel(p as Record<string, unknown>)}><span className="text-gray-400">Carbon (screening)</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
           <div><span className="text-gray-400">Incentives</span><div className="font-mono text-[#5BC0BE]">${advancedRoi.incentiveGrantUsd.toLocaleString()}</div></div>
           <div><span className="text-gray-400">Jobs</span><div className="font-mono">{advancedRoi.jobs.total} FTE</div></div>
         </div>
       )}
-      <div className="mb-4 p-3 bg-slate-800/40 rounded-lg">
+      <div className={`mb-4 p-3 bg-slate-800/40 rounded-lg${sectionOff('financials')}`}>
         <RoiProjectionChart dailyBtc={calculations.effectiveDailyBtc} btcUsd={btcPrice} />
       </div>
-      <TadbuyAdHook siteId={site?.id} />
-      <div className="mb-3 flex gap-2 text-label">
+      <div className={sectionOff('evidence')}>
+        <TadbuyAdHook siteId={site?.id} />
+      </div>
+      <div className={`mb-3 flex gap-2 text-label${sectionOff('evidence')}`}>
         <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="hit-area-row justify-center flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
       </div>
-      <div className="mb-3">
+      <div className={`mb-3${sectionOff('financials')}`}>
         <label className="text-xs text-gray-400">Gas treatment derate: {(gasTreatmentDerate * 100).toFixed(0)}%</label>
         <input type="range" min="0.7" max="1" step="0.01" value={gasTreatmentDerate} onChange={e => setGasTreatmentDerate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
         <GeneratorDerateChart emissionKgDay={siteEmission} gensetId={selectedGenset} className="mt-3" />
       </div>
-      <div className="bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4">
+      <div className={`bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4${sectionOff('financials')}`} data-testid="site-roi-summary">
         <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary <span className="text-xs font-normal">(BTC first — always the denominator)</span></h3>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-gray-400">Daily BTC Earned (after pool)</span><span className="text-white">{calculations.effectiveDailyBtc.toFixed(6)} BTC</span></div>
@@ -962,9 +1108,9 @@ export default function SiteDetailsPanel({
           </div>
         </div>
       </div>
-      <button onClick={() => setAdvancedMode(!advancedMode)} className="w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors">{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
+      <button onClick={() => setAdvancedMode(!advancedMode)} data-testid="site-advanced-toggle" className={`w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors${sectionOff('financials')}`}>{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
       {advancedMode && (
-        <div className="space-y-4 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm">
+        <div className={`space-y-4 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm${sectionOff('financials')}`} data-testid="site-advanced-panel">
           <div>
             <label className="text-xs text-gray-400">Miners: {machineCount.toLocaleString()} of {ceilingMiners.toLocaleString()} the gas supports</label>
             <input type="range" min="1" max={Math.max(10000, ceilingMiners)} value={Math.min(machineCount, Math.max(10000, ceilingMiners))} onChange={(e) => { setStackMode('manual'); setMachineCount(Number(e.target.value)) }} className="w-full mt-2 accent-[#5BC0BE]" />
@@ -1059,14 +1205,16 @@ export default function SiteDetailsPanel({
         </div>
       )}
 
-      <div className="mb-3">
+      <div className={`mb-3${sectionOff('evidence')}`} data-testid="site-notes">
         <label className="text-xs text-gray-400">Site notes (saved locally)</label>
         <textarea value={note} onChange={e => setNote(e.target.value)} onBlur={() => site && setSiteNote(site.id, note)} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-xs h-16" placeholder="Due diligence notes…" />
       </div>
-      <details className="mt-1 mb-2">
+      <details className={`mt-1 mb-2${sectionOff('evidence')}`} data-testid="site-raw-properties">
         <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-200">All raw properties from dataset ({Object.keys(p).length} fields)</summary>
         <pre className="text-label mt-1 p-2 bg-black/40 rounded overflow-auto max-h-44 text-gray-300 whitespace-pre-wrap break-all">{JSON.stringify(p, null, 2)}</pre>
       </details>
+      </div>
+      {/* ---- end of the section body (Overview / Build / Financials / Evidence) ---- */}
 
       {onAddToMission && (
         <button
@@ -1129,11 +1277,7 @@ export default function SiteDetailsPanel({
           gasCeilingKw={calculations.generatorPowerKw}
           satsPerDay={currentPreview.satsPerDay}
           onStep={stepMiners}
-          onJumpToStack={() => {
-            if (typeof document === 'undefined') return
-            const el = document.querySelector('[data-testid="miner-stack"]')
-            el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}
+          onJumpToStack={jumpToBuild}
         />
       )}
       </>
