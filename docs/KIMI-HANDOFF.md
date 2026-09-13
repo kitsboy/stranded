@@ -1,3 +1,13 @@
+## Session — 2026-09-13 · economics repair 2 — carbon baseline honesty, FX contract, portfolio alignment (Ziggy, card t_424deeeb · commit 02bd54d)
+
+**Done:** closed Lenny's review t_e9e28d17 follow-up. Carbon-credit/abatement revenue is now **$0 by default** and only an opt-in capture scenario on a baseline-bearing (published fugitive split) site produces an *illustrative* figure. The two ungrounded panel numbers ($50/t ×100% vs $45/t ×30%) are gone; `flux_scope: not-applicable` / null-split sites show "$0 — no published baseline". GWP=28 everywhere (MissionPanel 25→28) and MissionPanel genset capex now uses `GENSET.capexPerKW` instead of the $1,000/kW heuristic.
+
+- **FX contract:** price is produced once (fleet-model pattern) — dropped `(btc/85000)` production scaling from `computeAdvancedRoi`, `computeSiteValue`, and the education widget, so fiat revenue is exactly linear in BTC price (test asserts $170k == 2× $85k, never 4×). No bare `1.35` remains in any export path; `CAD_PER_USD` export removed; unit purity (USD opex vs USD revenue). Static/legacy heuristics use documented `lib/capex-fx.ts` fallbacks derived from the live-map defaults (115000/85000).
+- **Templates:** equipment + overclock only; `estimateFleetPaybackDays` now returns the live session payback or `unavailable` — it no longer estimates from stale stored assumptions (the export block says "uses the current session's assumptions").
+- **CO₂e relabelled** as scenario equivalents across homepage/dashboard/pitch/term-sheet/LIVE-STATS (never "avoided").
+- **New economics unit tests** in `scripts/test-helpers.mjs`: carbon=0 without baseline / off-by-default, exact-linear price, no `1.35` in export files, template payback contract, GWP=28 in MissionPanel. `npm test` + `lint` (warnings only) + `build` green; rendered-DOM e2e 45 tests green on the new head.
+- **Shared-tree flag:** a sibling (t_88d78786 route sweep) is concurrently editing `tests/e2e/mobile-viewport.spec.ts` (112 added lines) — I did NOT commit it; left unstaged for that card. Hotspot remains `components/SiteDetailsPanel.tsx` (already serialized by the card graph).
+
 ## Session — 2026-09-13 · every `hit-area-inline` link audited for the hit-test traps (Mimi, card t_90eed310)
 
 **Done:** all 15 visible `hit-area-inline` / `hit-area-row` links across the 5 routes that render them were
