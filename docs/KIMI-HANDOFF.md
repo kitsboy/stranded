@@ -1,3 +1,65 @@
+## Session — 2026-09-13 · /education phone layout viewport: the 676px site select + the 381px residual (Mimi, card t_88d78786)
+
+**Done:** `/education` no longer widens the LAYOUT viewport on any phone width. Two offenders, both
+in-flow flex items whose automatic minimum size (`min-width: auto`) is their min-content:
+
+1. **The site picker — the big one.** `select` "Select Real Site from Dataset…" was a flex item with
+   `flex-1`, so its min-content = its longest `<option>` (`Enbridge Gas Inc. - Distribution — Ontario
+   (39,072.2 kg/day)`) = **676px**. That set the page min-content to **788px**, and Chromium widened the
+   layout viewport to 788 at device **360/375/390/430** (measured live on `ca34da9`: `innerWidth` 788,
+   `clientWidth` 360…, `scrollWidth` 788) — so every `position: fixed` box anchored to it (quick-actions
+   FAB, bottom sheet, map chrome) was placed for a 788px screen. Same family as t_a81648a3's header fix.
+   **Fix:** `min-w-0 max-w-full` at the offender (lets it shrink and clip its own label) + the row stacks
+   below `lg`; `lg:` re-declares the original desktop values (`w-auto min-w-[auto] max-w-none flex-1`).
+2. **The 381px residual.** With the select constrained, the widest unclipped in-flow box left was the
+   glossary row (`h2` + `w-64` search input, right edge **380.7**) and the site panel's financing row
+   ("Financing: …" + two ranges, right edge **379.1**) → `innerWidth` **381** at 360/375.
+   **Fix:** `flex-wrap` on both rows (+ `w-full min-w-0` on the search input below `sm`) so they break
+   instead of pushing.
+
+- **Evidence, same base, 10 routes × 5 widths (360/375/390/430/844-landscape), `scripts/_mimi-viewport-sweep.mjs`:**
+  base (`c7ded0d`) **2/50 failing** — `/education` 360 → `381/360/381`, 375 → `381/375/381`;
+  fixed build **0/50 failing**, every row `innerWidth == device` and `scrollWidth <= clientWidth + 1`.
+  Only those two rows changed; the other nine routes were already clean and stayed byte-identical.
+- **The original defect, measured on the deployed site before it was fixed (`ca34da9`):**
+  `/education` @360 → innerWidth **788**, @375 → 788, @390 → 788, @430 → 788; offender
+  `select.bg-[#0f172a].border.border-white/20.rounded.px-3` **676px** wide, right edge **787.8**,
+  `position: static`, `overflow-x: visible`, `min-width: auto`; `/sites/` and `/provinces/` were clean
+  (the `/provinces/` 691.8px table sits inside an `overflow-x-auto` container, so it never pushed).
+- **Desktop is unchanged — and the picker row is back to its pre-fix geometry.** At 1440 with a **fine**
+  pointer my build's site-selector row is **byte-identical to the `ca34da9` snapshot**: picker
+  `676 × 28 @ x=579`, label `382 × 40` (two lines), row `1070 × 28`, panel `1104 × 118`; `financingRow`
+  and `financingRange` identical too. Against **my own base** the only differences are the two intended
+  `flex-wrap` declarations and the picker row restoring `28 → 40px` height, which shifts everything below
+  it `+12px` (`docScrollHeight` 14271 → 14283). (`ca34da9 → c7ded0d` moved that page's desktop height
+  14299 → 14271 by itself — that is Ziggy's `02bd54d`, not this change.) Snapshot tool:
+  `scripts/_mimi-desktop-1440-parity.mjs`.
+- **Timing, and why it matters twice.** `innerWidth` read right after load **under-reports**: the picker
+  only exists once the dataset fetch resolves, and before that the page measures the device width (or the
+  smaller 381). Both the sweep and the spec now (a) wait for a `<select>` with >10 options on
+  `/education` and (b) require ≥3s of stable reads — an earlier version that stopped at the first stable
+  read **passed against the unfixed site**. Worse, the 381 residual is font-metric dependent (it measured
+  381 three times on the deployed site and in the base sweep, and sometimes 360 locally) — which is
+  exactly why the fix is a `flex-wrap`/`min-w-0` contract rather than a width tweak.
+- **Regression guard:** extended `tests/e2e/mobile-viewport.spec.ts` (the existing viewport-identity
+  mechanism, not a parallel one) with a per-ROUTE sweep — 10 routes × the 5 phone widths asserting
+  `innerWidth <= device`, `scrollWidth <= clientWidth + 1`, and **no UNCLIPPED in-flow box past the layout
+  viewport** — plus a focused `/education` picker test (`data-testid="edu-site-picker"`: must be visible,
+  inside 390px, carry a selected option, and still measure 390 after changing it). Tracked suite locally:
+  **83 passed, 1 flaky** (legibility `/sites` @1440 hit its 30s timeout once under load, passed on retry).
+- **Tooling committed with this card:** `scripts/_mimi-viewport-culprit.mjs` (per-route offender list),
+  `_mimi-viewport-sweep.mjs` (route × width matrix, JSON), `_mimi-viewport-residual.mjs` (every box past
+  the viewport, flagged `clippedBy` an overflow ancestor — only unclipped ones can push),
+  `_mimi-desktop-1440-parity.mjs` (before/after geometry diff), `_mimi-education-timeline.mjs`
+  (second-by-second onset of the inflation).
+- **Overlap, recorded:** my first hunk for this card (`sm:` variant) rode into Ziggy's `02bd54d` push
+  while this card ran, so it was already deployed when I re-measured live at 03:41 (`buildId
+  20260913034115`, `c7ded0d`). Nothing was lost; this commit supersedes it with the `lg:` variant that
+  restores the desktop geometry the `sm:` one had moved. Separately, the **untracked**
+  `tests/e2e/mobile-layout.spec.ts` (another worker, never committed, so CI never runs it) asserts the
+  same property — this commit does **not** touch it; dedupe rather than land two fixes on the same select.
+
+
 ## Session — 2026-09-13 · economics repair 2 — carbon baseline honesty, FX contract, portfolio alignment (Ziggy, card t_424deeeb · commit 02bd54d)
 
 **Done:** closed Lenny's review t_e9e28d17 follow-up. Carbon-credit/abatement revenue is now **$0 by default** and only an opt-in capture scenario on a baseline-bearing (published fugitive split) site produces an *illustrative* figure. The two ungrounded panel numbers ($50/t ×100% vs $45/t ×30%) are gone; `flux_scope: not-applicable` / null-split sites show "$0 — no published baseline". GWP=28 everywhere (MissionPanel 25→28) and MissionPanel genset capex now uses `GENSET.capexPerKW` instead of the $1,000/kW heuristic.

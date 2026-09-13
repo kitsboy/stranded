@@ -785,12 +785,16 @@ export default function EducationContent() {
                 viewport to 788 and every `position: fixed` box anchored to it
                 (quick-actions FAB, bottom sheet, map chrome) was placed for a
                 788px screen. Fix at the offender: `min-w-0 max-w-full` lets the
-                select shrink and clip its own label; the row stacks below sm so
-                the select gets the full width instead of a squeezed remainder.
+                select shrink and clip its own label, and below lg the row stacks
+                so the select gets the full width instead of a squeezed
+                remainder. `lg:` restores the desktop declarations byte-for-byte
+                (width auto / min-width auto / max-width none / flex-1), so the
+                >=lg layout is untouched — this is a phone fix only, like the
+                header cluster fix in t_a81648a3.
               */}
-              <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center">
-                <label className="text-sm sm:shrink-0">Select Real Site from Dataset (top emitters shown, {realSites.length} total):</label>
-                <select data-testid="edu-site-picker" value={selectedRealSiteId} onChange={e => setSelectedRealSiteId(e.target.value)} className="w-full min-w-0 max-w-full truncate bg-[#0f172a] border border-white/20 rounded px-3 py-1 text-sm sm:flex-1">
+              <div className="flex flex-col gap-3 mb-3 lg:flex-row lg:items-center">
+                <label className="text-sm">Select Real Site from Dataset (top emitters shown, {realSites.length} total):</label>
+                <select data-testid="edu-site-picker" value={selectedRealSiteId} onChange={e => setSelectedRealSiteId(e.target.value)} className="w-full min-w-0 max-w-full truncate bg-[#0f172a] border border-white/20 rounded px-3 py-1 text-sm lg:w-auto lg:min-w-[auto] lg:max-w-none lg:flex-1">
                   {[...realSites].sort((a,b) => b.emission - a.emission).slice(0, 30).map(s => (
                     <option key={s.id} value={s.id}>{s.properties.name || s.id} — {s.properties.province} ({s.emission.toLocaleString()} kg/day)</option>
                   ))}
@@ -857,7 +861,7 @@ export default function EducationContent() {
 
                   {/* Financing Toggle (as requested) */}
                   <div className="mb-4 p-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-4 text-xs mb-2">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs mb-2">
                       <div>Financing: <span className="font-mono">{financingDebtPercent}% debt @ {financingInterestRate}%</span></div>
                       <input type="range" min="0" max="90" value={financingDebtPercent} onChange={e => setFinancingDebtPercent(+e.target.value)} className="flex-1 accent-[#FF8C00]" />
                       <input type="range" min="3" max="15" step="0.5" value={financingInterestRate} onChange={e => setFinancingInterestRate(+e.target.value)} className="w-24 accent-[#5BC0BE]" />
@@ -898,14 +902,24 @@ export default function EducationContent() {
 
       {/* 3+4. Multiple Simulators - enhanced with live BTC sensitivity & one-click mission builder */}
       <div className="mb-16">
-        <div className="flex items-center justify-between mb-4">
+        {/*
+          t_88d78786 (residual): this row and the financing row inside the site
+          panel are the SECOND half of the same defect family. Both are flex rows
+          whose min-content ("Education Glossary" h2 + the w-64 search input;
+          "Financing: …" + two range inputs) measured ~381px, and once the site
+          <select> stopped dominating the page min-content at 788px, 381 was what
+          Chromium still widened /education's layout viewport to at 360/375.
+          `flex-wrap` lets the row break instead of pushing the viewport. Nothing
+          wraps at >=lg, so the desktop geometry is unchanged.
+        */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <h2 className="text-2xl font-semibold flex items-center gap-2"><BookOpen className="text-[#5BC0BE]" /> {t('eduGlossary')}</h2>
           <input 
             type="text" 
             placeholder="Search terms..." 
             value={glossarySearch} 
             onChange={(e) => setGlossarySearch(e.target.value)}
-            className="bg-[#0f172a] border border-white/20 rounded-lg px-4 py-2 text-sm w-64 focus:outline-none focus:border-[#5BC0BE]"
+            className="w-full min-w-0 sm:w-64 bg-[#0f172a] border border-white/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#5BC0BE]"
           />
         </div>
         <div className="grid md:grid-cols-2 gap-3">

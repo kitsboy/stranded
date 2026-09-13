@@ -183,3 +183,143 @@ test('desktop 1440px keeps the full header and has no overflow', async ({ browse
   expect(f.innerWidth).toBe(1440)
   await context.close()
 })
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Route sweep (t_88d78786). The header fix above only pinned the routes it
+ * visits (`/map?site=…`); the same defect family reappeared on `/education`,
+ * where the "Select Real Site from Dataset" <select> is a FLEX ITEM with
+ * `flex-1`, so its automatic minimum size is its min-content width — and a
+ * native <select> takes min-content from its longest <option>
+ * ("Enbridge Gas Inc. - Distribution — Ontario…" = 676px). That single in-flow
+ * box set the page min-content to 788px, so Chromium inflated the LAYOUT
+ * viewport to 788 at EVERY phone width (measured 360/375/390/430 → innerWidth
+ * 788, doc scrollWidth 788), and every `position: fixed` box anchored to it was
+ * placed for a 788px screen. At 844px landscape it was invisible (844 > 788).
+ *
+ * So identity is asserted per ROUTE, not just per map URL, and the picker gets
+ * a focused assertion of its own so a future `flex-1` regression names itself.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+const ROUTES = [
+  '/',
+  '/education',
+  '/provinces/',
+  '/sites/',
+  '/open-data',
+  '/docs/api',
+  '/map/?site=G12350',
+  '/dashboard',
+  '/methodology',
+  '/print/province',
+]
+
+/** Read the layout viewport once it has stopped moving — and keep sampling for
+ *  at least SETTLE_MS, because `/education` populates the site picker from the
+ *  dataset AFTER load: the layout viewport reads 390 (device width, looks fine)
+ *  for the first second and only inflates to 788 once the picker's options
+ *  arrive. A guard that stops at the first stable read would report the
+ *  pre-fetch value and pass against the unfixed site — verified: it did. */
+const SETTLE_MS = 3000
+async function settledViewport(page: Page) {
+  const read = () =>
+    page.evaluate(() => ({
+      innerWidth: window.innerWidth,
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }))
+  const t0 = Date.now()
+  let last = ''
+  let stable = 0
+  let snap = await read()
+  while (Date.now() - t0 < 20000) {
+    const key = `${snap.innerWidth}/${snap.clientWidth}/${snap.scrollWidth}`
+    stable = key === last ? stable + 1 : 0
+    last = key
+    if (stable >= 2 && Date.now() - t0 >= SETTLE_MS) return snap
+    await page.waitForTimeout(250)
+    snap = await read()
+  }
+  return snap
+}
+
+for (const { w, h } of MOBILE) {
+  test(`no route inflates the layout viewport @${w}px`, async ({ browser }) => {
+    test.setTimeout(240000)
+    const context = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
+    const page = await context.newPage()
+    await page.addInitScript(() => localStorage.setItem('stranded-onboarding-dismissed', '1'))
+    for (const route of ROUTES) {
+      await page.goto(route, { waitUntil: 'domcontentloaded', timeout: 60000 })
+      // /education renders its dataset picker only AFTER the fetch resolves. Until
+      // then the layout viewport reads the device width (or the smaller 381px
+      // residual), so a sweep that measures the pre-fetch page passes against the
+      // unfixed site — verified: it did, at 390. Wait for the picker's options.
+      if (route === '/education') {
+        await page
+          .waitForFunction(() => Array.from(document.querySelectorAll('select')).some((s) => s.options.length > 10), null, { timeout: 20000 })
+          .catch(() => {})
+      }
+      const f = await settledViewport(page)
+      expect(f.innerWidth, `${route} @${w}px: layout viewport ${f.innerWidth} != device ${w}`).toBeLessThanOrEqual(w + 1)
+      expect(f.scrollWidth, `${route} @${w}px: scrollWidth ${f.scrollWidth} > clientWidth ${f.clientWidth}`).toBeLessThanOrEqual(f.clientWidth + 1)
+      // Nothing UNCLIPPED in flow may stick out past the layout viewport either —
+      // that is the shape that inflates it, on any width (the select did it at
+      // 676px; the glossary search row at 381px). A box inside an
+      // `overflow-x: auto` container is fine: the container clips it, so it
+      // contributes nothing to the page's min-content.
+      const strays = await page.evaluate(() => {
+        const layoutW = document.documentElement.clientWidth
+        const clipped = (el: Element) => {
+          let p = el.parentElement
+          while (p && p !== document.documentElement) {
+            if (getComputedStyle(p).overflowX !== 'visible') return true
+            p = p.parentElement
+          }
+          return false
+        }
+        const out: string[] = []
+        for (const el of Array.from(document.querySelectorAll('body *'))) {
+          const r = el.getBoundingClientRect()
+          if (!r.width || !r.height) continue
+          const cs = getComputedStyle(el)
+          if (cs.position === 'fixed' || cs.position === 'absolute') continue
+          if (r.right <= layoutW + 0.5) continue
+          if (clipped(el)) continue
+          out.push(`${el.tagName.toLowerCase()}${el.getAttribute('data-testid') ? `[${el.getAttribute('data-testid')}]` : ''} ${Math.round(r.width)}px`)
+        }
+        return out.slice(0, 5)
+      })
+      expect(strays, `${route} @${w}px: unclipped in-flow boxes past the layout viewport`).toEqual([])
+    }
+    await context.close()
+  })
+}
+
+test('the /education site picker cannot widen the layout viewport @390px', async ({ browser }) => {
+  test.setTimeout(120000)
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 })
+  const page = await context.newPage()
+  await page.goto('/education', { waitUntil: 'domcontentloaded', timeout: 60000 })
+  const picker = page.getByTestId('edu-site-picker')
+  await expect(picker, 'the site picker never rendered — the guard is measuring nothing').toBeVisible({ timeout: 30000 })
+
+  const f = await settledViewport(page)
+  expect(f.innerWidth, `layout viewport ${f.innerWidth} != 390`).toBeLessThanOrEqual(391)
+
+  const box = await picker.boundingBox()
+  expect(box, 'picker has no box').not.toBeNull()
+  expect(box!.width, `picker ${box!.width}px wide`).toBeLessThanOrEqual(391)
+  expect(box!.x + box!.width, `picker right edge ${box!.x + box!.width} past 390`).toBeLessThanOrEqual(391)
+
+  // It must still be a working control, not just a narrow box: it carries the
+  // longest option and changing it changes the read-out.
+  const optionText = await picker.evaluate((el) => (el as HTMLSelectElement).selectedOptions[0]?.textContent ?? '')
+  expect(optionText.length, 'picker has no selected option').toBeGreaterThan(0)
+  await picker.selectOption({ index: 1 })
+  await expect.poll(() => picker.evaluate((el) => (el as HTMLSelectElement).value), { timeout: 5000 }).not.toBe('')
+  // …and the viewport is STILL at device width after the swap.
+  const after = await settledViewport(page)
+  expect(after.innerWidth).toBeLessThanOrEqual(391)
+  await context.close()
+})
+
