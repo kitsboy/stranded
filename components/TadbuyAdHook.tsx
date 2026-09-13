@@ -16,7 +16,7 @@ export default function TadbuyAdHook({ siteId }: Props) {
         href={integrationUrl('tadbuy', siteId)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[#FF8C00] font-medium hover:underline"
+        className="hit-area-inline inline-flex items-center gap-1 text-[#FF8C00] font-medium hover:underline"
       >
         Shop miners at tadbuy.giveabit.io →
       </a>

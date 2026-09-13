@@ -1910,8 +1910,31 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
     align-items: center;
   }
 
-  /* Icon-only dismiss/close buttons: a 44px target is 44x44, not 26x44. These
-     are square glyph buttons in a header row, so the extra width costs nothing. */
+  /* `hit-area-inline` grows an INLINE box, where vertical padding does not
+     contribute to the line box — layout-neutral by construction. On an
+     inline-flex box the same padding DOES grow the row, so the sponsored
+     "Shop miners…" anchor takes the padding back out with a matching negative
+     block margin: 44px thumb target, zero layout movement. */
+  a.hit-area-inline[class*='inline-flex'] {
+    margin-block: -1rem;
+  }
+
+  /* A real 44px control box for a LINK — two shapes need it: the bordered
+     full-width pill ("Legal via Sherpacarta", measured 31px) and any inline
+     link whose line lives inside an `overflow: hidden` ancestor.
+     Second case matters: `truncate` on the panel's "City, Province" line sets
+     overflow:hidden, and an ancestor's clip clips HIT TESTING as well as paint
+     — so `hit-area-inline`'s padding-block grows that link's rect to 48px while
+     a thumb can still only reach ~16px of it (measured on the live panel:
+     rect 46px, reachable 16px). An atomic inline box grows the LINE instead,
+     which is the honest fix: the row becomes 44px and the whole row is the
+     target. Coarse pointers only, so desktop keeps the compact line. */
+  .hit-area-row {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
   button[aria-label^='Dismiss'],
   button[aria-label^='Close'] {
     min-width: 44px;

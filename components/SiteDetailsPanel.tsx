@@ -524,7 +524,7 @@ export default function SiteDetailsPanel({
           </h2>
           <p className={`text-gray-400 truncate ${compact ? 'text-label mt-0.5' : 'text-sm'}`}>
             {p.city || 'Unknown'},{' '}
-            {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
+            {p.province ? <Link href={`/provinces?name=${encodeURIComponent(p.province)}`} className="hit-area-row text-[#5BC0BE] hover:underline">{p.province}</Link> : ''}
           </p>
           {typeof site.strandedScore === 'number' && (
             <div className={`flex items-center gap-1.5 flex-wrap ${compact ? 'mt-1.5' : 'mt-2'}`}>
@@ -909,7 +909,7 @@ export default function SiteDetailsPanel({
       </div>
       <TadbuyAdHook siteId={site?.id} />
       <div className="mb-3 flex gap-2 text-label">
-        <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
+        <a href={integrationUrl('sherpacarta', site?.id)} target="_blank" rel="noopener noreferrer" className="hit-area-row justify-center flex-1 text-center py-1.5 rounded border border-white/15 hover:border-[#5BC0BE]/40 text-gray-400 hover:text-[#5BC0BE]">Legal via Sherpacarta</a>
       </div>
       <div className="mb-3">
         <label className="text-xs text-gray-400">Gas treatment derate: {(gasTreatmentDerate * 100).toFixed(0)}%</label>

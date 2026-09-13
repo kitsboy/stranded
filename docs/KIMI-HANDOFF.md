@@ -1,3 +1,66 @@
+## Session — 2026-09-13 · site-panel tap targets: three sub-44px inline links (Mimi, card t_ff2b0edd)
+
+**Done:** the three inline links on the site panel (`/map/?site=G12350`) that measured under the 44px
+touch floor are now real 44px targets on a phone — measured with `elementFromPoint`, not just a rect.
+
+- **BEFORE (measured on live `09a7766`, emulated touch, BOTH sheet states):** peek sheet → province link
+  "British Columbia" **14px** (rect *and* reachable); expanded sheet → province **16px**, Tadbuy
+  "Shop miners…" **16px**, "Legal via Sherpacarta" **31.4px**.
+- **Root cause (measured, not assumed) — why the obvious fix fails here:** `a.hit-area-inline`
+  (`padding-block` on the inline box, the family's documented pattern) grew the province link's **rect**
+  16 → 46/48px without moving the line — but its line lives in `<p class="… truncate">`, and `truncate`
+  sets `overflow:hidden`. **An ancestor's clip clips hit testing as well as paint**, so
+  `elementFromPoint` 2px inside the padded box returned the `h2` above / the score row below and the
+  *reachable* height stayed ~16px. Confirmed with two controlled Chromium micro-tests
+  (`scripts/_mimi-hit-inline-experiment.mjs`, `scripts/_mimi-hit-inline-clip.mjs`): no clipping ancestor
+  → 56/57px reachable; clipping ancestor → reachable collapses to the ancestor's box. A rect is not a
+  target.
+- **Fix (coarse pointer only — desktop stays compact):**
+  `components/SiteDetailsPanel.tsx` — province link `hit-area-inline` → `hit-area-row`; "Legal via
+  Sherpacarta" gains `hit-area-row justify-center`. `components/TadbuyAdHook.tsx` — "Shop miners…"
+  gains `hit-area-inline` (its line is not clipped, so padding is enough).
+  `app/globals.css` (inside the existing `@media (pointer: coarse)` block):
+  `.hit-area-row { min-height:44px; display:inline-flex; align-items:center }` — a real 44px atomic
+  inline box for links that are clipped or are controls; and
+  `a.hit-area-inline[class*='inline-flex'] { margin-block:-1rem }` — the padding grows that link's hit
+  box 16 → 48px while the matching negative block margin keeps the sponsored card's layout unchanged
+  (measured 104.4px before and after).
+- **AFTER (measured at 360/375/390/430, peek + expanded):** province **44px**, Tadbuy **48px**,
+  "Legal via Sherpacarta" **44px** — each ≥44px AND owned by the link (`elementFromPoint`) 2px inside
+  its top edge, 2px inside its bottom edge, and at its centre; **zero** overlapping link hit areas.
+  Layout delta at 390px: peek panel 162.9 → 189.5 (the province row grows 17.4 → 44), sponsored card
+  104.4 → 104.4, expanded sheet 681.4 → 681.4. Desktop 1440 box geometry (panel, province line, all
+  three links) **byte-identical** before vs after.
+- **Regression guard:** new `tests/e2e/site-panel-tap-targets.spec.ts` (12 tests) — height + ownership
+  + zero-overlap at 4 widths in both sheet states, plus real `touchscreen.tap` 3px inside each box that
+  must navigate (`/provinces/`) or open the Tadbuy/Sherpacarta tab. The spec sets its own
+  `test.describe.configure({ timeout: 120_000 })`: each case boots the real map and a spring-animated
+  sheet, so 15-25s per case on an idle box and more than the 30s default on a loaded one (the first
+  version of this spec was flaky purely for that reason — the tap point is now asserted as owned by the
+  link *before* tapping, so a real regression fails on the assertion, not on a navigation timeout).
+  `npm test` + `npm run lint` + `npm run build` green; tracked e2e set 72/72.
+- **Measurement tools committed with this fix** (re-runnable, coarse-pointer contexts):
+  `scripts/_mimi-tap-probe.mjs` (per-link height + owner element at each edge + overlap list, before/after),
+  `scripts/_mimi-hit-inline-experiment.mjs` and `scripts/_mimi-hit-inline-clip.mjs` (the controlled
+  micro-tests that proved the clipping behaviour), `scripts/_mimi-layout-delta.mjs` (what moved and what
+  did not) and `scripts/_mimi-desktop-parity.mjs` (1440 fine-pointer geometry).
+- **Method note for the next worker:** a spring-animated sheet mid-flight answers `elementFromPoint`
+  with whatever it is passing over, and an element scrolled out of the viewport legitimately returns
+  `null` — settle the sheet and measure header links before scrolling to the tail, or you will chase
+  two convincing false failures.
+- **Superseded, not carried forward:** the shared tree held uncommitted leftover tap-target edits in
+  `SiteDetailsPanel.tsx` / `TadbuyAdHook.tsx` from the timed-out `t_62e3bd3d` attempt (`min-h-[44px]`
+  on the compact branch only, which missed the expanded sheet entirely). Replaced by the CSS-pattern
+  fix above rather than shipping two overlapping mechanisms. `components/Map.tsx` (t_42674867),
+  economics (t_424deeeb) and the UI-upgrade work (t_152a2036) were left untouched.
+- **Residual, honest:** the province row is 44px tall on a phone because that is what a 44px target
+  costs inside a clipped line; desktop keeps the compact 16px line.
+- **Evidence:** `artifacts/tap-targets/before|after/` (probe JSON incl. owner element at each edge,
+  layout delta JSON, 390px peek/expanded + 1440px screenshots).
+
+**Git State:** single coherent commit for this card (SHA recorded on card t_ff2b0edd); live commit
+marker re-verified after the Cloudflare Pages deploy.
+
 ## Session — 2026-09-13 · mobile layout-viewport inflation + off-screen FAB (Mimi, card t_a81648a3)
 
 **Done:** Phones no longer inflate the layout viewport, so fixed chrome sits where the screen is.
