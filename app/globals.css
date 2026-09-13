@@ -1827,26 +1827,25 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
    ========================================================================== */
 .site-section-off { display: none !important; }
 
-.site-section-nav {
-  /* Sticky to the top of the sheet's own scrollport: reachable while the
-     section scrolls, and never over the map (it lives inside the panel, not
-     in the fixed chrome layer). */
+.site-section-sticky {
+  /* The ONE sticky box of the phone sheet: the section tabs, plus the build
+     summary while Build is active. Sticky to the top of the sheet's own
+     scrollport: reachable while the section scrolls, never over the map (it
+     lives inside the panel, not in the fixed chrome layer). It sticks flush
+     with the sheet's top edge: the sticky rectangle starts at the scrollport's
+     CONTENT box, so the sheet's own top padding (1rem here, 1.5rem at sm) must
+     be offset — otherwise a strip of scrolling content stays visible above the
+     strip, which is supposed to cover it. No top padding on this box either:
+     the first child must be flush with its top, or the tabs would sit a
+     padding-height below the sheet's edge with content showing between. */
   position: sticky;
-  /* Sticks flush with the sheet's top edge. The sticky rectangle starts at the
-     scrollport's CONTENT box, so the sheet's own top padding (1rem here,
-     1.5rem at sm) must be offset — otherwise a 16px strip of scrolling content
-     stays visible above the strip, which the nav is supposed to cover. */
   top: -1rem;
   z-index: 20;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.25rem;
-  /* Full-bleed across the sheet's padding WITHOUT a negative block-start
-     margin: a negative top margin would offset the sticky box by the same
-     amount and leave a 16px strip of scrolling content visible above it (and
-     overlap the header at rest). */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin: 0 -1rem 0.75rem;
-  padding: 0.5rem 1rem calc(0.5rem + 1px);
+  padding: 0 1rem 0.5rem;
   padding-left: max(1rem, env(safe-area-inset-left));
   padding-right: max(1rem, env(safe-area-inset-right));
   background: #0f172a;
@@ -1854,12 +1853,19 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   border-bottom: 1px solid rgba(91, 192, 190, 0.30);
 }
 @media (min-width: 640px) {
-  .site-section-nav {
+  .site-section-sticky {
     top: -1.5rem;
     margin: 0 -1.5rem 0.75rem;
     padding-left: max(1.5rem, env(safe-area-inset-left));
     padding-right: max(1.5rem, env(safe-area-inset-right));
   }
+}
+
+.site-section-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding-top: 0.5rem;
 }
 
 .site-section-tab {
@@ -1890,6 +1896,139 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
   outline: 2px solid #FF8C00;
   outline-offset: 2px;
 }
+
+/* ── Build summary strip (components/BuildSummary.tsx) ───────────────────────
+   The persistent "what am I building" readout: electrical power used/available,
+   total CapEx, net/day and payback, all read from the same `computeFleetModel`
+   outputs as the cockpit, the ROI summary and the exports.
+
+   Layout: TWO rows on a narrow phone (power + its meter, then the three
+   money/time figures) and the same two rows in the 480px docked column, where
+   it needs no media query at all. Solid background: no label ever sits on a
+   translucent surface. No transition/animation anywhere — a strip that moved or
+   ticked while a slider was dragged would be the jank this replaces. */
+.build-summary {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.4375rem 0.625rem;
+  border-radius: 0.75rem;
+  background: #16233a;
+  border: 1px solid rgba(91, 192, 190, 0.28);
+  font-variant-numeric: tabular-nums;
+}
+.build-summary--docked {
+  margin-bottom: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 1rem;
+}
+
+.build-summary-label {
+  display: block;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #94a3b8;
+}
+.build-summary-value {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+.build-summary-value--bad { color: #f87171; }
+.build-summary-hint { color: #64748b; }
+
+.build-summary-power-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.build-summary-power-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+.build-summary-miners { color: #cbd5e1; }
+.build-summary-power-value { font-size: 13px; font-weight: 600; color: #5BC0BE; white-space: nowrap; }
+.build-summary-meter {
+  flex: 1 1 auto;
+  min-width: 2rem;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.build-summary-meter-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7fe3e1, #3f9c99);
+}
+.build-summary-chips { display: inline-flex; align-items: center; gap: 0.25rem; flex: none; }
+.build-summary-chip {
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+.build-summary-chip--warn {
+  border-color: rgba(251, 191, 36, 0.55);
+  background: rgba(251, 191, 36, 0.12);
+  color: #fcd34d;
+}
+.build-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+.build-summary-cell { min-width: 0; }
+.build-summary-note { margin: 0; font-size: 12px; line-height: 1.35; color: #cbd5e1; }
+.build-summary-note--warn { color: #fcd34d; }
+.build-summary-note--ok { color: #6ee7b7; }
+
+/* ── Phone Build: controls before prose ──────────────────────────────────────
+   `order` needs a flex/grid parent, so the sheet's Build tab turns the section
+   body into a one-column flex context. The ASIC model and generator pickers and
+   the miner stack (count, ±, drag, genset inventory) come first; the templates
+   shelf, the sales handoff, the power table and every other explanatory block
+   follow. Only this class changes layout: the docked desktop cockpit and the
+   other three sections keep plain block flow and margin collapsing exactly as
+   they were. */
+.site-section-body--build-order { display: flex; flex-direction: column; }
+.site-section-body--build-order > * { order: 5; }
+.site-section-body--build-order > [data-testid="site-asic-select"] { order: 1; }
+.site-section-body--build-order > [data-testid="site-genset-select"] { order: 2; }
+.site-section-body--build-order > [data-testid="build-cockpit"] { order: 3; }
+.site-section-body--build-order > [data-testid="build-templates"] { order: 4; }
+.site-section-body--build-order > [data-testid="send-this-build"] { order: 6; }
+.site-section-body--build-order > [data-testid="site-power-summary"] { order: 7; }
+
+/* Any control scrolled to can clear the sticky strip — nothing hides under it.
+   `scroll-margin-top` is honoured by scrollIntoView (the thumb bar's "jump to
+   stack") and by native anchor scrolling alike, so the target lands below the
+   tabs AND the summary rather than underneath them. 14rem clears the tallest
+   sticky strip the sheet can show (tabs + a two-line summary). */
+.site-section-body--build-order [data-testid="miner-stack"],
+.site-section-body--build-order [data-testid="site-asic-select"],
+.site-section-body--build-order [data-testid="site-genset-select"] { scroll-margin-top: 14rem; }
+
+/* ── Cockpit flow: the same "controls before prose" rule inside the cockpit ──
+   A plain block by default (the docked desktop cockpit is unchanged, wrapper and
+   all); a one-column flex context only when the cockpit is rendered as the phone
+   sheet's variant, so the miner stack moves above the venting comparison. */
+.cockpit-flow { display: block; }
+.cockpit[data-variant='sheet'] .cockpit-flow { display: flex; flex-direction: column; }
+.cockpit[data-variant='sheet'] .cockpit-flow > [data-testid="cockpit-hero"] { order: 1; }
+.cockpit[data-variant='sheet'] .cockpit-flow > [data-testid="miner-stack"] { order: 2; }
+.cockpit[data-variant='sheet'] .cockpit-flow > [data-testid="cockpit-venting-compare"] { order: 3; }
+.cockpit[data-variant='sheet'] .cockpit-flow > [data-testid="cockpit-how"] { order: 4; }
 
 /* Keep the map's own controls clear of the docked cockpit (desktop).
    The toolbar is now a static child of .map-top-stack, so it is nudged with a

@@ -1,3 +1,82 @@
+## Session — 2026-09-13 · Build summary beside the hardware controls + Build leads with the pickers (Mimi, card t_a04fe2af)
+
+**Done:** the phone sheet's **Build** section now leads with the choices (ASIC model, generator,
+quantity) and carries a **persistent build summary** — electrical power used/available, total CapEx,
+net/day, payback — that reads the *same* `computeFleetModel` outputs as the cockpit, the ROI summary
+and the bank-pack export. No formula, default, input or export moved.
+
+**How it is built (three small pieces):**
+
+1. **`components/BuildSummary.tsx` (new)** — display-only. Every value is a prop the panel already
+   computed with `computeFleetModel`; the component adds no arithmetic beyond a clamped bar width, so
+   the strip can never quote a number the cockpit does not have. It shows the selected currency code
+   and an `optimistic scenario` chip when the per-TH/day assumption sits above the network-derived
+   hashprice (the shipped default always does — that disclosure was previously three screens away).
+   Payback renders `N/A` when the model has no finite payback, and the capacity note states the real
+   constraint in words ("Gas ceiling reached — equipment adds no gas.", "N miners beyond the gas
+   ceiling earn nothing.", "No usable gas here — the build stays at zero."). It never multiplies
+   methane by a genset count — gas is a site-wide budget in `lib/fleet-template.ts`.
+2. **One sticky box (`.site-section-sticky`)** — the section tabs and the summary now share a single
+   `position: sticky` wrapper, so the summary stays under the tabs for the whole Build section instead
+   of scrolling away, and no offset constant has to be kept in sync with the tab height. The wrapper
+   has **no top padding** (the nav keeps its own): the original `top:-1rem` trick that keeps the strip
+   flush with the sheet's top edge still measures a 1px gap, and `site-sections.spec.ts` still passes.
+3. **Controls before prose** — two additive, phone-scoped `order` rules (a one-column flex context on
+   the sheet's Build tab only, `.site-section-body--build-order`, plus `.cockpit-flow` when the cockpit
+   is rendered with `data-variant="sheet"`): ASIC select → generator select → miner stack (count, ±,
+   drag, typed count, genset inventory) → templates → handoff → power table, and inside the cockpit the
+   miner stack moves above the venting comparison. The docked desktop cockpit is untouched: every block
+   stays in its original flow order with `order: 0` and no gating class (asserted at 1280/1440).
+
+**Honesty/consistency details worth keeping:**
+
+- `formatMoneyFiat` extracted to `lib/cockpit.ts` and used by **both** the ROI summary rows and the
+  strip, so the two can never disagree by a rounding rule (byte-identical output to the original
+  inline `fmt`, including the `$0.00` fallback and the legacy `$-42.50` negative rendering).
+- `buildSummaryState` (pure, `lib/cockpit.ts`) owns the "what to say" logic: `noGas` →
+  warn note, `unsupportedMiners` (installed beyond the ceiling) → warn note, spare ceiling miners →
+  "Spare generation could power N more miners.", else the gas-ceiling note. Unit-tested in
+  `scripts/test-helpers.mjs`.
+- Notes are written to fit **one line at 360px** (measured): a second line costs ~16px of the sticky
+  strip, i.e. of the sheet's content. Sticky strip at 360×740 = **187px of a 593px sheet (31.6%)**,
+  asserted as an invariant (`≤ 34%`).
+- `scroll-margin-top: 14rem` on the stack/ASIC/genset blocks means `scrollIntoView` (the thumb bar's
+  "jump to stack") lands *below* the strip — no control hides under it (asserted per width).
+- Nothing unmounts: the strip is annotated `site-section-build` and gated with the existing
+  `.site-section-off` class, so there is exactly one copy in the DOM in every section.
+
+**Verified locally:** `npm test` (validate + helpers + fuel-budget) **PASS** (new unit coverage for
+`buildSummaryState` / `formatMoneyFiat`), `npm run lint` (pre-existing warnings only, exit 0),
+`npm run build` **PASS**, new `tests/e2e/build-summary.spec.ts` **12/12 PASS** (1 worker) —
+`@360/375/390/430` touch emulation + `@1280/1440` fine pointer. Each width test pins: one strip in the
+DOM, inside the sticky box, power == the cockpit's own gauge, CapEx/net/payback == the ROI summary
+rows, currency named, optimistic labelled, strip height ≤ 34% of the sheet, flush under the tabs after
+scrolling (no content above them), every picker scrollable clear of the strip, and a screenshot.
+Interaction/live coverage: ASIC / count / generator changes move the strip; oversized install and the
+zero-gas site `G10035` (Brunswick Smelter — 0 kg CH₄/day, so ceiling 0) are stated in words with
+`N/A` payback; repeated section switching keeps one strip and the same numbers; a new site shows its
+own numbers; save → reload → re-apply and the fleet share URL reproduce the same build; the strip's
+power/payback match the **bank-pack Markdown export**; 12px type floor and no sideways scroll.
+Sibling suites re-run clean on a healthy dev server: `site-sections` 9/9 (the sticky-wrapper change is
+compatible) and `fuel-budget` presets pass.
+
+**Environment note (repeat offender, not a product bug):** running `npm run build` while `next dev` is
+up corrupts the dev server's `.next`, after which *every* e2e spec fails with "no site selected"
+(the map paints "2611 of 2611 sites visible" but no `?site=` selection). Restarting the dev server
+fixes it. Also pre-existing: the `?site=` deep link can take ~35s to select on a loaded box, and
+`fuel-budget.spec.ts:53` has only the default 30s test budget, so it fails while every other spec
+passes — measured on the same URL with the panel rendering correctly (0.0/0.0 kW, "2,636 kg").
+Throwaway diagnostics kept in the tree: `scripts/_mimi-build-summary-probe.mjs`,
+`scripts/_mimi-empty-inventory-probe.mjs`, `scripts/_mimi-fleet-save-probe.mjs`.
+
+**Finding for QA (pre-existing, not fixed here):** a saved fleet is stored under the name the user
+typed, but the shelf card renders `template.name` ("Custom fleet") — the user's name is never shown.
+Reproduce: save a build as "QA summary build" in Build; the new card reads "Custom fleet".
+(`components/FleetTemplateShelf.tsx` + `saveNamedFleet` in `lib/fleet-template.ts`.)
+
+**Files:** `components/BuildSummary.tsx` (new), `components/SiteDetailsPanel.tsx`,
+`components/MinerStackCockpit.tsx`, `app/globals.css`, `lib/cockpit.ts`, `scripts/test-helpers.mjs`,
+`tests/e2e/build-summary.spec.ts` (new).
 ## Session — 2026-09-13 · /education phone layout viewport: the 676px site select + the 381px residual (Mimi, card t_88d78786)
 
 **Done:** `/education` no longer widens the LAYOUT viewport on any phone width. Two offenders, both

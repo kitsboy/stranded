@@ -253,6 +253,14 @@ export default function MinerStackCockpit({
         </Tip>
       </div>
 
+      {/*
+        The build controls come before the long explanatory blocks on a phone.
+        `.cockpit-flow` is a plain block on the docked desktop cockpit (byte-for-
+        byte the same layout) and a one-column flex context only in the sheet,
+        where order moves the miner stack — the count, the ± buttons and the
+        genset inventory — above the venting/what-if prose. See globals.css.
+      */}
+      <div className="cockpit-flow">
       {/* ---------- the hero number ---------- */}
       <div className="cockpit-hero rounded-2xl px-4 py-3 mb-3" data-testid="cockpit-hero">
         <div className="text-micro uppercase tracking-widest text-[#5BC0BE] flex items-center gap-1.5">
@@ -577,6 +585,7 @@ export default function MinerStackCockpit({
         </details>
 
         {children}
+      </div>
       </div>
     </div>
   )

@@ -151,6 +151,98 @@ export function formatPayback(days: number): string {
   return `${(days / 365).toFixed(1)} yr`
 }
 
+/**
+ * The panel's headline fiat format — `$1.23` / `$1.2K` / `$1.23M`.
+ *
+ * ONE implementation for every surface that quotes the same model number: the
+ * ROI summary's rows, the wallet/build figures and the build summary strip. Two
+ * formatters over one value is how a "summary" ends up disagreeing with the
+ * export it is summarising, so the strip deliberately quotes the exact string
+ * the ROI summary shows. Output is byte-identical to the panel's original
+ * inline `fmt` (including its `$0.00` fallback for non-finite input) — this is a
+ * de-duplication, not a format change. Non-finite input is the caller's signal
+ * to show an explicit "N/A" instead (see buildSummaryState).
+ */
+export function formatMoneyFiat(value: number, symbol = '$'): string {
+  if (!isFinite(value) || isNaN(value)) return symbol + '0.00'
+  if (value >= 1e6) return symbol + (value / 1e6).toFixed(2) + 'M'
+  if (value >= 1e3) return symbol + (value / 1e3).toFixed(1) + 'K'
+  return symbol + value.toFixed(2)
+}
+
+// ---------------------------------------------------------------------------
+// Build summary strip — the persistent "what am I building" readout
+// ---------------------------------------------------------------------------
+
+export type BuildSummaryTone = 'neutral' | 'ok' | 'warn'
+
+export type BuildSummaryState = {
+  /** The site's gas cannot power a single miner. */
+  noGas: boolean
+  /** Installed miners beyond what the gas ceiling can power — they earn nothing. */
+  unsupportedMiners: number
+  /** Miners the installed generation could still power but this build does not buy. */
+  spareMiners: number
+  /** 0-100 fill of the gas ceiling (0 when there is no gas). */
+  powerPct: number
+  /** False when the model has no finite net (e.g. nothing installed). */
+  netAvailable: boolean
+  /** False when payback is Infinity/0 — shown as "N/A", never as a fake number. */
+  paybackAvailable: boolean
+  note: string
+  tone: BuildSummaryTone
+}
+
+/**
+ * Presentation state for the build summary strip. Pure: it reads the SAME
+ * `computeFleetModel` outputs the cockpit, the ROI summary and the exports use
+ * and adds no arithmetic of its own beyond clamping. Never derives a second
+ * "net" — the number shown is the model's own net (revenue − power −
+ * maintenance).
+ */
+export function buildSummaryState(input: {
+  /** Miners the user has chosen (may exceed what the gas supports). */
+  installedMiners: number
+  /** Miners the model actually powers (clamped to the gas ceiling). */
+  poweredMiners: number
+  ceilingMiners: number
+  usedKw: number
+  availableKw: number
+  paybackDays: number
+  netPerDayFiat: number
+}): BuildSummaryState {
+  const ceiling = Math.max(0, Math.floor(Number.isFinite(input.ceilingMiners) ? input.ceilingMiners : 0))
+  const installed = Math.max(0, Math.floor(Number.isFinite(input.installedMiners) ? input.installedMiners : 0))
+  const powered = Math.max(0, Math.min(Math.floor(Number.isFinite(input.poweredMiners) ? input.poweredMiners : 0), ceiling))
+  const usedKw = Math.max(0, Number.isFinite(input.usedKw) ? input.usedKw : 0)
+  const availableKw = Math.max(0, Number.isFinite(input.availableKw) ? input.availableKw : 0)
+  const noGas = ceiling <= 0
+  const unsupportedMiners = Math.max(0, installed - ceiling)
+  const spareMiners = Math.max(0, ceiling - powered)
+  const powerPct = availableKw > 0 ? Math.max(0, Math.min(100, (usedKw / availableKw) * 100)) : 0
+  const netAvailable = Number.isFinite(input.netPerDayFiat)
+  const paybackAvailable = Number.isFinite(input.paybackDays) && input.paybackDays > 0
+
+  let note = ''
+  let tone: BuildSummaryTone = 'neutral'
+  // Keep every note short enough to read on ONE line at 360px: a second line of
+  // prose costs ~16px of the sticky strip, which is the sheet's content space.
+  if (noGas) {
+    tone = 'warn'
+    note = 'No usable gas here — the build stays at zero.'
+  } else if (unsupportedMiners > 0) {
+    tone = 'warn'
+    note = `${unsupportedMiners.toLocaleString()} miners beyond the gas ceiling earn nothing.`
+  } else if (spareMiners > 0) {
+    note = `Spare generation could power ${spareMiners.toLocaleString()} more miners.`
+  } else {
+    tone = 'ok'
+    note = 'Gas ceiling reached — equipment adds no gas.'
+  }
+
+  return { noGas, unsupportedMiners, spareMiners, powerPct, netAvailable, paybackAvailable, note, tone }
+}
+
 // ---------------------------------------------------------------------------
 // Venting baseline vs your build — the emotional core, two numbers
 // ---------------------------------------------------------------------------

@@ -942,7 +942,7 @@ assert.ok(!tsPlain.markdown.includes('Fleet template'))
 const {
   minersPerBlock, minerBlocks, blockScaleLabel, capacityModel, satsPerDay,
   formatPayback, ventingComparison, dataRecencyBadge, fluxBadge, hashpriceRead,
-  hoverTeaser, METHANE_GWP100,
+  hoverTeaser, METHANE_GWP100, formatMoneyFiat, buildSummaryState,
 } = await import('../lib/cockpit.ts')
 const { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY } = await import('../lib/fleet-model.ts')
 
@@ -1001,6 +1001,68 @@ assert.equal(half.sparePct > 0, true)
 const empty = capacityModel({ count: 10, ceilingMiners: 0, gasCeilingKw: 0, asicWatts: 4050 })
 assert.equal(empty.ceilingMiners, 0)
 assert.equal(empty.filledPct, 0)
+
+// --- build summary strip (lib/cockpit.ts) -----------------------------------
+// The strip quotes the SAME model outputs as the cockpit/ROI summary, and says
+// "unavailable" instead of inventing a number. One money formatter, too.
+const fullSummary = buildSummaryState({
+  installedMiners: ceiling,
+  poweredMiners: keeleModel.effectiveMachineCount,
+  ceilingMiners: keeleModel.ceilingMiners,
+  usedKw: keeleModel.usedPowerKw,
+  availableKw: keeleModel.generatorPowerKw,
+  paybackDays: keeleModel.paybackDays,
+  netPerDayFiat: keeleModel.dailyProfitFiat,
+})
+assert.equal(fullSummary.noGas, false)
+assert.equal(fullSummary.unsupportedMiners, 0)
+assert.equal(fullSummary.spareMiners, 0)
+assert.equal(fullSummary.tone, 'ok')
+assert.ok(fullSummary.powerPct > 99 && fullSummary.powerPct <= 100, `powerPct ${fullSummary.powerPct}`)
+assert.equal(fullSummary.netAvailable, true)
+assert.equal(fullSummary.paybackAvailable, true)
+assert.match(fullSummary.note, /gas ceiling reached/i)
+
+// oversized install: the extras are named as earning nothing, not hidden.
+const overSummary = buildSummaryState({
+  installedMiners: ceiling + 40, poweredMiners: ceiling, ceilingMiners: ceiling,
+  usedKw: keeleModel.usedPowerKw, availableKw: keeleModel.generatorPowerKw,
+  paybackDays: keeleModel.paybackDays, netPerDayFiat: keeleModel.dailyProfitFiat,
+})
+assert.equal(overSummary.unsupportedMiners, 40)
+assert.equal(overSummary.tone, 'warn')
+assert.match(overSummary.note, /40 miners beyond the gas ceiling/)
+assert.ok(overSummary.powerPct > 99 && overSummary.powerPct <= 100, `powerPct ${overSummary.powerPct}`)
+
+// zero-gas site: no power, no payback figure, an explicit "no usable gas" note.
+const emptySummary = buildSummaryState({
+  installedMiners: 10, poweredMiners: 0, ceilingMiners: 0, usedKw: 0, availableKw: 0,
+  paybackDays: Infinity, netPerDayFiat: 0,
+})
+assert.equal(emptySummary.noGas, true)
+assert.equal(emptySummary.powerPct, 0)
+assert.equal(emptySummary.paybackAvailable, false)
+assert.match(emptySummary.note, /no usable gas/i)
+
+// partial build: "spare generation", never "venting" (existing treatment unknown)
+const spareSummary = buildSummaryState({
+  installedMiners: 10, poweredMiners: 10, ceilingMiners: 50, usedKw: 40, availableKw: 200,
+  paybackDays: 900, netPerDayFiat: 120,
+})
+assert.equal(spareSummary.spareMiners, 40)
+assert.equal(spareSummary.tone, 'neutral')
+assert.match(spareSummary.note, /spare generation/i)
+assert.equal(spareSummary.powerPct, 20)
+
+// money format is the ROI summary's own: one implementation, unchanged output.
+assert.equal(formatMoneyFiat(1234.5), '$1.2K')
+assert.equal(formatMoneyFiat(2500000), '$2.50M')
+assert.equal(formatMoneyFiat(999.999), '$1000.00')
+assert.equal(formatMoneyFiat(-42.5), '$-42.50')
+assert.equal(formatMoneyFiat(NaN), '$0.00')
+assert.equal(formatMoneyFiat(1234.5, '€'), '€1.2K')
+// …and the strip's payback wording is the cockpit's own formatter.
+assert.equal(formatPayback(Infinity), 'N/A')
 
 // block scale is always labelled and never explodes the DOM
 for (const n of [0, 1, 7, 60, 61, 468, 1524, 9999, 100000]) {

@@ -71,6 +71,7 @@ import {
   fluxBadge,
   formatCount,
   formatKw,
+  formatMoneyFiat,
   formatPayback,
   formatSats,
   hashpriceRead,
@@ -78,6 +79,7 @@ import {
 } from '@/lib/cockpit'
 import MinerStackCockpit, { type CockpitPreview } from '@/components/MinerStackCockpit'
 import MinerStackThumbBar from '@/components/MinerStackThumbBar'
+import BuildSummary from '@/components/BuildSummary'
 import FleetTemplateShelf, { type ShelfResult } from '@/components/FleetTemplateShelf'
 
 const FIAT_OPTIONS = [
@@ -302,12 +304,12 @@ export default function SiteDetailsPanel({
     setMachineCount(ceiling)
   }, [stackMode, gensetStack, selectedASIC, site, overclockPercent])
 
-  const fmt = (val: number) => {
-    if (!isFinite(val) || isNaN(val)) return currencySymbol + '0.00'
-    if (val >= 1e6) return currencySymbol + (val/1e6).toFixed(2) + 'M'
-    if (val >= 1e3) return currencySymbol + (val/1e3).toFixed(1) + 'K'
-    return currencySymbol + val.toFixed(2)
-  }
+  /**
+   * The panel's headline fiat format lives in lib/cockpit.ts so the ROI summary
+   * and the build summary strip quote the exact same string for the same value
+   * (and so the format itself is unit-tested). Behaviour is unchanged.
+   */
+  const fmt = (val: number) => formatMoneyFiat(val, currencySymbol)
 
   const fmtBtc = (val: number) => {
     if (!isFinite(val) || isNaN(val)) return '0.000000'
@@ -573,6 +575,32 @@ export default function SiteDetailsPanel({
     selectSection(SITE_SECTIONS[next].id, true)
   }
 
+  /**
+   * The build summary — ONE element, mounted once. On the phone sheet it lives
+   * inside the sticky tab strip (persistent while the Build section scrolls); on
+   * the docked desktop cockpit it renders as the first block of the panel, right
+   * above the builder. Both branches consume the same model outputs as the
+   * cockpit and the ROI summary: no number is computed here.
+   */
+  const buildSummary = (
+    <BuildSummary
+      variant={sectionsEnabled ? 'sheet' : 'docked'}
+      miners={capacity.miners}
+      installedMiners={machineCount}
+      ceilingMiners={ceilingMiners}
+      usedKw={capacity.usedKw}
+      availableKw={calculations.generatorPowerKw}
+      capexFiat={calculations.totalInvestmentFiat}
+      netPerDayFiat={calculations.dailyProfitFiat}
+      paybackDays={calculations.paybackDays}
+      currencySymbol={currencySymbol}
+      fiatCode={selectedFiat}
+      optimistic={isOptimistic}
+      hashpriceDiffPct={hashpriceDiffPct}
+      className={sectionOff('build')}
+    />
+  )
+
   return (
     <motion.div
       ref={panelScrollRef}
@@ -698,33 +726,47 @@ export default function SiteDetailsPanel({
         keys; every tab is a >=44px box (globals.css `.site-section-tab`). It
         only exists in the bottom sheet — desktop keeps one continuous cockpit.
       */}
+      {/*
+        The sticky strip. It holds the section tabs AND — while Build is the
+        active section — the build summary, so the summary stays under the thumb
+        against the tabs for the whole section instead of scrolling away. One
+        sticky box (not two) also means the summary can never leave a gap or a
+        strip of content above the nav, and no offset constant has to be kept in
+        sync with the tabs' height.
+      */}
       {sectionsEnabled && (
-        <div
-          className="site-section-nav"
-          role="tablist"
-          aria-label="Site sections"
-          data-testid="site-section-nav"
-          onKeyDown={onSectionKeyDown}
-        >
-          {SITE_SECTIONS.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              role="tab"
-              id={`${sectionPanelId}-tab-${s.id}`}
-              aria-selected={activeSection === s.id}
-              aria-controls={sectionPanelId}
-              tabIndex={activeSection === s.id ? 0 : -1}
-              ref={el => { sectionTabRefs.current[s.id] = el }}
-              className="site-section-tab"
-              data-testid={`site-section-tab-${s.id}`}
-              onClick={() => selectSection(s.id)}
-            >
-              {s.label}
-            </button>
-          ))}
+        <div className="site-section-sticky" data-testid="site-section-sticky">
+          <div
+            className="site-section-nav"
+            role="tablist"
+            aria-label="Site sections"
+            data-testid="site-section-nav"
+            onKeyDown={onSectionKeyDown}
+          >
+            {SITE_SECTIONS.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                role="tab"
+                id={`${sectionPanelId}-tab-${s.id}`}
+                aria-selected={activeSection === s.id}
+                aria-controls={sectionPanelId}
+                tabIndex={activeSection === s.id ? 0 : -1}
+                ref={el => { sectionTabRefs.current[s.id] = el }}
+                className="site-section-tab"
+                data-testid={`site-section-tab-${s.id}`}
+                onClick={() => selectSection(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          {buildSummary}
         </div>
       )}
+
+      {/* Docked desktop cockpit: no tabs exist, so the summary sits above the builder. */}
+      {!sectionsEnabled && buildSummary}
 
       {/*
         One neutral wrapper so the four sections can share a single tabpanel id.
@@ -735,6 +777,14 @@ export default function SiteDetailsPanel({
         id={sectionsEnabled ? sectionPanelId : undefined}
         role={sectionsEnabled ? 'tabpanel' : undefined}
         aria-labelledby={sectionsEnabled ? `${sectionPanelId}-tab-${activeSection}` : undefined}
+        /*
+          Phone Build only: a one-column flex context so the ASIC / generator
+          pickers and the miner stack can be ordered ABOVE the long
+          explanatory blocks (`order` needs a flex/grid parent). The class exists
+          only on the sheet's Build tab, so every other section — and the whole
+          docked desktop cockpit — keeps plain block flow and margin collapsing.
+        */
+        className={sectionsEnabled && activeSection === 'build' ? 'site-section-body--build-order' : undefined}
         data-testid="site-section-body"
       >
       {/*
@@ -753,9 +803,10 @@ export default function SiteDetailsPanel({
         </button>
       )}
       {/* ---- THE COCKPIT: hero number, capacity bar with the gas ceiling, live readouts ---- */}
-      <div className={sectionOff('build')}>
+      <div className={sectionOff('build')} data-testid="build-cockpit">
       <MinerStackCockpit
         siteId={site.id}
+        variant={sectionsEnabled ? 'sheet' : 'docked'}
         machineCount={machineCount}
         onCountChange={setCountManually}
         mode={stackMode}
@@ -793,7 +844,7 @@ export default function SiteDetailsPanel({
       </div>
 
       {/* ---- templates as a shelf, not a form ---- */}
-      <div className={sectionOff('build')}>
+      <div className={sectionOff('build')} data-testid="build-templates">
       <FleetTemplateShelf
         presets={MINER_STACK_PRESETS}
         saved={namedFleets}
@@ -888,7 +939,7 @@ export default function SiteDetailsPanel({
         </div>
       )}
 
-      <div className="mb-4 grid gap-3">
+      <div className="mb-4 grid gap-3" data-testid="site-metric-grid">
         <div className={sectionOff('overview')}>
           <VerticalScoreGrid scores={verticalScores} />
         </div>
