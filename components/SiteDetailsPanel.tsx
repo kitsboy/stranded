@@ -34,7 +34,7 @@ import { useLocale } from '@/lib/useLocale'
 import { assessSiteDataQuality } from '@/lib/data-quality'
 import { scoreConfidenceBand } from '@/lib/score-confidence'
 import { computeVerticalScores } from '@/lib/vertical-scores'
-import { avoidedMethaneValue } from '@/lib/carbon-overlay'
+import { hasCarbonBaseline, carbonBaselineLabel } from '@/lib/carbon-overlay'
 import DataQualityBadge from '@/components/DataQualityBadge'
 import ConfidenceBandBar from '@/components/ConfidenceBandBar'
 import VerticalScoreGrid from '@/components/VerticalScoreGrid'
@@ -325,10 +325,7 @@ export default function SiteDetailsPanel({
       ),
     [site?.strandedScore, siteEmission, p.source_type, p.confidence, p.province],
   )
-  const carbonValue = useMemo(
-    () => avoidedMethaneValue(siteEmission, 50, 28),
-    [siteEmission],
-  )
+  const carbonBaseline = hasCarbonBaseline(p as Record<string, unknown>)
 
   if (!site || !calculations) return null
 
@@ -761,15 +758,15 @@ export default function SiteDetailsPanel({
 
       <div className="mb-4 grid gap-3">
         <VerticalScoreGrid scores={verticalScores} />
-        <p className="text-label text-gray-500">
-          <FormulaTip formulaId="carbonValue">Carbon abatement @ $50/t</FormulaTip>
+        <p className="text-label text-gray-500" data-testid="site-carbon-note">
+          <FormulaTip formulaId="carbonValue">Carbon (screening)</FormulaTip>
           {': '}
-          <span className="font-mono text-[#34D399]">${carbonValue.toLocaleString()}/yr</span>
+          <span className="font-mono text-[#34D399]">$0/yr</span>
           {' · '}
-          <FormulaTip formulaId="co2e">GWP100=28</FormulaTip>
+          <span className="text-gray-400">{carbonBaselineLabel(p as Record<string, unknown>)}</span>
         </p>
-        <MonteCarloPanel baseDailyCad={site.potentialDailyProfitCAD || 0} />
-        <GasDeclineChart emissionKgDay={siteEmission} baseDailyCad={site.potentialDailyProfitCAD || 0} />
+        <MonteCarloPanel baseDailyUsd={site.potentialDailyProfitUsd || 0} />
+        <GasDeclineChart emissionKgDay={siteEmission} baseDailyUsd={site.potentialDailyProfitUsd || 0} />
         <CapexFxControls baseCapexUsd={Math.max(250_000, (site.maxGeneratorPowerKW || 500) * 1000)} />
         <AmortizationTable defaultPrincipal={Math.round(((site.maxGeneratorPowerKW || 500) * 1000) * 0.6)} />
         <CaseStudyExport
@@ -784,7 +781,7 @@ export default function SiteDetailsPanel({
             gensetKw: site.maxGeneratorPowerKW,
             confidence: p.confidence,
             company: p.company,
-            potentialDailyCad: site.potentialDailyProfitCAD,
+            potentialDailyUsd: site.potentialDailyProfitUsd,
             fleet: { template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null },
           }}
           liveBtc={liveBtcPrice}
@@ -899,7 +896,7 @@ export default function SiteDetailsPanel({
       {advancedRoi && (
         <div className="mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2">
           <div><span className="text-gray-400">LCOE</span><div className="font-mono text-white">${advancedRoi.lcoeUsdPerKwh}/kWh</div></div>
-          <div><span className="text-gray-400">Carbon credits</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
+          <div title={carbonBaselineLabel(p as Record<string, unknown>)}><span className="text-gray-400">Carbon (screening)</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
           <div><span className="text-gray-400">Incentives</span><div className="font-mono text-[#5BC0BE]">${advancedRoi.incentiveGrantUsd.toLocaleString()}</div></div>
           <div><span className="text-gray-400">Jobs</span><div className="font-mono">{advancedRoi.jobs.total} FTE</div></div>
         </div>

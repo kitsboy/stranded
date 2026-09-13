@@ -8,7 +8,7 @@ type Props = {
   projectName?: string
   siteCount?: number
   totalCapexCad?: number
-  annualRevenueCad?: number
+  annualRevenueUsd?: number
   province?: string
   co2eTonnesYear?: number
 }
@@ -17,7 +17,7 @@ export default function TermSheetCard({
   projectName = 'Stranded cluster pilot',
   siteCount = 10,
   totalCapexCad = 5_000_000,
-  annualRevenueCad = 1_200_000,
+  annualRevenueUsd = 1_200_000,
   province,
   co2eTonnesYear,
 }: Props) {
@@ -28,13 +28,13 @@ export default function TermSheetCard({
         projectName,
         siteCount,
         totalCapexCad,
-        annualRevenueCad,
+        annualRevenueUsd,
         equityPct,
         debtPct: 100 - equityPct,
         province,
         co2eTonnesYear,
       }),
-    [projectName, siteCount, totalCapexCad, annualRevenueCad, equityPct, province, co2eTonnesYear],
+    [projectName, siteCount, totalCapexCad, annualRevenueUsd, equityPct, province, co2eTonnesYear],
   )
 
   return (

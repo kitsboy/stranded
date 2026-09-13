@@ -1,4 +1,5 @@
 import { EnrichedSite, GensetId, GENSET_DATA, computeGeneratorPower } from './sites'
+import { hasCarbonBaseline, METHANE_GWP100 } from './carbon-overlay'
 
 export type RoiParams = {
   liveBtcUsd: number
@@ -9,6 +10,14 @@ export type RoiParams = {
   h2sDerate?: number
   seasonalUptimeFactor?: number
   carbonCreditUsdPerTonne?: number
+  /**
+   * Optional, OPTO-IN carbon scenario: the % of the facility's CH₄ assumed
+   * captured (0–100). Carbon revenue is $0 by default (credit eligibility is
+   * not established). It is only non-zero when the caller opts in with a
+   * capture fraction AND the dataset publishes a vent/flare baseline — and even
+   * then it is an illustrative scenario, not a verified credit.
+   */
+  carbonCapturePct?: number
   fleetDeclineAnnualPct?: number
   years?: number
 }
@@ -68,6 +77,9 @@ export function computeAdvancedRoi(
   const treatmentDerate = params.gasTreatmentDerate ?? 1.0
   const h2s = params.h2sDerate ?? getH2sDerate(p.source_type || '')
   const seasonal = params.seasonalUptimeFactor ?? getSeasonalUptime(p.province || '')
+  // Illustrative scenario carbon price (CA OBPS charge level, NOT a verified
+  // market price). Only ever used when the caller opts in to a carbon capture
+  // scenario AND a baseline exists — see carbonRevenue below.
   const carbonPrice = params.carbonCreditUsdPerTonne ?? 45
   const decline = params.fleetDeclineAnnualPct ?? 8
   const years = params.years ?? 5
@@ -85,9 +97,11 @@ export function computeAdvancedRoi(
   // network-derived reference (~0.00000041 = ≈450 BTC/day ÷ ≈1.1 ZH/s). Deliberately
   // kept as the default (Cam's call — published paybacks must not shift), and surfaced
   // as "optimistic scenario" in the panel, methodology, education and every export.
+  // Price production once (fleet-model pattern): BTC-denominated hashprice, no
+  // (btc/85000) scaling of physical production — the model is linear in price.
   for (let y = 0; y < years; y++) {
     const declineFactor = Math.pow(1 - decline / 100, y)
-    const dailyBtc = numAsics * hashrate * 0.0000009 * (btc / 85000) * difficulty * declineFactor + txFees
+    const dailyBtc = numAsics * hashrate * 0.0000009 * difficulty * declineFactor + txFees
     annualBtc += dailyBtc * 365 * seasonal
     annualRevenue += dailyBtc * 365 * seasonal * btc
   }
@@ -95,9 +109,19 @@ export function computeAdvancedRoi(
   const gensetCapex = g.powerKW * g.capexPerKW
   const miningCapex = numAsics * 5500
   const totalCapex = gensetCapex + miningCapex
-  const annualOpex = powerKW * 0.04 * 24 * 365 * 1.35
+  // Power price is USD/kWh; revenue is USD — unit pure, no FX factor mixed in.
+  const annualOpex = powerKW * 0.04 * 24 * 365
   const ch4Tonnes = (p.ch4_tonnes_year || emission * 365 * 0.001)
-  const carbonRevenue = ch4Tonnes * 28 * carbonPrice * 0.3
+  // Carbon contract: no credit/abatement revenue without a verified baseline,
+  // and off by default. Only an OPTO-IN capture scenario on a baseline-bearing
+  // site yields a figure, and that figure is illustrative (not a verified
+  // credit — eligibility/additionality/registry are not established).
+  const carbonBaseline = hasCarbonBaseline(p)
+  const capturePct = params.carbonCapturePct
+  const carbonScenario = typeof capturePct === 'number' && Number.isFinite(capturePct) && capturePct > 0
+  const carbonRevenue = carbonBaseline && carbonScenario
+    ? Math.round(ch4Tonnes * METHANE_GWP100 * carbonPrice * Math.min(100, Math.max(0, capturePct)) / 100)
+    : 0
 
   const incentives = PROVINCE_INCENTIVES[p.province || ''] ?? { federal: 0.1, provincial: 0.08 }
   const incentiveGrant = totalCapex * (incentives.federal + incentives.provincial)
@@ -114,6 +138,10 @@ export function computeAdvancedRoi(
     annualBtc: +annualBtc.toFixed(4),
     annualRevenueUsd: Math.round(annualRevenue / years),
     carbonRevenueUsd: Math.round(carbonRevenue),
+    /** True when the dataset publishes a vent/flare split (baseline exists). */
+    carbonBaseline: carbonBaseline,
+    /** True when an opt-in capture scenario is being applied. */
+    carbonScenario: carbonScenario,
     incentiveGrantUsd: Math.round(incentiveGrant),
     paybackYears: isFinite(paybackYears) ? +paybackYears.toFixed(1) : Infinity,
     jobs,

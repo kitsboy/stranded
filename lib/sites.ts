@@ -10,7 +10,7 @@ export type EnrichedSite = StrandedSite & {
   strandedScore: number
   scorePercentile?: number
   scoreBadge?: string
-  potentialDailyProfitCAD: number // rough optimistic
+  potentialDailyProfitUsd: number // rough optimistic, USD @ $85k BTC scenario
   emission: number
   recommendedGenset?: keyof typeof GENSET_DATA
   maxGeneratorPowerKW?: number
@@ -26,9 +26,12 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
   const emission = p.emission_rate_kg_day || 0
   const score = computeStrandedScore(site)
 
-  // Very rough optimistic daily profit potential using average machine assumptions
+  // Very rough optimistic daily profit potential using average machine assumptions.
+  // Declared heuristic: USD at a fixed $85k BTC "optimistic scenario", after a 0.82
+  // opex/net haircut. No FX conversion here (unit pure USD) — live-rate consumers
+  // scale it by the live BTC price (see lib/portfolio.ts scalePotentialUsd).
   const roughDailyBtc = (emission / 22000) * 0.0008 // tuned heuristic from real emission -> usable methane energy
-  const potentialDailyProfitCAD = Math.round(roughDailyBtc * 85000 * 1.35 * 0.82) // after power/opex
+  const potentialDailyProfitUsd = Math.round(roughDailyBtc * 85000 * 0.82) // after power/opex (optimistic scenario)
 
   // Deterministic fallback — never random (breaks bookmarks/mission across reloads)
   const ghgrp = p.ghgrp_id || p.id || (() => {
@@ -43,7 +46,7 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
     ...site,
     id: ghgrp,
     strandedScore: score,
-    potentialDailyProfitCAD,
+    potentialDailyProfitUsd,
     emission,
     // Honesty: no reported CH₄ → no generator/ASIC recommendation (emission, hence
     // power, is unknown). Consumers must render the "not modelled" badge instead.
@@ -143,14 +146,17 @@ export function computeSiteValue(site: EnrichedSite, gensetId: GensetId = 'jenba
   // NOTE(honesty): 0.0000009 BTC/TH/day is an OPTIMISTIC scenario (~2.2× the network-derived
   // ~0.00000041 BTC/TH/day). Kept as default (published paybacks must not shift), surfaced as
   // "optimistic scenario" in the panel, methodology, education and exports.
-  const dailyBtc = numAsics * asicHashrate * 0.0000009 * (liveBtc / 85000) // adjusted
+  // Price production once (fleet-model pattern): BTC-denominated hashprice; price converts
+  // revenue exactly once below — never scales the physical production term.
+  const dailyBtc = numAsics * asicHashrate * 0.0000009 // adjusted
   const gensetCapex = GENSET_DATA[gensetId].powerKW * GENSET_DATA[gensetId].capexPerKW
   const miningCapex = numAsics * asicCost
   const totalCapex = gensetCapex + miningCapex
-  const dailyOpexCad = (powerKW * powerPriceUsdKwh * 24 * 1.35) // power + maint
-  const dailyProfitCad = (dailyBtc * liveBtc) - dailyOpexCad
-  const annualProfit = dailyProfitCad * 365 * uptime
-  const paybackDays = annualProfit > 0 ? totalCapex / (dailyProfitCad * uptime) : Infinity
+  // Power price is USD/kWh and revenue is USD — unit pure, no FX factor mixed in.
+  const dailyOpexUsd = (powerKW * powerPriceUsdKwh * 24) // power + maint
+  const dailyProfitUsd = (dailyBtc * liveBtc) - dailyOpexUsd
+  const annualProfit = dailyProfitUsd * 365 * uptime
+  const paybackDays = annualProfit > 0 ? totalCapex / (dailyProfitUsd * uptime) : Infinity
   const methaneLossDailyBtc = dailyBtc // opportunity cost of venting
   return {
     powerKW: Math.round(powerKW),

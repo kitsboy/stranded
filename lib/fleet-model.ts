@@ -35,8 +35,10 @@ export const NETWORK_DERIVED_BTC_PER_TH_DAY = NETWORK_DAILY_BTC_ISSUANCE / NETWO
 /** Assumed power cost in USD/kWh used by the base model (advanced panel can restate it). */
 export const DEFAULT_POWER_COST_USD_PER_KWH = 0.04
 
-/** Rough CAD per USD used across the app when converting CAD hardware costs to BTC. */
-export const CAD_PER_USD = 1.35
+// NOTE: there is deliberately NO hardcoded CAD/USD constant here. CAD-denominated
+// hardware/genset capex converts through the live multi-fiat BTC map (btcPrices.cad)
+// below; static/server heuristics that lack the live map use the documented fallback
+// constants in lib/capex-fx.ts (derived from the same map defaults).
 
 export type FleetModelAsic = {
   id?: string

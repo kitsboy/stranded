@@ -558,33 +558,18 @@ function fleetGensetLabel(gensets: FleetGenset[]): string {
   return parts.length ? parts.join(' + ') : '—'
 }
 
-/** A payback estimate (days) from the template's assumptions — mirrors the panel's model. */
+/**
+ * Payback for the fleet export block.
+ *
+ * The ONLY source of truth for payback is the live session model. When the caller
+ * does not pass the session's payback (`paybackDays` undefined/null), we do NOT
+ * reconstruct one from the template's stored assumptions (they may be stale and
+ * diverge from the on-screen model) — we report "unavailable" instead (contract
+ * 4.3: templates = equipment + overclock only; all financials come from the session).
+ */
 export function estimateFleetPaybackDays(f: FleetExportBlock): number | null {
-  if (f.paybackDays !== undefined) return f.paybackDays !== null && isFinite(f.paybackDays) ? f.paybackDays : null
-  const t = f.template
-  const a = t.assumptions
-  const asic = asicById(t.asicId)
-  if (!asic) return null
-  const minerCount = Math.max(0, Math.floor(t.minerCount || 0))
-  if (!minerCount) return null
-  const watts = fleetAsicWatts(t)
-  const poweredMiners = Math.min(minerCount, minerCeiling(siteGasCeilingKw(f.site, t.gensets), watts))
-  const powerKw = (poweredMiners * watts) / 1000
-  const dailyBtc =
-    asic.hashrate_ths * (1 + (t.overclockPercent || 0) / 100) * poweredMiners * a.revenuePerThPerDayBtc
-    * (1 - a.poolFeePct / 100) * (a.uptimePct / 100)
-  const usdBtc = a.btcPriceUsd || 1
-  const dailyPowerBtc = (powerKw * 24 * a.powerCostUsdPerKwh) / usdBtc
-  const hardwareCad = asic.cost_cad * minerCount
-  const dailyMaintBtc = (hardwareCad / 1.35 / usdBtc) * (a.maintenancePct / 100) / 365
-  const gensetCapexCad = (t.gensets || []).reduce((sum, g) => {
-    const spec = GENSET_DATA[g.gensetId]
-    return spec ? sum + spec.powerKW * spec.capexPerKW * Math.floor(g.count || 0) : sum
-  }, 0)
-  const totalInvestCad = hardwareCad + gensetCapexCad + a.fixedSetupCostCad
-  const dailyProfitBtc = dailyBtc - dailyPowerBtc - dailyMaintBtc
-  if (!(dailyProfitBtc > 0) || !(usdBtc > 0)) return null
-  return totalInvestCad / 1.35 / usdBtc / dailyProfitBtc
+  if (f.paybackDays === undefined) return null
+  return f.paybackDays !== null && isFinite(f.paybackDays) ? f.paybackDays : null
 }
 
 /** Structured numbers for the fleet block (shared by md/html/json generators). */
@@ -638,7 +623,8 @@ export function fleetBlockMarkdown(f: FleetExportBlock): string {
     `- Methane: **${d.capturedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day captured (${d.capturedPct.toFixed(0)}%)** · ${d.unconvertedKgPerDay.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg/day not converted (existing treatment unknown)`,
     d.paybackDays != null
       ? `- Payback (model): **${Math.round(d.paybackDays).toLocaleString()} days**`
-      : null,
+      : '- Payback: **unavailable** (uses the live session model; no explicit value passed)',
+    `- Financials: **uses the current session's assumptions** (this template stores equipment + overclock only).`,
   ].filter(Boolean).join('\n')
 }
 

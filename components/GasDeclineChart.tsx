@@ -5,11 +5,11 @@ import { projectGasDecline, cumulativeCapture } from '@/lib/gas-decline'
 
 export default function GasDeclineChart({
   emissionKgDay,
-  baseDailyCad = 0,
+  baseDailyUsd = 0,
   className = '',
 }: {
   emissionKgDay: number
-  baseDailyCad?: number
+  baseDailyUsd?: number
   className?: string
 }) {
   const [decline, setDecline] = useState(15)
@@ -17,8 +17,8 @@ export default function GasDeclineChart({
   const pts = useMemo(() => projectGasDecline(emissionKgDay, decline, years), [emissionKgDay, decline])
   const maxEm = Math.max(...pts.map(p => p.emission), 1)
   const cum = useMemo(
-    () => (baseDailyCad > 0 ? cumulativeCapture(baseDailyCad, decline, years) : null),
-    [baseDailyCad, decline],
+    () => (baseDailyUsd > 0 ? cumulativeCapture(baseDailyUsd, decline, years) : null),
+    [baseDailyUsd, decline],
   )
 
   return (

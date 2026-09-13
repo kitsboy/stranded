@@ -19,7 +19,7 @@ import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
 import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
-import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialCad, scalePotentialCad } from '@/lib/portfolio'
+import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialUsd, scalePotentialUsd } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl, buildMapUrl, buildMapShareUrl, haversineKm, type MapUrlState } from '@/lib/map-url-state'
 import { capFleetToSite, rescaleToSite, referenceSiteForPreset, type FleetTemplate } from '@/lib/fleet-template'
@@ -779,13 +779,13 @@ function StrandedCommandCenter() {
       missionGenerated: new Date().toISOString(),
       btcPriceUsed: liveBtcPrice,
       totalSites: portfolio.length,
-      totalDailyPotentialCAD: portfolioDailyPotentialCad(portfolio, liveBtcPrice),
+      totalDailyPotentialUsd: portfolioDailyPotentialUsd(portfolio, liveBtcPrice),
       sites: portfolio.map(s => ({
         name: s.properties.name,
         province: s.properties.province,
         emission_kg_day: s.emission,
         strandedScore: s.strandedScore,
-        potentialDailyCAD: scalePotentialCad(s.potentialDailyProfitCAD, liveBtcPrice),
+        potentialDailyUsd: scalePotentialUsd(s.potentialDailyProfitUsd, liveBtcPrice),
       }))
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -853,7 +853,7 @@ function StrandedCommandCenter() {
     }
   }, [filteredSites.length, t])
 
-  const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
+  const totalPotential = portfolioDailyPotentialUsd(portfolio, liveBtcPrice)
 
   const savedPresets = useMemo(() => {
     void filterPresetsRevision

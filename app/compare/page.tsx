@@ -54,7 +54,7 @@ function CompareContent() {
       { label: 'Confidence', pick: s => s.properties.confidence || '—' },
       { label: 'Genset', pick: s => s.recommendedGenset || '—' },
       { label: 'Generator kW', pick: s => String(s.maxGeneratorPowerKW) },
-      { label: 'Daily profit (CAD)', pick: s => `C$${s.potentialDailyProfitCAD.toLocaleString()}` },
+      { label: 'Daily profit (USD, optimistic @$85k)', pick: s => `$${s.potentialDailyProfitUsd.toLocaleString()}` },
       {
         label: 'Annual BTC (est.)',
         pick: s => {
@@ -89,7 +89,7 @@ function CompareContent() {
     let best: CompareSlot | null = null
     let bestVal = -Infinity
     for (const { slot, site } of active) {
-      const v = site.potentialDailyProfitCAD
+      const v = site.potentialDailyProfitUsd
       if (v > bestVal) {
         bestVal = v
         best = slot
@@ -181,7 +181,7 @@ function CompareContent() {
               </thead>
               <tbody>
                 {metricRows.map(row => {
-                  const isProfitRow = row.label === 'Daily profit (CAD)'
+                  const isProfitRow = row.label.startsWith('Daily profit (USD')
                   return (
                     <tr
                       key={row.label}

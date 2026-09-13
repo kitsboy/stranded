@@ -94,7 +94,7 @@ function enrich(f) {
     geometry: f.geometry,
     emission,
     strandedScore: computeStrandedScore(f.properties),
-    potentialDailyProfitCAD: Math.round(emission * 0.1),
+    potentialDailyProfitUsd: Math.round(emission * 0.1),
     recommendedGenset: 'jenbacher316',
     maxGeneratorPowerKW: Math.round(emission / 10),
   }
@@ -471,7 +471,7 @@ assert.ok(emptyCompare.includes('metric'))
 const mockSite = (id, profit) => ({
   id,
   strandedScore: 80,
-  potentialDailyProfitCAD: profit,
+  potentialDailyProfitUsd: profit,
   emission: 1000,
   recommendedGenset: 'jenbacher316',
   maxGeneratorPowerKW: 500,
@@ -482,12 +482,12 @@ const mockSite = (id, profit) => ({
 const compareSites = { a: mockSite('G10161', 5000), b: mockSite('G12147', 3000), c: null }
 const compareCsv = exportCompareCsv(compareSites)
 assert.ok(compareCsv.includes('site_a'))
-assert.ok(compareCsv.includes('Daily profit (CAD)'))
+assert.ok(compareCsv.includes('Daily profit (USD'))
 assert.ok(compareCsv.includes('5000'))
 
 const metricRows = buildCompareMetricRows(compareSites)
 assert.ok(metricRows.some(r => r.label === 'Stranded Score'))
-assert.equal(metricRows.find(r => r.label === 'Daily profit (CAD)')?.values.a, '5000')
+assert.equal(metricRows.find(r => r.label.startsWith('Daily profit (USD'))?.values.a, '5000')
 
 const bookmarkCsv = exportBookmarksCsv([
   { ...mockSite('G10161', 5000), tag: 'diligence' },
@@ -904,13 +904,17 @@ assert.ok(block.asicName)
 assert.ok(block.gasCeilingKw > 0)
 assert.ok(block.gensetLabel.includes('Jenbacher'))
 assert.ok(block.capturedPct > 0)
-assert.equal(typeof block.paybackDays, 'number')
+// Contract 4.3: no explicit session payback -> "unavailable", never a stale estimate
+assert.equal(block.paybackDays, null, 'no explicit session payback -> unavailable')
+assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele }), null)
 const mdBlock = fleetBlockMarkdown({ template: exportTpl, site: keele })
 assert.ok(mdBlock.includes('Fleet template'))
 assert.ok(mdBlock.includes(block.asicName))
-// payback override wins over estimate
+assert.ok(mdBlock.includes('unavailable'))
+// payback override wins over estimate (the live session model is the only source of truth)
 const payback = estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 123 })
 assert.equal(payback, 123)
+assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 0 }), 0)
 
 // exports carry the fleet block when present, and are unchanged when absent
 const withFleet = bankPackMarkdown(packSites, all, { liveBtcUsd: 90000, title: 'Test Pack', fleet: { template: exportTpl, site: keele } })
@@ -1125,6 +1129,101 @@ assert.equal(hpSame.aboveNetwork, null)
 assert.equal(formatPayback(Infinity), 'N/A')
 assert.equal(formatPayback(90), '90 d')
 assert.equal(formatPayback(1000), '2.7 yr')
+
+// ===========================================================================
+// Economics repair 2 — carbon baseline honesty, FX contract, model alignment
+// ===========================================================================
+const { computeAdvancedRoi } = await import('../lib/roi-model.ts')
+const { computeSiteValue } = await import('../lib/sites.ts')
+const { hasCarbonBaseline, carbonBaselineLabel } = await import('../lib/carbon-overlay.ts')
+
+// (e) GWP100 = 28 is the app-wide constant, and MissionPanel uses it (not 25).
+assert.equal(METHANE_GWP100, 28)
+const missionPanelSrc = fs.readFileSync(path.join(__dirname, '..', 'components', 'MissionPanel.tsx'), 'utf8')
+assert.ok(missionPanelSrc.includes('* 0.365 * 28'), 'MissionPanel must use GWP 28')
+assert.ok(!missionPanelSrc.includes('* 0.365 * 25'), 'MissionPanel must not use GWP 25')
+
+// (a) carbon revenue = $0 when flux_scope is not-applicable / split is null, and
+//     $0 by default everywhere (credit eligibility is NOT established).
+const missionProps = geo.features.find(f => String(f.properties.ghgrp_id) === 'G12350').properties
+assert.equal(missionProps.flux_scope, 'not-applicable')
+assert.equal(hasCarbonBaseline(missionProps), false)
+assert.ok(carbonBaselineLabel(missionProps).includes('no published baseline'))
+const noBaselineSite = {
+  id: 'G12350',
+  emission: missionProps.emission_rate_kg_day || 0,
+  properties: missionProps,
+}
+// Default model (no opt-in capture scenario) -> $0 carbon even with a price passed.
+const roiNoScenario = computeAdvancedRoi(noBaselineSite, 'jenbacher316', { liveBtcUsd: 85000, carbonCreditUsdPerTonne: 45 })
+assert.equal(roiNoScenario.carbonRevenueUsd, 0)
+assert.equal(roiNoScenario.carbonBaseline, false)
+assert.equal(roiNoScenario.carbonScenario, false)
+// Even an opt-in capture scenario cannot produce carbon revenue without a baseline.
+const roiNoBaseScenario = computeAdvancedRoi(noBaselineSite, 'jenbacher316', { liveBtcUsd: 85000, carbonCreditUsdPerTonne: 45, carbonCapturePct: 30 })
+assert.equal(roiNoBaseScenario.carbonRevenueUsd, 0, 'no baseline -> no carbon revenue even in a scenario')
+assert.equal(roiNoBaseScenario.carbonScenario, true)
+
+// A site with a published vent/flare split (fugitive) has a baseline; an opt-in
+// scenario yields an ILLUSTRATIVE figure (>0), but the default is still $0.
+const fugitive = geo.features.find(f =>
+  f.properties.flux_scope === 'fugitive'
+  && Number(f.properties.ch4_flared_kg_day) > 0
+  && Number(f.properties.ch4_tonnes_year) > 0)
+assert.ok(fugitive, 'dataset must contain a fugitive baseline site')
+assert.equal(hasCarbonBaseline(fugitive.properties), true)
+const baselineSite = { id: fugitive.properties.ghgrp_id || 'x', emission: fugitive.properties.emission_rate_kg_day || 0, properties: fugitive.properties }
+const roiBaselineDefault = computeAdvancedRoi(baselineSite, 'jenbacher316', { liveBtcUsd: 85000 })
+assert.equal(roiBaselineDefault.carbonRevenueUsd, 0, 'carbon off by default even with a baseline')
+assert.equal(roiBaselineDefault.carbonBaseline, true)
+const roiBaselineScenario = computeAdvancedRoi(baselineSite, 'jenbacher316', { liveBtcUsd: 85000, carbonCreditUsdPerTonne: 45, carbonCapturePct: 30 })
+assert.ok(roiBaselineScenario.carbonRevenueUsd > 0, 'opt-in scenario on a baseline site is an illustrative figure')
+assert.equal(roiBaselineScenario.carbonScenario, true)
+
+// (b) price is produced once: fiat revenue scales EXACTLY linearly with BTC price
+//     at a fixed hashrate (never quadratically). $170k must be 2x $85k, not 4x.
+const fixedSite = {
+  id: 'fx',
+  emission: 5000,
+  properties: {
+    flux_scope: 'fugitive',
+    ch4_vented_kg_day: 100,
+    ch4_flared_kg_day: 50,
+    source_type: 'oil_gas_extraction',
+    province: 'Alberta',
+  },
+}
+const roi85 = computeAdvancedRoi(fixedSite, 'jenbacher316', { liveBtcUsd: 85000 })
+const roi170 = computeAdvancedRoi(fixedSite, 'jenbacher316', { liveBtcUsd: 170000 })
+const ratio = roi170.annualRevenueUsd / roi85.annualRevenueUsd
+assert.ok(Math.abs(ratio - 2) < 0.01, `revenue must be linear in price (2x at 2x price), got ${ratio.toFixed(3)}`)
+assert.ok(roi170.annualRevenueUsd < roi85.annualRevenueUsd * 2.1, 'revenue must NOT be quadratic (4x)')
+// computeSiteValue (compare page) also decoupled: same linear rule.
+const sv85 = computeSiteValue(fixedSite, 'jenbacher316', 200, 3500, 5500, 85000)
+const sv170 = computeSiteValue(fixedSite, 'jenbacher316', 200, 3500, 5500, 170000)
+const svRatio = sv170.dailyBtc / sv85.dailyBtc
+assert.ok(Math.abs(svRatio - 1) < 1e-9, 'computeSiteValue production must be price-independent (hashprice), got ' + svRatio)
+assert.ok(Math.abs((sv170.dailyBtc * 170000 - sv85.dailyBtc * 85000) / (sv85.dailyBtc * 85000) - 1) < 1e-9, 'computeSiteValue profit linear in price')
+
+// (c) no hardcoded 1.35 FX rate remains in any economics/export path.
+const econFiles = [
+  'lib/bank-pack.ts', 'lib/fleet-template.ts', 'lib/roi-model.ts', 'lib/sites.ts',
+  'lib/portfolio.ts', 'lib/compare-export.ts', 'lib/bookmarks-export.ts', 'lib/case-study.ts',
+  'lib/term-sheet.ts', 'lib/fleet-model.ts', 'lib/sensitivity.ts', 'components/MissionPanel.tsx',
+  'app/dashboard/page.tsx', 'app/funding/page.tsx',
+]
+for (const f of econFiles) {
+  const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8')
+  assert.ok(!/\b1\.35\b/.test(src), `${f} must not contain a hardcoded 1.35 FX rate`)
+}
+const fleetModelSrc = fs.readFileSync(path.join(__dirname, '..', 'lib', 'fleet-model.ts'), 'utf8')
+assert.ok(!fleetModelSrc.includes('CAD_PER_USD ='), 'fleet-model must not export CAD_PER_USD')
+
+// (d) saved-template export payback is either the live session model or 'unavailable'
+//     — never a stale stored-assumption estimate.
+assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele }), null)
+assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 900 }), 900)
+assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: null }), null)
 
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

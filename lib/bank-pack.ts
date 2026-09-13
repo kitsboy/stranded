@@ -43,8 +43,8 @@ export function bankPackTsv(sites: EnrichedSite[], opts: BankPackOptions = {}): 
   const headers = [
     'id', 'name', 'province', 'city', 'source_type', 'confidence', 'reference_year',
     'emission_kg_day', 'ch4_tonnes_year', 'stranded_score', 'score_tier',
-    'genset_kw', 'recommended_genset', 'potential_daily_cad', 'lcoe_usd_kwh',
-    'carbon_credit_usd_yr', 'incentive_usd', 'jobs_fte', 'btc_price_usd',
+    'genset_kw', 'recommended_genset', 'potential_daily_usd', 'lcoe_usd_kwh',
+    'carbon_usd_yr_screening', 'incentive_usd', 'jobs_fte', 'btc_price_usd',
     'grid_km', 'grid_inferred', 'score_emission_pts', 'score_proximity_pts',
   ]
   const rows = sites.map(s => {
@@ -67,7 +67,7 @@ export function bankPackTsv(sites: EnrichedSite[], opts: BankPackOptions = {}): 
       scoreTier(s.strandedScore),
       s.maxGeneratorPowerKW || 0,
       s.recommendedGenset || '',
-      s.potentialDailyProfitCAD,
+      s.potentialDailyProfitUsd,
       roi.lcoeUsdPerKwh,
       roi.carbonRevenueUsd,
       roi.incentiveGrantUsd,
@@ -87,7 +87,7 @@ export function bankPackCsv(sites: EnrichedSite[], opts: BankPackOptions = {}): 
   const btc = opts.liveBtcUsd ?? 85000
   const headers = [
     'id', 'name', 'province', 'source_type', 'emission_kg_day', 'stranded_score',
-    'score_tier', 'genset_kw', 'potential_daily_cad', 'lcoe_usd_kwh',
+    'score_tier', 'genset_kw', 'potential_daily_usd', 'lcoe_usd_kwh',
     'carbon_usd_yr', 'jobs_fte', 'btc_usd',
   ]
   const rows = sites.map(s => {
@@ -101,7 +101,7 @@ export function bankPackCsv(sites: EnrichedSite[], opts: BankPackOptions = {}): 
       s.strandedScore,
       scoreTier(s.strandedScore),
       s.maxGeneratorPowerKW || 0,
-      s.potentialDailyProfitCAD,
+      s.potentialDailyProfitUsd,
       roi.lcoeUsdPerKwh,
       roi.carbonRevenueUsd,
       roi.jobs.total,
@@ -120,7 +120,7 @@ export function bankPackMarkdown(
   const btc = opts.liveBtcUsd ?? 85000
   const title = opts.title || (sites.length === 1 ? 'Site Bank Pack' : 'Mission Bank Pack')
   const totalEm = sites.reduce((a, s) => a + s.emission, 0)
-  const totalPot = sites.reduce((a, s) => a + s.potentialDailyProfitCAD, 0)
+  const totalPot = sites.reduce((a, s) => a + s.potentialDailyProfitUsd, 0)
   const avgScore = sites.length
     ? Math.round((sites.reduce((a, s) => a + s.strandedScore, 0) / sites.length) * 10) / 10
     : 0
@@ -131,9 +131,10 @@ export function bankPackMarkdown(
     `Generated: ${new Date().toISOString()}`,
     `BTC reference: $${btc.toLocaleString()} USD`,
     `Sites: ${sites.length} · Total CH₄: ${totalEm.toLocaleString()} kg/day · Avg score: ${avgScore}`,
-    `Model daily potential (portfolio): C$${totalPot.toLocaleString()}`,
+    `Model daily potential (portfolio, optimistic @$${btc.toLocaleString()} BTC): $${totalPot.toLocaleString()}`,
     ``,
     `> ⚠️ Model scenarios: revenue uses a hashprice of 0.0000009 BTC/TH/day, which is ABOVE the network-derived estimate (~0.00000041 BTC/TH/day from ≈450 BTC/day ÷ ≈1.1 ZH/s). These are optimistic-scenario figures, not a neutral forecast.`,
+    `> Carbon: shown at $0 (USD/yr) unless an opt-in capture scenario is applied to a site with a published vent/flare baseline. No carbon-credit or abatement revenue is established by the ECCC dataset — eligibility, additionality and registry issuance are not verified (screening only).`,
     `> Not financial advice. ECCC open data + Stranded Score™ v3 model. Independent verification required.`,
     ``,
   ]
@@ -162,7 +163,7 @@ export function bankPackMarkdown(
     lines.push(`| Stranded Score | **${s.strandedScore}** (${scoreTier(s.strandedScore)}) |`)
     lines.push(`| Generator kW | ${s.maxGeneratorPowerKW || '—'} (${s.recommendedGenset || 'n/a'}) |`)
     lines.push(`| LCOE | $${roi.lcoeUsdPerKwh}/kWh |`)
-    lines.push(`| Carbon credits (model) | $${roi.carbonRevenueUsd.toLocaleString()}/yr |`)
+    lines.push(`| Carbon (screening — $0 unless opt-in scenario) | $${roi.carbonRevenueUsd.toLocaleString()}/yr |`)
     lines.push(`| Incentives (model) | $${roi.incentiveGrantUsd.toLocaleString()} |`)
     lines.push(`| Jobs (model) | ${roi.jobs.total} FTE |`)
     lines.push(``)

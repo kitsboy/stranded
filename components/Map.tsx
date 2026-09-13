@@ -456,7 +456,7 @@ export default function Map({
         const avgLat = group.reduce((s, g) => s + g.geometry.coordinates[1], 0) / group.length
         const totalEmission = group.reduce((s, g) => s + g.emission, 0)
         const avgScore = Math.round(group.reduce((s, g) => s + g.strandedScore, 0) / group.length)
-        const clusterRevenue = group.reduce((s, g) => s + g.potentialDailyProfitCAD, 0)
+        const clusterRevenue = group.reduce((s, g) => s + g.potentialDailyProfitUsd, 0)
 
         const size = Math.min(38, Math.max(16, Math.sqrt(totalEmission) / 9))
         const el = document.createElement('div')
@@ -848,7 +848,7 @@ export default function Map({
     sites.forEach(s => {
       const p = s.properties.province || 'Unknown'
       if (choroplethMode === 'revenue') {
-        totals[p] = (totals[p] || 0) + s.potentialDailyProfitCAD * 365
+        totals[p] = (totals[p] || 0) + s.potentialDailyProfitUsd * 365
       } else {
         totals[p] = (totals[p] || 0) + s.emission
       }

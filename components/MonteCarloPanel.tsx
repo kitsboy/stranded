@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { runMonteCarloRoi, type MonteCarloResult } from '@/lib/monte-carlo'
 
-export default function MonteCarloPanel({ baseDailyCad, className = '' }: { baseDailyCad: number; className?: string }) {
+export default function MonteCarloPanel({ baseDailyUsd, className = '' }: { baseDailyUsd: number; className?: string }) {
   const [result, setResult] = useState<MonteCarloResult | null>(null)
   const [running, setRunning] = useState(false)
 
@@ -11,7 +11,7 @@ export default function MonteCarloPanel({ baseDailyCad, className = '' }: { base
     setRunning(true)
     // yield paint then run sync sim
     setTimeout(() => {
-      setResult(runMonteCarloRoi(baseDailyCad, { trials: 800, seed: 7 }))
+      setResult(runMonteCarloRoi(baseDailyUsd, { trials: 800, seed: 7 }))
       setRunning(false)
     }, 20)
   }
@@ -23,7 +23,7 @@ export default function MonteCarloPanel({ baseDailyCad, className = '' }: { base
         <button
           type="button"
           onClick={run}
-          disabled={running || !(baseDailyCad > 0)}
+          disabled={running || !(baseDailyUsd > 0)}
           className="rounded-lg border border-[#5BC0BE]/40 px-2.5 py-1 text-micro text-[#5BC0BE] hover:bg-[#5BC0BE]/10 disabled:opacity-40"
         >
           {running ? 'Running…' : 'Run 800 trials'}

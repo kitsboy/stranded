@@ -16,7 +16,7 @@ export function exportBookmarksCsv(sites: BookmarkExportSite[]): string {
     'emission_kg_day',
     'stranded_score',
     'recommended_genset',
-    'potential_daily_cad',
+    'potential_daily_usd',
     'source_type',
     'confidence',
   ]
@@ -30,7 +30,7 @@ export function exportBookmarksCsv(sites: BookmarkExportSite[]): string {
       s.emission,
       s.strandedScore,
       esc(s.recommendedGenset || ''),
-      s.potentialDailyProfitCAD,
+      s.potentialDailyProfitUsd,
       esc(p.source_type || ''),
       esc(p.confidence || ''),
     ].join(',')

@@ -89,7 +89,7 @@ export default function AllSitesExplorer() {
     if (fluxFilter !== 'any') res = res.filter(s => matchesFlux(s.properties, fluxFilter))
     return res.sort((a, b) =>
       sortBy === 'revenue'
-        ? b.potentialDailyProfitCAD - a.potentialDailyProfitCAD
+        ? b.potentialDailyProfitUsd - a.potentialDailyProfitUsd
         : b.strandedScore - a.strandedScore,
     )
   }, [allSites, search, provinceFilter, sourceFilter, minScoreFilter, recencyFilter, fluxFilter, sortBy])
@@ -412,8 +412,8 @@ export default function AllSitesExplorer() {
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#5BC0BE]">Potential daily</div>
-                    <div className="font-mono text-lg">C${site.potentialDailyProfitCAD.toLocaleString()}</div>
+                    <div className="text-sm text-[#5BC0BE]">Potential daily (USD)</div>
+                    <div className="font-mono text-lg">${site.potentialDailyProfitUsd.toLocaleString()}</div>
                   </div>
                 </div>
 
@@ -449,7 +449,7 @@ export default function AllSitesExplorer() {
                 <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Province</th>
                 <th className="p-4 text-left font-normal bg-[var(--bg-dark)]">Last reported</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Emission</th>
-                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Daily CAD</th>
+                <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Daily USD</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Generator kW</th>
                 <th className="p-4 text-right font-normal bg-[var(--bg-dark)]">Score</th>
                 <th className="p-4 bg-[var(--bg-dark)]">Actions</th>
@@ -473,7 +473,7 @@ export default function AllSitesExplorer() {
                     })()}
                   </td>
                   <td className="p-4 text-right font-mono text-[#FF8C00]">{site.emission.toLocaleString()}</td>
-                  <td className="p-4 text-right font-mono text-[#5BC0BE]">C${site.potentialDailyProfitCAD.toLocaleString()}</td>
+                  <td className="p-4 text-right font-mono text-[#5BC0BE]">${site.potentialDailyProfitUsd.toLocaleString()}</td>
                   <td className="p-4 text-right font-mono">{site.maxGeneratorPowerKW || 'N/A'} kW</td>
                   <td className="p-4 text-right"><span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span></td>
                   <td className="p-4 text-right">

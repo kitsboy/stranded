@@ -15,14 +15,14 @@ export type CaseStudySite = {
   gensetKw?: number
   confidence?: string
   company?: string
-  potentialDailyCad?: number
+  potentialDailyUsd?: number
   /** Optional fleet block carried into the document (additive, ignored when absent). */
   fleet?: FleetExportBlock
 }
 
 export function buildCaseStudyMarkdown(site: CaseStudySite, liveBtc = 85_000): string {
   const name = site.name || site.id
-  const annualCad = site.potentialDailyCad != null ? Math.round(site.potentialDailyCad * 365) : null
+  const annualUsd = site.potentialDailyUsd != null ? Math.round(site.potentialDailyUsd * 365) : null
   const lines = [
     `# Case study — ${name}`,
     '',
@@ -42,8 +42,8 @@ export function buildCaseStudyMarkdown(site: CaseStudySite, liveBtc = 85_000): s
     `|--------|-------|`,
     `| Emission | ${site.emissionKgDay != null ? `${Math.round(site.emissionKgDay).toLocaleString()} kg CH₄/day` : '—'} |`,
     `| Modeled genset | ${site.gensetKw != null ? `${site.gensetKw} kW` : '—'} |`,
-    `| Daily profit (model @ $${liveBtc.toLocaleString()} BTC) | ${site.potentialDailyCad != null ? `C$${Math.round(site.potentialDailyCad).toLocaleString()}` : '—'} |`,
-    `| Annualized (simple) | ${annualCad != null ? `C$${annualCad.toLocaleString()}` : '—'} |`,
+    `| Daily profit (optimistic @ $${liveBtc.toLocaleString()} BTC) | ${site.potentialDailyUsd != null ? `$${Math.round(site.potentialDailyUsd).toLocaleString()}` : '—'} |`,
+    `| Annualized (simple) | ${annualUsd != null ? `$${annualUsd.toLocaleString()}` : '—'} |`,
     '',
   ]
   if (site.fleet) {

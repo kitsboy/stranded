@@ -34,15 +34,15 @@ export function projectGasDecline(
 }
 
 /**
- * Cumulative capture of daily CAD under constant annual decline for `years` full years.
- * Sums baseDailyCad * 365 * revenueFactor for years 0..years-1.
+ * Cumulative capture of daily USD under constant annual decline for `years` full years.
+ * Sums baseDailyUsd * 365 * revenueFactor for years 0..years-1.
  */
 export function cumulativeCapture(
-  baseDailyCad: number,
+  baseDailyUsd: number,
   declinePct: number,
   years: number,
 ): number {
-  const base = Number.isFinite(baseDailyCad) ? Math.max(0, baseDailyCad) : 0
+  const base = Number.isFinite(baseDailyUsd) ? Math.max(0, baseDailyUsd) : 0
   const n = Math.max(0, Math.floor(years))
   if (n === 0) return 0
   const pts = projectGasDecline(1, declinePct, n - 1)

@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { X, TrendingUp, Zap, Leaf } from 'lucide-react'
-import { EnrichedSite } from '@/lib/sites'
+import { EnrichedSite, GENSET_DATA } from '@/lib/sites'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
-import { portfolioDailyPotentialCad } from '@/lib/portfolio'
+import { portfolioDailyPotentialUsd } from '@/lib/portfolio'
+import { USD_PER_CAD_FALLBACK } from '@/lib/capex-fx'
 import { projectBtcRevenue } from '@/lib/halving'
 import { toast } from 'sonner'
 import { useLocale } from '@/lib/useLocale'
@@ -43,14 +44,26 @@ export default function MissionPanel({
 
   const totalEmission = portfolio.reduce((sum, s) => sum + s.emission, 0)
   const totalScore = Math.round(portfolio.reduce((sum, s) => sum + s.strandedScore, 0) / portfolio.length)
-  const totalPotential = portfolioDailyPotentialCad(portfolio, liveBtcPrice)
-  const dailyBtc = (totalPotential / 1.35 / liveBtcPrice)
-  const annualCO2 = Math.round(totalEmission * 0.365 * 25)
+  const totalPotential = portfolioDailyPotentialUsd(portfolio, liveBtcPrice)
+  const dailyBtc = totalPotential > 0 ? (totalPotential / liveBtcPrice) : 0
+  // GWP100 = 28 (AR5, app-wide constant). CO₂e of the portfolio's reported CH₄ —
+  // an equivalent of the total emission, NOT an "avoided" or credited figure.
+  const annualCO2 = Math.round(totalEmission * 0.365 * 28)
   const totalGeneratorPower = portfolio.reduce((sum, s) => sum + (s.maxGeneratorPowerKW || 0), 0)
-  const totalGensetCapex = portfolio.reduce((sum, s) => sum + ((s.maxGeneratorPowerKW || 0) * 1000), 0)
-  const annualRevenueCad = totalPotential * 365
-  const simpleIrrPct = totalGensetCapex > 0
-    ? Math.min(99, Math.round((annualRevenueCad * 0.72 / totalGensetCapex) * 100))
+  // Real genset capex from GENSET_DATA.capexPerKW (CAD/kW), converted to USD with the
+  // documented fallback rate (live-rate surfaces use btcPrices; this overview has only
+  // the USD price). Replaces the old $1,000/kW heuristic.
+  const totalGensetCapexUsd = portfolio.reduce((sum, s) => {
+    const kw = s.maxGeneratorPowerKW || 0
+    if (!kw) return sum
+    const spec = GENSET_DATA[(s.recommendedGenset || 'jenbacher316') as keyof typeof GENSET_DATA]
+    return sum + kw * (spec?.capexPerKW ?? GENSET_DATA.jenbacher316.capexPerKW) * USD_PER_CAD_FALLBACK
+  }, 0)
+  const annualRevenueUsd = totalPotential * 365
+  // Declared heuristic: 0.72 = rough net-of-opex fraction of gross revenue. Illustrative only.
+  const MISSION_OPEX_NET_FACTOR = 0.72
+  const simpleIrrPct = totalGensetCapexUsd > 0
+    ? Math.min(99, Math.round((annualRevenueUsd * MISSION_OPEX_NET_FACTOR / totalGensetCapexUsd) * 100))
     : 0
 
   const handleRemove = (site: EnrichedSite) => {
@@ -127,7 +140,7 @@ export default function MissionPanel({
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="mission-stat bg-black/30 rounded-xl p-3">
           <div className="text-label text-gray-400 flex items-center gap-1"><TrendingUp size={13} /> {t('missionDailyYield')}</div>
-          <div className="text-2xl font-semibold text-[#FF8C00] tabular-nums mt-0.5">C${totalPotential.toLocaleString()}</div>
+          <div className="text-2xl font-semibold text-[#FF8C00] tabular-nums mt-0.5">${totalPotential.toLocaleString()}</div>
         </div>
         <div className="mission-stat bg-black/30 rounded-xl p-3">
           <div className="text-label text-gray-400 flex items-center gap-1"><Leaf size={13} /> {t('missionCo2Year')}</div>
@@ -138,7 +151,7 @@ export default function MissionPanel({
           <div className="text-2xl font-semibold tabular-nums mt-0.5">{totalScore}</div>
         </div>
       </div>
-      <div className="text-label text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapex/1000000).toFixed(1)}M)</div>
+      <div className="text-label text-gray-400 mt-2">{t('missionGeneratorCap')} {totalGeneratorPower.toLocaleString()} kW (est. CapEx ~${(totalGensetCapexUsd/1000000).toFixed(1)}M, USD)</div>
       <div className="text-label text-gray-400 mt-1">Cluster ROI: ~{(dailyBtc * 365).toFixed(2)} BTC/yr · {portfolio.length} site cluster</div>
       <div className="text-label text-[#34D399] mt-1">
         Est. simple IRR: <span className="font-mono font-semibold">{simpleIrrPct}%</span>

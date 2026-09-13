@@ -41,11 +41,11 @@ function normalish(rand: () => number): number {
 }
 
 /**
- * Multiplicative Monte Carlo on daily CAD revenue.
+ * Multiplicative Monte Carlo on daily USD revenue.
  * Each trial: base * btcShock * uptimeShock * gasShock
  */
 export function runMonteCarloRoi(
-  baseDailyCad: number,
+  baseDailyUsd: number,
   opts: MonteCarloOpts = {},
 ): MonteCarloResult {
   const trials = Math.max(1, Math.floor(opts.trials ?? 500))
@@ -53,7 +53,7 @@ export function runMonteCarloRoi(
   const uptimeVol = opts.uptimeVol ?? 0.08
   const gasVol = opts.gasVol ?? 0.15
   const rand = mulberry32(opts.seed ?? 42)
-  const base = Number.isFinite(baseDailyCad) ? Math.max(0, baseDailyCad) : 0
+  const base = Number.isFinite(baseDailyUsd) ? Math.max(0, baseDailyUsd) : 0
   const values: number[] = []
 
   for (let i = 0; i < trials; i++) {

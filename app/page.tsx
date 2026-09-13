@@ -341,14 +341,14 @@ export default function LandingPage() {
           const n = siteCount;
           const co2e = stats?.impact?.co2eAvoided5PctTonnes
             ? Math.round(stats.impact.co2eAvoided5PctTonnes * (v / 5))
-            : Math.round(v * 1240 * 365 * 25 / 1000);
+            : Math.round(v * 1240 * 365 * 28 / 1000);
           const el = document.getElementById('quick-impact');
-          if (el) el.innerText = `~${Math.round(n * v / 100).toLocaleString()} sites • ~${co2e.toLocaleString()} t CO₂e avoided/yr • serious sats`;
+          if (el) el.innerText = `~${Math.round(n * v / 100).toLocaleString()} sites • ~${co2e.toLocaleString()} t CO₂e (${v}% capture scenario, illustrative) • serious sats`;
         }} />
         <div id="quick-impact" className="mt-4 text-2xl font-mono text-[#FF8C00]">
-          ~{Math.round(siteCount * 0.05).toLocaleString()} sites • ~{(stats?.impact?.co2eAvoided5PctTonnes ?? 1049340).toLocaleString()} t CO₂e avoided/yr • serious sats
+          ~{Math.round(siteCount * 0.05).toLocaleString()} sites • ~{(stats?.impact?.co2eAvoided5PctTonnes ?? 1049340).toLocaleString()} t CO₂e (5% capture scenario, illustrative)
         </div>
-        <p className="text-xs text-gray-400 mt-1">This is only 5%. The full {siteCount.toLocaleString()} is 20× more powerful.</p>
+        <p className="text-xs text-gray-400 mt-1">Scenario equivalent at the stated capture rate — not a verified avoided-emissions claim. This is only 5%. The full {siteCount.toLocaleString()} is 20× more powerful.</p>
       </div>
 
       {/* Voices from the Frontier */}

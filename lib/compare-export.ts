@@ -29,7 +29,7 @@ export function buildCompareMetricRows(
     { label: 'Confidence', pick: s => s.properties.confidence || '—' },
     { label: 'Genset', pick: s => s.recommendedGenset || '—' },
     { label: 'Generator kW', pick: s => String(s.maxGeneratorPowerKW ?? '') },
-    { label: 'Daily profit (CAD)', pick: s => String(s.potentialDailyProfitCAD) },
+    { label: 'Daily profit (USD, optimistic @$85k)', pick: s => String(s.potentialDailyProfitUsd) },
     {
       label: 'Annual BTC (est.)',
       pick: s => {

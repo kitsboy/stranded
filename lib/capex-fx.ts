@@ -1,5 +1,18 @@
 /** Capex inflation + CAD/USD FX helpers. */
 
+/**
+ * Dated CAD↔USD fallback rates for STATIC/server heuristics that have no access
+ * to the live multi-fiat BTC map (enrich-time portfolio potential, the mission
+ * panel's genset capex, dashboard term-sheet). Derived from the fleet model's
+ * documented map defaults so the app never contradicts itself: USD BTC default
+ * = $85,000 and CAD BTC default = 115,000 (see lib/fleet-model.ts) ⇒
+ * 1 USD = 115000/85000 CAD ≈ 1.3529 CAD, i.e. 1 CAD ≈ 0.7391 USD.
+ * Live-rate surfaces (the fleet cockpit, SiteDetailsPanel) MUST use btcPrices,
+ * never these. Date: 2026-09-13.
+ */
+export const CAD_PER_USD_FALLBACK = 115000 / 85000 // ≈ 1.3529 CAD per 1 USD
+export const USD_PER_CAD_FALLBACK = 85000 / 115000 // ≈ 0.7391 USD per 1 CAD
+
 /** Future value of capex after annual inflation for `years`. */
 export function applyCapexInflation(
   capexCad: number,

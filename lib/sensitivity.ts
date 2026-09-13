@@ -1,5 +1,6 @@
 import { EnrichedSite } from './sites'
 import { computeAdvancedRoi } from './roi-model'
+import { hasCarbonBaseline } from './carbon-overlay'
 
 export type TornadoRow = {
   param: string
@@ -52,12 +53,18 @@ export function sensitivityTornado(site: EnrichedSite, liveBtcUsd = 85000): Torn
       low: { liveBtcUsd, difficultyMultiplier: 0.7 },
       high: { liveBtcUsd, difficultyMultiplier: 1.3 },
     },
-    {
-      param: 'Carbon credit price',
-      low: { liveBtcUsd, carbonCreditUsdPerTonne: 20 },
-      high: { liveBtcUsd, carbonCreditUsdPerTonne: 80 },
-    },
   ]
+
+  // Carbon-price sensitivity is an OPTO-IN scenario and only meaningful where the
+  // dataset publishes a vent/flare baseline. Without a baseline there is nothing to
+  // credit, so the lever is omitted rather than implying a false sensitivity.
+  if (hasCarbonBaseline(site.properties as Record<string, unknown>)) {
+    scenarios.push({
+      param: 'Carbon credit price (30% capture scenario)',
+      low: { liveBtcUsd, carbonCreditUsdPerTonne: 20, carbonCapturePct: 30 },
+      high: { liveBtcUsd, carbonCreditUsdPerTonne: 80, carbonCapturePct: 30 },
+    })
+  }
 
   const rows: TornadoRow[] = scenarios.map(sc => {
     const lowR = computeAdvancedRoi(site, genset, sc.low)

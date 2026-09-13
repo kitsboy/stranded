@@ -10,7 +10,7 @@ type SiteLite = {
   province?: string
   score?: number
   emission?: number
-  potentialDailyProfitCAD?: number
+  potentialDailyProfitUsd?: number
 }
 
 export default function PortfolioRollup({ sites, className = '' }: { sites?: SiteLite[]; className?: string }) {
@@ -40,8 +40,8 @@ export default function PortfolioRollup({ sites, className = '' }: { sites?: Sit
   const count = resolved.length
   const avgScore = Math.round(resolved.reduce((s, x) => s + (x.score || 0), 0) / count)
   const totalEmission = Math.round(resolved.reduce((s, x) => s + (x.emission || 0), 0))
-  const dailyCad = Math.round(
-    resolved.reduce((s, x) => s + (('potentialDailyProfitCAD' in x ? x.potentialDailyProfitCAD : 0) || 0), 0),
+  const dailyUsd = Math.round(
+    resolved.reduce((s, x) => s + (('potentialDailyProfitUsd' in x ? x.potentialDailyProfitUsd : 0) || 0), 0),
   )
   const missionParam = resolved.map(s => s.id).join(',')
 
@@ -62,8 +62,8 @@ export default function PortfolioRollup({ sites, className = '' }: { sites?: Sit
           <div className="font-mono text-lg">{totalEmission.toLocaleString()}</div>
         </div>
         <div className="rounded-lg border border-white/10 p-2">
-          <div className="text-label text-gray-400">Daily CAD</div>
-          <div className="font-mono text-lg text-[#34D399]">{dailyCad ? `$${dailyCad.toLocaleString()}` : '—'}</div>
+          <div className="text-label text-gray-400">Daily USD</div>
+          <div className="font-mono text-lg text-[#34D399]">{dailyUsd ? `$${dailyUsd.toLocaleString()}` : '—'}</div>
         </div>
       </div>
       <Link

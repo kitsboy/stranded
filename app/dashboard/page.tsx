@@ -201,7 +201,7 @@ export default function DashboardPage() {
             projectName="Stranded Canada pilot"
             siteCount={Math.min(25, stats.siteCount)}
             totalCapexCad={8_000_000}
-            annualRevenueCad={Math.round((stats.valueModel?.annualRevenueUsd || 2_000_000) * 0.05 * 1.35)}
+            annualRevenueUsd={Math.round((stats.valueModel?.annualRevenueUsd || 2_000_000) * 0.05)}
             co2eTonnesYear={stats.impact?.co2eAvoided5PctTonnes}
           />
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
@@ -263,7 +263,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mb-8 rounded-2xl border border-[#34D399]/25 bg-[#34D399]/5 p-5">
-          <h2 className="mb-3 font-semibold text-[#34D399]">Carbon Credit Scenarios (5% capture)</h2>
+          <h2 className="mb-3 font-semibold text-[#34D399]">Carbon scenarios (illustrative — no verified baseline)</h2>
           {carbonScenarios && (
             <div className="grid gap-4 text-sm sm:grid-cols-3">
               {carbonScenarios.map(c => (
@@ -275,7 +275,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-          <p className="mt-3 text-label text-gray-400">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands.</p>
+          <p className="mt-3 text-label text-gray-400">Side-by-side $20 / $50 / $80 per tonne — illustrative market bands at a 5% capture scenario. No carbon-credit revenue is established by the ECCC dataset (eligibility/additionality not verified).</p>
         </div>
 
         <div className="dashboard-panel mb-8 rounded-2xl border border-white/10 p-5">

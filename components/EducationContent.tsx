@@ -776,9 +776,21 @@ export default function EducationContent() {
 
             {/* Site Selector - use real data, filterable by province for regional suitability */}
             <div className="glass p-4 rounded-2xl mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <label className="text-sm">Select Real Site from Dataset (top emitters shown, {realSites.length} total):</label>
-                <select value={selectedRealSiteId} onChange={e => setSelectedRealSiteId(e.target.value)} className="bg-[#0f172a] border border-white/20 rounded px-3 py-1 text-sm flex-1">
+              {/*
+                t_88d78786: the select below is a FLEX ITEM with `flex-1`, so its
+                automatic minimum size is its min-content width — which a native
+                <select> takes from its longest <option> ("Enbridge Gas Inc. -
+                Distribution — Ontario…" = 676px). That in-flow box set the page's
+                min-content to 788px, so Chromium inflated the phone LAYOUT
+                viewport to 788 and every `position: fixed` box anchored to it
+                (quick-actions FAB, bottom sheet, map chrome) was placed for a
+                788px screen. Fix at the offender: `min-w-0 max-w-full` lets the
+                select shrink and clip its own label; the row stacks below sm so
+                the select gets the full width instead of a squeezed remainder.
+              */}
+              <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center">
+                <label className="text-sm sm:shrink-0">Select Real Site from Dataset (top emitters shown, {realSites.length} total):</label>
+                <select data-testid="edu-site-picker" value={selectedRealSiteId} onChange={e => setSelectedRealSiteId(e.target.value)} className="w-full min-w-0 max-w-full truncate bg-[#0f172a] border border-white/20 rounded px-3 py-1 text-sm sm:flex-1">
                   {[...realSites].sort((a,b) => b.emission - a.emission).slice(0, 30).map(s => (
                     <option key={s.id} value={s.id}>{s.properties.name || s.id} — {s.properties.province} ({s.emission.toLocaleString()} kg/day)</option>
                   ))}
@@ -798,17 +810,20 @@ export default function EducationContent() {
               const powerKW = methaneNm3DayToKw(dailyM3, realSiteGenset as GensetId, (site.emission > 10000 ? 0.95 : 0.85) * (p.confidence === 'high' ? 1 : p.confidence === 'medium' ? 0.92 : 0.85))
               const asic = ASIC_MACHINES.find(a => a.id === selectedAsicId) || ASIC_MACHINES[0]
               const numAsics = Math.max(1, Math.floor(powerKW * 1000 / asic.power_w))
-              const dailyBtcRevenue = numAsics * asic.hashrate_ths * 0.0000009 * liveBtc
-              const dailyOpexCadApprox = (powerKW * 0.04 * 24) * 1.35
-              const dailyProfitCad = dailyBtcRevenue * liveBtc - dailyOpexCadApprox
+              // Price production once (fleet-model pattern): BTC-denominated hashprice,
+              // converted to fiat exactly once. No (liveBtc) inside the production term.
+              const dailyBtcGross = numAsics * asic.hashrate_ths * 0.0000009
+              const dailyRevenueUsd = dailyBtcGross * liveBtc
+              const dailyOpexUsd = (powerKW * 0.04 * 24) // USD/kWh power cost — unit pure
+              const dailyProfitUsd = dailyRevenueUsd - dailyOpexUsd
               const gensetCapex = g.powerKW * g.capexPerKW * (dailyMethaneKg > 20000 ? 1.1 : 1)
               const asicCapex = numAsics * asic.cost_cad
               const totalCapex = gensetCapex + asicCapex
               const debt = totalCapex * (financingDebtPercent / 100)
               const annualFinancingCost = debt * (financingInterestRate / 100) * 0.25
-              const annualProfit = dailyProfitCad * 365 - annualFinancingCost
+              const annualProfit = dailyProfitUsd * 365 - annualFinancingCost
               const simplePaybackYears = annualProfit > 0 ? totalCapex / annualProfit : Infinity
-              const methaneLossDailyBtc = dailyBtcRevenue
+              const methaneLossDailyBtc = dailyBtcGross
               const personaNote = persona === 'investor' ? 'Focus: Payback & ROI after financing.' : persona === 'operator' ? 'Focus: Power reliability & deployment speed.' : persona === 'government' ? 'Focus: Total CO2e + jobs created.' : 'Focus: Landowner revenue share potential.'
 
               return (
@@ -860,7 +875,7 @@ export default function EducationContent() {
                     <div className="p-3 bg-[#0f172a] rounded">
                       <div className="text-[#FF8C00] text-xs">MINING OUTPUT</div>
                       <div className="text-2xl font-mono mt-1">{numAsics.toLocaleString()} ASICs</div>
-                      <div className="text-xs">~{dailyBtcRevenue.toFixed(2)} BTC/day revenue</div>
+                      <div className="text-xs">~{dailyBtcGross.toFixed(6)} BTC/day revenue</div>
                     </div>
                     <div className="p-3 bg-[#0f172a] rounded">
                       <div className="text-[#FF8C00] text-xs">FULL ROI (with financing)</div>

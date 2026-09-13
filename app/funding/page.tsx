@@ -18,6 +18,7 @@ import { liveModelRevenue, captureAtPct } from '@/lib/dashboard-metrics'
 import TermSheetCard from '@/components/TermSheetCard'
 import AmortizationTable from '@/components/AmortizationTable'
 import CapexFxControls from '@/components/CapexFxControls'
+import { USD_PER_CAD_FALLBACK } from '@/lib/capex-fx'
 
 const CETA_PROGRAMS = [
   { id: 'cleantech', name: 'CETA Cleantech SME', max: 5000000, match: 0.5, provinces: ['All'] },
@@ -309,10 +310,10 @@ export default function FundingPage() {
           province={province}
           siteCount={sites}
           totalCapexCad={capex}
-          annualRevenueCad={Math.round(capex * 0.22)}
+          annualRevenueUsd={Math.round(capex * 0.22 * USD_PER_CAD_FALLBACK)}
         />
         <div className="space-y-4">
-          <CapexFxControls baseCapexUsd={Math.round(capex / 1.36)} />
+          <CapexFxControls baseCapexUsd={Math.round(capex * USD_PER_CAD_FALLBACK)} />
           <AmortizationTable defaultPrincipal={Math.round(capex * 0.6)} />
         </div>
       </div>

@@ -264,8 +264,8 @@ function main() {
 | Avg Stranded Score | **${avgScore.toFixed(1)}** |
 | High-score sites (≥80) | **${highScoreCount}** |
 | Est. generator capacity (kW) | **${Math.round(totalGeneratorKW).toLocaleString()}** |
-| 5% capture → CO₂e avoided/yr | **${co2eAvoided5Pct.toLocaleString()} t** |
-| Full capture → CO₂e avoided/yr | **${co2eAvoided100Pct.toLocaleString()} t** |
+| CO₂e equivalent (5% capture scenario) | **${co2eAvoided5Pct.toLocaleString()} t** |
+| CO₂e equivalent (100% capture scenario) | **${co2eAvoided100Pct.toLocaleString()} t** |
 | Model annual BTC (portfolio) | **${annualBtcPortfolio.toFixed(2)}** |
 | Model annual revenue (@$${defaultBtc.toLocaleString()} BTC) | **$${annualRevenueUsd.toLocaleString()}** |
 

@@ -81,7 +81,7 @@ export default function DashboardStatGrid({ stats, btcUsd }: Props) {
       delay: 0.2,
     },
     {
-      label: '5% CO₂e Avoided',
+      label: 'CO₂e @ 5% capture (scenario)',
       value: `${formatCompactNumber(impact.co2eAvoided5PctTonnes, 1)} t/yr`,
       sub: `~${impact.sitesAt5Pct} sites · GWP ${impact.methaneGwp}×`,
       icon: Leaf,

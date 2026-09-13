@@ -3,6 +3,7 @@
  */
 
 import { fleetBlockMarkdown, type FleetExportBlock } from './fleet-template'
+import { CAD_PER_USD_FALLBACK } from './capex-fx'
 
 export type TermSheetInput = {
   projectName: string
@@ -13,7 +14,7 @@ export type TermSheetInput = {
   debtPct?: number
   targetIrrPct?: number
   holdYears?: number
-  annualRevenueCad?: number
+  annualRevenueUsd?: number
   co2eTonnesYear?: number
   notes?: string
   /** Optional fleet block carried into the document (additive, ignored when absent). */
@@ -33,11 +34,14 @@ export function sketchTermSheet(input: TermSheetInput): TermSheetSketch {
   const debtPct = input.debtPct ?? 60
   const equityCad = Math.round(input.totalCapexCad * (equityPct / 100))
   const debtCad = Math.round(input.totalCapexCad * (debtPct / 100))
-  const annual = input.annualRevenueCad ?? 0
+  const annual = input.annualRevenueUsd ?? 0
+  // Unit purity: capex is CAD (totalCapexCad); convert the USD revenue input to
+  // CAD with the documented fallback rate so payback / rev-to-capex are same-currency.
+  const annualCad = Math.round(annual * CAD_PER_USD_FALLBACK)
   const simplePaybackYears =
-    annual > 0 && input.totalCapexCad > 0 ? Math.round((input.totalCapexCad / annual) * 10) / 10 : null
+    annualCad > 0 && input.totalCapexCad > 0 ? Math.round((input.totalCapexCad / annualCad) * 10) / 10 : null
   const revenueToCapex =
-    input.totalCapexCad > 0 && annual > 0 ? Math.round((annual / input.totalCapexCad) * 1000) / 1000 : null
+    input.totalCapexCad > 0 && annualCad > 0 ? Math.round((annualCad / input.totalCapexCad) * 1000) / 1000 : null
 
   const md = [
     `# Term sheet sketch — ${input.projectName}`,
@@ -53,10 +57,10 @@ export function sketchTermSheet(input: TermSheetInput): TermSheetSketch {
     `| Debt (${debtPct}%) | ${debtCad.toLocaleString()} |`,
     `| Target IRR | ${input.targetIrrPct ?? 18}% |`,
     `| Hold period | ${input.holdYears ?? 7} years |`,
-    `| Annual revenue (model) | ${annual ? annual.toLocaleString() : '—'} |`,
+    `| Annual revenue (model, USD → CAD) | ${annualCad ? annualCad.toLocaleString() : '—'} |`,
     `| Simple payback | ${simplePaybackYears != null ? `${simplePaybackYears} yr` : '—'} |`,
     `| Rev / CapEx | ${revenueToCapex != null ? revenueToCapex : '—'} |`,
-    `| CO₂e abated / yr | ${input.co2eTonnesYear != null ? input.co2eTonnesYear.toLocaleString() : '—'} t |`,
+    `| CO₂e equivalent (scenario) | ${input.co2eTonnesYear != null ? input.co2eTonnesYear.toLocaleString() : '—'} t |`,
     '',
     '> ⚠️ Model scenarios: hashprice assumption (0.0000009 BTC/TH/day) sits ABOVE the network-derived estimate (~0.00000041 BTC/TH/day) — optimistic-scenario figures, not a neutral forecast. Burning methane still emits CO₂; the defensible claim is ~28–80× lower warming impact per molecule (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80), never "no emissions".',
     '',
