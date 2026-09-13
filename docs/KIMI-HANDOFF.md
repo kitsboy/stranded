@@ -1,3 +1,17 @@
+## Session — 2026-09-13 · Stranded mobile/UI/economics batch COMPLETE, live-verified
+
+**Whole approved batch shipped and independently verified against the live site**
+(commit `8246914`, CI green, deploy identity check passing). Cam's report:
+`https://hq.giveabit.io/docs/MOBILE-AND-UI-VERIFICATION-2026-09-13.md`; private copy in the vault.
+
+- 24× units fix (`7415a7a`,`b8fafa1`) → portfolio 9.5 GW→397 MW, revenue $13.17B→$548M
+- shared site methane budget + truthful presets `bc6b6d1`
+- mobile: viewport/FAB `09a7766`, tap targets `ce413ea`, glyphs `ca34da9`, /education `5dd83c3`
+- economics honesty `02bd54d` (carbon $0 + no-baseline when split unknown; FX contract; GWP28)
+- UI: phone-sheet Overview/Build/Financials/Evidence `d49c0ee` + persistent build summary `8246914`
+
+Outstanding: Cam's Google app publish + scoped Cloudflare tokens. Nothing else blocked on Stranded.
+
 ## Session — 2026-09-13 · Build summary beside the hardware controls + Build leads with the pickers (Mimi, card t_a04fe2af)
 
 **Done:** the phone sheet's **Build** section now leads with the choices (ASIC model, generator,
