@@ -154,7 +154,12 @@ curl -sS https://stranded.giveabit.io/status.json | jq '.'`}
           </pre>
         </section>
 
-        <p className="text-gray-400">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="hit-area-inline text-[#5BC0BE]">ECCC Open Data</a></p>
+        {/* `.hit-area-row`, not `.hit-area-inline`: this link is followed by an
+            inline-level sibling (`Try it on the map` below is `inline-block`), and
+            that later line box sits on this link's bottom padding band and wins the
+            hit test there — measured live: 48px rect, 34px reachable. An atomic
+            44px inline box owns its own room, so nothing can cover it. */}
+        <p className="text-gray-400">Source: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" className="hit-area-row text-[#5BC0BE]">ECCC Open Data</a></p>
         <Link href="/map" className="inline-block text-[#FF8C00] hover:underline">Try it on the map →</Link>
       </div>
     </div>

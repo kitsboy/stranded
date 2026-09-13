@@ -1,3 +1,66 @@
+## Session — 2026-09-13 · every `hit-area-inline` link audited for the hit-test traps (Mimi, card t_90eed310)
+
+**Done:** all 15 visible `hit-area-inline` / `hit-area-row` links across the 5 routes that render them were
+hit-tested on an emulated touch pointer at 390px. **One was a lie and is now fixed**; the other 14 measured
+as real targets. A second, previously unknown variant of the trap was found and proven by micro-test.
+
+- **THE TRAP, TWICE.** `a.hit-area-inline` (`padding-block:1rem` on an inline box) is only a 44px target
+  while nothing takes the painted padding back out of **hit testing**. Two things do:
+  1. **an ancestor with `overflow:hidden`** (`truncate`) — known from `t_ff2b0edd`, re-confirmed here:
+     the panel's province link still reports clip ancestors `p.truncate h=44` + the sheet's
+     `overflow-hidden` wrapper, and its reachable band is exactly that 44px clip band (OK, but only
+     because the row is a `.hit-area-row`).
+  2. **a LATER INLINE-LEVEL SIBLING** — new finding, and it needs **no `overflow` anywhere**. The
+     following line box overlaps the link's bottom padding band and wins the hit test there.
+     Controlled micro-tests (`scripts/_mimi-hit-inline-linebox.mjs`, 48px rect, 14px/20px text):
+     alone in a `<p>` → **48/48** reachable; following `<a class="inline-block">` → **48/34**;
+     following `<div>` with the same `margin-top:24px` → **48/48**; following `<p>` → **48/48**;
+     alone in a `<div>` → **48/48**. So it is specifically the inline-level sibling, not the gap.
+- **THE FAILURE (live `ce413ea`, coarse pointer, 390px):** `/docs/api`, the source line
+  `Source: ECCC Open Data` → rect **48px**, **reachable 34px** (owned band `rect.top .. +32.9`), tap 2px
+  inside the bottom edge returned `div.space-y-6.text-sm`; no overflow ancestor in its chain; the next
+  inline-level sibling is `a.inline-block.text-[#FF8C00]` ("Try it on the map →") at `456..476`.
+  14 other links OK — e.g. `/` "Learn more in Education →" 51/51, footer "ECCC Open" 46/46 and
+  "Part of the Give A Bit family" 46/46 on all five routes, `/open-data` "Check it" 46/46, panel
+  province 44/45, cockpit "Verify this yourself →" 45/45, Tadbuy 48/49, "Legal via Sherpacarta" 44/45.
+- **THE FIX:** `app/docs/api/page.tsx` — the source link's `hit-area-inline` → **`hit-area-row`**
+  (`.hit-area-row` is already the family's coarse-pointer 44px atomic inline box). Coarse pointer only,
+  so a fine pointer never sees it. **AFTER: 44px rect / 44px reachable**, both edges and the centre
+  owned by the link, at 390px; audit of all 15 links: **0 failures**.
+- **Residual, measured, honest:** on a phone the `Source:` line box grows 20 → 44px and everything below
+  it shifts **+24px** (page 4567 → 4591 at 390); the link itself goes 48px `inline` (pad 16/16) → 44px
+  `inline-flex` (pad 0). That is what a real 44px target costs inside a line, same trade as the province
+  row. **Desktop is untouched: at 1440px with a fine pointer the before(live)/after geometry diff is
+  empty apart from the intended class-name change** (`scrollHeight` 3133 both, every box identical).
+- **Regression guard:** new `tests/e2e/hit-area-links.spec.ts` (6 tests) — for every visible
+  `hit-area-inline`/`.hit-area-row` link on `/`, `/open-data`, `/docs/api`, `/provinces/` and in the
+  expanded `/map` sheet + cockpit disclosure it asserts **≥44px tall AND owned by the link 2px inside
+  each edge and at its centre AND ≥42 reachable pixels down its own centre column**, plus a real
+  `touchscreen.tap` 3px inside the `/docs/api` link's bottom edge that must start a navigation to the
+  dataset. Negative control: the same spec run against **live (unfixed)** fails on exactly those two
+  cases with `tap 2px inside the BOTTOM edge lands on div.space-y-6.text-sm` — the guard has teeth.
+- **Measurement tools committed with this card** (re-runnable, coarse-pointer contexts):
+  `scripts/_mimi-hit-area-audit.mjs` (per-link rect vs reachable band, both edge probes + centre, clip
+  ancestors + effective clip band, the next inline-level sibling, per route),
+  `scripts/_mimi-hit-inline-linebox.mjs` (the controlled A–H micro-test above),
+  `scripts/_mimi-page-geometry.mjs` (page-level geometry snapshot for before/after diffs, fine or
+  coarse) and `scripts/_mimi-docsapi-diagnose.mjs` (pixel-by-pixel owner dump around one link).
+- **Method note for the next worker:** measure **reachable pixels**, never the rect, and scroll the link
+  into the centre of *its own* scrollport before probing — a sheet's clip answers `elementFromPoint`
+  with the sheet for a link that is half outside it, and an element out of the viewport legitimately
+  returns `null`; both look exactly like the bug. `artifacts/hit-area-audit/{before,after,micro}/`.
+- **Shared-tree hazards encountered (not this card's work, flagged for the orchestrator):** the shared
+  checkout `/root/work/stranded` is being edited by another worker while this card ran —
+  `tests/e2e/mobile-layout.spec.ts` is **untracked** (so CI never runs it) and fails 3 cases here
+  (strict-mode violation: `getByTestId('site-details-panel')` matches 2 nodes; `/education` innerWidth
+  398 at 390px — `/education` also measures innerWidth **381 at a 360 device on live `ce413ea`**, so the
+  inflation is real and pre-existing, but on the *dirty local* build it measures **788**, which is the
+  sibling's in-flight work, not this card's). A leftover `stash@{0}: WIP on main: 8f4d1de …` from an
+  older base was already in the tree; it was left untouched.
+
+**Git State:** single coherent commit for this card (SHA recorded on card t_90eed310); live commit marker
+re-verified after the Cloudflare Pages deploy.
+
 ## Session — 2026-09-13 · site-panel tap targets: three sub-44px inline links (Mimi, card t_ff2b0edd)
 
 **Done:** the three inline links on the site panel (`/map/?site=G12350`) that measured under the 44px
