@@ -78,6 +78,7 @@ export default function Nav() {
           <Image
             src="/logo.png"
             alt=""
+            aria-hidden="true"
             width={28}
             height={28}
             className="nav-logo-img h-7 w-auto transition-all duration-250"
