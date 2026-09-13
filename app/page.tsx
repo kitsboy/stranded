@@ -326,7 +326,7 @@ export default function LandingPage() {
               <p className="mt-4 text-gray-300 max-w-md">The most elegant climate + capital flywheel available today. One offtaker that actually works for stranded resources.</p>
             </div>
             <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
-              <Image src="/images/5.jpg" alt="Energy to Bitcoin Flywheel" width={800} height={500} loading="lazy" className="w-full h-auto" />
+              <Image src="/images/5.webp" alt="Energy to Bitcoin Flywheel" width={800} height={500} loading="lazy" className="w-full h-auto" />
             </div>
           </div>
         </div>
