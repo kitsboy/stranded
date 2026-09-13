@@ -17,14 +17,12 @@ export const MAP_CSP_IMG_DOMAINS = [
 
 export const MAP_CSP_CONNECT_DOMAINS = [
   ...MAP_CSP_IMG_DOMAINS,
-  'https://demotiles.maplibre.org',
   'https://s3.amazonaws.com',
   'https://elevation-tiles-prod.s3.amazonaws.com',
 ] as const
 
-export const MAP_CSP_FONT_DOMAINS = [
-  'https://demotiles.maplibre.org',
-] as const
+/** Glyph PBFs are self-hosted under /fonts/ (same-origin, covered by font-src 'self'). */
+export const MAP_CSP_FONT_DOMAINS = [] as const
 
 /** Tile URL patterns used by MapLibre sources in Map.tsx */
 export const MAP_TILE_URL_PATTERNS = [
@@ -32,7 +30,6 @@ export const MAP_TILE_URL_PATTERNS = [
   'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-  'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
 ] as const
 
 function hostMatchesPattern(host: string, pattern: string): boolean {

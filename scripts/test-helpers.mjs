@@ -279,12 +279,15 @@ assert.equal(formatCompactNumber(1500000000), '1.5B')
 
 // map-csp (#414) — tile URLs must be covered by CSP allowlist documented in lib/map-csp.ts
 assert.ok(MAP_CSP_IMG_DOMAINS.length >= 6)
-assert.ok(MAP_CSP_CONNECT_DOMAINS.includes('https://demotiles.maplibre.org'))
+// Glyph PBFs are self-hosted under /fonts/ (same-origin, covered by font-src 'self'),
+// so the map no longer depends on the demo-server font host.
+assert.ok(!MAP_CSP_CONNECT_DOMAINS.includes('https://demotiles.maplibre.org'))
 assert.ok(mapTileUrlsCoveredByCsp(MAP_TILE_URL_PATTERNS))
 const headers = fs.readFileSync(path.join(__dirname, '..', 'public', '_headers'), 'utf8')
-for (const domain of ['tile.openstreetmap.org', 'basemaps.cartocdn.com', 'demotiles.maplibre.org']) {
+for (const domain of ['tile.openstreetmap.org', 'basemaps.cartocdn.com']) {
   assert.ok(headers.includes(domain), `_headers must allow ${domain}`)
 }
+assert.ok(headers.includes("font-src 'self'"), "_headers font-src must keep 'self' (self-hosted glyph PBFs)")
 
 // map-filters (#388–389) + data-recency / flux filters
 const {

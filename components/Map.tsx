@@ -368,7 +368,8 @@ export default function Map({
         filter: ['has', 'point_count'],
         layout: {
           'text-field': '{point_count_abbreviated}',
-          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          // Glyphs are self-hosted under /fonts/ (Noto Sans — see public/fonts/README.md).
+          'text-font': ['Noto Sans Bold'],
           'text-size': 11,
         },
         paint: {
@@ -403,7 +404,7 @@ export default function Map({
         filter: ['!', ['has', 'point_count']],
         layout: {
           'text-field': ['get', 'name'],
-          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+          'text-font': ['Noto Sans Regular'],
           'text-size': ['interpolate', ['linear'], ['zoom'], 10, 0, 10.5, 9, 14, 11],
           'text-offset': [0, 1.2],
           'text-anchor': 'top',
@@ -659,7 +660,7 @@ export default function Map({
       container: mapContainer.current,
       style: {
         version: 8,
-        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+        glyphs: '/fonts/{fontstack}/{range}.pbf',
         sources: {
           'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OSM' },
           'dark': { type: 'raster', tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© CARTO © OSM' },
