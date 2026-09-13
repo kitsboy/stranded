@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { downloadBlob } from '@/lib/export-formats'
 
@@ -33,6 +33,7 @@ const CONTACT_TO = 'hello@giveabit.io'
 
 export default function CertifiedLeadForm() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [form, setForm] = useState<FormState>(empty)
   const [category, setCategory] = useState('')
   const [specify, setSpecify] = useState('')
@@ -156,6 +157,9 @@ export default function CertifiedLeadForm() {
       setDraftSaved(false)
       setSubmitted(true)
       toast.success('Application sent')
+      // Land on the real thanks route — the lead is already saved locally
+      // (never-lose-a-lead) so navigating away stays safe.
+      router.push('/thank-you')
     } catch (err) {
       setLastLead(lead)
       const msg = err instanceof Error ? err.message : 'Something went wrong'
