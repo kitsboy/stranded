@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-16T19:54:04.434Z",
+  "endpoint": "https://api.satohash.io/api/verify",
+  "file": "stranded-sites-REAL.geojson",
+  "scope": "One digest covers every pin: sha256 of the published stranded-sites-REAL.geojson (byte-identical to /data/stranded-sites.geojson, which the map renders), reproducible with `sha256sum stranded-sites-REAL.geojson`.",
+  "targetSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
+  "verdict": {
+    "verified": true,
+    "verified_method": "bitcoind",
+    "trust": "self-sovereign",
+    "bitcoin_block_height": 966549,
+    "block_hash": "000000000000000000018b9edb7425af9f6ea148ca092550b0aa7528d5e7b2e3",
+    "block_time": 1789156479,
+    "ots_download_url": "https://api.satohash.io/api/stamps/74449082-7b9b-4667-b5ff-7ef6e092484b?download=true",
+    "explainer": "Verified against Satohash's own Bitcoin node — block 966549. No third party was trusted.",
+    "reason": null,
+    "registry_status": "confirmed",
+    "error": null,
+    "httpStatus": 200
+  },
+  "error": null,
+  "carriedFromPreviousBuild": true,
+  "history": [
+    {
+      "targetSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
+      "checkedAt": "2026-09-16T19:39:47.961Z",
+      "verified": true,
+      "verified_method": "bitcoind",
+      "bitcoin_block_height": 966549,
+      "reason": null,
+      "error": null
+    }
+  ],
+  "checkedAt": "2026-09-16T19:39:47.961Z"
+}

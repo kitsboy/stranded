@@ -9,6 +9,7 @@ import { hoverTeaser, formatCount, formatMoneyShort } from '@/lib/cockpit'
 import { emissionChoroplethGeojson, revenueChoroplethGeojson } from '@/lib/province-choropleth'
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
+import { getPinProof, loadPinProof, pinProofTeaserHtml } from '@/lib/pin-proof'
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
@@ -117,6 +118,7 @@ export function siteTeaserHtml(site: EnrichedSite, btcUsd: number): string {
     `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div>`
     + `<div class="text-micro text-gray-300 mt-0.5">${kg} kg CH₄/day · Stranded Score <span class="text-[#FF8C00] font-mono">${escapeHtml(site.strandedScore)}</span></div>`
     + `<div class="text-micro font-semibold text-[#FF8C00] mt-1">${minerLine}</div>`
+    + pinProofTeaserHtml(getPinProof())
     + `<div class="text-micro text-gray-400 mt-0.5">Click to build it →</div>`
   )
 }
@@ -232,6 +234,11 @@ export default function Map({
   onViewChangeRef.current = onViewChange
   performanceModeRef.current = performanceMode
   btcUsdRef.current = liveBtcPrice
+
+  // The Bitcoin-anchored proof state behind every pin, loaded once per visit.
+  useEffect(() => {
+    void loadPinProof()
+  }, [])
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick

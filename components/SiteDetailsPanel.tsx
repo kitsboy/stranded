@@ -30,6 +30,7 @@ import { Send } from 'lucide-react'
 import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
 import BankPackPreview from '@/components/BankPackPreview'
 import CopyLinkButton from '@/components/CopyLinkButton'
+import PinProof from '@/components/trust/PinProof'
 import { useLocale } from '@/lib/useLocale'
 import { assessSiteDataQuality } from '@/lib/data-quality'
 import { scoreConfidenceBand } from '@/lib/score-confidence'
@@ -1098,6 +1099,13 @@ export default function SiteDetailsPanel({
       )}
       <div className={`mb-4 p-3 bg-slate-800/40 rounded-lg${sectionOff('financials')}`}>
         <RoiProjectionChart dailyBtc={calculations.effectiveDailyBtc} btcUsd={btcPrice} />
+      </div>
+      <div className={sectionOff('evidence')}>
+        <PinProof
+          siteName={site?.properties?.name ?? null}
+          rowId={site?.id ?? null}
+          className="mb-4"
+        />
       </div>
       <div className={sectionOff('evidence')}>
         <TadbuyAdHook siteId={site?.id} />

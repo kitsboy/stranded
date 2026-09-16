@@ -29,6 +29,17 @@
   --selection-fg: #fff7ed;
   --scrollbar-thumb: rgba(91, 192, 190, 0.35);
   --scrollbar-track: rgba(15, 23, 42, 0.4);
+
+  /* Family proof tokens — the HowProofWorks contract (paper/ink/brass + BTC orange).
+     Stranded is dark-Ember, so the neutrals map onto the app's slate canvas while
+     brass and the state colours stay the family's. */
+  --accent-gold: #B8893A;
+  --accent-success: #34D399;
+  --accent-alert: #F87171;
+  --border: rgba(255, 255, 255, 0.12);
+  --text-secondary: #94a3b8;
+  --bg-secondary: #1e293b;
+  --surface-raised: #243447;
 }
 
 /* Premium glassmorphism */

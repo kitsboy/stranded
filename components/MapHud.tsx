@@ -3,6 +3,7 @@
 import { Target } from 'lucide-react'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
+import PinProofBadge from '@/components/trust/PinProofBadge'
 
 type MapHudProps = {
   filteredCount: number
@@ -55,6 +56,8 @@ export default function MapHud({
             </span>
           )}
         </div>
+        <div className="map-top-hud__divider h-3 w-px bg-white/20 shrink-0" aria-hidden />
+        <PinProofBadge label="Pin proof ·" />
         <div className="map-top-hud__divider h-3 w-px bg-white/20 shrink-0" aria-hidden />
         <button
           type="button"
