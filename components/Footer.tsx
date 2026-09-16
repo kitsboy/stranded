@@ -353,21 +353,7 @@ export default function Footer() {
         </div>
 
         <p className="mt-4 pt-4 border-t border-white/8 text-label text-gray-500">
-          <a
-            href="/privacy"
-            className="hit-area-inline hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
-          >
-            Privacy
-          </a>
-          <span className="text-white/15 mx-1.5">·</span>
-          <a
-            href="/terms"
-            className="hit-area-inline hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
-          >
-            Terms
-          </a>
-          <span className="text-white/15 mx-1.5">·</span>
-          <span>No cookies. We use self-hosted, cookie-less analytics. Nothing to consent to.</span>
+          No cookies. We use self-hosted, cookie-less analytics. Nothing to consent to.
         </p>
       </div>
     </footer>
