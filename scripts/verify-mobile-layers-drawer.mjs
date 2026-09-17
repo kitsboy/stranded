@@ -18,9 +18,16 @@ import { mkdirSync } from 'node:fs'
 
 const args = process.argv.slice(2)
 const baseUrl = (args.find(a => !a.startsWith('--')) || 'http://127.0.0.1:3099').replace(/\/$/, '')
+// --live: run against production — let the real service worker do its job and
+// bust the HTTP/CDN cache, so a stale cached page cannot pass this suite.
+// --strict-console: treat every console error as a failure (prod only; the
+// api.satohash.io CORS check is restricted to the production origin).
+const LIVE = args.includes('--live')
+const STRICT_CONSOLE = args.includes('--strict-console')
 const shotsIdx = args.indexOf('--shots')
 const shotsDir = shotsIdx >= 0 ? args[shotsIdx + 1] : '/tmp/layers-drawer-shots'
 const DEEP_LINK = '/map/?site=G12350'
+const cacheBust = LIVE ? `&cb=${Date.now().toString(36)}` : ''
 const WIDTHS = [360, 390, 430]
 const DESKTOP = 1440
 const results = []
@@ -39,7 +46,7 @@ const newPage = async (width, height = 844) => {
     userAgent: width < 900
       ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
       : undefined,
-    serviceWorkers: 'block',
+    serviceWorkers: LIVE ? 'allow' : 'block',
   })
   // Capture what the app writes to the clipboard (its own coordinate readout path).
   await ctx.addInitScript(() => {
@@ -130,7 +137,7 @@ const tap = async (page, x, y) => {
 /* ── 1. phone viewports ─────────────────────────────────────────────────── */
 for (const width of WIDTHS) {
   const { ctx, page, errors } = await newPage(width)
-  await page.goto(`${baseUrl}${DEEP_LINK}`, { waitUntil: 'domcontentloaded', timeout: 90000 })
+  await page.goto(`${baseUrl}${DEEP_LINK}${cacheBust}`, { waitUntil: 'domcontentloaded', timeout: 90000 })
   await waitForMap(page)
 
   const g = await glyph(page)
@@ -193,7 +200,13 @@ for (const width of WIDTHS) {
     const panelStillThere = await page.evaluate(() =>
       Array.from(document.querySelectorAll('.map-layer-stack, .map-layer-panel-unified'))
         .some(el => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0))
-    results.push({ width: '390-old-panel-footprint', footprint: FOOTPRINT, sampled: owners.length, tally, strayCount: strays, owners })
+    results.push({ width: '390-old-panel-footprint', footprint: FOOTPRINT, sampled: owners.length, tally, strayCount: strays, owners, minimap: await page.evaluate(() => {
+      const m = document.querySelector('[aria-label*="minimap"], [data-testid*="minimap"], .maplibregl-ctrl-minimap, [class*="minimap"]')
+      if (!m) return null
+      const r = m.getBoundingClientRect()
+      const cs = getComputedStyle(m)
+      return { cls: (m.className || '').toString().slice(0, 90), x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), display: cs.display, z: cs.zIndex }
+    }) })
     if (strays) fail.push(`390px: ${strays} unclassified element(s) over the old panel footprint`)
     if (panelStillThere) fail.push('390px: a layer panel still occupies space over the map')
     const panelOwned = await page.evaluate(() => document.elementsFromPoint(195, 450).some(el => el.closest('.map-layer-stack, .map-layer-panel-unified')))
@@ -221,18 +234,57 @@ for (const width of WIDTHS) {
 
     let pin = null
     const sweep = []
-    outer:
-    for (const y of [360, 400, 440, 480, 520]) {
-      for (const x of [120, 160, 200, 240, 280]) {
-        const r = await tapAndSee(x, y)
-        sweep.push({ x, y, ...r })
-        if (r.opened) { pin = { x, y }; break outer }
+    /* Find the pin by PROJECTION, not by luck: two taps on a horizontal line give
+     * the app's own lat/lng → px-per-degree scale (from its own coordinate
+     * readout), which projects the deep-linked site's coordinates to a pixel.
+     * A 25px pin is far too small to find with a coarse tap grid. */
+    const canvas = await page.locator('.maplibregl-canvas').first().boundingBox()
+    const cy = Math.round(canvas.y + canvas.height / 2)
+    const coordAt = async (x, y) => {
+      const before = await clipLen()
+      await tap(page, x, y)
+      const after = await clipLen()
+      const raw = await page.evaluate(() => (window.__copied || []).slice(-1)[0] || null)
+      const nums = raw ? raw.split(',').map(v => parseFloat(v)) : null
+      return { lat: nums && nums[0], lng: nums && nums[1], fresh: after > before }
+    }
+    const SITE = { lng: -122.33839, lat: 49.22849 } // ghgrp_id G12350 (Mission Landfill)
+    const A = { x: Math.round(canvas.x + 40), y: cy }
+    const B = { x: Math.round(canvas.x + canvas.width - 40), y: cy }
+    const ca = await coordAt(A.x, A.y)
+    const cb = await coordAt(B.x, B.y)
+    let projection = null
+    if (ca.fresh && cb.fresh && cb.lng !== ca.lng) {
+      const pxPerDegLng = (B.x - A.x) / (cb.lng - ca.lng)
+      const pxPerDegLat = pxPerDegLng / Math.cos((ca.lat * Math.PI) / 180)
+      projection = {
+        pxPerDegLng: +pxPerDegLng.toFixed(2),
+        pxPerDegLat: +pxPerDegLat.toFixed(2),
+        projected: {
+          x: Math.round(A.x + (SITE.lng - ca.lng) * pxPerDegLng),
+          y: Math.round(A.y - (SITE.lat - ca.lat) * pxPerDegLat),
+        },
+        refs: { A, ca, B, cb },
+      }
+    }
+    results.push({ width: '390-pin-projection', projection })
+    if (!projection) {
+      fail.push('390px: could not derive the map scale from the coordinate readout')
+    } else {
+      // tap the projected pixel, then a small ±8px ring in case the pin is offset
+      const ring = [{ dx: 0, dy: 0 }]
+      for (const r of [8, 16]) for (const a of [0, 45, 90, 135, 180, 225, 270, 315]) ring.push({ dx: Math.round(r * Math.cos(a * Math.PI / 180)), dy: Math.round(r * Math.sin(a * Math.PI / 180)) })
+      for (const o of ring) {
+        const p = { x: projection.projected.x + o.dx, y: projection.projected.y + o.dy }
+        const r = await tapAndSee(p.x, p.y)
+        sweep.push({ x: p.x, y: p.y, ...r })
+        if (r.opened) { pin = p; break }
         await closeCard()
       }
     }
-    results.push({ width: '390-pin-locate-sweep', taps: sweep.length, pin, sweep })
+    results.push({ width: '390-pin-locate', taps: sweep.length, pin, sweep })
     if (!pin) {
-      fail.push('390px: could not locate the deep-linked pin by tapping (1,000+ ms of taps, no card)')
+      fail.push('390px: the projected deep-linked pin could not be opened by tapping')
     } else {
       await closeCard()
       const inZone = pin.x >= FOOTPRINT.x0 && pin.x <= FOOTPRINT.x1
@@ -410,7 +462,7 @@ for (const width of WIDTHS) {
 
   // Local-only noise: the proof-per-pin fetch to api.satohash.io is CORS-restricted
   // to the production origin, so it can only fail when served from 127.0.0.1.
-  const NOISE = /api\.satohash\.io|CORS policy|Failed to load resource|net::|ERR_/i
+  const NOISE = STRICT_CONSOLE ? /(?!)/ : /api\.satohash\.io|CORS policy|Failed to load resource|net::|ERR_/i
   const noise = errors.filter(e => NOISE.test(e))
   const consoleClean = errors.filter(e => !NOISE.test(e))
   results.push({ width: 'console' + width, errors: consoleClean, ignoredLocalNoise: noise.length })
@@ -421,7 +473,7 @@ for (const width of WIDTHS) {
 /* ── 2. desktop parity: the corner panel must still be there ─────────────── */
 {
   const { ctx, page, errors } = await newPage(DESKTOP, 900)
-  await page.goto(`${baseUrl}${DEEP_LINK}`, { waitUntil: 'domcontentloaded', timeout: 90000 })
+  await page.goto(`${baseUrl}${DEEP_LINK}${cacheBust}`, { waitUntil: 'domcontentloaded', timeout: 90000 })
   await waitForMap(page)
   const g = await glyph(page)
   results.push({ width: 'desktop' + DESKTOP, ...g })

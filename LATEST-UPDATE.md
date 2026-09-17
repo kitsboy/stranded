@@ -8,11 +8,11 @@
 - **The controls are defined once.** The mission-ring toggle, the choropleth switch and every `LayerControls` row/preset/slider are now a single `layerControls` / `layerQuickToggles` pair rendered into *both* shells (desktop panel + drawer), so the two can never drift apart. The Score v3 legend rides along into the drawer.
 - **The phone keeps the touch floor.** New coarse-pointer rule: rows, pills and sliders inside the Layers drawer get the same ≥44px target the desktop panel already had (`.map-layer-stack` rules don't reach into a drawer).
 - **Honest by construction.** No map data, pin contents or proof-per-pin surface was touched (the serialised sibling card's work); layer *state* is the same React state, just a different home.
-- **Verified in a real browser, with real touch events.** `scripts/verify-mobile-layers-drawer.mjs` (Playwright, CDP `Input.dispatchTouchEvent`, fresh contexts, coarse pointer) — all green:
+- **Verified in a real browser, with real touch events.** `scripts/verify-mobile-layers-drawer.mjs` (Playwright, CDP `Input.dispatchTouchEvent`, fresh contexts, coarse pointer) — all green **locally and on production** (`--live --strict-console`: zero console errors at 360/390/430):
   - the floating panel's own footprint (x∈[186,378], y∈[0,755]) at 390px: **25/25 sampled points belong to the map or to chrome that pre-dates this change; 0 unclassified**; `elementFromPoint(195,450)` = the map canvas;
-  - **the deep-linked pin is tappable again:** the pin (Mission Landfill, G12350) was moved to (300,450) — the exact spot the panel owned — and a touch tap there opened the site card and set `?site=G12350`;
+  - **the deep-linked pin is tappable again.** The pin's pixel is derived from the app's own coordinate readout (two taps → px-per-degree → project G12350) and lands on **(195, 450)** — the exact pixel the audit measured and the exact spot the panel owned. One touch tap there opens the site card (Mission Landfill) and sets `?site=G12350`. Before: 0 maplibre click events, no card;
   - **the map pans from that half:** a 120px drag starting at (300,520) moved the centre lng −123.07961 → −122.50576;
-  - **the drawer carries the same controls:** 26 controls, **26 reachable**, scrollable, not the full screen (320px of 390), toggling a layer inside it flips the layer;
+  - **the drawer carries the same controls:** 26 controls, **26 reachable**, scrollable, 320px of 390 wide (not full screen), toggling a layer inside it flips the layer, and it closes on backdrop tap, ✕ and Escape;
   - 360/390/430 (no horizontal overflow) + 1440 desktop (panel still `display:flex`, 27 controls).
   - Known, unchanged, **not this card**: the first-visit quick tour (z-75) and getting-started strip still sit over the map (audit finding F13) — measured again and reported, untouched.
 
