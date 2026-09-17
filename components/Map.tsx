@@ -70,6 +70,13 @@ const CLUSTER_COUNT_LAYER = 'stranded-cluster-count'
 const UNCLUSTERED_LAYER = 'stranded-unclustered'
 const SITE_LABELS_LAYER = 'stranded-site-labels'
 
+/**
+ * Half of the 44 px touch-target floor (audit F4). A canvas pin is a circle of
+ * radius 4-14 px, so a tap is accepted anywhere within this many px of the pin's
+ * centre — the same 44x44 target the DOM markers carry via `.map-pin-hit`.
+ */
+const PIN_HIT_RADIUS = 22
+
 function isWebGLSupported(): boolean {
   if (typeof document === 'undefined') return true
   try {
@@ -466,13 +473,20 @@ export default function Map({
         const clusterRevenue = group.reduce((s, g) => s + g.potentialDailyProfitUsd, 0)
 
         const size = Math.min(38, Math.max(16, Math.sqrt(totalEmission) / 9))
+        const bubble = document.createElement('div')
+        bubble.className = `flex items-center justify-center rounded-full border-2 border-white/80 text-micro font-bold shadow-xl cursor-pointer ${avgScore > 72 ? 'bg-[#22c55e]' : avgScore > 45 ? 'bg-[#eab308]' : 'bg-[#FF8C00]'}`
+        bubble.style.width = `${size}px`
+        bubble.style.height = `${size}px`
+        bubble.style.color = '#0f172a'
+        bubble.textContent = String(group.length)
+        bubble.setAttribute('aria-hidden', 'true')
+        /* Same 44 px target as the pins: the bubble is 16-38 px, too small to aim at. */
         const el = document.createElement('div')
+        el.className = 'map-pin-hit'
+        el.dataset.testid = 'map-cluster-hit'
+        el.appendChild(bubble)
         el.title = `${group.length} sites · avg score ${avgScore} · C$${clusterRevenue.toLocaleString()}/day · ~${(clusterRevenue / liveBtcPrice * 0.0007).toFixed(3)} BTC/d`
-        el.className = `flex items-center justify-center rounded-full border-2 border-white/80 text-micro font-bold shadow-xl cursor-pointer ${avgScore > 72 ? 'bg-[#22c55e]' : avgScore > 45 ? 'bg-[#eab308]' : 'bg-[#FF8C00]'}`
-        el.style.width = `${size}px`
-        el.style.height = `${size}px`
-        el.style.color = '#0f172a'
-        el.textContent = String(group.length)
+        el.style.cursor = 'pointer'
         el.setAttribute('role', 'button')
         el.tabIndex = 0
         el.setAttribute('aria-label', `Cluster of ${group.length} sites, average score ${avgScore}`)
@@ -499,23 +513,39 @@ export default function Map({
         const isSelected = selectedId === site.id
 
         const size = Math.min(20, Math.max(8, Math.sqrt(Math.max(emission, 10)) / 11))
-        const el = document.createElement('div')
+        const dot = document.createElement('div')
         const bg = scoreTierColor(score)
 
-        el.style.width = `${size}px`
-        el.style.height = `${size}px`
-        el.style.borderRadius = isPortfolio || isSelected ? '2px' : '999px'
-        el.style.background = bg
-        el.style.border = isSelected ? '3px solid #fff' : isPortfolio ? '2px solid #67e8f9' : '2px solid rgba(255,255,255,0.85)'
-        el.style.boxShadow = isSelected
+        dot.style.width = `${size}px`
+        dot.style.height = `${size}px`
+        dot.style.borderRadius = isPortfolio || isSelected ? '2px' : '999px'
+        dot.style.background = bg
+        dot.style.border = isSelected ? '3px solid #fff' : isPortfolio ? '2px solid #67e8f9' : '2px solid rgba(255,255,255,0.85)'
+        dot.style.boxShadow = isSelected
           ? '0 0 0 6px rgba(255,140,0,0.35), 0 0 14px rgba(0,0,0,0.6)'
           : isPortfolio
             ? '0 0 0 3px rgba(103,232,249,0.45), 0 0 5px rgba(0,0,0,0.5)'
             : '0 0 5px rgba(0,0,0,0.5)'
+        dot.setAttribute('aria-hidden', 'true')
+        if (!performanceModeRef.current) {
+          dot.style.transition = 'box-shadow 160ms ease'
+        }
+
+        /*
+          The pin itself keeps its size; the marker element around it is the
+          44 px touch target (audit F4 — `.map-pin-hit`, a transparent flex box
+          with the dot centred inside). Position is unchanged: the marker is
+          anchored at its centre and the dot is centred in the box, so the
+          drawn pin sits exactly where it did before.
+        */
+        const el = document.createElement('div')
+        el.className = 'map-pin-hit'
+        el.dataset.testid = 'map-pin-hit'
+        el.appendChild(dot)
         el.style.cursor = 'pointer'
-        el.style.transition = performanceModeRef.current
-          ? 'none'
-          : 'transform 160ms cubic-bezier(0.23,1,0.32,1), box-shadow 160ms ease'
+        if (!performanceModeRef.current) {
+          el.style.transition = 'transform 160ms cubic-bezier(0.23,1,0.32,1)'
+        }
         if (isSelected) el.style.transform = 'scale(1.4)'
         el.setAttribute('role', 'button')
         el.tabIndex = 0
@@ -805,14 +835,47 @@ export default function Map({
         }
         return
       }
-      const coords = { lat: e.lngLat.lat, lng: e.lngLat.lng }
-      setClickedCoord(coords)
-      const text = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`
-      navigator.clipboard?.writeText(text).then(() => {
-        setCopyFlash(true)
-        onCoordCopied?.(coords)
-        setTimeout(() => setCopyFlash(false), 1600)
-      }).catch(() => {})
+      /*
+        Near miss on a canvas pin (mobile audit F4). The map's own pins are
+        circles between 8 px and 28 px across (radius 4-14 + a 2 px stroke), so
+        a thumb that is a few px off lands on bare map and nothing opens — the
+        audit measured 479 of 2,025 taps around the deep-linked pin landing on
+        it. Look in a 44x44 box around the tap instead, and treat a tap anywhere
+        inside it as a tap on the nearest pin in it — the same "invisible 44 px
+        hit circle" the DOM markers carry (`.map-pin-hit`). Clusters are left
+        alone: they are 36-80 px already, and a near miss that zoomed a
+        neighbouring cluster would be a worse answer than nothing.
+      */
+      const r = PIN_HIT_RADIUS
+      const near = map.queryRenderedFeatures(
+        [[e.point.x - r, e.point.y - r], [e.point.x + r, e.point.y + r]] as [[number, number], [number, number]],
+        { layers: [UNCLUSTERED_LAYER] },
+      )
+      let best: { d: number; site: EnrichedSite } | null = null
+      for (const f of near) {
+        const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number]
+        const p = map.project(coords)
+        const dx = p.x - e.point.x
+        const dy = p.y - e.point.y
+        if (Math.abs(dx) > r || Math.abs(dy) > r) continue
+        const site = sitesRef.current.find(s => s.id === f.properties?.id)
+        if (!site) continue
+        const d = Math.sqrt(dx * dx + dy * dy)
+        if (!best || d < best.d) best = { d, site }
+      }
+      if (best) {
+        onSiteClickRef.current(best.site)
+        return
+      }
+      /*
+        A tap on the map that misses a pin does NOT write to the clipboard
+        (audit F5). It used to: every missed tap fired `navigator.clipboard
+        .writeText` + a "Coordinates copied" toast, silently clobbering
+        whatever the person had copied — and on a ~25 px pin, misses are the
+        common case. The copy lives on the coordinate readout now, which is
+        the visible copy control; a stray tap only moves the readout.
+      */
+      setClickedCoord({ lat: e.lngLat.lat, lng: e.lngLat.lng })
     })
 
     const handleWindowResize = () => {
@@ -1236,6 +1299,21 @@ export default function Map({
   }, [])
 
   const displayCoord = clickedCoord ?? mapCenter
+
+  /**
+   * The explicit coordinate copy control (audit F5): the *only* thing that
+   * writes coordinates to the clipboard. A stray tap on the map background no
+   * longer copies anything — it just moves this readout.
+   * The string is unchanged from the old map-tap copy ("lat, lng", 5 dp).
+   */
+  const copyDisplayCoord = useCallback(() => {
+    const text = `${displayCoord.lat.toFixed(5)}, ${displayCoord.lng.toFixed(5)}`
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopyFlash(true)
+      onCoordCopied?.(displayCoord)
+      setTimeout(() => setCopyFlash(false), 1600)
+    }).catch(() => { /* clipboard unavailable — nothing to do */ })
+  }, [displayCoord, onCoordCopied])
   const showBearing = Math.abs(mapBearing) > 0.5
   const showPitch = effectiveTerrain && mapPitch > 0.5
   const loadingPct = Math.max(0, Math.min(100, Math.round(loadProgress)))
@@ -1292,11 +1370,15 @@ export default function Map({
         data-testid="map-coordinate-strip"
         aria-label="Map coordinates and view state"
       >
-        <div
-          className={`map-coord-readout px-2 py-1 rounded-lg border text-micro font-mono tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5 ${
+        <button
+          type="button"
+          onClick={copyDisplayCoord}
+          data-testid="map-coord-copy"
+          className={`map-coord-readout pointer-events-auto px-2 py-1 rounded-lg border text-micro font-mono tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5 cursor-pointer ${
             copyFlash ? 'map-coord-readout--copied text-[#5BC0BE]' : 'border-white/15 text-gray-300'
           }`}
           title={coordCopyLabel}
+          aria-label={coordCopyLabel}
         >
           <span className="inline-flex items-center gap-1">
             <Copy size={10} className={copyFlash ? 'text-[#5BC0BE]' : 'text-gray-400'} />
@@ -1310,7 +1392,7 @@ export default function Map({
             <span className="text-gray-400">{pitchLabel.replace('{deg}', mapPitch.toFixed(0))}</span>
           )}
           <span className="text-[#5BC0BE]/80">{viewportSitesLabel.replace('{count}', String(viewportSiteCount))}</span>
-        </div>
+        </button>
       </div>
 
       {/*

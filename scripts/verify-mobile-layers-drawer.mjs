@@ -6,7 +6,7 @@
  *   2. the new "Layers" button is visible AND reachable (elementFromPoint owns it);
  *   3. the old panel footprint over the map is now bare map (elementFromPoint);
  *   4. a pin that sat under the old panel is tappable again (touch tap -> site card);
- *   5. the map pans from the half that used to be swallowed (clipboard coord delta);
+ *   5. the map pans from the half that used to be swallowed (coordinate-readout delta);
  *   6. the drawer carries the same controls, every one of them reachable, and the
  *      layer toggles still work from inside it;
  *   7. no console errors; no horizontal overflow.
@@ -223,13 +223,24 @@ for (const width of WIDTHS) {
      *     proves the map receives gestures on that half; (c) tap the pin there and
      *     require the site card to open. */
     const clipLen = () => page.evaluate(() => (window.__copied || []).length)
+    /* Where did I just tap? The app's own coordinate readout, read from its DOM
+     * (`map-coordinate-strip`). It used to come from the clipboard — but map
+     * taps no longer write to the clipboard (fix 3/3, audit F5: a stray tap had
+     * been silently overwriting whatever the person had copied). The strip is
+     * `hidden sm:flex`, yet its text is in the DOM at every width. */
+    const readoutRaw = () =>
+      page.evaluate(() => {
+        const t = document.querySelector('[data-testid="map-coordinate-strip"]')?.textContent || ''
+        const m = t.match(/(-?\d+\.\d+)°,\s*(-?\d+\.\d+)°/)
+        return m ? `${m[1]}, ${m[2]}` : null
+      })
     const cardVisible = () => page.locator('[data-testid="mobile-site-sheet"]:visible').count()
     const tapAndSee = async (x, y) => {
-      const before = await clipLen()
+      const before = await readoutRaw()
       await tap(page, x, y)
       const opened = await cardVisible()
-      const after = await clipLen()
-      return { opened, missed: after > before }
+      const after = await readoutRaw()
+      return { opened, missed: !opened && after !== before }
     }
 
     let pin = null
@@ -241,12 +252,11 @@ for (const width of WIDTHS) {
     const canvas = await page.locator('.maplibregl-canvas').first().boundingBox()
     const cy = Math.round(canvas.y + canvas.height / 2)
     const coordAt = async (x, y) => {
-      const before = await clipLen()
+      const before = await readoutRaw()
       await tap(page, x, y)
-      const after = await clipLen()
-      const raw = await page.evaluate(() => (window.__copied || []).slice(-1)[0] || null)
-      const nums = raw ? raw.split(',').map(v => parseFloat(v)) : null
-      return { lat: nums && nums[0], lng: nums && nums[1], fresh: after > before }
+      const after = await readoutRaw()
+      const nums = after ? after.split(',').map(v => parseFloat(v)) : null
+      return { lat: nums && nums[0], lng: nums && nums[1], fresh: !!nums && after !== before }
     }
     const SITE = { lng: -122.33839, lat: 49.22849 } // ghgrp_id G12350 (Mission Landfill)
     const A = { x: Math.round(canvas.x + 40), y: cy }
@@ -294,11 +304,10 @@ for (const width of WIDTHS) {
       //     footprint (x=300, the half that used to be swallowed). The app's own
       //     coordinate readout (clipboard) gives the centre before/after.
       const readCoord = async () => {
-        const before = await page.evaluate(() => (window.__copied || []).length)
+        const before = await readoutRaw()
         await tap(page, 40, 640) // bare map, above the status bar, nowhere near a pin
-        const after = await page.evaluate(() => (window.__copied || []).length)
-        const coord = await page.evaluate(() => (window.__copied || []).slice(-1)[0] || null)
-        return { coord, fresh: after > before }
+        const after = await readoutRaw()
+        return { coord: after, fresh: !!after && after !== before }
       }
       const drag = async (sx, sy, dx, dy) => {
         const cdp = await ctx.newCDPSession(page)

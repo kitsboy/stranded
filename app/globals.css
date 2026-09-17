@@ -538,6 +538,24 @@ html.theme-transition *::after {
   z-index: 10 !important;
   transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
+
+/*
+  Pin hit target (mobile audit F4): the drawn pin is ~25 px tall including its
+  border, under the 44 px touch floor, so a thumb aimed at it misses as often
+  as it hits. The marker element is a transparent 44 px box with the unchanged
+  pin centred inside it — the visible marker is the same size it always was,
+  only the area a finger can land on grows.
+  Square, not a circle, on purpose: hit testing respects border-radius, and a
+  44 px circle would give away the four corners of the target.
+*/
+.map-pin-hit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+}
 .maplibregl-marker.selected {
   z-index: 50 !important;
   transform: scale(1.35);
