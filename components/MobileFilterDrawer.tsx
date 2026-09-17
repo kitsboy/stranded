@@ -11,10 +11,37 @@ type Props = {
   open: boolean
   onClose: () => void
   children: React.ReactNode
+  /** Drawer header label. Defaults to the map's filters header. */
+  title?: string
+  /** Header glyph. Defaults to the filter funnel. */
+  icon?: React.ReactNode
+  /** Accessible name of the close control and the backdrop. */
+  closeLabel?: string
+  /** Header accent (`text-*` class). Defaults to the filters orange. */
+  accentClass?: string
+  testId?: string
+  handleTestId?: string
 }
 
-export default function MobileFilterDrawer({ open, onClose, children }: Props) {
+/**
+ * The phone-only left drawer that carries the map's filter controls.
+ * Deliberately generic (title / icon / accent / test ids are props) because the
+ * Layers panel uses the exact same drawer on phones — one pattern, one file.
+ */
+export default function MobileFilterDrawer({
+  open,
+  onClose,
+  children,
+  title,
+  icon,
+  closeLabel,
+  accentClass = 'text-[#FF8C00]',
+  testId = 'mobile-filters-drawer',
+  handleTestId = 'mobile-filter-handle',
+}: Props) {
   const { t } = useLocale()
+  const drawerTitle = title ?? t('mapFiltersLive')
+  const drawerCloseLabel = closeLabel ?? t('mapCloseFilters')
   const reducedMotion = useReducedMotion()
   const panelTransition = reducedMotion
     ? { duration: 0 }
@@ -32,12 +59,12 @@ export default function MobileFilterDrawer({ open, onClose, children }: Props) {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[85] xl:hidden" role="presentation" data-testid="mobile-filters-drawer">
+        <div className="fixed inset-0 z-[85] xl:hidden" role="presentation" data-testid={testId}>
           <motion.button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
-            aria-label={t('mapCloseFilters')}
+            aria-label={drawerCloseLabel}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -60,19 +87,19 @@ export default function MobileFilterDrawer({ open, onClose, children }: Props) {
               <div className="pt-2 pb-1 flex justify-center shrink-0" aria-hidden>
                 <div
                   className="w-10 h-1 rounded-full bg-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
-                  data-testid="mobile-filter-handle"
+                  data-testid={handleTestId}
                 />
               </div>
               <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 shrink-0">
-                <div className="flex items-center gap-2 text-[#FF8C00] font-semibold tracking-widest text-xs">
-                  <Filter size={16} aria-hidden />
-                  {t('mapFiltersLive')}
+                <div className={`flex items-center gap-2 ${accentClass} font-semibold tracking-widest text-xs`}>
+                  {icon ?? <Filter size={16} aria-hidden />}
+                  {drawerTitle}
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
-                  aria-label={t('mapCloseFilters')}
+                  aria-label={drawerCloseLabel}
                 >
                   <X size={18} />
                 </button>

@@ -1468,7 +1468,10 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   animation: mapSourceChipPulse 2.8s ease-in-out infinite;
 }
 
-/* 365. Mission ring toggle integrated into layer panel */
+/* 365. Mission ring toggle integrated into layer panel.
+   The layer stack is DESKTOP ONLY (≥1280px) — below xl the same controls live in
+   the "Layers" drawer (components/MobileFilterDrawer), so there is no mobile
+   styling for it and it must never float over the map again. */
 .map-command-center .map-layer-stack {
   bottom: calc(var(--map-footer-offset) + 0.35rem + env(safe-area-inset-bottom, 0px));
   right: 1rem;
@@ -1595,10 +1598,6 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
     text-align: center;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-  }
-  .map-command-center .map-layer-stack {
-    right: 0.75rem;
-    max-width: min(12rem, calc(100vw - 1.5rem));
   }
   .map-command-center .maplibregl-ctrl-top-right {
     top: 3.75rem;
@@ -2102,6 +2101,18 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
      — not the glyph — is the real target. Grow the row, not the box. */
   .map-command-center .map-layer-stack label {
     min-height: 44px;
+  }
+  /* The Layers drawer carries the same controls as the desktop panel, so its rows
+     and pills need the same floor (the desktop rule above is scoped to the corner
+     panel only). Scoped to the drawer's scroll body so the 44px header/close
+     control is not double-specified; text pills keep their natural width. */
+  .map-command-center [data-testid='mobile-layers-drawer'] .map-filter-scroll label {
+    min-height: 44px;
+  }
+  .map-command-center [data-testid='mobile-layers-drawer'] .map-filter-scroll button,
+  .map-command-center [data-testid='mobile-layers-drawer'] .map-filter-scroll summary {
+    min-height: 44px;
+    min-width: 0;
   }
   /* Map footer links (ECCC dataset) sit on one line under the map. */
   .map-command-center .map-footer-bar a {

@@ -137,6 +137,7 @@ function StrandedCommandCenter() {
   const [presetName, setPresetName] = useState('')
   const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [showMobileLayers, setShowMobileLayers] = useState(false)
   const [showLayersPanel, setShowLayersPanel] = useState(true)
   const [showMissionRing, setShowMissionRing] = useState(true)
   const [mobileSiteSheet, setMobileSiteSheet] = useState<'peek' | 'expanded'>('peek')
@@ -751,6 +752,7 @@ function StrandedCommandCenter() {
     if (showKeyboardHelp) { setShowKeyboardHelp(false); return }
     if (showCompare) { setShowCompare(false); return }
     if (showMobileFilters) { setShowMobileFilters(false); return }
+    if (showMobileLayers) { setShowMobileLayers(false); return }
     if (!filtersCollapsed && isXlViewport) {
       setFiltersCollapsedPersisted(true)
       return
@@ -760,7 +762,7 @@ function StrandedCommandCenter() {
       if (mobileSiteSheet === 'expanded') { setMobileSiteSheet('peek'); return }
       setSelectedSite(null)
     }
-  }, [showKeyboardHelp, showCompare, showMobileFilters, showLayersPanel, selectedSite, mobileSiteSheet, filtersCollapsed, isXlViewport, setFiltersCollapsedPersisted])
+  }, [showKeyboardHelp, showCompare, showMobileFilters, showMobileLayers, showLayersPanel, selectedSite, mobileSiteSheet, filtersCollapsed, isXlViewport, setFiltersCollapsedPersisted])
 
   const isTypingTarget = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement | null
@@ -1042,6 +1044,81 @@ function StrandedCommandCenter() {
   }, [allSites])
 
   const showRightColumn = !!(selectedSite || portfolio.length > 0 || compareSites.length >= 2)
+
+  /*
+   * Layer controls live in two shells: the desktop corner panel (.map-layer-stack,
+   * ≥1280px) and the phone "Layers" drawer. The controls themselves are defined
+   * once here so the two shells can never drift apart.
+   */
+  const layerQuickToggles = (
+    <>
+      <button
+        type="button"
+        onClick={() => setShowMissionRing(v => !v)}
+        className="map-mission-ring-toggle"
+        data-testid="mission-ring-toggle"
+        aria-pressed={showMissionRing}
+        title={t('mapMissionRingToggle')}
+      >
+        <span>{showMissionRing ? t('mapMissionRingOn') : t('mapMissionRingOff')}</span>
+        <span className="map-mission-ring-toggle__dot" aria-hidden />
+      </button>
+      {layers.choropleth && (
+        <div className="flex gap-1 px-3 py-2 border-t border-white/10" data-testid="choropleth-mode-toggle">
+          <button
+            type="button"
+            onClick={() => setChoroplethMode('emission')}
+            className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
+              choroplethMode === 'emission'
+                ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
+                : 'border-white/15 text-gray-400 hover:text-white'
+            }`}
+          >
+            Emission
+          </button>
+          <button
+            type="button"
+            onClick={() => setChoroplethMode('revenue')}
+            className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
+              choroplethMode === 'revenue'
+                ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
+                : 'border-white/15 text-gray-400 hover:text-white'
+            }`}
+          >
+            Revenue
+          </button>
+        </div>
+      )}
+    </>
+  )
+
+  const layerControls = (
+    <LayerControls
+      compact
+      layers={layers}
+      onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
+      onApplyPreset={(preset: LayerPresetId) => {
+        const p = LAYER_PRESETS[preset]
+        setLayers(prev => ({ ...prev, ...p.layers }))
+        if (preset === 'satellite') setMapStyle('satellite')
+        else if (preset === 'minimal') setMapStyle('dark')
+        else setMapStyle('dark')
+        toast.success(`Applied ${p.label} layer preset`)
+      }}
+      heatmapOpacity={heatmapOpacity}
+      onHeatmapOpacityChange={setHeatmapOpacity}
+      terrainExaggeration={terrainExaggeration}
+      onTerrainExaggerationChange={setTerrainExaggeration}
+      mapStyle={mapStyle}
+      onMapStyleChange={handleMapStyleChange}
+      showSiteLabels={showSiteLabels}
+      onSiteLabelsChange={setShowSiteLabels}
+      performanceMode={performanceMode}
+      onPerformanceModeChange={setPerformanceMode}
+      onCopyViewport={copyViewportJson}
+      copyViewportLabel={t('mapCopyViewport')}
+    />
+  )
 
   return (
     <div className={`relative w-full overflow-hidden bg-[var(--bg-dark)] text-white map-command-center map-container${showRightColumn ? ' map-right-column-open' : ''}`} role="region" aria-label="Stranded command center map">
@@ -1551,21 +1628,36 @@ function StrandedCommandCenter() {
         {isXlViewport && <OnboardingTour layout="stacked" />}
       </div>
 
-      <button
-        type="button"
-        data-testid="mobile-filters-btn"
-        onClick={() => setShowMobileFilters(true)}
-        className="xl:hidden fixed top-[4.5rem] left-3 z-[68] glass px-3 py-2 rounded-2xl border border-white/10 text-xs flex items-center gap-2 touch-manipulation min-h-[44px] min-w-[44px] active:scale-[0.97] active:bg-white/5 transition-transform"
-        aria-label={t('mapFilters')}
-      >
-        <Filter size={14} className="text-[#FF8C00]" />
-        {t('mapFilters')}
-        {activeFilterCount > 0 && (
-          <span className="px-1.5 py-px rounded-full bg-[#FF8C00] text-black text-label font-bold">
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
+      {/* Phone chrome: Filters + Layers, side by side, top-left. */}
+      <div className="xl:hidden fixed top-[4.5rem] left-3 z-[68] flex items-stretch gap-2">
+        <button
+          type="button"
+          data-testid="mobile-filters-btn"
+          onClick={() => setShowMobileFilters(true)}
+          className="glass px-3 py-2 rounded-2xl border border-white/10 text-xs flex items-center gap-2 touch-manipulation min-h-[44px] min-w-[44px] active:scale-[0.97] active:bg-white/5 transition-transform"
+          aria-label={t('mapFilters')}
+        >
+          <Filter size={14} className="text-[#FF8C00]" />
+          {t('mapFilters')}
+          {activeFilterCount > 0 && (
+            <span className="px-1.5 py-px rounded-full bg-[#FF8C00] text-black text-label font-bold">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          data-testid="mobile-layers-btn"
+          onClick={() => setShowMobileLayers(true)}
+          className="glass px-3 py-2 rounded-2xl border border-white/10 text-xs flex items-center gap-2 touch-manipulation min-h-[44px] min-w-[44px] active:scale-[0.97] active:bg-white/5 transition-transform"
+          aria-label={t('mapLayers')}
+          aria-haspopup="dialog"
+          aria-expanded={showMobileLayers}
+        >
+          <Layers size={14} className="text-[#5BC0BE]" />
+          {t('mapLayers')}
+        </button>
+      </div>
 
       <MobileFilterDrawer open={showMobileFilters} onClose={() => setShowMobileFilters(false)}>
         <MapStatsBar stats={filterStats} className="mb-4" />
@@ -1622,6 +1714,25 @@ function StrandedCommandCenter() {
           onClose={() => setShowMobileFilters(false)}
           t={t}
         />
+      </MobileFilterDrawer>
+
+      {/* Phone "Layers" drawer — the same controls the desktop corner panel carries,
+          moved off the map so the map stays tappable and pannable underneath. */}
+      <MobileFilterDrawer
+        open={showMobileLayers}
+        onClose={() => setShowMobileLayers(false)}
+        title={t('mapLayersLive')}
+        icon={<Layers size={16} aria-hidden />}
+        accentClass="text-[#5BC0BE]"
+        closeLabel={t('mapCloseLayers')}
+        testId="mobile-layers-drawer"
+        handleTestId="mobile-layers-handle"
+      >
+        <ScoreLegend compact horizontal />
+        <div className="map-layer-panel-unified mt-4">
+          {layerQuickToggles}
+          {layerControls}
+        </div>
       </MobileFilterDrawer>
 
       {/* THE MAP — full-bleed base layer */}
@@ -1803,74 +1914,17 @@ function StrandedCommandCenter() {
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
       {!isXlViewport && <OnboardingTour layout="floating" />}
 
-      {/* Score legend + layer controls */}
-      <div className="map-layer-stack absolute right-4 z-[60] flex flex-col gap-2">
+      {/* Score legend + layer controls — DESKTOP ONLY (≥1280px).
+          On a phone this panel used to float over the map (192×950 px bottom-right:
+          44% of the stage area, 49% of its width) and it swallowed every tap and drag
+          underneath it, so a pin under it could not be opened and the map would not
+          pan from that half. On phones/tablets those same controls now live in the
+          "Layers" drawer, next to "Filters". */}
+      <div className="map-layer-stack absolute right-4 z-[60] hidden xl:flex flex-col gap-2">
         <ScoreLegend compact horizontal />
         <div className="map-layer-panel-unified">
-          <button
-            type="button"
-            onClick={() => setShowMissionRing(v => !v)}
-            className="map-mission-ring-toggle"
-            data-testid="mission-ring-toggle"
-            aria-pressed={showMissionRing}
-            title={t('mapMissionRingToggle')}
-          >
-            <span>{showMissionRing ? t('mapMissionRingOn') : t('mapMissionRingOff')}</span>
-            <span className="map-mission-ring-toggle__dot" aria-hidden />
-          </button>
-          {layers.choropleth && (
-            <div className="flex gap-1 px-3 py-2 border-t border-white/10" data-testid="choropleth-mode-toggle">
-              <button
-                type="button"
-                onClick={() => setChoroplethMode('emission')}
-                className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
-                  choroplethMode === 'emission'
-                    ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
-                    : 'border-white/15 text-gray-400 hover:text-white'
-                }`}
-              >
-                Emission
-              </button>
-              <button
-                type="button"
-                onClick={() => setChoroplethMode('revenue')}
-                className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
-                  choroplethMode === 'revenue'
-                    ? 'border-[#FF8C00] text-[#FF8C00] bg-[#FF8C00]/10'
-                    : 'border-white/15 text-gray-400 hover:text-white'
-                }`}
-              >
-                Revenue
-              </button>
-            </div>
-          )}
-          {showLayersPanel ? (
-            <LayerControls
-              compact
-              layers={layers}
-              onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
-              onApplyPreset={(preset: LayerPresetId) => {
-                const p = LAYER_PRESETS[preset]
-                setLayers(prev => ({ ...prev, ...p.layers }))
-                if (preset === 'satellite') setMapStyle('satellite')
-                else if (preset === 'minimal') setMapStyle('dark')
-                else setMapStyle('dark')
-                toast.success(`Applied ${p.label} layer preset`)
-              }}
-              heatmapOpacity={heatmapOpacity}
-              onHeatmapOpacityChange={setHeatmapOpacity}
-              terrainExaggeration={terrainExaggeration}
-              onTerrainExaggerationChange={setTerrainExaggeration}
-              mapStyle={mapStyle}
-              onMapStyleChange={handleMapStyleChange}
-              showSiteLabels={showSiteLabels}
-              onSiteLabelsChange={setShowSiteLabels}
-              performanceMode={performanceMode}
-              onPerformanceModeChange={setPerformanceMode}
-              onCopyViewport={copyViewportJson}
-              copyViewportLabel={t('mapCopyViewport')}
-            />
-          ) : (
+          {layerQuickToggles}
+          {showLayersPanel ? layerControls : (
             <button
               type="button"
               onClick={() => setShowLayersPanel(true)}

@@ -1,3 +1,23 @@
+# stranded — Last Updated 2026-09-17 by Mimi (layers panel gets a phone form, t_0b9e6cb1)
+
+**Brief:** on a phone the *layers* box ("SCORE V3 / Satellite imagery / performance mode") used to float over the map — 192 × 950 px anchored bottom-right, **44% of the map stage** — and it swallowed every tap and drag underneath it, so a pin under it could not be opened and the map would not pan from that half. It now has the same phone form the Filters panel already has: a **"Layers" button next to "Filters"** opening the **same drawer**, with the panel itself desktop-only. Desktop is untouched.
+
+**Commit:** `fix(map): give the layers panel a phone form — "Layers" button + drawer`
+
+- **Below 1280px the corner panel is gone; it is a drawer.** `.map-layer-stack` is now `hidden xl:flex`. The "Layers" button (teal layers glyph, 44px, top-left beside Filters) opens the Filters drawer component — one file, one pattern: `MobileFilterDrawer` grew `title` / `icon` / `accentClass` / `closeLabel` / `testId` props so both drawers are the same surface. Closes by backdrop tap, ✕, Escape, or the page's `closeAllPanels`.
+- **The controls are defined once.** The mission-ring toggle, the choropleth switch and every `LayerControls` row/preset/slider are now a single `layerControls` / `layerQuickToggles` pair rendered into *both* shells (desktop panel + drawer), so the two can never drift apart. The Score v3 legend rides along into the drawer.
+- **The phone keeps the touch floor.** New coarse-pointer rule: rows, pills and sliders inside the Layers drawer get the same ≥44px target the desktop panel already had (`.map-layer-stack` rules don't reach into a drawer).
+- **Honest by construction.** No map data, pin contents or proof-per-pin surface was touched (the serialised sibling card's work); layer *state* is the same React state, just a different home.
+- **Verified in a real browser, with real touch events.** `scripts/verify-mobile-layers-drawer.mjs` (Playwright, CDP `Input.dispatchTouchEvent`, fresh contexts, coarse pointer) — all green:
+  - the floating panel's own footprint (x∈[186,378], y∈[0,755]) at 390px: **25/25 sampled points belong to the map or to chrome that pre-dates this change; 0 unclassified**; `elementFromPoint(195,450)` = the map canvas;
+  - **the deep-linked pin is tappable again:** the pin (Mission Landfill, G12350) was moved to (300,450) — the exact spot the panel owned — and a touch tap there opened the site card and set `?site=G12350`;
+  - **the map pans from that half:** a 120px drag starting at (300,520) moved the centre lng −123.07961 → −122.50576;
+  - **the drawer carries the same controls:** 26 controls, **26 reachable**, scrollable, not the full screen (320px of 390), toggling a layer inside it flips the layer;
+  - 360/390/430 (no horizontal overflow) + 1440 desktop (panel still `display:flex`, 27 controls).
+  - Known, unchanged, **not this card**: the first-visit quick tour (z-75) and getting-started strip still sit over the map (audit finding F13) — measured again and reported, untouched.
+
+---
+
 # stranded — Last Updated 2026-09-16 by Mimi (proof-per-pin trust UI, t_fcf032ef)
 
 **Brief:** every pin on the map now carries its OTS-backed proof state — one honest answer for all 2,611 pins, because they all come from one Bitcoin-anchored dataset file (`stranded-sites-REAL.geojson`, digest `28c99c26…`, block 966,549, checked via Satohash's own node). The family's shared `HowProofWorks` explainer was ported byte-for-byte (kitsboy/satohash `src/components/trust/HowProofWorks.jsx`) — not reinvented.
