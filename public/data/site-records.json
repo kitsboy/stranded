@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "note": "One record per map site — the deep-link fast path. Each file is the exact EnrichedSite that loadSites() returns for that site, generated from the canonical geojson with the same functions the client uses.",
+  "urlTemplate": "/data/site/{id}.json",
+  "source": "stranded-sites.geojson",
+  "sourceSha256": "28c99c26607b33048cae81bb0a8df50f96e101a99d3e80ed148001b128e7208b",
+  "siteCount": 2611,
+  "recordsSha256": "1ce1974a7c735039d88f63e7afa2023248908031264461d84dbc8802e28c5d27",
+  "bytes": 2425704,
+  "bytesNote": "total uncompressed payload of all records"
+}

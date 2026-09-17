@@ -18,7 +18,7 @@ import DualRangeSlider from '@/components/DualRangeSlider'
 import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
 import CompareSitesModal from '@/components/CompareSitesModal'
-import { loadSites, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
+import { loadSites, loadSiteRecord, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialUsd, scalePotentialUsd } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
 import { parseMapUrl, buildMapUrl, buildMapShareUrl, haversineKm, type MapUrlState } from '@/lib/map-url-state'
@@ -167,10 +167,51 @@ function StrandedCommandCenter() {
   const router = useRouter()
 
   /**
-   * The site id a shared/deep link asks for. It is resolved only after the
-   * dataset downloads, so the panel can name it while the map is still loading.
+   * The site id a shared/deep link asks for.
+   *
+   * Fix 2/3 — the card no longer waits for the dataset: the effect below opens it from the
+   * site's own record (~950 B) in about a second, and the 2,611-site dataset loads behind it.
+   * This comment used to say the id "is resolved only after the dataset downloads" — that
+   * was the bug: measured 10–37 s on a phone, CPU-bound (a faster link was slower).
    */
   const deepLinkSiteId = searchParams.get('site')
+  /** The record-backed site we opened early (id + the object the panel is showing). */
+  const earlyDeepLinkRef = useRef<string | null>(null)
+  /** True while the deep link still owns the selection — a person who moved it wins. */
+  const deepLinkOwnsSelection = useRef(true)
+  /**
+   * Fleet links (?site=…&tpl=…/miners/asic/gensets/mode) carry a template that can only be
+   * scaled once the whole dataset is here, and SiteDetailsPanel reads it as an initial
+   * state — so those links keep the dataset path and never show a card that would then have
+   * to be rebuilt. They are the one deep link with a reason to wait.
+   */
+  const deepLinkHasFleet = useMemo(() => !!parseMapUrl(searchParams).fleet, [searchParams])
+
+  /**
+   * Open the deep-linked site from its own record, before the portfolio arrives.
+   * Falls back silently (null) to the dataset path when there is no record.
+   */
+  useEffect(() => {
+    if (!deepLinkSiteId || deepLinkHasFleet) return
+    let cancelled = false
+    loadSiteRecord(deepLinkSiteId).then(record => {
+      if (cancelled || !record) return
+      earlyDeepLinkRef.current = record.id
+      recordRecentSite(record)
+      const [lng, lat] = record.geometry.coordinates
+      // Put the map on the site as soon as it exists, so "the answer" is centred too.
+      setCenterTarget(prev => prev ?? { lat, lng, zoom: 10 })
+      setSelectedSite(prev => (prev && prev.id !== record.id ? prev : record))
+    })
+    return () => { cancelled = true }
+  }, [deepLinkSiteId, deepLinkHasFleet])
+
+  /** The link stops owning the selection the moment the person picks or closes a site. */
+  useEffect(() => {
+    if (!deepLinkSiteId) return
+    if (selectedSite && selectedSite.id !== deepLinkSiteId) deepLinkOwnsSelection.current = false
+    else if (!selectedSite && earlyDeepLinkRef.current) deepLinkOwnsSelection.current = false
+  }, [selectedSite, deepLinkSiteId])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -220,7 +261,13 @@ function StrandedCommandCenter() {
             setFleetUrlState({ siteId: match.id, template: capFleetToSite(template, match) })
           }
           setTimeout(() => {
-            setSelectedSite(match)
+            // The dataset arriving must not overrule the person: if they already picked or
+            // closed a site while it loaded, their choice stands. (The whole wait used to
+            // be silent and 10–37 s long, so an unconditional re-open here was a real yank.)
+            if (!deepLinkOwnsSelection.current) return
+            // Already showing this exact site from its own record? Then there is nothing to
+            // replace — same data, same panel, no remount flash.
+            if (earlyDeepLinkRef.current !== match.id) setSelectedSite(match)
             // ensure province of deep-linked site is not filtered out
             if (match.properties.province) {
               setSelectedProvinces(prev => {

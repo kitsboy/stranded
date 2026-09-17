@@ -3,7 +3,7 @@ import {
   computeStrandedScore, scoreTierClass, scoreTierColor, scoreTier,
   effectiveGridKm, effectiveInternetFactor, hasMeasuredGrid, hasStrongConnectivity,
 } from './scoring'
-import { scorePercentile, scoreBadgeLabel } from './percentile'
+import { scorePercentile, scorePercentiles, scoreBadgeLabel } from './percentile'
 
 export type EnrichedSite = StrandedSite & {
   id: string
@@ -55,6 +55,33 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
   }
 }
 
+/**
+ * One site, from its own published record (`/data/site/<id>.json`, ~950 B; 587 B gzipped).
+ *
+ * The deep-link fast path. A shared link used to wait for the whole portfolio — 2.85 MB of
+ * geojson to parse, 2,611 features to enrich and percentile-rank — before the named site's
+ * card could appear; measured 10–37 s on a phone and provably CPU-bound. This returns the
+ * SAME EnrichedSite `loadSites()` would produce for that site (generated from the same
+ * canonical geojson by the same functions — see scripts/generate-site-records.mjs), so the
+ * card the person sees first is the card they keep, only sooner. The dataset still loads
+ * behind it and the map fills in as usual.
+ *
+ * Returns null when there is no record (older deploy, offline, unknown id) — callers must
+ * fall back to the dataset path, never invent a site.
+ */
+export async function loadSiteRecord(id: string): Promise<EnrichedSite | null> {
+  if (!id) return null
+  try {
+    const res = await fetch(`/data/site/${encodeURIComponent(id)}.json`)
+    if (!res.ok) return null
+    const record = (await res.json()) as EnrichedSite
+    if (!record?.id || !record.geometry?.coordinates?.length || !record.properties) return null
+    return record
+  } catch {
+    return null
+  }
+}
+
 export async function loadSites(): Promise<EnrichedSite[]> {
   let data: GeoJSON.FeatureCollection
   try {
@@ -77,11 +104,12 @@ export async function loadSites(): Promise<EnrichedSite[]> {
   }
   const features: StrandedSite[] = (data.features || []) as StrandedSite[]
   const enriched = features.map(enrichSite)
-  const allScores = enriched.map(s => s.strandedScore)
-  return enriched.map(s => ({
+  // One pass over the score distribution (not one sort per site — see scorePercentiles).
+  const percentiles = scorePercentiles(enriched.map(s => s.strandedScore))
+  return enriched.map((s, i) => ({
     ...s,
-    scorePercentile: scorePercentile(s.strandedScore, allScores),
-    scoreBadge: scoreBadgeLabel(scorePercentile(s.strandedScore, allScores)),
+    scorePercentile: percentiles[i],
+    scoreBadge: scoreBadgeLabel(percentiles[i]),
   }))
 }
 
