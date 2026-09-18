@@ -1,3 +1,23 @@
+# 🚀 Stranded /map — deep-link boot weight cut SHIPPED (fix 4/4), live-verified
+
+**2026-09-18 · commits `f1a14e9` + `3ce7a03`, live verified (`3ce7a03`, CI "verify live deploy" green).**
+
+Deep-linked site card (`?site=…`) shipped up: the residual after fix 2/3 was the app's own **boot**
+(bundle parse + hydration), not data. What landed:
+- **Deferred 4 interaction/first-run-gated widgets** off the boot bundle → `next/dynamic ssr:false`
+  (KeyboardHelpModal, CompareSitesModal, ClusterSiteList, OnboardingTour). Zero behavior change.
+- **Warm-started the deep-link record at module scope** — `loadSiteRecord` memoizes its promise; the
+  page kicks the real ~1 KB fetch the moment its chunk parses instead of waiting for hydration.
+  Local 4× CPU record start: 1600 → 544 ms; live fast record start 2056 → 1283 ms.
+- **Deliberately did NOT lazy-load `SiteDetailsPanel` (the card)** — measured it added ~2 s to reveal on
+  Slow 4G (heavy chunk had to download on the reveal path); reverted. The card must stay eager.
+- Do not regress: the record still opens the card first; dataset loads behind and never re-opens a
+  closed/replaced card; fleet links (`?tpl|gensets|miners|asic|mode`) still wait for the dataset.
+- Note: the box is a loaded 3-core VPS (load 5–10); slow-4G card latency tracks box CPU. Deep-link path
+  itself is sub-second; desktop card ~1.7 s.
+
+Full write-up: `/root/MASTER-BRAIN/03-Projects/stranded/docs/STRANDED-MAP-FIX-4-BOOT-WEIGHT-2026-09-18.md`.
+
 ## Session — 2026-09-13 · Stranded mobile/UI/economics batch COMPLETE, live-verified
 
 **Whole approved batch shipped and independently verified against the live site**

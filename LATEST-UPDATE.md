@@ -1,3 +1,29 @@
+# stranded — Last Updated 2026-09-18 by Mimi (deep-link boot weight cut, t_06b46ab4)
+
+**Brief:** after fix 2/3 the deep-linked card (`?site=G12350`) was down to ~5.5 s live, but the residual
+was the app's own **boot** (bundle parse + hydration), not data — ~3.7 s passed before the record was
+even chosen. This fix cut boot weight and warm-started the record: (1) four interaction/first-run-gated
+widgets (KeyboardHelpModal, CompareSitesModal, ClusterSiteList, OnboardingTour) are now
+`next/dynamic ssr:false` — they never render on the deep-link first paint, so their code left the boot
+bundle; (2) `loadSiteRecord` memoizes its promise and the page kicks the real ~1 KB fetch at module
+scope, so the request overlaps boot instead of waiting for hydration (local 4× CPU record start
+1600 → 544 ms; live fast 2056 → 1283 ms). The card (`SiteDetailsPanel`) was deliberately **not**
+lazy-loaded — measured it added ~2 s to reveal on Slow 4G and was reverted. Record-first logic, dataset
+fallback, and fleet-link wait path are unchanged.
+
+**Commit:** `f1a14e9` (defer widgets) + `3ce7a03` (warm-start record) — live verified `3ce7a03`.
+
+- **`app/map/page.tsx`** — 4 interaction-gated widgets → `dynamic(…, { ssr: false })`; module-scope
+  record prefetch guarded to client + non-fleet links (mirrors `deepLinkHasFleet`).
+- **`lib/sites.ts`** — `loadSiteRecord` memoizes its promise (`siteRecordCache`); record byte-identical.
+- **Measured (live, cold cache, back-to-back on the loaded 3-core VPS):** record in hand
+  slow4g 3799 → 3021 ms, fast 2093 → 1350 ms, desktop 651 → 528 ms; desktop card 1977 → 1736 ms.
+  Slow-4G card latency tracks the box's CPU (long tasks 4.9 → 11.5 s across runs); the deep-link path
+  itself stays sub-second. Plain `/map/` still reaches 2,611 sites; no card on plain map (correct).
+- **Full write-up:** `/root/MASTER-BRAIN/03-Projects/stranded/docs/STRANDED-MAP-FIX-4-BOOT-WEIGHT-2026-09-18.md`.
+
+---
+
 # stranded — Last Updated 2026-09-17 by Mimi (deep-link card from the site's own record, t_ea3a7734)
 
 **Brief:** `https://stranded.giveabit.io/map/?site=G12350` — the link you send when you mean *"look at this one"* — took **10–37 s** before Mission Landfill's card appeared, and it was provably CPU, not network (the audit measured a *faster* connection taking *longer*). The `?site=` id was only resolved *inside* the code path that had already parsed 2.85 MB of GeoJSON, enriched 2,611 sites and percentile-ranked them all, so the card could not exist until the portfolio did. It now opens from **that one site's own record** (~950 B, `public/data/site/G12350.json`) while the dataset loads behind it.
