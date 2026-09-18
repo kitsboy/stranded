@@ -17,7 +17,6 @@ import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/L
 import DualRangeSlider from '@/components/DualRangeSlider'
 import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
-import CompareSitesModal from '@/components/CompareSitesModal'
 import { loadSites, loadSiteRecord, filterSites, EnrichedSite, effectiveGridKm, hasStrongConnectivity } from '@/lib/sites'
 import { savePortfolio, loadPortfolioIds, portfolioShareUrl, exportPortfolioCsv, exportPortfolioPdfHtml, portfolioDailyPotentialUsd, scalePotentialUsd } from '@/lib/portfolio'
 import { decodePortfolioShare } from '@/lib/portfolio'
@@ -35,12 +34,10 @@ import { exportFilteredGeojson, exportSitesKml, downloadBlob } from '@/lib/expor
 import { savePortfolioProfile } from '@/lib/portfolio-profiles'
 import { addSiteAlert, evaluateWatchHits, markAlertNotified } from '@/lib/alerts'
 import { decodePresetHash, presetShareUrl } from '@/lib/filter-preset-hash'
-import KeyboardHelpModal from '@/components/KeyboardHelpModal'
 import ScoreLegend from '@/components/ScoreLegend'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
-import OnboardingTour from '@/components/OnboardingTour'
 import QuickActions, { MapFabIcons } from '@/components/QuickActions'
 import CopyLinkButton from '@/components/CopyLinkButton'
 import { recordRecentSite } from '@/lib/recent-sites'
@@ -85,11 +82,23 @@ import FilterPanelHeader from '@/components/FilterPanelHeader'
 import { computeMapFilterStats, buildFilterAnnouncement, siteDensityTier } from '@/lib/map-stats'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import SavedMapViews from '@/components/SavedMapViews'
-import ClusterSiteList from '@/components/ClusterSiteList'
 import type { ClusterListItem } from '@/lib/cluster-list'
 
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false })
+
+/*
+ * Fix 4/4 — boot-weight cleanup. The deep-linked site's card (SiteDetailsPanel) waits on
+ * the page module's whole eager import graph to download, parse, and hydrate before the
+ * record effect can fire. These four widgets are interaction-gated or first-run-only, so
+ * they never render on the deep-link first paint: lazy-loading them splits their code off
+ * the critical boot path with zero behavior change (each <X> below already mounts only
+ * under showCompare / showKeyboardHelp / clusterList / first-run).
+ */
+const KeyboardHelpModal = dynamic(() => import('@/components/KeyboardHelpModal'), { ssr: false })
+const CompareSitesModal = dynamic(() => import('@/components/CompareSitesModal'), { ssr: false })
+const ClusterSiteList = dynamic(() => import('@/components/ClusterSiteList'), { ssr: false })
+const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false })
 type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 
 function StrandedCommandCenter() {
