@@ -69,17 +69,32 @@ export function enrichSite(site: StrandedSite): EnrichedSite {
  * Returns null when there is no record (older deploy, offline, unknown id) — callers must
  * fall back to the dataset path, never invent a site.
  */
+/*
+ * Fix 4/4 — warm-start the deep link. The card's record is tiny (~1 KB), but the fetch
+ * used to START only after the whole page module had downloaded, parsed, and hydrated —
+ * measured ~3.6 s into a slow-4G cold load. Memoizing the promise lets the page kick the
+ * fetch off at module scope (overlapping boot with the request) and still dedupes any
+ * later call. The record itself is unchanged; this only starts it sooner.
+ */
+const siteRecordCache = new Map<string, Promise<EnrichedSite | null>>()
+
 export async function loadSiteRecord(id: string): Promise<EnrichedSite | null> {
   if (!id) return null
-  try {
-    const res = await fetch(`/data/site/${encodeURIComponent(id)}.json`)
-    if (!res.ok) return null
-    const record = (await res.json()) as EnrichedSite
-    if (!record?.id || !record.geometry?.coordinates?.length || !record.properties) return null
-    return record
-  } catch {
-    return null
-  }
+  const cached = siteRecordCache.get(id)
+  if (cached) return cached
+  const promise = (async () => {
+    try {
+      const res = await fetch(`/data/site/${encodeURIComponent(id)}.json`)
+      if (!res.ok) return null
+      const record = (await res.json()) as EnrichedSite
+      if (!record?.id || !record.geometry?.coordinates?.length || !record.properties) return null
+      return record
+    } catch {
+      return null
+    }
+  })()
+  siteRecordCache.set(id, promise)
+  return promise
 }
 
 export async function loadSites(): Promise<EnrichedSite[]> {

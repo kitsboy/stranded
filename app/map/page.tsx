@@ -99,6 +99,25 @@ const KeyboardHelpModal = dynamic(() => import('@/components/KeyboardHelpModal')
 const CompareSitesModal = dynamic(() => import('@/components/CompareSitesModal'), { ssr: false })
 const ClusterSiteList = dynamic(() => import('@/components/ClusterSiteList'), { ssr: false })
 const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false })
+
+/*
+ * Fix 4/4 — warm-start the deep-link record. Kick the real (memoized) record fetch off at
+ * module scope, as soon as this chunk parses, instead of waiting for hydration to complete
+ * (the old path started the request ~3.6 s into a slow-4G cold load). Overlaps the ~1 KB
+ * request with the rest of boot; the useEffect below still owns the card and keeps the
+ * dataset-fallback and fleet-template behaviour exactly as before.
+ */
+if (typeof window !== 'undefined') {
+  try {
+    const sp = new URLSearchParams(window.location.search)
+    const s = sp.get('site')
+    // Fleet links (?site=…&tpl|gensets|miners|asic|mode) still wait for the dataset to
+    // rescale — mirror the runtime's deepLinkHasFleet guard and don't pre-warm those.
+    if (s && !parseMapUrl(sp).fleet) {
+      void loadSiteRecord(s)
+    }
+  } catch { /* non-module context (SSR/prerender) — the effect handles it on the client */ }
+}
 type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 
 function StrandedCommandCenter() {
