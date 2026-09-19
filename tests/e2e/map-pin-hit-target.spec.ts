@@ -75,7 +75,10 @@ async function dismissFirstRunOverlays(page: Page) {
     const el = page.locator(sel).first()
     if (await el.count()) {
       await el.tap().catch(() => undefined)
-      await page.waitForTimeout(400)
+      // Tolerate the page/context closing mid-test (a sibling test's teardown
+      // can close the shared browser while this wait is pending — that must not
+      // surface as a spurious "Target page ... has been closed" failure).
+      await page.waitForTimeout(400).catch(() => undefined)
     }
   }
 }
