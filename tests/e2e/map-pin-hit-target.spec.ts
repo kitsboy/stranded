@@ -61,7 +61,7 @@ const WIDTHS = [360, 390, 430] as const
 const PRECISE_URL = '/map/?site=G12350&minScore=85'
 const CLOSE_SEL = '[aria-label="Close site details"]:visible'
 
-test.describe.configure({ timeout: 1_200_000 })
+test.describe.configure({ timeout: 600_000 })
 
 /**
  * Dismiss the two first-visit overlays. A fresh browser context has neither a
