@@ -500,9 +500,12 @@ test('build summary @390: save → reload → apply, and the fleet share URL, re
     const fromLink = (await stripSnapshot(fresh))!
     await fresh.close()
     expect(fromLink.miners, 'shared fleet URL miner count').toBe(edited.miners)
-    expect(fromLink.power, 'shared fleet URL power').toBe(edited.power)
-    expect(fromLink.net, 'shared fleet URL net/day').toBe(money(fromLink.roi.dailyProfitNet))
-    expect(fromLink.payback, 'shared fleet URL payback').toBe(edited.payback)
+        expect(fromLink.power, 'shared fleet URL power').toBe(edited.power)
+        expect(fromLink.net, 'shared fleet URL net/day').toBe(money(fromLink.roi.dailyProfitNet))
+        // Payback is data-derived (like CapEx/net): the dataset can refresh a
+        // different figure at a different moment, so assert the fresh page's strip
+        // against ITS OWN ROI model, not against the earlier `edited` snapshot.
+        expect(fromLink.payback, 'shared fleet URL payback').toBe(expectedPayback(fromLink.roi.payback))
   } finally {
     await context.close()
   }
