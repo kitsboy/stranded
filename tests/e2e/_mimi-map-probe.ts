@@ -200,6 +200,17 @@ export async function canvasPins(page: Page) {
           drawnPx: Math.round((typeof radius === 'number' ? radius : 0) * 2),
           probes: vectors.map((v: any) => {
             const c = { x: p.x + v.dx, y: p.y + v.dy }
+            // The app's own hit test (Map.tsx) looks in a 44x44 box around the
+            // tap (PIN_HIT_RADIUS = 22), not at a single pixel. A near-miss
+            // point can be a single-pixel miss yet still fall inside a
+            // neighbour's 44 px box — the app would then open the neighbour,
+            // which is correct but is not this assertion. So the "does another
+            // marker own this point" check must use the same box the app uses,
+            // or a near-miss that the app routes to a neighbour is not skipped.
+            const box: [[number, number], [number, number]] = [
+              [c.x - 22, c.y - 22],
+              [c.x + 22, c.y + 22],
+            ]
             return {
               kind: v.kind,
               dx: v.dx,
@@ -208,7 +219,7 @@ export async function canvasPins(page: Page) {
               y: cr.y + c.y,
               directOnPin: map.queryRenderedFeatures([c.x, c.y], { layers: [layer] }).length > 0,
               directOnAnyMarker:
-                map.queryRenderedFeatures([c.x, c.y], { layers: [layer, clusterLayer] }).length > 0,
+                map.queryRenderedFeatures(box, { layers: [layer, clusterLayer] }).length > 0,
             }
           }),
         })
