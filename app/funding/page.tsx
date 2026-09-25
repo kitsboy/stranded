@@ -361,7 +361,7 @@ export default function FundingPage() {
         <p className="text-gray-400 max-w-3xl mb-5">
           One decision — forming an EU entity — opens <b className="text-gray-200">both lanes at once</b>: a fast
           talent lane to bring European engineering into Canada, and a capital lane that unlocks the EU instruments
-          a Canada-only company can't touch. Here's how the two sides of the same move work.
+          a Canada-only company can&apos;t touch. Here&apos;s how the two sides of the same move work.
         </p>
         <div className="grid md:grid-cols-2 gap-4">
           {/* talent lane */}
@@ -399,7 +399,7 @@ export default function FundingPage() {
         </div>
         <div className="mt-4 text-[10px] text-gray-600 leading-relaxed">
           These are indicative pathways, not guarantees — always confirm terms with an immigration lawyer and the relevant EU programme before acting.
-          Eligibility reflects the Canada–EU Horizon Europe association (signed 3 July 2024) and Canada's status as an EUREKA/Eurostars country.
+          Eligibility reflects the Canada–EU Horizon Europe association (signed 3 July 2024) and Canada&apos;s status as an EUREKA/Eurostars country.
         </div>
       </section>
 
