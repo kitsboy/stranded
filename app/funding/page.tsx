@@ -18,6 +18,7 @@ import { liveModelRevenue, captureAtPct } from '@/lib/dashboard-metrics'
 import TermSheetCard from '@/components/TermSheetCard'
 import AmortizationTable from '@/components/AmortizationTable'
 import CapexFxControls from '@/components/CapexFxControls'
+import EuFundingExplorer from '@/components/EuFundingExplorer'
 import { USD_PER_CAD_FALLBACK } from '@/lib/capex-fx'
 
 const CETA_PROGRAMS = [
@@ -210,6 +211,8 @@ export default function FundingPage() {
                 These documents self-update from the research vault — the download links always serve the current version.
               </div>
             </section>
+
+            <div className="mb-10"><EuFundingExplorer /></div>
 
       {liveStats && liveRevenue != null && (
         <section className="mb-8 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-5" data-testid="funding-live-revenue">
