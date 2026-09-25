@@ -403,6 +403,33 @@ export default function FundingPage() {
         </div>
       </section>
 
+      {/* EUMER compliance product — the niche */}
+      <section className="mb-10 rounded-2xl border border-[#5BC0BE]/40 bg-gradient-to-br from-[#5BC0BE]/12 via-black/10 to-[#FF8C00]/8 p-6 md:p-7">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-[#5BC0BE] text-black rounded">COMPLIANCE · THE NICHE</span>
+          <span className="text-[10px] text-gray-500 font-mono">EUMER · 2027</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tighter mb-1">Verified methane, sold to Europe</h2>
+        <p className="text-gray-400 max-w-3xl mb-4">
+          From <b className="text-gray-200">1 January 2027</b> the EU Methane Regulation will require importers to prove the
+          methane intensity of the gas they buy. That turns our measure → verify → document engine into a
+          <b className="text-gray-200"> commercial inset product</b> — verified abatement from our Canadian sites, sold to EU
+          importers. Not a grant pitch: a business.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[10px]">
+          {['MEASURE', 'ABATE', 'VERIFY', 'CERTIFY', 'SELL'].map((s, i) => (
+            <div key={s} className="rounded-xl border border-white/10 bg-black/20 px-2 py-3">
+              <div className={`text-lg font-bold ${i % 2 ? 'text-[#FF8C00]' : 'text-[#5BC0BE]'}`}>{i + 1}</div>
+              <div className="mt-1 font-semibold text-gray-300">{s}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 text-[10px] text-gray-600 leading-relaxed">
+          Scoping stage — not yet live. Buyer: EU gas importers and LNG aggregators who must show lower-intensity
+          supply. Regulatory mechanics are still being verified with counsel; the full scope lives in the research vault.
+        </div>
+      </section>
+
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-4">
           <div>
