@@ -171,8 +171,8 @@ button:focus-visible,
     radial-gradient(ellipse 60% 45% at 50% 85%, rgba(255, 140, 0, 0.06), transparent 45%);
 }
 
-/* Header background image — Canada energy map, full-width, colour, at 20%
-   opacity, layered behind the glass mesh. Remove this block to drop it. */
+/* Header background image — tree-and-birds landscape, full-width, colour, at
+   20% opacity, layered behind the glass mesh. Remove this block to drop it. */
 .hero-mesh::after {
   content: '';
   position: absolute;
@@ -183,7 +183,7 @@ button:focus-visible,
   transform: translateX(-50%);
   z-index: -1;
   pointer-events: none;
-  background: url('/images/7-canada-energy.jpg') center / cover no-repeat;
+  background: url('/images/header-bg.jpg') center / cover no-repeat;
   opacity: 0.2;
 }
 
