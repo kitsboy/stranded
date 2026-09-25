@@ -351,6 +351,58 @@ export default function FundingPage() {
         )}
       </section>
 
+      {/* Talent + Capital — two-lane EU play */}
+      <section className="mb-10 rounded-2xl border border-[#FF8C00]/30 bg-gradient-to-br from-[#FF8C00]/10 via-black/10 to-[#5BC0BE]/10 p-6 md:p-7">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-[#FF8C00] text-black rounded">TALENT + CAPITAL</span>
+          <span className="text-[10px] text-gray-500 font-mono">Canada–EU two-lane play</span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tighter mb-1">Hire EU engineers. Tap EU capital.</h2>
+        <p className="text-gray-400 max-w-3xl mb-5">
+          One decision — forming an EU entity — opens <b className="text-gray-200">both lanes at once</b>: a fast
+          talent lane to bring European engineering into Canada, and a capital lane that unlocks the EU instruments
+          a Canada-only company can't touch. Here's how the two sides of the same move work.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* talent lane */}
+          <div className="rounded-2xl border border-white/15 bg-black/20 p-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-semibold text-[#5BC0BE] tracking-wider">LANE 1 · TALENT</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#5BC0BE]/15 text-[#5BC0BE] border border-[#5BC0BE]/40">2-week hires</span>
+            </div>
+            <div className="font-semibold mb-3">EU engineers → Canadian projects</div>
+            <ul className="space-y-2.5 text-xs text-gray-300 leading-relaxed">
+              <li className="flex gap-2"><span className="text-[#5BC0BE]">·</span><span><b className="text-gray-100">Global Talent Stream</b> — work permit in ~2 weeks for specialized tech/in-demand occupations. The fast lane for software, electrical and mechanical engineers.</span></li>
+              <li className="flex gap-2"><span className="text-[#5BC0BE]">·</span><span><b className="text-gray-100">Provincial Nominee Programs</b> — BC PNP Tech, Alberta AAIP and Ontario OINP explicitly list mechanical, electrical and civil engineers; a practical path to permanent residence.</span></li>
+              <li className="flex gap-2"><span className="text-[#5BC0BE]">·</span><span><b className="text-gray-100">Intra-company transfer</b> (needs no labour-market test) — moves staff from our EU entity to Canada quickly. The same entity that unlocks the capital lane.</span></li>
+            </ul>
+            <div className="mt-4 pt-3 border-t border-white/10 text-[10px] text-gray-500">
+              Sources: <a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:text-white">IRCC Express Entry</a> · <a href="https://www.welcomebc.ca/immigrate-to-b-c/about-the-bc-provincial-nominee-program/the-bc-provincial-nominee-program" target="_blank" rel="noopener noreferrer" className="text-[#5BC0BE] hover:text-white">BC PNP Tech</a>
+            </div>
+          </div>
+          {/* capital lane */}
+          <div className="rounded-2xl border border-white/15 bg-black/20 p-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-semibold text-[#FF8C00] tracking-wider">LANE 2 · CAPITAL</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FF8C00]/15 text-[#FF8C00] border border-[#FF8C00]/40">up to €226M</span>
+            </div>
+            <div className="font-semibold mb-3">EU entity → EU facilities</div>
+            <ul className="space-y-2.5 text-xs text-gray-300 leading-relaxed">
+              <li className="flex gap-2"><span className="text-[#FF8C00]">·</span><span><b className="text-gray-100">EIC Accelerator</b> — up to <b className="text-gray-100">€2.5M grant + €10M equity</b>, for a deeper-EU startup once our European arm relocates its activity there.</span></li>
+              <li className="flex gap-2"><span className="text-[#FF8C00]">·</span><span><b className="text-gray-100">EU Innovation Fund (ETS)</b> — <b className="text-gray-100">€1.8M–€216M</b> for a CCS / net-zero demo hosted in Europe, channelled through the EU entity.</span></li>
+              <li className="flex gap-2"><span className="text-[#FF8C00]">·</span><span><b className="text-gray-100">Horizon Cluster 5</b> (31 Mar 2026) — the flagship €2.5M–€15M consortium grant, accessible from Canada via our EU partners.</span></li>
+            </ul>
+            <div className="mt-4 pt-3 border-t border-white/10 text-[10px] text-gray-500">
+              Sources: <a href="https://eic.ec.europa.eu/eic-funding-opportunities/eic-accelerator_en" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:text-white">EIC Accelerator</a> · <a href="https://climate.ec.europa.eu/areas-action/eu-funding-climate-action/innovation-fund/what-innovation-fund_en" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:text-white">EU Innovation Fund</a>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 text-[10px] text-gray-600 leading-relaxed">
+          These are indicative pathways, not guarantees — always confirm terms with an immigration lawyer and the relevant EU programme before acting.
+          Eligibility reflects the Canada–EU Horizon Europe association (signed 3 July 2024) and Canada's status as an EUREKA/Eurostars country.
+        </div>
+      </section>
+
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-4">
           <div>
