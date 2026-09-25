@@ -16,7 +16,7 @@ import TooltipBinder from '@/components/TooltipBinder'
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
   description: '2,611 mapped stranded-energy sites (with reported CH₄). Discover, model, and fund Bitcoin-powered energy projects with our world-class intelligence platform — optimistic scenarios always labelled as such. Real generators, per-site Value (CapEx + methane-loss ROI + financing), portfolio tools, education, and capital pathways. Methane today, full stranded energy ecosystem tomorrow.',
-  icons: { icon: ['/favicon.svg', '/logo.png'] },
+  icons: { icon: ['/favicon.svg', '/favicon-32x32.png', '/favicon-16x16.png'], apple: ['/apple-touch-icon.png'] },
   manifest: '/manifest.json',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stranded.giveabit.io'),
   alternates: {
@@ -53,8 +53,8 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="theme-color" content="#243447" />
-        <link rel="apple-touch-icon" href="/logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://api.coingecko.com" crossOrigin="anonymous" />
         {/* Umami (privacy-friendly analytics) — website f07bb222-…; host is suite Umami on THOR via analytics.giveabit.io */}
         <script
