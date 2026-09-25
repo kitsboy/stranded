@@ -72,6 +72,44 @@ const QUIZ_STEPS: { key: keyof GrantQuizAnswers; label: string; options: { value
       { value: 'over36', label: 'Over 36 months' },
     ],
   },
+  {
+    key: 'energyType',
+    label: 'What does the project primarily tackle?',
+    options: [
+      { value: 'gas', label: 'Stranded / flare gas → energy (ideally to Bitcoin)' },
+      { value: 'ch4', label: 'Landfill or coal-mine methane capture' },
+      { value: 'renew', label: 'Solar / wind / other renewables' },
+      { value: 'ccs', label: 'Carbon capture, use or storage' },
+      { value: 'hybrid', label: 'Mixed — several of the above' },
+    ],
+  },
+  {
+    key: 'talent',
+    label: 'Will you bring in specialized international (EU) engineering talent?',
+    options: [
+      { value: 'domestic', label: 'Canadian / local hires for now' },
+      { value: 'euTalent', label: 'Yes — hiring EU engineers / specialists' },
+      { value: 'researchTeam', label: 'Building an R&D / research team' },
+    ],
+  },
+  {
+    key: 'measurement',
+    label: 'How verified is your methane / emissions data?',
+    options: [
+      { value: 'unmeasured', label: 'Estimates only so far' },
+      { value: 'measured', label: 'Field-measured on our sites' },
+      { value: 'ogmp', label: 'Third-party / OGMP-2.0-level verified' },
+    ],
+  },
+  {
+    key: 'monetize',
+    label: 'Planned revenue / monetization?',
+    options: [
+      { value: 'energyOnly', label: 'Energy (and/or Bitcoin) sales only' },
+      { value: 'carbon', label: 'Carbon credits / offsets' },
+      { value: 'both', label: 'Energy + carbon-market revenue' },
+    ],
+  },
 ]
 
 const DEFAULT_ANSWERS: GrantQuizAnswers = {
@@ -80,6 +118,10 @@ const DEFAULT_ANSWERS: GrantQuizAnswers = {
   capexBand: '1to5m',
   indigenousPartnership: false,
   timeline: '12to36',
+  energyType: 'hybrid',
+  talent: 'domestic',
+  measurement: 'unmeasured',
+  monetize: 'energyOnly',
 }
 
 function fmtUsd(n: number) {
@@ -261,7 +303,7 @@ export default function FundingPage() {
       {/* Grant matcher quiz — upgrade 176 */}
       <section className="mb-10 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-6">
         <h2 className="text-xl font-semibold text-[#5BC0BE] mb-1">Grant Matcher Quiz</h2>
-        <p className="text-xs text-gray-400 mb-4">5 questions · result saved locally on this device</p>
+        <p className="text-xs text-gray-400 mb-4">9 questions · result saved locally on this device</p>
 
         {!quizDone ? (
           <>
