@@ -619,7 +619,8 @@ function PitchContent() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/education" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchEducation')}</Link>
-          <Link href="/sites" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchAllSites')}</Link>
+                    <Link href="/sites" className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition hover:bg-white/15">{t('pitchAllSites')}</Link>
+                    <Link href="/investors" className="rounded-xl border border-[#FF8C00]/50 px-6 py-3 text-[#FFB347] transition hover:bg-[#FF8C00]/10">Investor &amp; Partner Materials</Link>
           <a
             href={buildNostrShareUrl(
               `Stranded Value — ${fmt(stats.siteCount)} mapped methane sites across Canada. Stranded methane → Bitcoin.`,
