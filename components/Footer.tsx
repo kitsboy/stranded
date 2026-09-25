@@ -191,9 +191,9 @@ export default function Footer() {
                 <Image
                   src="/images/giveabit-logo.png"
                   alt="giveabit.io"
-                  width={140}
-                  height={36}
-                  className="h-7 w-auto opacity-85 group-hover:opacity-100 transition-opacity duration-200"
+                  width={280}
+                  height={72}
+                  className="h-14 w-auto opacity-85 group-hover:opacity-100 transition-opacity duration-200"
                 />
               </span>
               <span className="text-label text-gray-500 group-hover:text-[#FF8C00] transition-colors">
