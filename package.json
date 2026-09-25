@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
-    "prebuild": "node scripts/generate-live-stats.js && node scripts/stamp-dataset.js && node scripts/generate-pin-proofs.js && node scripts/generate-sitemap.js && node scripts/generate-metrics.js && node --import tsx scripts/generate-site-records.mjs",
+    "prebuild": "node scripts/generate-live-stats.js && node scripts/stamp-dataset.js && node scripts/generate-pin-proofs.js && node scripts/generate-sitemap.js && node scripts/generate-metrics.js && node --import tsx scripts/generate-site-records.mjs && npm run build:marketing-css",
+    "build:marketing-css": "npx tailwindcss -c tailwind.marketing.config.ts -i styles/marketing-input.css -o public/marketing-hub.css --minify",
     "build": "BUILD_STATIC=true npx next build",
     "postbuild": "node scripts/sync-docs.js",
     "start": "npx serve -p 3003 dist",
