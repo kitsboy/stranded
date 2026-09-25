@@ -174,7 +174,42 @@ export default function FundingPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold tracking-tighter mb-2">CETA Funding Pathway</h1>
-      <p className="text-gray-400 mb-8">Interactive wizard for Canadian-EU trade agreement aligned cleantech capital. Estimates only — verify with program officers.</p>
+            <p className="text-gray-400 mb-8">Interactive wizard for Canadian-EU trade agreement aligned cleantech capital. Estimates only — verify with program officers.</p>
+
+            {/* Horizon Europe / EU Funding — self-evolving suite */}
+            <section className="mb-10 rounded-2xl border border-[#FF8C00]/30 bg-gradient-to-r from-[#FF8C00]/10 via-transparent to-[#5BC0BE]/10 p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-[#FF8C00] text-black rounded">HORIZON EUROPE</span>
+                <span className="text-[10px] text-gray-500 font-mono">EU · €95.5B pool · Canada associated</span>
+              </div>
+              <h2 className="text-2xl font-bold tracking-tighter mb-2">The EU Funding Strategy</h2>
+              <p className="text-gray-400 max-w-2xl mb-5">
+                Beyond CETA, the primary path is a <b className="text-gray-200">Horizon Europe Pillar II · Cluster 5</b> grant
+                (€2.5M–€15M) via a cross-Canada–EU consortium. Canada is an associated country — eligible on the same
+                terms as EU entities. Two documents carry the full case.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <a href="/docs/stranded-eu-funding-board-deck.pdf" download className="group rounded-2xl border border-white/15 bg-black/20 p-5 hover:border-[#FF8C00]/50 transition">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-semibold text-[#FF8C00] tracking-wider">BOARD DECK · 6 SHEETS</span>
+                    <svg className="h-4 w-4 text-gray-400 group-hover:text-[#FF8C00]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4" /></svg>
+                  </div>
+                  <div className="font-semibold mb-1">EU Funding Board Deck</div>
+                  <div className="text-xs text-gray-400 leading-relaxed">The ask, the landscape, the consortium, and the €15M budget — for a funding board or board of directors.</div>
+                </a>
+                <a href="/docs/stranded-eu-consortium-outreach-brief.pdf" download className="group rounded-2xl border border-white/15 bg-black/20 p-5 hover:border-[#5BC0BE]/50 transition">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-semibold text-[#5BC0BE] tracking-wider">PARTNER BRIEF · 1 PAGE</span>
+                    <svg className="h-4 w-4 text-gray-400 group-hover:text-[#5BC0BE]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4" /></svg>
+                  </div>
+                  <div className="font-semibold mb-1">EU Consortium Outreach Brief</div>
+                  <div className="text-xs text-gray-400 leading-relaxed">The ready-to-send one-pager for Tier-1 partners — TNO, Fraunhofer UMSICHT, SINTEF.</div>
+                </a>
+              </div>
+              <div className="mt-4 text-[10px] text-gray-600">
+                These documents self-update from the research vault — the download links always serve the current version.
+              </div>
+            </section>
 
       {liveStats && liveRevenue != null && (
         <section className="mb-8 rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-5" data-testid="funding-live-revenue">
