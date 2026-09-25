@@ -14,6 +14,7 @@ import {
   Presentation,
   Link2,
   Check,
+  Download,
 } from 'lucide-react'
 import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
@@ -324,6 +325,14 @@ function PitchContent() {
             <button type="button" onClick={() => window.print()} className="no-print px-6 py-3 rounded-xl border border-white/25 transition hover:bg-white/10">
               {t('pitchPrintPdf')}
             </button>
+            <a
+              href="/docs/stranded-eu-funding-board-deck.pdf"
+              download
+              className="no-print inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#FF8C00]/60 bg-[#FF8C00]/10 text-[#FFB347] font-semibold transition hover:bg-[#FF8C00]/20"
+            >
+              <Download className="h-4 w-4" />
+              {t('pitchDownloadDeck')}
+            </a>
           </div>
         </div>
       </section>
