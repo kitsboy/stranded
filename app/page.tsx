@@ -240,7 +240,28 @@ export default function LandingPage() {
 
       <SectionDivider label="Featured" />
 
-      {/* Featured Opportunities */}
+            {/* Watch the film — subtle mid-page embed, poster as thumbnail */}
+            <div className="max-w-4xl mx-auto px-6 py-14">
+              <div className="text-center mb-6">
+                <div className="text-[#FF8C00] text-xs tracking-[3px]">WATCH THE FILM</div>
+                <h2 className="text-3xl font-semibold tracking-tighter mt-1">The richest country on Earth doesn&apos;t know how rich it is.</h2>
+              </div>
+              <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                <video
+                  controls
+                  preload="none"
+                  poster="/images/stranded-film-poster.jpg"
+                  className="w-full h-auto aspect-video"
+                  aria-label="Stranded Value explainer film"
+                >
+                  <source src="/videos/stranded-film.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <p className="text-center text-xs text-gray-400 mt-3">1:54 · Stranded Value — capture the value that is already yours.</p>
+            </div>
+
+            {/* Featured Opportunities */}
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="flex items-end justify-between mb-6">
           <div>
