@@ -47,13 +47,13 @@ export default function PitchStatCard({
         )}
       </div>
       <div
-        className="pitch-stat-value relative mt-3 font-bold tabular-nums leading-none tracking-tight"
-        style={{ color: accent }}
-        title={value}
-      >
-        <span className="hidden xl:inline">{value}</span>
-        <span className="xl:hidden">{compactValue ?? value}</span>
-      </div>
+              className="pitch-stat-value relative mt-3 font-bold tabular-nums leading-none tracking-tight"
+              style={{ color: accent }}
+              title={value}
+            >
+              <span className="hidden xl:inline">{compactValue ?? value}</span>
+              <span className="xl:hidden">{compactValue ?? value}</span>
+            </div>
       {sub && (
         <p className="relative mt-auto pt-2.5 text-label leading-snug text-gray-400 line-clamp-2">
           {sub}
