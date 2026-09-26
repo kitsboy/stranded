@@ -1391,6 +1391,12 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   row-gap: var(--map-hud-gap);
   column-gap: var(--map-hud-gap);
   padding: 0.375rem var(--map-panel-padding);
+  /* Solid, opaque bar — the HUD floats over the map, so a translucent pill
+     ambiguously hides pins/labels behind it. A solid background makes it read
+     as a deliberate header instead of a see-through overlay. */
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: none;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5);
 }
 /* 359b. The top-centre overlays are one flex column (see app/map/page.tsx), so the
    HUD, the toolbar, the first-run strip and the radius chip can never overlap each
