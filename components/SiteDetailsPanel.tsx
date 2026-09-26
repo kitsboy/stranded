@@ -128,6 +128,8 @@ export default function SiteDetailsPanel({
   compact = false,
   onExpand,
   initialFleet = null,
+  initialFiatCode,
+  initialScenario,
   /** Rendered inside the mobile bottom sheet — adds the sticky thumb-zone controls. */
   sheet = false,
 }: { 
@@ -145,6 +147,10 @@ export default function SiteDetailsPanel({
   onExpand?: () => void
   /** Fleet template restored from a share link (already capped to this site) */
   initialFleet?: FleetTemplate | null
+  /** Restore the currency from a shared link (e.g. ?fiat=CAD). */
+  initialFiatCode?: string
+  /** Restore the market scenario from a shared link (e.g. ?scen=bull). */
+  initialScenario?: 'bear' | 'base' | 'bull'
   sheet?: boolean
 }) {
   const { t } = useLocale()
@@ -153,6 +159,7 @@ export default function SiteDetailsPanel({
 
   const { fiats: sharedFiats } = useBtcPrice()
     const [selectedFiat, setSelectedFiat] = useState<FiatCode>(() => {
+      if (initialFiatCode && FIAT_OPTIONS.some(f => f.code === initialFiatCode)) return initialFiatCode as FiatCode
       if (typeof window === 'undefined') return 'USD'
       const saved = window.localStorage.getItem('stranded-fiat')
       return (saved && FIAT_OPTIONS.some(f => f.code === saved)) ? saved as FiatCode : 'USD'
@@ -209,7 +216,7 @@ export default function SiteDetailsPanel({
   const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
   /** Bear/Base/Bull scenario — scales BTC price & hashprice instantly across the whole card. */
-  const [scenario, setScenario] = useState<'bear' | 'base' | 'bull'>('base')
+  const [scenario, setScenario] = useState<'bear' | 'base' | 'bull'>(initialScenario || 'base')
   const [bookmarked, setBookmarked] = useState(false)
   const [note, setNote] = useState('')
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
@@ -561,7 +568,7 @@ export default function SiteDetailsPanel({
   const fullLoadModel = computeFleetModel({ ...modelInput, machineCount: ceilingMiners })
   const unminedUsdPerDay = Math.max(0, fullLoadModel.dailyRevenueFiat - calculations.dailyRevenueFiat)
   const suggestedPreset = fleetPresetForSourceType(p.source_type || '')
-  const fleetShareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${encodeURIComponent(site.id)}&${encodeFleet(fleetTemplate)}`
+  const fleetShareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${encodeURIComponent(site.id)}&${encodeFleet(fleetTemplate)}&fiat=${encodeURIComponent(selectedFiat)}&scen=${encodeURIComponent(scenario)}`
   const gaugePct = Math.min(100, Math.round((machineCount / Math.max(1, ceilingMiners)) * 100))
   const usedPowerKw = Math.min(calculations.totalPowerKw, calculations.generatorPowerKw)
   const sparePct = Math.max(0, 100 - gaugePct)

@@ -126,6 +126,8 @@ function StrandedCommandCenter() {
   const [selectedSite, setSelectedSite] = useState<EnrichedSite | null>(null)
   /** Fleet template decoded from the share link, bound to the site it came with */
   const [fleetUrlState, setFleetUrlState] = useState<{ siteId: string; template: FleetTemplate } | null>(null)
+  const [urlFiat, setUrlFiat] = useState<string | undefined>(undefined)
+  const [urlScenario, setUrlScenario] = useState<'bear' | 'base' | 'bull' | undefined>(undefined)
   const [portfolio, setPortfolio] = useState<EnrichedSite[]>([])
   const [viewMode, setViewMode] = useState<MapViewMode>('precise')
   const didAutoCluster = useRef(false)
@@ -288,6 +290,10 @@ function StrandedCommandCenter() {
               if (reference) template = rescaleToSite(template, reference, match)
             }
             setFleetUrlState({ siteId: match.id, template: capFleetToSite(template, match) })
+            const f = searchParams.get('fiat')
+            if (f) setUrlFiat(f)
+            const sc = searchParams.get('scen')
+            if (sc === 'bear' || sc === 'base' || sc === 'bull') setUrlScenario(sc)
           }
           setTimeout(() => {
             // The dataset arriving must not overrule the person: if they already picked or
@@ -1904,6 +1910,8 @@ function StrandedCommandCenter() {
                 liveBtcPrice={liveBtcPrice}
                 allSites={allSites}
                 initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
+                initialFiatCode={urlFiat as string | undefined}
+                initialScenario={urlScenario}
               />
             </div>
           </motion.div>
@@ -1925,6 +1933,8 @@ function StrandedCommandCenter() {
               liveBtcPrice={liveBtcPrice}
               allSites={allSites}
               initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
+              initialFiatCode={urlFiat as string | undefined}
+              initialScenario={urlScenario}
             />
           )}
         </AnimatePresence>
