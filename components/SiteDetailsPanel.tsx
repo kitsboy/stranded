@@ -145,7 +145,11 @@ export default function SiteDetailsPanel({
   const siteEmission = p.emission_rate_kg_day || 0
 
   const { fiats: sharedFiats } = useBtcPrice()
-  const [selectedFiat, setSelectedFiat] = useState<FiatCode>('USD')
+    const [selectedFiat, setSelectedFiat] = useState<FiatCode>(() => {
+      if (typeof window === 'undefined') return 'USD'
+      const saved = window.localStorage.getItem('stranded-fiat')
+      return (saved && FIAT_OPTIONS.some(f => f.code === saved)) ? saved as FiatCode : 'USD'
+    })
   const [btcPrices, setBtcPrices] = useState<BtcPriceMap>({ usd: 85000, eur: 78000, jpy: 12500000, gbp: 65000, cad: 115000 })
   const [selectedASIC, setSelectedASIC] = useState(
     () => ASIC_MACHINES.find(m => m.id === initialFleet?.asicId) || ASIC_MACHINES[0],
@@ -240,8 +244,22 @@ export default function SiteDetailsPanel({
 
   const handleFiatChange = (newFiat: FiatCode) => {
     setSelectedFiat(newFiat)
+    if (typeof window !== 'undefined') window.localStorage.setItem('stranded-fiat', newFiat)
     const live = btcPrices[newFiat.toLowerCase() as Lowercase<FiatCode>]
     if (live) setBtcPrice(live)
+  }
+
+  /** Convert a CAD-denominated value into the selected fiat (for the fixed-setup input). */
+  const cadToFiat = (cad: number): number => {
+    const cadPrice = btcPrices.cad || 115000
+    const selPrice = btcPrices[selectedFiat.toLowerCase() as Lowercase<FiatCode>] || btcPrices.usd
+    return cad * (selPrice / cadPrice)
+  }
+  /** Convert a selected-fiat value back into CAD (the model's internal unit). */
+  const fiatToCad = (val: number): number => {
+    const cadPrice = btcPrices.cad || 115000
+    const selPrice = btcPrices[selectedFiat.toLowerCase() as Lowercase<FiatCode>] || btcPrices.usd
+    return val * (cadPrice / selPrice)
   }
 
   /**
@@ -1107,19 +1125,24 @@ export default function SiteDetailsPanel({
         title={`Bank pack — ${p.name || site.id}`}
         fleet={{ template: fleetTemplate, site: siteAsFleet, paybackDays: isFinite(calculations.paybackDays) ? calculations.paybackDays : null }}
       />
-      {/* Currency dropdown - BTC always the base/denominator */}
-      <div className={`mb-4${sectionOff('financials')}`} data-testid="site-fiat-select">
-        <label className="text-sm font-semibold text-[#5BC0BE]">BTC Price in</label>
-        <select 
-          value={selectedFiat} 
-          onChange={(e) => handleFiatChange(e.target.value as FiatCode)}
-          className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
-        >
-          {FIAT_OPTIONS.map(opt => (
-            <option key={opt.code} value={opt.code}>{opt.code} ({opt.symbol}) — {opt.name}</option>
-          ))}
-        </select>
-      </div>
+      {/* Currency lock-in — BTC is always the denominator; pick the fiat you think in */}
+            <div className={`mb-4${sectionOff('financials')}`} data-testid="site-fiat-select">
+              <label className="text-sm font-semibold text-[#5BC0BE]">Currency</label>
+              <div className="mt-1.5 grid grid-cols-3 gap-1.5 rounded-xl border border-slate-600 bg-slate-800/60 p-1">
+                {FIAT_OPTIONS.filter(f => f.code !== 'JPY' && f.code !== 'GBP').map(opt => (
+                  <button
+                    key={opt.code}
+                    type="button"
+                    onClick={() => handleFiatChange(opt.code)}
+                    className={`rounded-lg px-2 py-2 text-xs font-semibold transition ${selectedFiat === opt.code ? 'bg-[#FF8C00] text-black' : 'text-gray-300 hover:bg-white/10'}`}
+                  >
+                    {opt.code}+BTC
+                    <span className="block text-[10px] font-normal opacity-70">{opt.name}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="text-label text-gray-400 mt-1.5">BTC &amp; sats are always the denominator. This just sets the fiat you read.</div>
+            </div>
       <div className={`space-y-2 text-sm mb-4 p-3 bg-slate-800/50 rounded-lg${sectionOff('build')}`} data-testid="site-power-summary">
         <div className="flex justify-between"><span className="text-gray-400">Total Power (ASICs)</span><span className="text-[#5BC0BE]">{calculations.totalPowerKw.toFixed(1)} kW</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
@@ -1305,8 +1328,8 @@ export default function SiteDetailsPanel({
 
           <div className="pt-2 border-t border-slate-700 space-y-3">
             <div>
-              <label className="text-xs text-gray-400">Fixed Setup Cost (CAD) — one-time (permitting, generator base, install, etc.)</label>
-              <input type="number" value={fixedSetupCostCad} onChange={(e) => setFixedSetupCostCad(Number(e.target.value))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
+              <label className="text-xs text-gray-400">Fixed Setup Cost ({selectedFiat}) — one-time (permitting, generator base, install, etc.)</label>
+              <input type="number" value={Math.round(cadToFiat(fixedSetupCostCad))} onChange={(e) => setFixedSetupCostCad(fiatToCad(Number(e.target.value)))} className="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white" />
             </div>
 
             <div>
