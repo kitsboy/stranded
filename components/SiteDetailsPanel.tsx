@@ -1168,20 +1168,30 @@ export default function SiteDetailsPanel({
       )}
 
       {peers.length > 0 && (
-        <details className={`mb-4 rounded-lg border border-white/10 bg-black/20 p-3${sectionOff('overview')}`} data-testid="site-peers">
-          <summary className="text-sm font-semibold text-white cursor-pointer">
-            Peers {peerMeta ? `(rank ${peerMeta.rankByScore}/${peers.length + 1} in cohort)` : ''}
-          </summary>
-          <ul className="mt-2 space-y-1 text-xs text-gray-300">
-            {peers.map(peer => (
-              <li key={peer.id} className="flex justify-between gap-2">
-                <span className="truncate">{peer.properties.name}</span>
-                <span className="font-mono text-[#FF8C00] shrink-0">{peer.strandedScore}</span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+              <details className={`mb-4 rounded-lg border border-white/10 bg-black/20 p-3${sectionOff('overview')}`} data-testid="site-peers" open>
+                <summary className="text-sm font-semibold text-white cursor-pointer">
+                  Peers {peerMeta ? `(rank ${peerMeta.rankByScore}/${peers.length + 1} in cohort)` : ''}
+                </summary>
+                <div className="mt-2 space-y-1.5 text-xs">
+                  {peers.map(peer => {
+                    const peerProfit = peer.potentialDailyProfitUsd || 0
+                    return (
+                      <div key={peer.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-2 py-1.5">
+                        <Link href={`/map?site=${peer.id}`} className="truncate text-gray-300 hover:text-[#5BC0BE]">{peer.properties.name}</Link>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-gray-500">{peer.emission.toLocaleString()} kg/d</span>
+                          <span className="font-mono text-[#FF8C00]">{peer.strandedScore}</span>
+                          <span className="font-mono text-[#34D399]">{fmt(peerProfit)}/d</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                {peerMeta && (
+                                  <div className="text-label text-gray-500 mt-2">Cohort avg score <span className="text-white">{peerMeta.avgScore}</span> · this site ranks <span className="text-[#FF8C00]">#{peerMeta.rankByScore}</span> of {peers.length + 1}.</div>
+                )}
+              </details>
+            )}
 
       <div className={`mb-4${sectionOff('evidence')}`} data-testid="site-bank-export">
         <div className="text-xs font-semibold text-gray-400 mb-1.5">Bank pack export</div>
