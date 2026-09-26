@@ -26,7 +26,7 @@ import {
   FLUX_NO_SPLIT_HINT,
 } from '@/lib/map-filters'
 import { motion } from 'framer-motion'
-import { Send } from 'lucide-react'
+import { Send, Link2 } from 'lucide-react'
 import ExportFormatPicker, { type ExportFormat } from '@/components/ExportFormatPicker'
 import BankPackPreview from '@/components/BankPackPreview'
 import CopyLinkButton from '@/components/CopyLinkButton'
@@ -694,6 +694,12 @@ export default function SiteDetailsPanel({
       className={`w-full bg-[#1e293b] border border-[#5BC0BE]/30 shadow-xl relative ${compact ? 'rounded-t-2xl p-4' : 'rounded-xl p-4 sm:p-6 max-h-full overflow-y-auto'}`}
       data-testid={compact ? 'mobile-site-peek' : 'site-details-panel'}
     >
+      {initialFleet && !compact && (
+        <div className="mb-3 rounded-lg border border-[#A78BFA]/40 bg-[#A78BFA]/10 px-3 py-2 text-label text-[#A78BFA] flex items-center gap-2" data-testid="shared-build-banner">
+          <Link2 size={13} aria-hidden />
+          You're viewing a <span className="font-semibold">shared build</span> — this stack was pre-loaded from a link. Tweak it freely.
+        </div>
+      )}
       <div className={`flex items-start justify-between ${compact ? 'mb-3 gap-2' : 'mb-3'}`}>
         <div className="min-w-0 flex-1">
           <h2 className={`font-bold text-white truncate ${compact ? 'text-[15px] leading-tight' : 'text-xl'}`}>
@@ -987,7 +993,18 @@ export default function SiteDetailsPanel({
           data-testid="send-this-build-cta"
         >
           <Send size={15} aria-hidden /> Send this build to the team
-        </a>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(fleetShareUrl)
+                      toast.success('Build link copied — share it anywhere')
+                    }}
+                    className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#5BC0BE]/50 px-3 py-3 text-sm font-semibold text-[#5BC0BE] hover:bg-[#5BC0BE]/10 active:scale-[0.985] transition"
+                    data-testid="share-build-cta"
+                  >
+                    <Link2 size={15} aria-hidden /> Share this build
+                  </button>
         <div className="text-label text-gray-400 mt-1.5 leading-snug">
           Opens the certified application with this fleet link pre-filled, category{' '}
           <span className="text-gray-300">Site application</span>, subject{' '}
