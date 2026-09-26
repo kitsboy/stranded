@@ -65,6 +65,7 @@ import {
   type FleetTemplate,
 } from '@/lib/fleet-template'
 import { computeFleetModel, NETWORK_ESTIMATE_BTC_PER_TH_DAY, NETWORK_DERIVED_BTC_PER_TH_DAY, NETWORK_HASHRATE_THS, NETWORK_DAILY_BTC_ISSUANCE, DEFAULT_POWER_COST_USD_PER_KWH } from '@/lib/fleet-model'
+import { projectGasDecline } from '@/lib/gas-decline'
 import {
   blockScaleLabel,
   capacityModel,
@@ -1360,10 +1361,45 @@ export default function SiteDetailsPanel({
           ))}
         </div>
         {scenario !== 'base' && (
-          <div className="text-label mt-1.5 text-amber-300/90">Showing a <span className="font-semibold">{scenarioMul.label}</span> scenario — daily profit, payback and sats all reflect it.</div>
-        )}
-      </div>
-      <button onClick={() => setAdvancedMode(!advancedMode)} data-testid="site-advanced-toggle" className={`w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors${sectionOff('financials')}`}>{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
+                  <div className="text-label mt-1.5 text-amber-300/90">Showing a <span className="font-semibold">{scenarioMul.label}</span> scenario — daily profit, payback and sats all reflect it.</div>
+                )}
+              </div>
+              {/* Honest range — the spread, not just a single point */}
+              <div className={`mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-3${sectionOff('financials')}`} data-testid="honest-range">
+                <div className="text-label text-gray-400 mb-1.5">Honest range — where this build lands across market scenarios</div>
+                <div className="grid grid-cols-3 gap-1.5 text-center">
+                  <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-2">
+                    <div className="text-micro text-gray-400">Bear daily profit</div>
+                    <div className="font-mono text-red-400 text-sm">{fmt(calculations.dailyProfitFiat * SCENARIO.bear.btc)}</div>
+                  </div>
+                  <div className="rounded-lg border border-[#FF8C00]/25 bg-[#FF8C00]/5 p-2">
+                    <div className="text-micro text-gray-400">Base daily profit</div>
+                    <div className="font-mono text-[#FF8C00] text-sm">{fmt(calculations.dailyProfitFiat)}</div>
+                  </div>
+                  <div className="rounded-lg border border-green-500/25 bg-green-500/5 p-2">
+                    <div className="text-micro text-gray-400">Bull daily profit</div>
+                    <div className="font-mono text-green-400 text-sm">{fmt(calculations.dailyProfitFiat * SCENARIO.bull.btc)}</div>
+                  </div>
+                </div>
+                <div className="text-label text-gray-500 mt-1.5">Payback swings from <span className="text-red-400">{isFinite(calculations.paybackDays / SCENARIO.bear.btc) ? Math.round(calculations.paybackDays / SCENARIO.bear.btc).toLocaleString() : 'N/A'} days</span> (bear) to <span className="text-green-400">{isFinite(calculations.paybackDays / SCENARIO.bull.btc) ? Math.round(calculations.paybackDays / SCENARIO.bull.btc).toLocaleString() : 'N/A'} days</span> (bull).</div>
+              </div>
+              {/* Gas-decline timeline — does it still pay in year 3? */}
+              <div className={`mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-3${sectionOff('financials')}`} data-testid="gas-decline-strip">
+                <div className="text-label text-gray-400 mb-1.5">Gas decline — daily profit as the well ages (15%/yr)</div>
+                <div className="grid grid-cols-5 gap-1.5 text-center">
+                  {projectGasDecline(1, 15, 4).map((p, i) => (
+                    <div key={p.year} className="rounded-lg border border-white/10 p-1.5">
+                      <div className="text-micro text-gray-400">Yr {p.year}</div>
+                      <div className="font-mono text-sm" style={{ color: p.revenueFactor >= 0.5 ? '#34D399' : p.revenueFactor >= 0.3 ? '#FBBF24' : '#FB7185' }}>
+                        {fmt(calculations.dailyProfitFiat * p.revenueFactor)}
+                      </div>
+                      <div className="text-micro text-gray-500">{Math.round(p.revenueFactor * 100)}%</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-label text-gray-500 mt-1.5">At 15%/yr decline, this build keeps <span className="text-[#34D399]">{Math.round(projectGasDecline(1, 15, 4)[4].revenueFactor * 100)}%</span> of its day-0 profit by year 4.</div>
+              </div>
+              <button onClick={() => setAdvancedMode(!advancedMode)} data-testid="site-advanced-toggle" className={`w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors${sectionOff('financials')}`}>{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
       {advancedMode && (
         <div className={`space-y-4 mb-4 p-4 bg-slate-800/30 rounded-lg text-sm${sectionOff('financials')}`} data-testid="site-advanced-panel">
           <div>
