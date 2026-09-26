@@ -84,14 +84,20 @@ async function openMap(browser: Browser, { forged = false }: { forged?: boolean 
   return { context, page }
 }
 
-test('map HUD shows every pin anchored to Bitcoin, with method and block', async ({ browser }) => {
+test('map HUD shows the compact pin-proof badge — block on the bar, full detail in the tooltip', async ({ browser }) => {
   const { context, page } = await openMap(browser)
   try {
     const badge = page.locator('[data-testid="pin-proof-badge"]')
     await expect(badge).toHaveAttribute('data-pin-proof', 'confirmed', { timeout: 30000 })
-    await expect(badge.locator('[data-testid="pin-proof-badge-text"]')).toContainText('Anchored to Bitcoin')
-    await expect(badge.locator('[data-testid="pin-proof-badge-text"]')).toContainText('966,549')
-    await expect(badge.locator('[data-testid="pin-proof-badge-text"]')).toContainText('own node')
+    const text = badge.locator('[data-testid="pin-proof-badge-text"]')
+    // The compact header form keeps the bar short: just the anchored block.
+    await expect(text).toContainText('block')
+    await expect(text).toContainText('966,549')
+    // The full anchored state + how it was checked (own node) live in the tooltip.
+    const title = await badge.getAttribute('title')
+    expect(title).toContain('Anchored to Bitcoin')
+    expect(title).toContain('966,549')
+    expect(title).toContain('own node')
   } finally {
     await context.close()
   }
