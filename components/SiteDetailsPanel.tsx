@@ -1359,8 +1359,27 @@ export default function SiteDetailsPanel({
             <span className="text-gray-300">{isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays) + ' days' : 'N/A'}</span>
           </div>
         </div>
-      </div>
-      {/* Instant Bear/Base/Bull scenario strip — one tap re-runs the whole card */}
+              </div>
+              {/* Build-to-build: your stack vs the gas ceiling */}
+              <div className={`mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-3${sectionOff('financials')}`} data-testid="build-compare">
+                <div className="text-label text-gray-400 mb-1.5">Your build vs. max capture — are you leaving money on the table?</div>
+                <div className="grid grid-cols-2 gap-1.5 text-center">
+                  <div className="rounded-lg border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-2">
+                    <div className="text-micro text-gray-400">Your build</div>
+                    <div className="font-mono text-[#5BC0BE] text-sm">{fmt(calculations.dailyProfitFiat)}/d</div>
+                    <div className="text-micro text-gray-500">{calculations.effectiveMachineCount.toLocaleString()} miners · {formatSats(satsPerDay(calculations.effectiveDailyBtc))} sats</div>
+                  </div>
+                  <div className="rounded-lg border border-[#FF8C00]/30 bg-[#FF8C00]/5 p-2">
+                    <div className="text-micro text-gray-400">Max capture (gas ceiling)</div>
+                    <div className="font-mono text-[#FF8C00] text-sm">{fmt(fullLoadModel.dailyProfitFiat)}/d</div>
+                    <div className="text-micro text-gray-500">{fullLoadModel.effectiveMachineCount.toLocaleString()} miners · {formatSats(satsPerDay(fullLoadModel.effectiveDailyBtc))} sats</div>
+                  </div>
+                </div>
+                {fullLoadModel.dailyProfitFiat > calculations.dailyProfitFiat + 0.01 && (
+                  <div className="text-label mt-1.5 text-amber-300/90">Filling the gas adds <span className="font-semibold">{fmt(fullLoadModel.dailyProfitFiat - calculations.dailyProfitFiat)}/day</span> — <button type="button" onClick={() => setStackMode('auto')} className="underline font-semibold hover:text-white">fill it</button>.</div>
+                )}
+              </div>
+              {/* Instant Bear/Base/Bull scenario strip — one tap re-runs the whole card */}
       <div className={`mb-4 rounded-xl border border-white/10 bg-gradient-to-r from-red-500/5 via-[#FF8C00]/5 to-green-500/5 p-3${sectionOff('financials')}`} data-testid="scenario-strip">
         <div className="text-label text-gray-400 mb-1.5">Market scenario — instantly re-runs every number on this card</div>
         <div className="grid grid-cols-3 gap-1.5">
