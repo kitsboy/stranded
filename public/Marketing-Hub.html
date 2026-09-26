@@ -25,8 +25,30 @@
         }
         
         body {
-            font-family: 'Inter', system_ui, sans-serif;
-        }
+                    font-family: 'Inter', system_ui, sans-serif;
+                }
+
+                /* All links orange for visibility on the dark bg. Buttons that are
+                   already orange carry explicit dark text (text-[#0b111f]) which
+                   overrides this. */
+                a {
+                    color: #FF8C00;
+                }
+                a:hover {
+                    color: #ff9d33;
+                }
+                a[class*="bg-[#FF8C00]"] {
+                    color: #0b111f;
+                }
+                a[class*="bg-[#FF8C00]"]:hover {
+                            color: #0b111f;
+                        }
+                        .nav-link {
+                            color: #FF8C00;
+                        }
+                        .nav-link:hover {
+                            color: #ff9d33;
+                        }
         
         .heading-font {
             font-family: 'Space Grotesk', 'Inter', system_ui, sans-serif;
