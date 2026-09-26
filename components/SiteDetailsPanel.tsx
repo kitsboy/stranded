@@ -766,7 +766,7 @@ export default function SiteDetailsPanel({
       {initialFleet && !compact && (
         <div className="mb-3 rounded-lg border border-[#A78BFA]/40 bg-[#A78BFA]/10 px-3 py-2 text-label text-[#A78BFA] flex items-center gap-2" data-testid="shared-build-banner">
           <Link2 size={13} aria-hidden />
-          You're viewing a <span className="font-semibold">shared build</span> — this stack was pre-loaded from a link. Tweak it freely.
+          You are viewing a <span className="font-semibold">shared build</span> — this stack was pre-loaded from a link. Tweak it freely.
         </div>
       )}
       <div className={`flex items-start justify-between ${compact ? 'mb-3 gap-2' : 'mb-3'}`}>
