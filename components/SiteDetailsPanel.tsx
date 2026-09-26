@@ -465,6 +465,61 @@ export default function SiteDetailsPanel({
 
   const mapDeepLink = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
 
+  /** Open a branded one-page PDF (via browser print) of the whole card. */
+  const downloadPdf = () => {
+    const fmtUsdLocal = (n: number) => formatMoneyFiat(n, currentFiat.symbol)
+    const st = `<html><head><title>Stranded Value — ${p.name}</title>
+      <style>
+        body{font-family:system-ui,sans-serif;background:#0f172a;color:#fff;padding:32px;max-width:820px;margin:0 auto;line-height:1.5}
+        .brand{font-size:10px;letter-spacing:2px;color:#5BC0BE;text-transform:uppercase;margin-bottom:2px}
+        h1{font-size:26px;margin:0 0 2px}
+        .sub{color:#94a3b8;font-size:13px;margin-bottom:20px}
+        h2{font-size:14px;color:#FF8C00;border-bottom:1px solid #334155;padding-bottom:4px;margin:22px 0 10px}
+        .row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .row .k{color:#94a3b8}.row .v{font-weight:600;text-align:right}
+        .disclaimer{font-size:10px;color:#64748b;margin-top:24px;border-top:1px solid #334155;padding-top:12px}
+        .foot{margin-top:16px;font-size:10px;letter-spacing:1px;color:#5BC0BE;text-transform:uppercase}
+        table{width:100%;border-collapse:collapse;font-size:12px}.row td{padding:3px 0}
+      </style></head><body>
+      <div class="brand">GiveAbit Intelligence · Stranded Value</div>
+      <h1>${p.name}</h1>
+      <div class="sub">${p.city ? p.city + ', ' : ''}${p.province} · Score ${site.strandedScore} (${scoreTier(site.strandedScore)}) · ECCC ${p.reference_year || ''} · ${siteEmission.toLocaleString()} kg CH₄/day</div>
+
+      <h2>Build</h2>
+      <div class="row"><span class="k">Miners</span><span class="v">${calculations.effectiveMachineCount.toLocaleString()} × ${selectedASIC.name}</span></div>
+      <div class="row"><span class="k">Generator</span><span class="v">${calculations.gensetName} · ${calculations.generatorPowerKw.toFixed(1)} kW from gas</span></div>
+      <div class="row"><span class="k">Power used</span><span class="v">${calculations.usedPowerKw.toFixed(1)} of ${calculations.generatorPowerKw.toFixed(1)} kW</span></div>
+
+      <h2>Daily Economics (BTC-first)</h2>
+      <div class="row"><span class="k">Revenue</span><span class="v">${calculations.dailyRevenueBtc.toFixed(6)} BTC · ${fmtUsdLocal(calculations.dailyRevenueFiat)}</span></div>
+      <div class="row"><span class="k">Power cost</span><span class="v">${calculations.dailyPowerCostBtc.toFixed(6)} BTC · ${fmtUsdLocal(calculations.dailyPowerCostFiat)}</span></div>
+      <div class="row"><span class="k">Maintenance</span><span class="v">${calculations.dailyMaintBtc.toFixed(6)} BTC · ${fmtUsdLocal(calculations.dailyMaintFiat)}</span></div>
+      <div class="row"><span class="k">Net profit</span><span class="v">${calculations.dailyProfitBtc.toFixed(6)} BTC · ${fmtUsdLocal(calculations.dailyProfitFiat)}/day</span></div>
+      <div class="row"><span class="k">Monthly net</span><span class="v">${calculations.monthlyProfitBtc.toFixed(6)} BTC · ${fmtUsdLocal(calculations.monthlyProfitFiat)}</span></div>
+
+      <h2>Investment</h2>
+      <div class="row"><span class="k">Hardware</span><span class="v">${calculations.hardwareCostBtc.toFixed(4)} BTC · ${fmtUsdLocal(calculations.hardwareCostFiat)}</span></div>
+      <div class="row"><span class="k">Fixed setup</span><span class="v">${calculations.fixedCostBtc.toFixed(4)} BTC · ${fmtUsdLocal(calculations.fixedCostFiat)}</span></div>
+      <div class="row"><span class="k">Generator CapEx</span><span class="v">${calculations.gensetCapexBtc.toFixed(4)} BTC</span></div>
+      <div class="row"><span class="k">Total</span><span class="v">${calculations.totalInvestmentBtc.toFixed(4)} BTC · ${fmtUsdLocal(calculations.totalInvestmentFiat)}</span></div>
+
+      <h2>Payback</h2>
+      <div class="row"><span class="k">Total capital</span><span class="v">${isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays).toLocaleString() + ' days' : 'N/A'}</span></div>
+      <div class="row"><span class="k">Marginal (per miner)</span><span class="v">${isFinite(calculations.marginalPayback) ? Math.round(calculations.marginalPayback).toLocaleString() + ' days' : 'N/A'}</span></div>
+      <div class="row"><span class="k">Financed (${debtPercent}% @ ${interestRate}%)</span><span class="v">${isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays).toLocaleString() + ' days' : 'N/A'}</span></div>
+
+      <div class="disclaimer">Simplified model for education only. Real mining revenue varies with difficulty, fees, hardware degradation, gas composition, weather, downtime and regulation. Not investment advice.</div>
+      <div class="foot">Stranded Value · GiveAbit Intelligence · ${mapDeepLink}</div>
+      </body></html>`
+    const w = window.open('', '_blank')
+    if (!w) { toast.error('Popup blocked — allow popups to export PDF'); return }
+    w.document.write(st)
+    w.document.close()
+    w.focus()
+    setTimeout(() => { w.print() }, 400)
+    toast.success('PDF opened — choose "Save as PDF"')
+  }
+
   // ---- Editable miner stack (fleet template) ----------------------------------
   const siteAsFleet: FleetSite = site as FleetSite
   const ceilingMiners = calculations.ceilingMiners
@@ -1136,6 +1191,9 @@ export default function SiteDetailsPanel({
           </button>
           <button type="button" onClick={() => downloadBankPack(exportFmt)} className="text-label px-2 py-1 rounded border border-[#FF8C00]/40 text-[#FF8C00]">
             Export {exportFmt.toUpperCase()}
+          </button>
+          <button type="button" onClick={downloadPdf} className="text-label px-2 py-1 rounded border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10" data-testid="bank-pack-pdf">
+            <i className="fa-solid fa-file-pdf mr-1" /> Download PDF
           </button>
           <CopyLinkButton url={mapDeepLink} label="Copy link" successMessage="Site deep link copied" />
           <Link
