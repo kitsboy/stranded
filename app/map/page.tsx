@@ -282,6 +282,12 @@ function StrandedCommandCenter() {
         const match = sites.find(s => s.id === siteId || String(s.properties.ghgrp_id) === siteId)
         if (match) {
           recordRecentSite(match)
+          // Currency & scenario restore regardless of whether a fleet template is present,
+          // so a bare ?site=X&fiat=CAD&scen=bull link still opens in that exact framing.
+          const f = searchParams.get('fiat')
+          if (f) setUrlFiat(f)
+          const sc = searchParams.get('scen')
+          if (sc === 'bear' || sc === 'base' || sc === 'bull') setUrlScenario(sc)
           if (urlState.fleet) {
             // tpl-only links carry a preset: scale it from its typical site to this one
             let template = urlState.fleet
@@ -290,10 +296,6 @@ function StrandedCommandCenter() {
               if (reference) template = rescaleToSite(template, reference, match)
             }
             setFleetUrlState({ siteId: match.id, template: capFleetToSite(template, match) })
-            const f = searchParams.get('fiat')
-            if (f) setUrlFiat(f)
-            const sc = searchParams.get('scen')
-            if (sc === 'bear' || sc === 'base' || sc === 'bull') setUrlScenario(sc)
           }
           setTimeout(() => {
             // The dataset arriving must not overrule the person: if they already picked or
