@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useId, useRef, type KeyboardEvent as Reac
 import { GENSET_DATA, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks } from '@/lib/bookmarks'
+import { isWatched, watchSite, unwatchSite, watchDelta, type WatchDelta } from '@/lib/watchlist'
 import { getSiteNote, setSiteNote } from '@/lib/site-notes'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -239,6 +240,8 @@ export default function SiteDetailsPanel({
     return initialScenario || 'base'
   })
   const [bookmarked, setBookmarked] = useState(false)
+    const [watched, setWatched] = useState(false)
+    const [watchDeltaInfo, setWatchDeltaInfo] = useState<WatchDelta | null>(null)
   const [note, setNote] = useState('')
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
   const [exportFmt, setExportFmt] = useState<ExportFormat>('md')
@@ -250,9 +253,11 @@ export default function SiteDetailsPanel({
   const sectionTabRefs = useRef<Partial<Record<SiteSectionId, HTMLButtonElement | null>>>({})
 
   useEffect(() => {
-    if (!site) return
-    setBookmarked(getBookmarks().includes(site.id))
-    setNote(getSiteNote(site.id))
+      if (!site) return
+      setBookmarked(getBookmarks().includes(site.id))
+      setWatched(isWatched(site.id))
+      setNote(getSiteNote(site.id))
+      if (calculations) setWatchDeltaInfo(watchDelta(site.id, calculations.paybackDays, calculations.dailyProfitFiat))
     // A newly selected site always opens on Overview — never on the section the
     // previous site was left on.
     setSection('overview')
@@ -877,18 +882,44 @@ export default function SiteDetailsPanel({
           )}
         </div>
         <div className="flex gap-2">
-          {!compact && (
-            <button
-              type="button"
-              onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }}
-              className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}
-              aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark site'}
-              aria-pressed={bookmarked}
-            >{bookmarked ? '★' : '☆'}</button>
-          )}
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-white h-11 w-11 md:h-6 md:w-6 inline-flex items-center justify-center shrink-0" aria-label="Close site details">✕</button>
-        </div>
-      </div>
+                  {!compact && (
+                    <button
+                      type="button"
+                      onClick={() => { if (site) { const b = toggleBookmark(site.id); setBookmarked(b) } }}
+                      className={`text-xs px-2 py-1 rounded border ${bookmarked ? 'border-[#FF8C00] text-[#FF8C00]' : 'border-white/20 text-gray-400'}`}
+                      aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark site'}
+                      aria-pressed={bookmarked}
+                    >{bookmarked ? '★' : '☆'}</button>
+                  )}
+                  {!compact && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!site || !calculations) return
+                        if (watched) { unwatchSite(site.id); setWatched(false); setWatchDeltaInfo(null) }
+                        else { watchSite(site.id, calculations.paybackDays, calculations.dailyProfitFiat); setWatched(true); setWatchDeltaInfo(null) }
+                      }}
+                      className={`text-xs px-2 py-1 rounded border ${watched ? 'border-[#5BC0BE] text-[#5BC0BE]' : 'border-white/20 text-gray-400'}`}
+                      aria-label={watched ? 'Remove from watchlist' : 'Watch this site'}
+                      aria-pressed={watched}
+                      title={watched ? 'Watching — you will be alerted when this build moves' : 'Watch — get alerted when this build moves'}
+                    >{watched ? '◉' : '○'}</button>
+                  )}
+                  <button type="button" onClick={onClose} className="text-gray-400 hover:text-white h-11 w-11 md:h-6 md:w-6 inline-flex items-center justify-center shrink-0" aria-label="Close site details">✕</button>
+                </div>
+              </div>
+
+              {watchDeltaInfo && (
+                <div className="mx-3 mt-2 rounded-lg border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 px-3 py-2 text-xs" data-testid="watch-delta-alert">
+                  <div className="text-[#5BC0BE] font-semibold">Your watch moved</div>
+                  <div className="text-gray-300 mt-0.5">
+                    {watchDeltaInfo.profitPctChange > 0
+                      ? <>Daily profit is up <span className="text-green-400 font-semibold">{Math.round(watchDeltaInfo.profitPctChange)}%</span> since you watched it.</>
+                      : <>Daily profit is down <span className="text-red-400 font-semibold">{Math.abs(Math.round(watchDeltaInfo.profitPctChange))}%</span> since you watched it.</>}
+                    {' '}Payback now <span className="text-white font-semibold">{Math.round(watchDeltaInfo.newPaybackDays).toLocaleString()} days</span> (was {Math.round(watchDeltaInfo.entry.paybackDays).toLocaleString()}).
+                  </div>
+                </div>
+              )}
 
       {compact && (
         <div className="flex items-center gap-2 pt-0.5">
