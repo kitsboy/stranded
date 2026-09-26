@@ -1384,7 +1384,7 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   max-width: min(96vw, 52rem);
   pointer-events: none;
 }
-.map-command-center .map-top-hud__inner {
+.map-command-center .map-top-hud .map-top-hud__inner {
   pointer-events: auto;
   flex-wrap: wrap;
   justify-content: center;
@@ -1393,7 +1393,8 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   padding: 0.375rem var(--map-panel-padding);
   /* Solid, opaque bar — the HUD floats over the map, so a translucent pill
      ambiguously hides pins/labels behind it. A solid background makes it read
-     as a deliberate header instead of a see-through overlay. */
+     as a deliberate header instead of a see-through overlay. (Higher
+     specificity than the [class*="hud"] jewel-glass gradient below.) */
   background: rgba(15, 23, 42, 0.96);
   backdrop-filter: none;
   box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.5);
