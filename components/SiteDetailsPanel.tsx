@@ -217,6 +217,8 @@ export default function SiteDetailsPanel({
   const [poolFeePercent, setPoolFeePercent] = useState(1.5)
   const [maintenanceAnnualPercent, setMaintenanceAnnualPercent] = useState(5)
   const [revenuePerThPerDayBtc, setRevenuePerThPerDayBtc] = useState(0.0000009)
+    /** Opt-in carbon-credit uplift: stacks avoided-methane credit value into the build return. Off by default (honesty). */
+    const [carbonToggle, setCarbonToggle] = useState(false)
   /**
    * Honest hashprice inputs (Fix: optimistic must be visible). Net value derived
    * live from the two editable network inputs; anything above it is an optimistic scenario.
@@ -447,12 +449,13 @@ export default function SiteDetailsPanel({
           }
 
   const advancedRoi = site ? computeAdvancedRoi(site, selectedGenset, {
-    liveBtcUsd: btcPrice,
-    historicalBtcUsd: historicalBtcUsd || undefined,
-    difficultyMultiplier,
-    gasTreatmentDerate,
-    txFeeBtcPerDay: 0.0002,
-  }) : null
+      liveBtcUsd: btcPrice,
+      historicalBtcUsd: historicalBtcUsd || undefined,
+      difficultyMultiplier,
+      gasTreatmentDerate,
+      txFeeBtcPerDay: 0.0002,
+      carbonCapturePct: carbonToggle ? 100 : undefined,
+    }) : null
 
   const scoreExplain = useMemo(() => (site ? explainStrandedScore(site) : null), [site])
   const peers = useMemo(() => {
@@ -1319,12 +1322,28 @@ export default function SiteDetailsPanel({
           <label className="text-xs">Interest: {interestRate}%</label>
           <input type="range" min="3" max="15" step="0.5" value={interestRate} onChange={e => setInterestRate(+e.target.value)} className="w-full accent-[#5BC0BE]" />
         </div>
-      </div>
-      {advancedRoi && (
-        <div className={`mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2${sectionOff('financials')}`}>
-          <div><span className="text-gray-400">LCOE</span><div className="font-mono text-white">${advancedRoi.lcoeUsdPerKwh}/kWh</div></div>
-          <div title={carbonBaselineLabel(p as Record<string, unknown>)}><span className="text-gray-400">Carbon (screening)</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
-          <div><span className="text-gray-400">Incentives</span><div className="font-mono text-[#5BC0BE]">${advancedRoi.incentiveGrantUsd.toLocaleString()}</div></div>
+              </div>
+              {/* Carbon-credit uplift toggle — opt-in, off by default (honesty) */}
+              <div className={`mb-3 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5${sectionOff('financials')}`} data-testid="carbon-toggle">
+                <div>
+                  <div className="text-sm font-semibold text-[#34D399]">Carbon-credit uplift</div>
+                  <div className="text-micro text-gray-500">Stack avoided-methane credit value into this build&apos;s return (illustrative, screening only).</div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={carbonToggle}
+                  onClick={() => setCarbonToggle(v => !v)}
+                  className={`relative w-11 h-6 rounded-full transition ${carbonToggle ? 'bg-[#34D399]' : 'bg-slate-700'}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${carbonToggle ? 'left-[22px]' : 'left-0.5'}`} />
+                </button>
+              </div>
+              {advancedRoi && (
+              <div className={`mb-4 p-3 bg-[#FF8C00]/10 border border-[#FF8C00]/25 rounded-lg text-xs grid grid-cols-2 gap-2${sectionOff('financials')}`}>
+                <div><span className="text-gray-400">LCOE</span><div className="font-mono text-white">${advancedRoi.lcoeUsdPerKwh}/kWh</div></div>
+                <div title={carbonBaselineLabel(p as Record<string, unknown>)}><span className="text-gray-400">Carbon {carbonToggle ? '(uplift on)' : '(screening)'}</span><div className="font-mono text-[#34D399]">${advancedRoi.carbonRevenueUsd.toLocaleString()}/yr</div></div>
+                <div><span className="text-gray-400">Incentives</span><div className="font-mono text-[#5BC0BE]">${advancedRoi.incentiveGrantUsd.toLocaleString()}</div></div>
           <div><span className="text-gray-400">Jobs</span><div className="font-mono">{advancedRoi.jobs.total} FTE</div></div>
         </div>
       )}
