@@ -5,6 +5,7 @@ import { GENSET_DATA, GensetId, EnrichedSite } from '@/lib/sites'
 import { computeAdvancedRoi } from '@/lib/roi-model'
 import { toggleBookmark, getBookmarks } from '@/lib/bookmarks'
 import { getSiteNote, setSiteNote } from '@/lib/site-notes'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import RoiProjectionChart from '@/components/RoiProjectionChart'
 import { integrationUrl } from '@/lib/integrations'
@@ -167,7 +168,10 @@ export default function SiteDetailsPanel({
   const siteEmission = p.emission_rate_kg_day || 0
 
   const { fiats: sharedFiats } = useBtcPrice()
+    const urlFiat = useSearchParams().get('fiat')
     const [selectedFiat, setSelectedFiat] = useState<FiatCode>(() => {
+      const urlVal = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('fiat') : urlFiat
+      if (urlVal && FIAT_OPTIONS.some(f => f.code === urlVal)) return urlVal as FiatCode
       if (initialFiatCode && FIAT_OPTIONS.some(f => f.code === initialFiatCode)) return initialFiatCode as FiatCode
       if (typeof window === 'undefined') return 'USD'
       const saved = window.localStorage.getItem('stranded-fiat')
@@ -225,7 +229,13 @@ export default function SiteDetailsPanel({
   const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
   /** Bear/Base/Bull scenario — scales BTC price & hashprice instantly across the whole card. */
-  const [scenario, setScenario] = useState<'bear' | 'base' | 'bull'>(initialScenario || 'base')
+  const [scenario, setScenario] = useState<'bear' | 'base' | 'bull'>(() => {
+    if (typeof window !== 'undefined') {
+      const sv = new URLSearchParams(window.location.search).get('scen')
+      if (sv === 'bear' || sv === 'base' || sv === 'bull') return sv
+    }
+    return initialScenario || 'base'
+  })
   const [bookmarked, setBookmarked] = useState(false)
   const [note, setNote] = useState('')
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
