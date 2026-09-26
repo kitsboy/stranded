@@ -16,7 +16,14 @@ export function portfolioDailyPotentialUsd(sites: EnrichedSite[], liveBtc = 8500
 
 export function savePortfolio(sites: EnrichedSite[]) {
   if (typeof window === 'undefined') return
-  const minimal = sites.map(s => ({ id: s.id, name: s.properties.name, province: s.properties.province, score: s.strandedScore, emission: s.emission }))
+  const minimal = sites.map(s => ({
+    id: s.id,
+    name: s.properties.name,
+    province: s.properties.province,
+    score: s.strandedScore,
+    emission: s.emission,
+    build: (s as any)._buildSnapshot || undefined,
+  }))
   localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(minimal))
 }
 

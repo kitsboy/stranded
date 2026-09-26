@@ -1519,7 +1519,20 @@ export default function SiteDetailsPanel({
 
       {onAddToMission && (
         <button
-          onClick={() => onAddToMission(site)}
+          onClick={() => onAddToMission({
+            ...site,
+            _buildSnapshot: {
+              asicId: selectedASIC.id,
+              minerCount: machineCount,
+              gensets: gensetStack,
+              mode: stackMode,
+              scenario,
+              dailyProfitBtc: calculations.dailyProfitBtc,
+              dailyProfitFiat: calculations.dailyProfitFiat,
+              paybackDays: calculations.paybackDays,
+              satsPerDay: satsPerDay(calculations.effectiveDailyBtc),
+            },
+          })}
           className="mt-2 w-full py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black active:scale-[0.985] transition flex items-center justify-center gap-2"
         >
           + ADD TO MISSION PORTFOLIO
