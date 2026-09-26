@@ -117,6 +117,15 @@ const SITE_SECTIONS = [
 ] as const
 type SiteSectionId = (typeof SITE_SECTIONS)[number]['id']
 
+/** Small ⓘ with a native tooltip explaining how a number is computed. */
+function Why({ text, className = '' }: { text: string; className?: string }) {
+  return (
+    <span className={`group/why relative inline-flex align-middle ${className}`}>
+      <span className="inline-flex items-center justify-center rounded-full w-4 h-4 text-[10px] text-gray-500 border border-white/15 cursor-help hover:text-[#5BC0BE] hover:border-[#5BC0BE]/40" title={text}>ⓘ</span>
+    </span>
+  )
+}
+
 export default function SiteDetailsPanel({ 
   site, 
   onClose, 
@@ -1321,11 +1330,11 @@ export default function SiteDetailsPanel({
       <div className={`bg-[#5BC0BE]/10 border border-[#5BC0BE]/30 rounded-lg p-4 mb-4${sectionOff('financials')}`} data-testid="site-roi-summary">
         <h3 className="text-[#5BC0BE] font-bold mb-2">ROI Summary <span className="text-xs font-normal">(BTC first — always the denominator)</span></h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between"><span className="text-gray-400">Daily BTC Earned (after pool)</span><span className="text-white">{calculations.effectiveDailyBtc.toFixed(6)} BTC</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Daily Revenue</span><span className="text-green-400 font-semibold">{calculations.dailyRevenueBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyRevenueFiat)})</span></span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Power Cost</span><span className="text-red-400">{calculations.dailyPowerCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyPowerCostFiat)})</span></span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Daily Maintenance</span><span className="text-red-400">{calculations.dailyMaintBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyMaintFiat)})</span></span></div>
-          <div className="flex justify-between border-t border-slate-600 pt-2"><span className="text-gray-400">Daily Profit (net)</span><span className={`font-bold ${calculations.dailyProfitBtc >= 0 ? 'text-green-400' : 'text-red-400'}`}>{calculations.dailyProfitBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyProfitFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400 inline-flex items-center gap-1">Daily BTC Earned (after pool) <Why text="Gross hashrate × hashprice, minus pool fee, × uptime." /></span><span className="text-white">{calculations.effectiveDailyBtc.toFixed(6)} BTC</span></div>
+          <div className="flex justify-between"><span className="text-gray-400 inline-flex items-center gap-1">Daily Revenue <Why text="Daily BTC earned × live BTC price in the selected currency." /></span><span className="text-green-400 font-semibold">{calculations.dailyRevenueBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyRevenueFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400 inline-flex items-center gap-1">Power Cost <Why text={`kW used × 24h × ${powerCostUsdPerKwh.toFixed(3)}/kWh. A stranded-gas site is O&M only.`} /></span><span className="text-red-400">{calculations.dailyPowerCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyPowerCostFiat)})</span></span></div>
+          <div className="flex justify-between"><span className="text-gray-400 inline-flex items-center gap-1">Daily Maintenance <Why text={`${maintenanceAnnualPercent}% of hardware cost per year, ÷ 365.`} /></span><span className="text-red-400">{calculations.dailyMaintBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyMaintFiat)})</span></span></div>
+          <div className="flex justify-between border-t border-slate-600 pt-2"><span className="text-gray-400 inline-flex items-center gap-1">Daily Profit (net) <Why text="Revenue − power − maintenance. This is what the site keeps." /></span><span className={`font-bold ${calculations.dailyProfitBtc >= 0 ? 'text-green-400' : 'text-red-400'}`}>{calculations.dailyProfitBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.dailyProfitFiat)})</span></span></div>
           <div className="flex justify-between"><span className="text-gray-400">Monthly Profit (net)</span><span className={`font-bold ${calculations.monthlyProfitBtc >= 0 ? 'text-green-400' : 'text-red-400'}`}>{calculations.monthlyProfitBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.monthlyProfitFiat)})</span></span></div>
 
           <div className="flex justify-between mt-2 pt-2 border-t border-slate-600">
@@ -1346,7 +1355,7 @@ export default function SiteDetailsPanel({
           </div>
 
           <div className="flex justify-between mt-2 pt-2 border-t border-slate-600">
-            <span className="text-gray-400">Payback (Total Capital)</span>
+            <span className="text-gray-400 inline-flex items-center gap-1">Payback (Total Capital) <Why text="Total investment ÷ daily net profit. Days to recoup everything." /></span>
             <span className={calculations.paybackDays < 365 ? 'text-green-400' : 'text-yellow-400'}>{isFinite(calculations.paybackDays) ? Math.round(calculations.paybackDays) + ' days' : 'N/A'}</span>
           </div>
           <div className="flex justify-between text-xs">
@@ -1354,11 +1363,11 @@ export default function SiteDetailsPanel({
             <span className="text-gray-300">{isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays) + ' days' : 'N/A'}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-gray-400">Marginal Payback (per extra machine)</span>
+            <span className="text-gray-400 inline-flex items-center gap-1">Marginal Payback (per extra machine) <Why text="Payback for ONE more miner, ignoring fixed costs — the cheapest extra unit." /></span>
             <span className="text-gray-300">{isFinite(calculations.marginalPayback) ? Math.round(calculations.marginalPayback) + ' days' : 'N/A'}</span>
           </div>
           <div className="flex justify-between text-xs mt-1 border-t border-slate-700 pt-1">
-            <span className="text-red-400">Methane Loss (daily BTC if vented)</span>
+            <span className="text-red-400 inline-flex items-center gap-1">Methane Loss (daily BTC if vented) <Why text="The full daily BTC the site's gas could earn if fully captured — what venting wastes." /></span>
             <span className="text-red-400">{calculations.methaneLossDailyBtc.toFixed(4)} BTC</span>
           </div>
           <div className="flex justify-between text-xs">
