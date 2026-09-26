@@ -588,6 +588,7 @@ export default function SiteDetailsPanel({
   const unminedUsdPerDay = Math.max(0, fullLoadModel.dailyRevenueFiat - calculations.dailyRevenueFiat)
   const suggestedPreset = fleetPresetForSourceType(p.source_type || '')
   const fleetShareUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${encodeURIComponent(site.id)}&${encodeFleet(fleetTemplate)}&fiat=${encodeURIComponent(selectedFiat)}&scen=${encodeURIComponent(scenario)}`
+    const publicPageUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/site/${encodeURIComponent(site.id)}`
   const gaugePct = Math.min(100, Math.round((machineCount / Math.max(1, ceilingMiners)) * 100))
   const usedPowerKw = Math.min(calculations.totalPowerKw, calculations.generatorPowerKw)
   const sparePct = Math.max(0, 100 - gaugePct)
@@ -1097,16 +1098,27 @@ export default function SiteDetailsPanel({
           <Send size={15} aria-hidden /> Send this build to the team
                   </a>
                   <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(fleetShareUrl)
-                      toast.success('Build link copied — share it anywhere')
-                    }}
-                    className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#5BC0BE]/50 px-3 py-3 text-sm font-semibold text-[#5BC0BE] hover:bg-[#5BC0BE]/10 active:scale-[0.985] transition"
-                    data-testid="share-build-cta"
-                  >
-                    <Link2 size={15} aria-hidden /> Share this build
-                  </button>
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(fleetShareUrl)
+                                        toast.success('Build link copied — share it anywhere')
+                                      }}
+                                      className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#5BC0BE]/50 px-3 py-3 text-sm font-semibold text-[#5BC0BE] hover:bg-[#5BC0BE]/10 active:scale-[0.985] transition"
+                                      data-testid="share-build-cta"
+                                    >
+                                      <Link2 size={15} aria-hidden /> Share this build
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(publicPageUrl)
+                                        toast.success('Public page link copied — clean one-pager for this site')
+                                      }}
+                                      className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-3 py-3 text-sm font-semibold text-gray-200 hover:bg-white/5 active:scale-[0.985] transition"
+                                      data-testid="public-page-cta"
+                                    >
+                                      <Link2 size={15} aria-hidden /> Copy public page link
+                                    </button>
         <div className="text-label text-gray-400 mt-1.5 leading-snug">
           Opens the certified application with this fleet link pre-filled, category{' '}
           <span className="text-gray-300">Site application</span>, subject{' '}
