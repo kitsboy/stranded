@@ -272,7 +272,7 @@ export default function MinerStackCockpit({
           </span>
           <span className="text-sm text-[#FF8C00] font-semibold">sats / day</span>
           <span className="text-xs text-gray-400 tabular-nums" data-testid="cockpit-fiat">
-            ≈ {formatMoneyShort(live.usdPerDay, currencySymbol)} / day
+            ≈ {formatMoneyShort(live.usdPerDay, currencySymbol)} {fiatCode} / day
           </span>
         </div>
         <div className="text-micro text-gray-400 mt-1.5 tabular-nums">
@@ -299,7 +299,7 @@ export default function MinerStackCockpit({
             <Leaf size={11} aria-hidden /> Your build
           </div>
           <div className="text-sm font-semibold text-white tabular-nums" data-testid="cockpit-venting-gain">
-            {formatMoneyShort(live.netUsdPerDay, currencySymbol)}/day model net
+            {formatMoneyShort(live.netUsdPerDay, currencySymbol)} {fiatCode}/day model net
           </div>
           <div className="text-micro text-[#34D399] tabular-nums" data-testid="cockpit-co2e">
             Avoided emissions: baseline not established
@@ -516,7 +516,7 @@ export default function MinerStackCockpit({
             </div>
           </div>
           <div className={`min-w-0 ${showAll ? '' : 'hidden md:block'}`}>
-            <div className="text-gray-400">Cash / day</div>
+            <div className="text-gray-400">Cash / day ({fiatCode})</div>
             <div className="text-white font-semibold tabular-nums">{formatMoneyShort(live.usdPerDay, currencySymbol)}</div>
           </div>
         </div>
@@ -542,7 +542,7 @@ export default function MinerStackCockpit({
             <span className="font-semibold">Left on the table:</span>{' '}
             <span className="tabular-nums">
               {formatCount(unusedKgPerDay)} kg CH₄/day ({formatCount(unusedKgPerDay * 365 / 1000, 1)} t/yr) of spare installed conversion —
-              about {formatMoneyShort(unusedUsdPerDay, currencySymbol)}/day unmined, {formatMoneyShort(ventingUsdPerYear, currencySymbol)}/year.
+              about {formatMoneyShort(unusedUsdPerDay, currencySymbol)} {fiatCode}/day unmined, {formatMoneyShort(ventingUsdPerYear, currencySymbol)} {fiatCode}/year.
             </span>
             <button type="button" onClick={() => onModeChange('auto')} className="ml-1 inline-flex items-center min-h-11 underline font-semibold hover:text-white">
               Fill the gas instead
