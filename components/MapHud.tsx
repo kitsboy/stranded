@@ -57,7 +57,7 @@ export default function MapHud({
           )}
         </div>
         <div className="map-top-hud__divider h-3 w-px bg-white/20 shrink-0" aria-hidden />
-        <PinProofBadge label="Pin proof ·" />
+        <PinProofBadge label="Pin proof ·" compact />
         <div className="map-top-hud__divider h-3 w-px bg-white/20 shrink-0" aria-hidden />
         <button
           type="button"

@@ -21,14 +21,20 @@ const TONES: Record<'good' | 'wait' | 'bad', { text: string; border: string; bg:
 export default function PinProofBadge({
   className = '',
   label = 'Pin proof',
+  compact = false,
 }: {
   className?: string
   /** Prefix shown before the state, so a reader knows what is being described. */
   label?: string
+  /** Compact header form: "✓ block 966,549" — keeps the bar short; full detail stays in the tooltip. */
+  compact?: boolean
 }) {
   const proof = usePinProof()
   const { text, tone } = pinProofStatus(proof)
   const c = TONES[tone]
+  const shown = compact && proof.state === 'confirmed'
+    ? `block ${proof.verdict?.bitcoin_block_height ? Number(proof.verdict.bitcoin_block_height).toLocaleString() : '?'}`
+    : text
 
   return (
     <span
@@ -44,7 +50,7 @@ export default function PinProofBadge({
     >
       <Pin size={11} aria-hidden />
       <span className="hidden sm:inline text-gray-400">{label}</span>
-      <span data-testid="pin-proof-badge-text">{text}</span>
+      <span data-testid="pin-proof-badge-text">{shown}</span>
     </span>
   )
 }
