@@ -201,6 +201,8 @@ export default function SiteDetailsPanel({
   const [gasTreatmentDerate, setGasTreatmentDerate] = useState(1.0)
   const [historicalBtcUsd, setHistoricalBtcUsd] = useState(0)
   const [difficultyMultiplier, setDifficultyMultiplier] = useState(1.0)
+  /** Bear/Base/Bull scenario — scales BTC price & hashprice instantly across the whole card. */
+  const [scenario, setScenario] = useState<'bear' | 'base' | 'bull'>('base')
   const [bookmarked, setBookmarked] = useState(false)
   const [note, setNote] = useState('')
   const [scoreHistory, setScoreHistory] = useState<number[]>([])
@@ -227,6 +229,18 @@ export default function SiteDetailsPanel({
 
   const currentFiat = FIAT_OPTIONS.find(f => f.code === selectedFiat) || FIAT_OPTIONS[0]
   const currencySymbol = currentFiat.symbol
+
+  // Bear/Base/Bull scenario multipliers (BTC price & hashprice scale together).
+  const SCENARIO = {
+    bear: { btc: 0.70, hash: 0.70, label: 'Bear' },
+    base: { btc: 1.00, hash: 1.00, label: 'Base' },
+    bull: { btc: 1.30, hash: 1.30, label: 'Bull' },
+  }
+  const scenarioMul = SCENARIO[scenario]
+  /** BTC price in the selected fiat, scaled by the chosen scenario. */
+  const scenarioBtcPrice = btcPrice * scenarioMul.btc
+  /** Hashprice scale applied to the model. */
+  const scenarioHashMultiplier = scenarioMul.hash
 
   // Sync multi-fiat map from shared provider (single CoinGecko poll site-wide)
   useEffect(() => {
@@ -271,19 +285,19 @@ export default function SiteDetailsPanel({
     gensets: gensetStack,
     asic: selectedASIC,
     overclockPercent,
-    btcPrice,
+    btcPrice: scenarioBtcPrice,
     btcPrices,
     uptimePercent,
     poolFeePercent,
     maintenanceAnnualPercent,
-    revenuePerThPerDayBtc,
+    revenuePerThPerDayBtc: revenuePerThPerDayBtc * scenarioHashMultiplier,
     fixedSetupCostCad,
     powerCostUsdPerKwh,
     debtPercent,
     interestRate,
   }), [
-    site, gensetStack, selectedASIC, overclockPercent, btcPrice, btcPrices, uptimePercent,
-    poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, fixedSetupCostCad,
+    site, gensetStack, selectedASIC, overclockPercent, scenarioBtcPrice, btcPrices, uptimePercent,
+    poolFeePercent, maintenanceAnnualPercent, revenuePerThPerDayBtc, scenarioHashMultiplier, fixedSetupCostCad,
     powerCostUsdPerKwh, debtPercent, interestRate,
   ])
 
@@ -390,7 +404,7 @@ export default function SiteDetailsPanel({
       lines.push('ASSUMPTIONS (honest)')
       lines.push(`  Hashprice:    ${c.hashpriceUsdPerThDay.toFixed(4)} USD/TH/day — ${isOptimistic ? 'optimistic scenario (above network-derived)' : 'in line with network'}`)
       lines.push(`  Power cost:   ${powerCostUsdPerKwh.toFixed(3)} USD/kWh`)
-      lines.push(`  BTC price:    ${fmt(btcPrice)} (${selectedFiat})`)
+      lines.push(`  BTC price:    ${fmt(scenarioBtcPrice)} (${selectedFiat}${scenario !== 'base' ? ` · ${scenarioMul.label} scenario` : ''})`)
       lines.push(`  Data year:    ${p.reference_year || '—'} — measured, not modelled`)
       lines.push('')
       lines.push('DISCLAIMER: Simplified model for education only. Real mining revenue varies with network difficulty, fees, hardware degradation, gas composition, weather, downtime and regulation. Not investment advice.')
@@ -1270,6 +1284,26 @@ export default function SiteDetailsPanel({
             <span className="text-gray-300">{isFinite(calculations.financedPaybackDays) ? Math.round(calculations.financedPaybackDays) + ' days' : 'N/A'}</span>
           </div>
         </div>
+      </div>
+      {/* Instant Bear/Base/Bull scenario strip — one tap re-runs the whole card */}
+      <div className={`mb-4 rounded-xl border border-white/10 bg-gradient-to-r from-red-500/5 via-[#FF8C00]/5 to-green-500/5 p-3${sectionOff('financials')}`} data-testid="scenario-strip">
+        <div className="text-label text-gray-400 mb-1.5">Market scenario — instantly re-runs every number on this card</div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {(Object.keys(SCENARIO) as ('bear' | 'base' | 'bull')[]).map(id => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setScenario(id)}
+              className={`rounded-lg px-2 py-2 text-xs font-semibold transition ${scenario === id ? `${id === 'bear' ? 'bg-red-500/80' : id === 'bull' ? 'bg-green-500/80' : 'bg-[#FF8C00]'} text-black` : 'bg-white/5 text-gray-300 hover:bg-white/10'}`}
+            >
+              {SCENARIO[id].label}
+              <span className="block text-[10px] font-normal opacity-70">{selectedFiat} {SCENARIO[id].btc >= 1 ? '+' : ''}{Math.round((SCENARIO[id].btc - 1) * 100)}%</span>
+            </button>
+          ))}
+        </div>
+        {scenario !== 'base' && (
+          <div className="text-label mt-1.5 text-amber-300/90">Showing a <span className="font-semibold">{scenarioMul.label}</span> scenario — daily profit, payback and sats all reflect it.</div>
+        )}
       </div>
       <button onClick={() => setAdvancedMode(!advancedMode)} data-testid="site-advanced-toggle" className={`w-full py-2 mb-4 text-[#5BC0BE] text-sm border border-[#5BC0BE]/30 rounded-lg hover:bg-[#5BC0BE]/10 transition-colors${sectionOff('financials')}`}>{advancedMode ? 'Hide Advanced' : 'Show Advanced'}</button>
       {advancedMode && (
