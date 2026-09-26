@@ -121,6 +121,8 @@ export default function SiteDetailsPanel({
   site, 
   onClose, 
   onAddToMission, 
+  inMission = false,
+  onOpenMission,
   liveBtcPrice = 85000,
   allSites = [],
   compact = false,
@@ -132,6 +134,10 @@ export default function SiteDetailsPanel({
   site: any
   onClose: () => void
   onAddToMission?: (site: any) => void
+  /** True when this site is already in the mission portfolio. */
+  inMission?: boolean
+  /** Jump to the mission view (used when the site is already added). */
+  onOpenMission?: () => void
   liveBtcPrice?: number
   allSites?: EnrichedSite[]
   /** Mobile peek mode — header summary only */
@@ -1518,6 +1524,21 @@ export default function SiteDetailsPanel({
       {/* ---- end of the section body (Overview / Build / Financials / Evidence) ---- */}
 
       {onAddToMission && (
+        inMission ? (
+          <div className="mt-2 flex gap-2">
+            <div className="flex-1 py-2.5 text-sm font-semibold rounded-xl border border-[#34D399]/40 bg-[#34D399]/10 text-[#34D399] flex items-center justify-center gap-2">
+              ✓ In Mission
+            </div>
+            {onOpenMission && (
+              <button
+                onClick={onOpenMission}
+                className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-[#FF8C00] to-[#f59e0b] text-black active:scale-[0.985] transition flex items-center justify-center gap-2"
+              >
+                Open Mission
+              </button>
+            )}
+          </div>
+        ) : (
         <button
           onClick={() => onAddToMission({
             ...site,
@@ -1537,6 +1558,7 @@ export default function SiteDetailsPanel({
         >
           + ADD TO MISSION PORTFOLIO
         </button>
+        )
       )}
 
       <div className="flex gap-2 mt-2">

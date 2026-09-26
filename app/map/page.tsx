@@ -129,6 +129,7 @@ function StrandedCommandCenter() {
   const [portfolio, setPortfolio] = useState<EnrichedSite[]>([])
   const [viewMode, setViewMode] = useState<MapViewMode>('precise')
   const didAutoCluster = useRef(false)
+  const missionRef = useRef<HTMLDivElement>(null)
   const liveBtcPrice = useBtcUsd()
   const { locale, t } = useLocale()
   const reducedMotion = useReducedMotion()
@@ -1898,6 +1899,8 @@ function StrandedCommandCenter() {
                 onExpand={() => setMobileSiteSheet('expanded')}
                 onClose={() => { setSelectedSite(null); setMobileSiteSheet('peek') }}
                 onAddToMission={addToPortfolio}
+                inMission={portfolio.some(p => p.id === selectedSite.id)}
+                onOpenMission={() => missionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 liveBtcPrice={liveBtcPrice}
                 allSites={allSites}
                 initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
@@ -1917,6 +1920,8 @@ function StrandedCommandCenter() {
               site={selectedSite}
               onClose={() => setSelectedSite(null)}
               onAddToMission={addToPortfolio}
+              inMission={portfolio.some(p => p.id === selectedSite.id)}
+              onOpenMission={() => missionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               liveBtcPrice={liveBtcPrice}
               allSites={allSites}
               initialFleet={fleetUrlState && fleetUrlState.siteId === selectedSite.id ? fleetUrlState.template : null}
@@ -1925,16 +1930,18 @@ function StrandedCommandCenter() {
         </AnimatePresence>
 
         {/* The wild useful Mission Portfolio panel - stays visible at bottom of the column */}
-        <MissionPanel 
-          portfolio={portfolio} 
-          liveBtcPrice={liveBtcPrice} 
-          onRemove={removeFromPortfolio}
-          onRestore={restoreToPortfolio}
-          onClear={clearPortfolio}
-          onFlyTo={flyToFromPortfolio}
-          onApplyTemplate={applyMissionTemplate}
-          allSites={allSites}
-        />
+                <div ref={missionRef}>
+                <MissionPanel 
+                  portfolio={portfolio} 
+                  liveBtcPrice={liveBtcPrice} 
+                  onRemove={removeFromPortfolio}
+                  onRestore={restoreToPortfolio}
+                  onClear={clearPortfolio}
+                  onFlyTo={flyToFromPortfolio}
+                  onApplyTemplate={applyMissionTemplate}
+                  allSites={allSites}
+                />
+                </div>
 
         {portfolio.length > 0 && (
           <div className="flex flex-wrap gap-1.5 justify-end">
