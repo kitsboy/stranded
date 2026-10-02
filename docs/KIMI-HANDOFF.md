@@ -1,3 +1,11 @@
+# Map Layers ticks — next model, read this first (2026-10-02, v2.12.3)
+
+Cam is out of Grok credit. The layer checkboxes are the open job. Full instructions, the measured bug, and the pass/fail checks are in `docs/MAP-LAYER-TICKS.md`. Welcome card is good enough. Do not restyle it.
+
+v2.12.3 makes untick empty the methane source, retries heatmap/choropleth/satellite on `idle` instead of the already-fired `load` event, and drives every tick from the label click. Prove it on https://stranded.giveabit.io/map/ by reading MapLibre layer visibility, not by a raw Playwright checkbox click (that toggles the DOM and does not commit React).
+
+---
+
 # 🗺️ Stranded — pin / dark / welcome fixes (2026-10-02, v2.12.1)
 
 Dark was CARTO's keyless tile, which now paints "API KEY REQUIRED" over the map. Switched to Esri World Dark Gray (already allowed by CSP). Overlay dots were drawn under the methane clusters, so a toggled layer looked empty; they now sit on top with a white ring. Satellite, heatmap and choropleth insert under the methane pins so they cannot cover them. The welcome card scrolls (left column on desktop, inside the card on a phone).

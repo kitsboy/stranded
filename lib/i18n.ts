@@ -253,7 +253,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     mapLayerChoropleth: 'Province Emission Choropleth',
     mapLayerVerified: 'Verified',
     mapLayerDemo: 'Demo',
-    mapLayerNote2: 'Layers dynamically filter the 2,611 pins in real time.',
+    mapLayerNote2: 'Power grid and internet hide sites that do not match. They do not draw new lines.',
     mapOverlayTitle: 'Official energy overlays',
     mapOverlayLegend: 'Filled dot = a power plant. Ring = a remote community. These colours are not the methane score colours.',
     mapOverlayWind: 'Wind plants',

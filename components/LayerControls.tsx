@@ -133,43 +133,47 @@ export default function LayerControls({
       )}
 
       <div className={compact ? 'space-y-1' : 'space-y-2'}>
-        <label className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} data-testid="layer-methane">
-          <input type="checkbox" checked={layers.sites} onChange={() => onToggle('sites')} className={`accent-[#FF8C00] ${compact ? 'w-4 h-4' : 'w-4 h-4'}`} />
+        <label
+          data-testid="layer-methane"
+          className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`}
+          onClick={(e) => { e.preventDefault(); onToggle('sites') }}
+        >
+          <input type="checkbox" checked={layers.sites} readOnly className="accent-[#FF8C00] w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerMethaneSites')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={layers.grid} onChange={() => onToggle('grid')} className={`accent-[#5BC0BE] ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-grid" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('grid') }}>
+          <input type="checkbox" checked={layers.grid} readOnly className="accent-[#5BC0BE] w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerPowerGrid')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={layers.internet} onChange={() => onToggle('internet')} className={`accent-blue-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-internet" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('internet') }}>
+          <input type="checkbox" checked={layers.internet} readOnly className="accent-blue-400 w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerInternet')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={!!layers.satellite} onChange={() => onToggle('satellite')} className={`accent-purple-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-satellite" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('satellite') }}>
+          <input type="checkbox" checked={!!layers.satellite} readOnly className="accent-purple-400 w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapSatellite')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={!!layers.terrain} onChange={() => onToggle('terrain')} className={`accent-emerald-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-terrain" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('terrain') }}>
+          <input type="checkbox" checked={!!layers.terrain} readOnly className="accent-emerald-400 w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapTerrain')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={!!layers.heatmap} onChange={() => onToggle('heatmap')} className={`accent-rose-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-heatmap" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('heatmap') }}>
+          <input type="checkbox" checked={!!layers.heatmap} readOnly className="accent-rose-400 w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerHeatmap')}</span>
         </label>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={!!layers.choropleth} onChange={() => onToggle('choropleth')} className={`accent-amber-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label data-testid="layer-choropleth" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('choropleth') }}>
+          <input type="checkbox" checked={!!layers.choropleth} readOnly className="accent-amber-400 w-4 h-4" />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerChoropleth')}</span>
         </label>
         {onSiteLabelsChange && (
-          <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-            <input type="checkbox" checked={showSiteLabels} onChange={() => onSiteLabelsChange(!showSiteLabels)} className={`accent-cyan-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <label data-testid="layer-labels" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onSiteLabelsChange(!showSiteLabels) }}>
+            <input type="checkbox" checked={showSiteLabels} readOnly className="accent-cyan-400 w-4 h-4" />
             <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapSiteLabels')}</span>
           </label>
         )}
         {onPerformanceModeChange && (
-          <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-            <input type="checkbox" checked={performanceMode} onChange={() => onPerformanceModeChange(!performanceMode)} className={`accent-slate-400 ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+          <label data-testid="layer-performance" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onPerformanceModeChange(!performanceMode) }}>
+            <input type="checkbox" checked={performanceMode} readOnly className="accent-slate-400 w-4 h-4" />
             <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapPerformanceMode')}</span>
           </label>
         )}
@@ -203,11 +207,12 @@ export default function LayerControls({
                 key={cat.id}
                 className="flex min-h-[44px] cursor-pointer items-center gap-2"
                 data-testid={`overlay-${cat.id}`}
+                onClick={(e) => { e.preventDefault(); onToggleOverlay(cat.id) }}
               >
                 <input
                   type="checkbox"
                   checked={!!overlays?.[cat.id]}
-                  onChange={() => onToggleOverlay(cat.id)}
+                  readOnly
                   className="h-4 w-4 shrink-0"
                   style={{ accentColor: cat.color }}
                 />

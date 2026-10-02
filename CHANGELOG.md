@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.12.3] — 2026-10-02 · Map layer ticks show and hide
+
+- Unticking Methane Sites empties the pin source and hides the cluster layers. An idle listener keeps them hidden if the style was busy.
+- Heatmap, province colour, satellite and terrain no longer wait for the map's one-time load event. That event has already fired, so the old wait never ran.
+- Every layer tick calls the toggle from the label click, so the box and the map stay in step.
+- Power grid and internet still filter which methane sites remain. They do not draw power lines or fibre. The note under the list says so.
+- Site names show as soon as that box is ticked, including at country zoom.
+
 ## [2.12.2] — 2026-10-02 · Map layer ticks actually show and hide
 
 - Unticking Methane Sites now removes the pins. Ticking it puts them back. The box used to change and the map ignored it.

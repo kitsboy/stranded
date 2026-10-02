@@ -82,10 +82,22 @@ const UNCLUSTERED_LAYER = 'stranded-unclustered'
 const SITE_LABELS_LAYER = 'stranded-site-labels'
 
 /** Insert basemap extras under the methane pins so a raster or fill cannot cover them. */
+const EMPTY_FC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+
 function beforePinLayer(map: maplibregl.Map): string | undefined {
   if (map.getLayer(CLUSTER_LAYER)) return CLUSTER_LAYER
   if (map.getLayer(UNCLUSTERED_LAYER)) return UNCLUSTERED_LAYER
   return undefined
+}
+
+/** Run a style change now. If the style is busy, retry on idle — never on 'load', which already fired. */
+function runStyleOp(map: maplibregl.Map, fn: () => void) {
+  const attempt = () => {
+    try { fn(); return true } catch { return false }
+  }
+  if (attempt()) return
+  const retry = () => { map.off('idle', retry); attempt() }
+  map.on('idle', retry)
 }
 
 /**
@@ -482,7 +494,7 @@ export default function Map({
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Regular'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 4, 0, 5.2, 10, 12, 12],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 2, 10, 8, 11, 12, 13],
           'text-offset': [0, 1.2],
           'text-anchor': 'top',
           'text-max-width': 10,
@@ -502,15 +514,14 @@ export default function Map({
   const syncNativeClusters = useCallback((sitesToRender: EnrichedSite[], visible: boolean) => {
     const map = mapRef.current
     if (!map) return
-    if (!map.isStyleLoaded?.()) {
-      map.once('load', () => syncNativeClusters(sitesToRender, visible))
-      return
+    const apply = () => {
+      ensureNativeLayers(map)
+      const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource | undefined
+      if (!source) return
+      source.setData(visible ? sitesToGeoJSON(sitesToRender) : EMPTY_FC)
+      setNativeVisibility(map, visible)
     }
-
-    ensureNativeLayers(map)
-    const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource
-    source.setData(sitesToGeoJSON(sitesToRender))
-    setNativeVisibility(map, visible)
+    runStyleOp(map, apply)
   }, [ensureNativeLayers, setNativeVisibility])
 
   const addMarkers = useCallback((sitesToRender: EnrichedSite[], mode: MapViewMode) => {
@@ -668,51 +679,56 @@ export default function Map({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !map.isStyleLoaded?.()) return
-    const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
+    if (!map) return
+    const apply = () => {
+      if (!map.getLayer('osm')) return
+      const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
 
-    const showDark = mapStyle === 'dark'
-    const showStandard = mapStyle !== 'dark' && mapStyle !== 'satellite'
-    if (map.getLayer('dark')) map.setLayoutProperty('dark', 'visibility', showDark ? 'visible' : 'none')
-    if (map.getLayer('osm')) map.setLayoutProperty('osm', 'visibility', showStandard ? 'visible' : 'none')
+      const showDark = mapStyle === 'dark'
+      const showStandard = mapStyle !== 'dark' && mapStyle !== 'satellite'
+      if (map.getLayer('dark')) map.setLayoutProperty('dark', 'visibility', showDark ? 'visible' : 'none')
+      if (map.getLayer('osm')) map.setLayoutProperty('osm', 'visibility', showStandard ? 'visible' : 'none')
 
-    if (effectiveSatellite !== layers.satellite) {
-      if (effectiveSatellite && !map.getLayer('satellite')) {
-        map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } }, beforePinLayer(map))
-      } else if (!effectiveSatellite && map.getLayer('satellite')) {
-        map.removeLayer('satellite')
-      }
-      layers.satellite = effectiveSatellite
-    } else if (effectiveSatellite && map.getLayer('satellite')) {
-      map.setLayoutProperty('satellite', 'visibility', 'visible')
-    }
-
-    if (effectiveTerrain !== layers.terrain) {
-      map.setPitch(effectiveTerrain ? 50 : 0)
-      if (effectiveTerrain && terrainExaggeration > 0) {
-        if (!map.getSource('terrain')) return
-        map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
-        if (!map.getLayer('hillshade')) {
-          map.addLayer({
-            id: 'hillshade',
-            type: 'hillshade',
-            source: 'terrain',
-            paint: { 'hillshade-exaggeration': 0.4 },
-          }, 'osm')
+      if (effectiveSatellite !== layers.satellite) {
+        if (effectiveSatellite && !map.getLayer('satellite')) {
+          map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } }, beforePinLayer(map))
+        } else if (!effectiveSatellite && map.getLayer('satellite')) {
+          map.removeLayer('satellite')
         }
-      } else {
-        map.setTerrain(null)
-        if (map.getLayer('hillshade')) map.removeLayer('hillshade')
+        layers.satellite = effectiveSatellite
+      } else if (effectiveSatellite && map.getLayer('satellite')) {
+        map.setLayoutProperty('satellite', 'visibility', 'visible')
       }
-      layers.terrain = effectiveTerrain
-    } else if (effectiveTerrain && map.getTerrain()) {
-      map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
-      if (map.getLayer('hillshade')) {
-        map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrainExaggeration * 0.4)
+
+      if (effectiveTerrain !== layers.terrain) {
+        map.setPitch(effectiveTerrain ? 50 : 0)
+        if (effectiveTerrain && terrainExaggeration > 0) {
+          if (!map.getSource('terrain')) return
+          map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
+          if (!map.getLayer('hillshade')) {
+            map.addLayer({
+              id: 'hillshade',
+              type: 'hillshade',
+              source: 'terrain',
+              paint: { 'hillshade-exaggeration': 0.4 },
+            }, 'osm')
+          }
+        } else {
+          map.setTerrain(null)
+          if (map.getLayer('hillshade')) map.removeLayer('hillshade')
+        }
+        layers.terrain = effectiveTerrain
+      } else if (effectiveTerrain && map.getTerrain()) {
+        map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
+        if (map.getLayer('hillshade')) {
+          map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrainExaggeration * 0.4)
+        }
       }
+      ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
     }
-    ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
-  }, [effectiveSatellite, effectiveTerrain, terrainExaggeration, mapStyle])
+    if (!map.getLayer('osm')) map.once('idle', apply)
+    else apply()
+  }, [effectiveSatellite, effectiveTerrain, terrainExaggeration, mapStyle, mapLoaded])
 
   useEffect(() => {
     const map = mapRef.current
@@ -1069,8 +1085,8 @@ export default function Map({
   const syncChoropleth = useCallback(() => {
     const map = mapRef.current
     if (!map) return
-    if (!map.isStyleLoaded?.()) {
-      map.once('load', () => syncChoropleth())
+    if (!map.getSource('province-choropleth') && !map.isStyleLoaded?.()) {
+      map.once('idle', () => syncChoropleth())
       return
     }
     const srcId = 'province-choropleth'
@@ -1173,8 +1189,8 @@ export default function Map({
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
     const map = mapRef.current
     if (!map) return
-    if (!map.isStyleLoaded?.()) {
-      map.once('load', () => syncHeatmap(sitesToRender))
+    if (!map.getSource('emission-heat') && !map.isStyleLoaded?.()) {
+      map.once('idle', () => syncHeatmap(sitesToRender))
       return
     }
     const srcId = 'emission-heat'
@@ -1237,6 +1253,21 @@ export default function Map({
     if (!map || !mapLoaded) return
     setViewportSiteCount(countSitesInViewport(map, filteredSites))
   }, [filteredSites, mapLoaded, mapZoom, mapCenter])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapLoaded) return
+    const hidePins = () => {
+      clearMarkers()
+      setNativeVisibility(map, false)
+      const source = map.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource | undefined
+      try { source?.setData(EMPTY_FC) } catch { /* style busy; idle retries */ }
+    }
+    if (!showSites) hidePins()
+    const onIdle = () => { if (!showSites) hidePins() }
+    map.on('idle', onIdle)
+    return () => { map.off('idle', onIdle) }
+  }, [showSites, mapLoaded, setNativeVisibility])
 
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
