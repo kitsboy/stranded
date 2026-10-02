@@ -124,12 +124,14 @@ for (const r of report) {
   for (const b of r.beaconResponses) console.log(`      ${b}`);
   console.log(`  beacon blocked    : ${r.beaconBlocked.length}`);
   for (const b of r.beaconBlocked) console.log(`      ${b}`);
-  const cspViolations = r.violations.filter((v) =>
-    String(v.blocked).includes("cloudflareinsights")
-  );
-  console.log(`  CSP violations    : ${r.violations.length} total`);
+  console.log(`  CSP violations    : ${r.violations.length}`);
   for (const v of r.violations) console.log(`      ${v.directive} → ${String(v.blocked).slice(0, 90)}`);
-  problems += cspViolations.length;
+  // Any violation is a problem, not just the beacon's: a new third-party script
+  // that nobody allowlisted must fail the build too. The site currently reports
+  // zero violations on these paths, so this gate starts from a clean baseline.
+  problems += r.violations.length;
 }
 
-console.log(`\n${problems === 0 ? "PASS" : `FAIL (${problems})`} — cloudflareinsights violations under this policy`);
+console.log(
+  `\n${problems === 0 ? "PASS" : `FAIL (${problems})`} — CSP violations under this policy`
+);
