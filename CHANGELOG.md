@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.4] — 2026-10-02 · Map Layers card, footer hit-areas, welcome card reopen
+
+- The Map Layers card anchors below the sticky navbar (it used to slide up under it and clip its own heading) and now collapses/expands with a chevron so the full map is reachable underneath.
+- Footer source links (ECCC Open, NRCan plants) are real 44px targets again — they were inline links in a wrapping paragraph, so on a phone the next line stole the tap band.
+- The welcome card is gated behind a `stranded-onboarding-dismissed` flag; once dismissed it never returned. A "Show welcome" button in the Map Layers header clears the flag and remounts the tour.
+- Regenerated `public/data/live-stats.json` and `public/status.json` (they still named a Sept 16 build, which was failing the CI docs gate before E2E ever ran).
+
 ## [2.12.3] — 2026-10-02 · Map layer ticks show and hide
 
 - Unticking Methane Sites empties the pin source and hides the cluster layers. An idle listener keeps them hidden if the style was busy.

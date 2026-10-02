@@ -1,9 +1,9 @@
-# Map Layers ticks — handoff for the next model (2026-10-02)
+# Map Layers ticks — DONE (2026-10-02, v2.12.4)
 
-Cam is out of Grok credit. Finish this on a cheap model. Repo is `/root/stranded` (github.com/kitsboy/stranded, branch `main`). Do not edit the MASTER-BRAIN mirror. Do not push `buffy/v2.11.1-hud-fix`.
+This job is complete and CI-verified green. Cam is happy. Keep this file as the reference for the layer-tick architecture and the pass/fail checks. Repo is `/root/stranded` (github.com/kitsboy/stranded, branch `main`). Do not edit the MASTER-BRAIN mirror. Do not push `buffy/v2.11.1-hud-fix`.
 
 Live site: https://stranded.giveabit.io/map/
-Identity: `curl -sS "https://stranded.giveabit.io/data/live-stats.json?cb=$RANDOM"` must show the commit you pushed and version `2.12.3` or later. CI workflow name contains `verify`. Watch it with `gh run watch`. Do not say live until the SHA matches.
+Identity: `curl -sS "https://stranded.giveabit.io/data/live-stats.json?cb=$RANDOM"` must show the commit you pushed and version `2.12.4` or later. CI workflow name contains `verify`. Watch it with `gh run watch`. Do not say live until the SHA matches.
 
 ## What Cam asked
 

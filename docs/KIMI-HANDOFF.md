@@ -1,3 +1,18 @@
+# Stranded map — DONE (2026-10-02, v2.12.4)
+
+All map-layer work is shipped and CI-verified green (run on `de90636`). Cam is happy. No open job.
+
+**What shipped this session:**
+- Map Layers checkboxes show/hide every layer (methane pins, grid, internet, satellite, terrain, heatmap, choropleth). Untick empties the methane source; every toggle is driven from the label click so React commits real state; layer ops wait on `isStyleLoaded` + retry on `idle` (the old `load`-event wait had already fired and never ran).
+- Map fills the full width on desktop; the Map Layers card anchors below the navbar and collapses/expands with a chevron.
+- Welcome card scrolls inside itself, and a "Show welcome" button in the Map Layers header brings it back after dismissal (it's gated behind `stranded-onboarding-dismissed` in localStorage).
+- Footer source links are real 44px targets again.
+- Regenerated `live-stats.json`/`status.json` — the stale Sept-16 buildId was failing the CI docs gate before E2E ever ran, masking the footer hit-area bug.
+
+**Handoff for the next model:** `docs/MAP-LAYER-TICKS.md` has the full measured-bug writeup, per-layer expectations, and the pass/fail checks. Do not restyle the welcome card unless Cam asks again.
+
+---
+
 # Map Layers ticks — next model, read this first (2026-10-02, v2.12.3)
 
 Cam is out of Grok credit. The layer checkboxes are the open job. Full instructions, the measured bug, and the pass/fail checks are in `docs/MAP-LAYER-TICKS.md`. Welcome card is good enough. Do not restyle it.
