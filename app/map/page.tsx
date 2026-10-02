@@ -2041,16 +2041,30 @@ function StrandedCommandCenter() {
           "Layers" drawer, next to "Filters". */}
       <div className="map-layer-stack absolute right-4 z-[60] hidden xl:flex flex-col gap-2">
         <ScoreLegend compact horizontal />
-        <div className="map-layer-panel-unified">
-          {layerQuickToggles}
-          {showLayersPanel ? layerControls : (
+        <div className="map-layer-panel-unified flex flex-col">
+          <button
+            type="button"
+            onClick={() => setShowLayersPanel(v => !v)}
+            aria-expanded={showLayersPanel}
+            data-testid="layers-panel-toggle"
+            className="w-full flex items-center justify-between px-4 py-2.5 text-label uppercase tracking-wider text-[#FF8C00] hover:bg-white/5 cursor-pointer min-h-[44px]"
+          >
+            <span className="flex items-center gap-1.5"><Layers size={12} /> {t('mapLayers')}</span>
+            {showLayersPanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+          {showLayersPanel ? (
+            <>
+              {layerQuickToggles}
+              {layerControls}
+            </>
+          ) : (
             <button
               type="button"
               onClick={() => setShowLayersPanel(true)}
-              className="w-full text-label px-4 py-2.5 text-gray-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 border-t border-white/10"
               data-testid="layers-panel-reopen"
+              className="w-full text-label px-4 py-2 text-gray-400 hover:text-white hover:bg-white/5 text-left"
             >
-              <Layers size={12} /> {t('mapLayers')}
+              {t('mapLayersReopen')}
             </button>
           )}
         </div>

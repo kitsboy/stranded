@@ -1521,10 +1521,13 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
    the "Layers" drawer (components/MobileFilterDrawer), so there is no mobile
    styling for it and it must never float over the map again. */
 .map-command-center .map-layer-stack {
-  bottom: calc(var(--map-footer-offset) + 0.35rem + env(safe-area-inset-bottom, 0px));
+  top: calc(3.5rem + 0.75rem);
+  bottom: auto;
   right: 1rem;
   align-items: stretch;
   min-width: 11.5rem;
+  max-height: calc(100dvh - 3.5rem - 1.5rem - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
 }
 .map-command-center .map-layer-panel-unified {
   background: var(--map-glass-bg);
@@ -1534,6 +1537,8 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   overflow: hidden;
 }
+.map-command-center .map-layer-stack::-webkit-scrollbar { width: 6px; }
+.map-command-center .map-layer-stack::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 .map-command-center .map-layer-panel-unified > div:last-child {
   background: transparent !important;
   border: none !important;
