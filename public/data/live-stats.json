@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-16T20:37:52.110Z",
-  "version": "2.11.0",
-  "buildId": "20260916203752",
-  "commit": "c4c7096f04a9f446db5c73981be730e3ada28209",
-  "commitShort": "c4c7096",
+  "generatedAt": "2026-10-02T15:08:59.064Z",
+  "version": "2.12.4",
+  "buildId": "20261002150859",
+  "commit": "14f1c4e00f24df271576aa7334e9d3d74a79b3a1",
+  "commitShort": "14f1c4e",
   "siteCount": 2611,
   "provinceCount": 13,
   "provinces": [
