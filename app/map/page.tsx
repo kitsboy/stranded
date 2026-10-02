@@ -100,6 +100,7 @@ const KeyboardHelpModal = dynamic(() => import('@/components/KeyboardHelpModal')
 const CompareSitesModal = dynamic(() => import('@/components/CompareSitesModal'), { ssr: false })
 const ClusterSiteList = dynamic(() => import('@/components/ClusterSiteList'), { ssr: false })
 const OnboardingTour = dynamic(() => import('@/components/OnboardingTour'), { ssr: false })
+import { reopenOnboarding } from '@/components/OnboardingTour'
 
 /*
  * Fix 4/4 — warm-start the deep-link record. Kick the real (memoized) record fetch off at
@@ -173,6 +174,7 @@ function StrandedCommandCenter() {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [showMobileLayers, setShowMobileLayers] = useState(false)
   const [showLayersPanel, setShowLayersPanel] = useState(true)
+  const [welcomeKey, setWelcomeKey] = useState(0)
   const [showMissionRing, setShowMissionRing] = useState(true)
   const [mobileSiteSheet, setMobileSiteSheet] = useState<'peek' | 'expanded'>('peek')
   const [filterPresetsRevision, setFilterPresetsRevision] = useState(0)
@@ -1732,7 +1734,7 @@ function StrandedCommandCenter() {
           )}
         </div>
       </div>
-        {isXlViewport && <OnboardingTour layout="stacked" />}
+        {isXlViewport && <OnboardingTour key={welcomeKey} layout="stacked" />}
       </div>
 
       {/* Phone chrome: Filters + Layers, side by side, top-left. */}
@@ -2031,7 +2033,7 @@ function StrandedCommandCenter() {
       )}
       {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
-      {!isXlViewport && <OnboardingTour layout="floating" />}
+      {!isXlViewport && <OnboardingTour key={welcomeKey} layout="floating" />}
 
       {/* Score legend + layer controls — DESKTOP ONLY (≥1280px).
           On a phone this panel used to float over the map (192×950 px bottom-right:
@@ -2050,7 +2052,18 @@ function StrandedCommandCenter() {
             className="w-full flex items-center justify-between px-4 py-2.5 text-label uppercase tracking-wider text-[#FF8C00] hover:bg-white/5 cursor-pointer min-h-[44px]"
           >
             <span className="flex items-center gap-1.5"><Layers size={12} /> {t('mapLayers')}</span>
-            {showLayersPanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            <span className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); reopenOnboarding(); setWelcomeKey(k => k + 1) }}
+                data-testid="show-welcome"
+                className="text-micro text-gray-400 hover:text-white px-2 py-1 rounded min-h-[44px]"
+                title="Show the welcome card again"
+              >
+                Show welcome
+              </button>
+              {showLayersPanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </span>
           </button>
           {showLayersPanel ? (
             <>

@@ -23,6 +23,15 @@ export function dismissOnboarding(): void {
   }
 }
 
+/** Clear the dismissed flag so the welcome card shows again on next mount. */
+export function reopenOnboarding(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
 type OnboardingTourProps = {
   /** Stacked under map filters on xl; floating on smaller breakpoints */
   layout?: 'stacked' | 'floating'
