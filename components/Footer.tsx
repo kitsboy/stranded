@@ -323,30 +323,33 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-label text-gray-500">
-          <p className="leading-relaxed max-w-2xl">
-            <span className="text-gray-400">© {new Date().getFullYear()} Stranded Value</span>
-            <span className="text-white/15 mx-1.5">·</span>
-            {t('footerData')}{' '}
+          {/* Source links: a flex-WRAP row, not one wrapping paragraph, so each
+              link owns its own 44px line box. Inside a single paragraph the
+              second line steals the hit band below the first link (E2E hit-area
+              catches this). */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 max-w-2xl">
+            <span className="text-gray-400 whitespace-nowrap">© {new Date().getFullYear()} Stranded Value</span>
+            <span className="text-white/15" aria-hidden>·</span>
             <a
               href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823"
               target="_blank"
               rel="noopener noreferrer"
-              className="hit-area-inline text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
+              className="hit-area-inline flex items-center text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
             >
               {t('footerEccc')}
             </a>
-            <span className="text-white/15 mx-1.5">·</span>
+            <span className="text-white/15" aria-hidden>·</span>
             <a
               href="https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de"
               target="_blank"
               rel="noopener noreferrer"
-              className="hit-area-inline text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
+              className="hit-area-inline flex items-center text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
             >
               NRCan plants
             </a>
-            <span className="text-white/15 mx-1.5">·</span>
-            Models illustrative — not investment advice
-          </p>
+            <span className="text-white/15" aria-hidden>·</span>
+            <span className="text-gray-500">Models illustrative — not investment advice</span>
+          </div>
           <p className="sm:text-right text-gray-500">
             <span className="text-gray-400">Safe Harbour</span>
             <span className="text-white/15 mx-1.5">·</span>
@@ -354,7 +357,7 @@ export default function Footer() {
               href="https://giveabit.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="hit-area-inline hover:text-[#FF8C00] transition-colors duration-200"
+              className="hit-area-inline flex items-center hover:text-[#FF8C00] transition-colors duration-200"
             >
               Part of the Give A Bit family
             </a>
