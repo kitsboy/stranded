@@ -15,6 +15,7 @@
     "records:build": "node --import tsx scripts/generate-site-records.mjs",
     "verify:deeplink": "node scripts/verify-deeplink-first-paint.mjs",
     "verify:hud": "node scripts/verify-map-hud-bar.mjs",
+    "verify:csp": "node scripts/verify-csp-headers.mjs",
     "stamp:dataset": "node --import tsx scripts/stamp-dataset.js --stamp",
     "stamp:dataset:refresh": "node --import tsx scripts/stamp-dataset.js --refresh",
     "proof:refresh": "node scripts/generate-pin-proofs.js --refresh",
