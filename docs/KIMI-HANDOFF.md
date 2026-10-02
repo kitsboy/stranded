@@ -1,3 +1,39 @@
+# 🩹 Stranded /map — HUD dark bar removed (2026-10-01, `d7adba1`, pushed to `main`)
+
+**What was wrong.** The map HUD rendered a long dark rectangle extending well past the pill content. Cause:
+`app/globals.css` styles the jewel-glass HUD with a **substring** selector, `.map-command-center [class*="hud"]`,
+which also matched the full-width outer wrapper `div.map-top-hud` (`components/MapHud.tsx`, `… w-full`) rather than
+only the inner pill. The wrapper therefore received the gradient, border and shadow.
+
+**Fix.** Reset the wrapper only — `.map-command-center .map-top-hud { background: transparent; border: none;
+box-shadow: none; backdrop-filter: none; }` plus the `:hover` variant. The inner `.map-top-hud__inner` pill keeps
+its own solid background (see the "fix: HUD solid bar" rule above it). 18 added lines, CSS-only; count,
+`/ 2,611 visible`, Pin proof chip, geolocate and BTC ticker unchanged.
+
+**Pushed safely on top of your tip.** `d7adba1` has parent `0b2e7ca` and changes exactly `app/globals.css` +
+`CHANGELOG.md` — verified with `git diff-tree origin/main`, so it reverts none of your work.
+
+## ⚠️ Read before reusing the `buffy/v2.11.1-hud-fix` branch
+
+A local session had earlier pulled your files down over an older working tree, which left **~43 files whose
+local copies are OLDER than yours** — most importantly `public/_headers` (it would have restored `unsafe-eval`
+and dropped HSTS, undoing the 2026-09-11 CSP hardening) and `CONTRIBUTING.md` (missing the generated-outputs
+policy). None of that was pushed to `main`; it is only on `buffy/v2.11.1-hud-fix`. **Do not merge that branch
+wholesale** — `main` is the good copy. The working tree was restored to `main` and is clean (0 modified/deleted
+files).
+
+### If GitHub downloads stall again (Oct 1 incident)
+
+Pack **downloads** (fetch/clone/pull) can stall while SSH auth and **uploads** still work — and every `git commit`
+in a partial clone will then hang trying to fetch missing blobs. Working recipe used here:
+`git fetch --filter=blob:none --no-tags --depth=1 origin main` (commit+trees only, ~6 s), then build the commit
+without touching missing blobs: `git mktree --missing` over `git ls-tree origin/main` edits, `git commit-tree`,
+`git update-ref`. Also: set `GIT_NO_LAZY_FETCH=1` so it fails fast instead of hanging, and check for a stale
+`.git/index.lock` if commands hang for no reason. `timeout` does not exist on macOS — use
+`GIT_SSH_COMMAND="ssh -o ConnectTimeout=15"`.
+
+---
+
 # 🚀 Stranded /map — deep-link boot weight cut SHIPPED (fix 4/4), live-verified
 
 **2026-09-18 · commits `f1a14e9` + `3ce7a03`, live verified (`3ce7a03`, CI "verify live deploy" green).**

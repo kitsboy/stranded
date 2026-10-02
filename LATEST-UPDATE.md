@@ -1,3 +1,23 @@
+# stranded — Last Updated 2026-10-01 by Buffy (map HUD dark bar removed, pushed to main)
+
+**Brief:** the map HUD on `/map/` showed a long dark rectangle stretching well past the pill's content
+(`2,611 / 2,611 visible · Pin proof · block 966,549 · My location · BTC $84,599`). The jewel-glass rule in
+`app/globals.css` is written as `.map-command-center [class*="hud"]`, which is a *substring* match — it hit
+the full-width outer wrapper `div.map-top-hud` (`w-full`), not just the inner pill, so the wrapper was
+painted with the same gradient, border and shadow. The wrapper is now reset (`background: transparent;
+border: none; box-shadow: none; backdrop-filter: none`, plus the `:hover` variant) and the inner
+`.map-top-hud__inner` pill keeps its own solid background — so only the pill paints. CSS-only: **18 added
+lines, no markup, component or data change.** Content is untouched: the count, `/ 2,611 visible`, the Pin
+proof chip, the geolocate button and the BTC ticker.
+
+**Commit:** `d7adba1` — pushed to `main` (`0b2e7ca..d7adba1`, fast-forward). CHANGELOG `[2.11.1]`.
+
+- **Verified against your tip, not around it.** The commit's parent is `0b2e7ca` and it changes exactly
+two files (`app/globals.css`, `CHANGELOG.md`) — `git diff-tree origin/main` shows nothing else, so nothing
+of yours was reverted to land it.
+
+---
+
 # stranded — Last Updated 2026-09-18 by Mimi (deep-link boot weight cut, t_06b46ab4)
 
 **Brief:** after fix 2/3 the deep-linked card (`?site=G12350`) was down to ~5.5 s live, but the residual
