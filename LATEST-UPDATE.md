@@ -16,6 +16,21 @@ proof chip, the geolocate button and the BTC ticker.
 two files (`app/globals.css`, `CHANGELOG.md`) — `git diff-tree origin/main` shows nothing else, so nothing
 of yours was reverted to land it.
 
+## Also this session — CSP beacon fix + both checks wired into CI
+
+- **Cloudflare's RUM beacon was violating our own CSP** on every page load (`script-src-elem` blocked
+  `static.cloudflareinsights.com/beacon.min.js`). Cloudflare's edge injects that script; the repo never
+  adds it, which is why it was never in the policy. `public/_headers` now allows `static.cloudflareinsights.com`
+  in `script-src` and `cloudflareinsights.com` in `connect-src` (its `/cdn-cgi/rum` endpoint) — nothing else
+  about the policy changed. Commit `6ffa21a`, live-verified on `/` and `/map/`: beacon 200, **0 violations**.
+- **Both checks now gate CI** (`.github/workflows/ci.yml`). `verify-map-hud-bar.mjs` asserts the wrapper is
+  unpainted, the pill is still solid, the HUD content is intact, sibling jewel glass survived and there is no
+  overflow — against the **built output** served on :3003 (not the live site, which lags the commit). It then
+  runs again with the old rule re-injected and requires the assertions to fire (`CONTROL OK`), so the verifier is
+  proven able to fail. `verify-csp-headers.mjs` loads the live page with this commit's policy swapped in, so a
+  CSP mistake is caught before it deploys. HUD screenshots upload as a `hud-verify` artifact.
+- Run locally with `npm run verify:hud` / `npm run verify:csp` (`--control` self-tests either one).
+
 ---
 
 # stranded — Last Updated 2026-09-18 by Mimi (deep-link boot weight cut, t_06b46ab4)

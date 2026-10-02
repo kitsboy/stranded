@@ -88,6 +88,42 @@ jobs:
           sleep 3
           PLAYWRIGHT_BASE_URL=http://localhost:3003 npm run e2e
 
+      # The map HUD bar was painted on the full-width wrapper by the substring
+      # selector `.map-command-center [class*="hud"]`, which is easy to
+      # reintroduce and invisible to unit tests (it is a rendered-CSS bug). This
+      # checks the BUILT output served above — not the live site, which lags the
+      # commit — and then runs the same check with the old rule re-injected, so
+      # the verifier is proven able to fail rather than assumed to.
+      - name: Map HUD regression (built output)
+        run: |
+          set -euo pipefail
+          if ! curl -sf http://localhost:3003/map/ >/dev/null; then
+            npx serve -p 3003 dist > /tmp/serve-hud.log 2>&1 &
+            for i in $(seq 1 30); do
+              curl -sf http://localhost:3003/map/ >/dev/null && break
+              sleep 1
+            done
+          fi
+          node scripts/verify-map-hud-bar.mjs --url http://localhost:3003/map/ --out /tmp/hud-verify
+          node scripts/verify-map-hud-bar.mjs --control --url http://localhost:3003/map/ --out /tmp/hud-verify-control
+
+      # Cloudflare Pages applies public/_headers, so a CSP mistake normally only
+      # shows up in production, after a deploy. This loads the live page and
+      # swaps in this commit's policy, so it is testable before it ships.
+      - name: CSP policy check (against the live page)
+        run: node scripts/verify-csp-headers.mjs
+
+      - name: Upload HUD screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hud-verify
+          path: |
+            /tmp/hud-verify
+            /tmp/hud-verify-control
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Notify on success
         if: success() && env.SLACK_WEBHOOK_URL != ''
         env:
