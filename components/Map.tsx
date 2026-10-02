@@ -37,6 +37,8 @@ interface MapProps {
   selectedId?: string | null
   portfolioIds?: string[]
   showMissionRing?: boolean
+  /** When false, methane pins and clusters are hidden. */
+  showSites?: boolean
   /** @deprecated use native-clusters */
   viewMode?: MapViewMode | 'clusters'
   showSatellite?: boolean
@@ -196,6 +198,7 @@ export default function Map({
   selectedId,
   portfolioIds = [],
   showMissionRing = true,
+  showSites = true,
   viewMode,
   showSatellite = false,
   showTerrain = false,
@@ -479,7 +482,7 @@ export default function Map({
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Regular'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 10, 0, 10.5, 9, 14, 11],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 4, 0, 5.2, 10, 12, 12],
           'text-offset': [0, 1.2],
           'text-anchor': 'top',
           'text-max-width': 10,
@@ -660,8 +663,8 @@ export default function Map({
     }
   }, [onSiteClick, portfolioIds, selectedId, liveBtcPrice, showMissionRing])
 
-  const effectiveSatellite = mapStyle === 'satellite' || showSatellite
-  const effectiveTerrain = mapStyle === 'terrain' || showTerrain
+  const effectiveSatellite = !!showSatellite
+  const effectiveTerrain = !!showTerrain
 
   useEffect(() => {
     const map = mapRef.current
@@ -669,7 +672,7 @@ export default function Map({
     const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
 
     const showDark = mapStyle === 'dark'
-    const showStandard = mapStyle === 'standard'
+    const showStandard = mapStyle !== 'dark' && mapStyle !== 'satellite'
     if (map.getLayer('dark')) map.setLayoutProperty('dark', 'visibility', showDark ? 'visible' : 'none')
     if (map.getLayer('osm')) map.setLayoutProperty('osm', 'visibility', showStandard ? 'visible' : 'none')
 
@@ -808,10 +811,8 @@ export default function Map({
   useEffect(() => {
     const map = mapRef.current
     if (!map || !map.getLayer(SITE_LABELS_LAYER)) return
-    const zoom = map.getZoom()
-    const visible = showSiteLabels && zoom > 10 && !showHeatmap
-    map.setLayoutProperty(SITE_LABELS_LAYER, 'visibility', visible ? 'visible' : 'none')
-  }, [showSiteLabels, showHeatmap, mapCenter, mapLoaded])
+    map.setLayoutProperty(SITE_LABELS_LAYER, 'visibility', showSiteLabels && showSites ? 'visible' : 'none')
+  }, [showSiteLabels, showSites, mapLoaded])
 
 
 
@@ -1243,7 +1244,7 @@ export default function Map({
 
     syncHeatmap(filteredSites)
 
-    if (showHeatmap) {
+    if (!showSites) {
       clearMarkers()
       syncNativeClusters(filteredSites, false)
       return
@@ -1256,7 +1257,7 @@ export default function Map({
       syncNativeClusters(filteredSites, false)
       addMarkers(filteredSites, mode)
     }
-  }, [filteredSites, addMarkers, viewMode, showHeatmap, syncHeatmap, syncNativeClusters, mapLoaded])
+  }, [filteredSites, addMarkers, viewMode, showHeatmap, showSites, syncHeatmap, syncNativeClusters, mapLoaded])
 
   useEffect(() => {
     const map = mapRef.current

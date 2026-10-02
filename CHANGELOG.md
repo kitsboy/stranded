@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.2] — 2026-10-02 · Map layer ticks actually show and hide
+
+- Unticking Methane Sites now removes the pins. Ticking it puts them back. The box used to change and the map ignored it.
+- Satellite, terrain, heatmap and the province colours follow their own boxes. Unticking satellite also leaves the street or dark map underneath, instead of a blank screen.
+- Heatmap no longer hides the methane pins. Each box is its own layer.
+- The welcome card keeps the orange button on screen. The text in the middle scrolls on its own, including on a phone.
+
 ## [2.12.1] — 2026-10-02 · Pins stay visible, Dark map is a real map, welcome card scrolls
 
 - Dark basemap no longer uses the CARTO tile that stamps “API KEY REQUIRED” over the map. Dark is now Esri’s public dark-gray canvas, which needs no key.

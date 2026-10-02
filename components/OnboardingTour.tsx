@@ -49,19 +49,21 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
     setVisible(false)
   }
 
-  const positionClass =
+  const shell =
     layout === 'stacked'
-      ? 'relative w-full shrink-0 mb-1 max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain'
-      : 'absolute left-3 right-3 z-[75] w-auto max-w-[min(320px,calc(100vw-1.5rem))] xl:hidden bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] max-h-[min(46vh,380px)] overflow-y-auto overscroll-contain'
+      ? 'relative w-full shrink-0 mb-1'
+      : 'absolute left-3 right-3 z-[75] w-auto max-w-[min(320px,calc(100vw-1.5rem))] xl:hidden bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))]'
 
   return (
     <div
       data-testid="onboarding-tour"
-      className={`${positionClass} glass rounded-2xl border border-[#FF8C00]/40 p-4 shadow-2xl text-sm`}
+      className={`${shell} glass rounded-2xl border border-[#FF8C00]/40 shadow-2xl text-sm flex flex-col max-h-[min(42vh,340px)] overflow-hidden`}
       role="dialog"
       aria-labelledby="onboarding-tour-title"
+      onWheel={e => e.stopPropagation()}
+      onTouchMove={e => e.stopPropagation()}
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
+      <div className="flex items-start justify-between gap-3 px-4 pt-3 pb-2 shrink-0">
         <div className="min-w-0">
           <div className="text-micro uppercase tracking-widest text-[#FF8C00] mb-1">{t('onboardingBadge')}</div>
           <h3 id="onboarding-tour-title" className="font-semibold text-white leading-snug">{t('onboardingTitle')}</h3>
@@ -70,39 +72,33 @@ export default function OnboardingTour({ layout = 'floating' }: OnboardingTourPr
           type="button"
           data-testid="onboarding-dismiss"
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-white p-1 rounded-lg shrink-0"
+          className="text-gray-400 hover:text-white p-1 rounded-lg shrink-0 min-h-[44px] min-w-[44px]"
           aria-label={t('onboardingDismiss')}
         >
           <X size={18} />
         </button>
       </div>
 
-      <div className="flex items-center justify-between gap-2 mb-4 px-1" aria-hidden>
-        {STEPS.map(({ icon: Icon, color }, i) => (
-          <div key={i} className="flex flex-col items-center gap-1 flex-1">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10 ${color}`}>
-              <Icon size={16} />
-            </div>
-            <span className="text-micro text-gray-400 uppercase tracking-wider">{i + 1}</span>
-          </div>
-        ))}
+      <div className="overflow-y-auto overscroll-contain touch-pan-y px-4 pb-2 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <ul className="space-y-2.5 text-gray-300 text-xs">
+          {STEPS.map(({ icon: Icon, color, key }) => (
+            <li key={key} className="flex gap-2.5 items-start">
+              <Icon size={14} className={`${color} shrink-0 mt-0.5`} aria-hidden />
+              <span className="leading-relaxed">{t(key)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <ul className="space-y-2.5 text-gray-300 text-xs">
-        {STEPS.map(({ icon: Icon, color, key }) => (
-          <li key={key} className="flex gap-2.5 items-start">
-            <Icon size={14} className={`${color} shrink-0 mt-0.5`} aria-hidden />
-            <span className="leading-relaxed">{t(key)}</span>
-          </li>
-        ))}
-      </ul>
-      <button
-        type="button"
-        onClick={handleDismiss}
-        className="mt-4 w-full py-2.5 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold text-xs hover:bg-[#FF8C00]/90 transition"
-      >
-        {t('onboardingGotIt')}
-      </button>
+      <div className="shrink-0 px-4 pb-3 pt-2">
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="w-full py-2.5 rounded-xl bg-[#FF8C00] text-[#1e293b] font-semibold text-xs hover:bg-[#FF8C00]/90 transition"
+        >
+          {t('onboardingGotIt')}
+        </button>
+      </div>
     </div>
   )
 }

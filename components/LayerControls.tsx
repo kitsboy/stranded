@@ -133,8 +133,8 @@ export default function LayerControls({
       )}
 
       <div className={compact ? 'space-y-1' : 'space-y-2'}>
-        <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>
-          <input type="checkbox" checked={layers.sites} onChange={() => onToggle('sites')} className={`accent-[#FF8C00] ${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+        <label className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} data-testid="layer-methane">
+          <input type="checkbox" checked={layers.sites} onChange={() => onToggle('sites')} className={`accent-[#FF8C00] ${compact ? 'w-4 h-4' : 'w-4 h-4'}`} />
           <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerMethaneSites')}</span>
         </label>
         <label className={`flex items-center cursor-pointer group ${compact ? 'gap-2' : 'gap-3'}`}>

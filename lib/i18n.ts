@@ -304,7 +304,7 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     mapStyleDark: 'Dark',
     mapStyleSatellite: 'Satellite',
     mapStyleTerrain: 'Terrain',
-    mapSiteLabels: 'Site labels (zoom > 10)',
+    mapSiteLabels: 'Site names',
     mapPerformanceMode: 'Performance mode',
     mapPerformanceModeOn: 'Performance mode on — animations reduced',
     mapWebglUnsupported: 'WebGL unavailable — map may be limited',

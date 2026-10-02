@@ -1195,7 +1195,11 @@ function StrandedCommandCenter() {
     <LayerControls
       compact
       layers={layers}
-      onToggle={(l) => setLayers(prev => ({ ...prev, [l]: !prev[l] }))}
+      onToggle={(l) => {
+        setLayers(prev => ({ ...prev, [l]: !prev[l] }))
+        if (l === 'satellite' && layers.satellite) setMapStyle(mapStyle === 'dark' ? 'dark' : 'standard')
+        if (l === 'satellite' && !layers.satellite) setMapStyle('satellite')
+      }}
       onApplyPreset={(preset: LayerPresetId) => {
         const p = LAYER_PRESETS[preset]
         setLayers(prev => ({ ...prev, ...p.layers }))
@@ -1847,6 +1851,7 @@ function StrandedCommandCenter() {
         selectedId={selectedSite?.id}
         portfolioIds={portfolio.map(p => p.id)}
         showMissionRing={showMissionRing}
+        showSites={layers.sites}
         viewMode={viewMode}
         showSatellite={layers.satellite}
         showTerrain={layers.terrain}
