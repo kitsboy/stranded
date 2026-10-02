@@ -27,7 +27,7 @@ export const MAP_CSP_FONT_DOMAINS = [] as const
 /** Tile URL patterns used by MapLibre sources in Map.tsx */
 export const MAP_TILE_URL_PATTERNS = [
   'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
 ] as const

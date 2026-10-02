@@ -1342,7 +1342,7 @@ function StrandedCommandCenter() {
         />
       )}
 
-      <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-3 max-h-[calc(100dvh-5.5rem)] pb-3 items-stretch pointer-events-none [&>*]:pointer-events-auto">
+      <div className="absolute top-16 left-4 z-[65] w-72 hidden xl:flex flex-col gap-3 max-h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain pb-3 items-stretch">
       <div
         className={`map-filter-panel glass rounded-3xl shadow-2xl border border-white/10 flex flex-col min-h-0 max-h-[min(50vh,calc(100dvh-24rem))] overflow-hidden shrink-0${activeFilterCount > 0 ? ' map-filter-panel--active' : ''}`}
         data-tour="map-filters"

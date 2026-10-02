@@ -1,3 +1,9 @@
+# 🗺️ Stranded — pin / dark / welcome fixes (2026-10-02, v2.12.1)
+
+Dark was CARTO's keyless tile, which now paints "API KEY REQUIRED" over the map. Switched to Esri World Dark Gray (already allowed by CSP). Overlay dots were drawn under the methane clusters, so a toggled layer looked empty; they now sit on top with a white ring. Satellite, heatmap and choropleth insert under the methane pins so they cannot cover them. The welcome card scrolls (left column on desktop, inside the card on a phone).
+
+---
+
 # 🗺️ Stranded — official energy overlays (2026-10-02, v2.12.0)
 
 **What shipped.** Toggleable map overlays for verified Canadian renewable plants and remote communities. Off by default. Methane pins unchanged until a layer is turned on.

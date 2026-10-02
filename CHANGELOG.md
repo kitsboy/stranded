@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.1] — 2026-10-02 · Pins stay visible, Dark map is a real map, welcome card scrolls
+
+- Dark basemap no longer uses the CARTO tile that stamps “API KEY REQUIRED” over the map. Dark is now Esri’s public dark-gray canvas, which needs no key.
+- Methane pins stay above satellite, heatmap and province fills, so turning a layer on cannot cover them.
+- Energy-overlay dots sit on top of the methane clusters, with a white ring, so a toggled layer is actually visible.
+- The “Welcome to the Command Center” card can be scrolled. On a desktop the left column scrolls. On a phone the card scrolls inside itself, so the bottom line and the button are reachable.
+
 ## [2.12.0] — 2026-10-02 · Official Canadian energy overlays on the map
 
 - Map layer panel gains **Official energy overlays**. Off by default, so the methane pins are unchanged until a layer is turned on.

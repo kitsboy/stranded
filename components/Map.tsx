@@ -79,6 +79,13 @@ const CLUSTER_COUNT_LAYER = 'stranded-cluster-count'
 const UNCLUSTERED_LAYER = 'stranded-unclustered'
 const SITE_LABELS_LAYER = 'stranded-site-labels'
 
+/** Insert basemap extras under the methane pins so a raster or fill cannot cover them. */
+function beforePinLayer(map: maplibregl.Map): string | undefined {
+  if (map.getLayer(CLUSTER_LAYER)) return CLUSTER_LAYER
+  if (map.getLayer(UNCLUSTERED_LAYER)) return UNCLUSTERED_LAYER
+  return undefined
+}
+
 /**
  * Half of the 44 px touch-target floor (audit F4). A canvas pin is a circle of
  * radius 4-14 px, so a tap is accepted anywhere within this many px of the pin's
@@ -668,7 +675,7 @@ export default function Map({
 
     if (effectiveSatellite !== layers.satellite) {
       if (effectiveSatellite && !map.getLayer('satellite')) {
-        map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } })
+        map.addLayer({ id: 'satellite', type: 'raster', source: 'satellite', paint: { 'raster-opacity': 0.85 } }, beforePinLayer(map))
       } else if (!effectiveSatellite && map.getLayer('satellite')) {
         map.removeLayer('satellite')
       }
@@ -716,6 +723,7 @@ export default function Map({
         if (!map.getLayer(id)) continue
         const on = !!renewableOverlays?.[cat.id]
         map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
+        if (on) map.moveLayer(id)
       }
     }
 
@@ -735,37 +743,37 @@ export default function Map({
           return
         }
         map.addSource(RENEWABLE_SOURCE_ID, { type: 'geojson', data })
-        const before = map.getLayer(CLUSTER_LAYER) ? CLUSTER_LAYER : undefined
         for (const cat of RENEWABLE_CATS) {
           const id = renewableLayerId(cat.id)
           if (map.getLayer(id)) continue
           map.addLayer({
-            id,
-            type: 'circle',
-            source: RENEWABLE_SOURCE_ID,
-            filter: ['==', ['get', 'cat'], cat.id],
-            paint: cat.shape === 'plant'
-              ? {
-                  'circle-color': cat.color,
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['ln', ['+', ['get', 'mw'], 1]],
-                    0, 5,
-                    2.3, 7,
-                    4.6, 10,
-                    7, 14,
-                  ],
-                  'circle-stroke-width': 1.5,
-                  'circle-stroke-color': '#0f172a',
-                  'circle-opacity': 0.92,
-                }
-              : {
-                  'circle-color': cat.color,
-                  'circle-radius': 7,
-                  'circle-stroke-width': 2.5,
-                  'circle-stroke-color': cat.color,
-                  'circle-opacity': 0.18,
-                },
-          }, before)
+                    id,
+                    type: 'circle',
+                    source: RENEWABLE_SOURCE_ID,
+                    filter: ['==', ['get', 'cat'], cat.id],
+                    paint: cat.shape === 'plant'
+                      ? {
+                          'circle-color': cat.color,
+                          'circle-radius': [
+                            'interpolate', ['linear'], ['get', 'mw'],
+                            0, 7,
+                            20, 9,
+                            100, 12,
+                            500, 15,
+                          ],
+                          'circle-stroke-width': 2,
+                          'circle-stroke-color': '#ffffff',
+                          'circle-opacity': 0.95,
+                        }
+                      : {
+                          'circle-color': cat.color,
+                          'circle-radius': 9,
+                          'circle-stroke-width': 2.5,
+                          'circle-stroke-color': cat.color,
+                          'circle-opacity': 0.2,
+                        },
+                  })
+                  if (map.getLayer(id)) map.moveLayer(id)
           map.on('mouseenter', id, (e) => {
             if (map.getLayoutProperty(id, 'visibility') === 'none') return
             map.getCanvas().style.cursor = 'pointer'
@@ -846,7 +854,7 @@ export default function Map({
         glyphs: '/fonts/{fontstack}/{range}.pbf',
         sources: {
           'osm': { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© OSM' },
-          'dark': { type: 'raster', tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© CARTO © OSM' },
+          'dark': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, attribution: '© Esri' },
           'satellite': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 },
           'terrain': { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], tileSize: 256, encoding: 'terrarium', maxzoom: 15 },
         },
@@ -1113,7 +1121,7 @@ export default function Map({
               'rgba(255,255,255,0.25)',
             ],
           },
-        })
+        }, beforePinLayer(map))
         map.addLayer({
           id: outlineId,
           type: 'line',
@@ -1132,7 +1140,7 @@ export default function Map({
               0.5,
             ],
           },
-        })
+        }, beforePinLayer(map))
       }
       if (map.getLayer(layerId)) {
         map.setPaintProperty(layerId, 'fill-color', [
@@ -1199,7 +1207,7 @@ export default function Map({
               1, '#f43f5e',
             ],
           },
-        })
+        }, beforePinLayer(map))
       }
       if (map.getLayer('emission-heat-layer')) {
         map.setLayoutProperty('emission-heat-layer', 'visibility', showHeatmap ? 'visible' : 'none')
@@ -1556,13 +1564,13 @@ export default function Map({
         1280+ by the onboarding card. Top-left is contested by nothing.
       */}
       <a
-        href={tileFallbackActive ? 'https://www.openstreetmap.org/copyright' : 'https://carto.com/attributions'}
+        href={tileFallbackActive || mapStyle === 'standard' ? 'https://www.openstreetmap.org/copyright' : 'https://www.esri.com/en-us/legal/copyright-trademarks'}
         target="_blank"
         rel="noopener noreferrer"
         className="absolute top-3 left-3 z-[12] text-micro leading-none rounded bg-[#0f172a]/70 px-1.5 py-1 text-gray-300 hover:text-[#5BC0BE] transition pointer-events-auto"
         data-testid="map-attribution"
       >
-        {tileFallbackActive ? '© OSM' : attributionLabel}
+        {tileFallbackActive || mapStyle === 'standard' ? '© OSM' : mapStyle === 'satellite' ? '© Esri' : '© Esri'}
       </a>
 
       <div
