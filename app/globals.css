@@ -1752,6 +1752,24 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   box-shadow: 0 0 20px -4px rgba(91,192,190,0.3);
 }
 
+/* HUD dark-bar fix (v2.11.1): the jewel-glass rule above uses [class*="hud"],
+   which also matched the FULL-WIDTH outer wrapper div.map-top-hud of the top
+   HUD. That painted a dark gradient + border bar stretching past the pill
+   content ("2,611 / 2,611 visible · Pin proof · …"). Reset the wrapper only;
+   the inner .map-top-hud__inner pill keeps its own solid background. */
+.map-command-center .map-top-hud {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.map-command-center .map-top-hud:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
 /* Stranded score chips — glow + gradient */
 .stranded-score {
   background: linear-gradient(160deg, rgba(91,192,190,0.16), rgba(91,192,190,0.05));

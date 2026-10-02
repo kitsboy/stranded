@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.11.1] — 2026-10-01 · Fix: dark bar behind the map HUD pill
+- **The map HUD had a long dark rectangle stretching past the visible-count pill** on `/map/`. Cause: the jewel-glass rule in `app/globals.css` targets `.map-command-center [class*="hud"]`, which also matched the **full-width outer wrapper** `div.map-top-hud`, not just the inner pill — so the wrapper got a gradient + border + shadow painted across the whole strip.
+- **Fix:** reset the wrapper only (`.map-command-center .map-top-hud` and its `:hover` → `background: transparent; border: none; box-shadow: none; backdrop-filter: none`). The inner `.map-top-hud__inner` pill keeps its own solid background, so the count, `/ 2,611 visible`, **Pin proof** badge, geolocate button and BTC ticker are untouched.
+- CSS-only: 18 added lines in `app/globals.css`, no markup, component or data changes.
+
 ## [2.11.0] — 2026-09-11 · Data refresh to the 2024 GHGRP year + honest recency/flux
 - **Data is current** — refreshed from ECCC GHGRP's 2024 reporting year (1,745 sites now on 2024 filings, newest `reference_year` 2024); a site's `last_reported_year` is stored and shown so a 2011 figure is never presented as current
 - **Never assert venting/flaring we cannot prove** — the venting/flaring split exists only for facilities that report a fugitive source (oil & gas). Landfill gas is filed under "Waste", so for those sites the flux UI says *no claim* instead of a false "not flaring"; `flux_scope: fugitive | not-applicable` records it
