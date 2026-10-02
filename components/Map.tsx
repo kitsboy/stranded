@@ -10,6 +10,13 @@ import { emissionChoroplethGeojson, revenueChoroplethGeojson } from '@/lib/provi
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
 import { getPinProof, loadPinProof, pinProofTeaserHtml } from '@/lib/pin-proof'
+import {
+  RENEWABLE_CATS,
+  RENEWABLE_DATA_URL,
+  RENEWABLE_SOURCE_ID,
+  renewableLayerId,
+  renewablePopupHtml,
+} from '@/lib/renewable-layers'
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
@@ -61,6 +68,8 @@ interface MapProps {
   pitchLabel?: string
   viewportSitesLabel?: string
   tileFallbackLabel?: string
+  /** Official energy overlays, keyed by category id. Off by default. */
+  renewableOverlays?: Record<string, boolean>
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -210,6 +219,7 @@ export default function Map({
   pitchLabel = 'Pitch',
   viewportSitesLabel = 'in view',
   tileFallbackLabel = 'Switched to OpenStreetMap tiles',
+  renewableOverlays,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const minimapContainer = useRef<HTMLDivElement>(null)
@@ -222,6 +232,10 @@ export default function Map({
   const performanceModeRef = useRef(performanceMode)
   const nativeHandlersAttached = useRef(false)
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
+  const renewablePopupRef = useRef<maplibregl.Popup | null>(null)
+  const renewableLoadingRef = useRef(false)
+  const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
+  const showRenewableRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
   /** Live BTC price for the hover teaser — the native handlers are attached once. */
   const btcUsdRef = useRef(liveBtcPrice)
   const skipHistoryRef = useRef(false)
@@ -249,6 +263,45 @@ export default function Map({
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
+
+  renewableHitRef.current = (map, point) => {
+    const ids = RENEWABLE_CATS.map(c => renewableLayerId(c.id)).filter((id) => {
+      if (!map.getLayer(id)) return false
+      return map.getLayoutProperty(id, 'visibility') !== 'none'
+    })
+    if (!ids.length) return null
+    let hits: maplibregl.MapGeoJSONFeature[] = []
+    try {
+      hits = map.queryRenderedFeatures(
+        [[point.x - 16, point.y - 16], [point.x + 16, point.y + 16]],
+        { layers: ids },
+      )
+    } catch {
+      return null
+    }
+    let best: { d: number; coords: [number, number]; props: Record<string, unknown> } | null = null
+    for (const f of hits) {
+      if (f.geometry.type !== 'Point') continue
+      const coords = f.geometry.coordinates as [number, number]
+      const p = map.project(coords)
+      const d = Math.hypot(p.x - point.x, p.y - point.y)
+      if (d > 16) continue
+      if (!best || d < best.d) best = { d, coords, props: (f.properties || {}) as Record<string, unknown> }
+    }
+    return best
+  }
+  showRenewableRef.current = (map, hit) => {
+    if (!renewablePopupRef.current) {
+      renewablePopupRef.current = new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        className: 'stranded-hover-popup',
+        maxWidth: '280px',
+        offset: 14,
+      })
+    }
+    renewablePopupRef.current.setLngLat(hit.coords).setHTML(renewablePopupHtml(hit.props)).addTo(map)
+  }
 
   const clearMarkers = () => {
     markersRef.current.forEach(m => m.remove())
@@ -653,6 +706,99 @@ export default function Map({
 
   useEffect(() => {
     const map = mapRef.current
+    if (!map || !mapLoaded) return
+    const anyOn = Object.values(renewableOverlays || {}).some(Boolean)
+    let cancelled = false
+
+    const applyVisibility = () => {
+      for (const cat of RENEWABLE_CATS) {
+        const id = renewableLayerId(cat.id)
+        if (!map.getLayer(id)) continue
+        const on = !!renewableOverlays?.[cat.id]
+        map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
+      }
+    }
+
+    const ensure = async () => {
+      if (map.getSource(RENEWABLE_SOURCE_ID)) {
+        applyVisibility()
+        return
+      }
+      if (!anyOn || renewableLoadingRef.current) return
+      renewableLoadingRef.current = true
+      try {
+        const res = await fetch(RENEWABLE_DATA_URL)
+        if (!res.ok || cancelled || !mapRef.current) return
+        const data = await res.json()
+        if (cancelled || map.getSource(RENEWABLE_SOURCE_ID)) {
+          applyVisibility()
+          return
+        }
+        map.addSource(RENEWABLE_SOURCE_ID, { type: 'geojson', data })
+        const before = map.getLayer(CLUSTER_LAYER) ? CLUSTER_LAYER : undefined
+        for (const cat of RENEWABLE_CATS) {
+          const id = renewableLayerId(cat.id)
+          if (map.getLayer(id)) continue
+          map.addLayer({
+            id,
+            type: 'circle',
+            source: RENEWABLE_SOURCE_ID,
+            filter: ['==', ['get', 'cat'], cat.id],
+            paint: cat.shape === 'plant'
+              ? {
+                  'circle-color': cat.color,
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['ln', ['+', ['get', 'mw'], 1]],
+                    0, 5,
+                    2.3, 7,
+                    4.6, 10,
+                    7, 14,
+                  ],
+                  'circle-stroke-width': 1.5,
+                  'circle-stroke-color': '#0f172a',
+                  'circle-opacity': 0.92,
+                }
+              : {
+                  'circle-color': cat.color,
+                  'circle-radius': 7,
+                  'circle-stroke-width': 2.5,
+                  'circle-stroke-color': cat.color,
+                  'circle-opacity': 0.18,
+                },
+          }, before)
+          map.on('mouseenter', id, (e) => {
+            if (map.getLayoutProperty(id, 'visibility') === 'none') return
+            map.getCanvas().style.cursor = 'pointer'
+            const feature = e.features?.[0]
+            if (!feature || feature.geometry.type !== 'Point') return
+            const coords = feature.geometry.coordinates as [number, number]
+            if (!hoverPopupRef.current) {
+              hoverPopupRef.current = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                className: 'stranded-hover-popup',
+                offset: 12,
+              })
+            }
+            hoverPopupRef.current.setLngLat(coords).setHTML(renewablePopupHtml(feature.properties as Record<string, unknown>)).addTo(map)
+          })
+          map.on('mouseleave', id, () => {
+            map.getCanvas().style.cursor = ''
+            hoverPopupRef.current?.remove()
+          })
+        }
+        applyVisibility()
+      } finally {
+        renewableLoadingRef.current = false
+      }
+    }
+
+    ensure().catch((err) => console.warn('[Map] renewable overlay sync failed', err))
+    return () => { cancelled = true }
+  }, [mapLoaded, renewableOverlays])
+
+  useEffect(() => {
+    const map = mapRef.current
     if (!map || !map.getLayer(SITE_LABELS_LAYER)) return
     const zoom = map.getZoom()
     const visible = showSiteLabels && zoom > 10 && !showHeatmap
@@ -862,6 +1008,13 @@ export default function Map({
         if (!site) continue
         const d = Math.sqrt(dx * dx + dy * dy)
         if (!best || d < best.d) best = { d, site }
+      }
+      const renew = renewableHitRef.current(map, e.point)
+      // A methane pin still wins when it is the closer target. An overlay wins
+      // only when the tap is on it and not on a nearer methane pin.
+      if (renew && (!best || renew.d + 4 < best.d)) {
+        showRenewableRef.current(map, renew)
+        return
       }
       if (best) {
         onSiteClickRef.current(best.site)

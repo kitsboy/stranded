@@ -1,3 +1,19 @@
+# 🗺️ Stranded — official energy overlays (2026-10-02, v2.12.0)
+
+**What shipped.** Toggleable map overlays for verified Canadian renewable plants and remote communities. Off by default. Methane pins unchanged until a layer is turned on.
+
+**Sources, and only those.**
+- Plants: NRCan NACEI “Renewable Energy Power Plants, 1 MW or more” — https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de — 1,049 Canada rows. Periods 2000–201708, mostly August 2017. Not a 2026 census. Say that whenever you quote a MW from a pin.
+- Remote: 2025 service timed out. Used the 2018 official file — https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd — 276 communities. Quarterly job retries 2025 first.
+- Geothermal plants ≥1 MW: **zero** in the official file. The toggle exists so a later file can fill it. Do not add guessed sites.
+- StatCan generation/capacity tables, CER projections, solar-municipality CSV (no coordinates), resource-potential rasters, hydrokinetic polygons, and transmission lines are recorded and **not painted**. Full list: `docs/DATA-SOURCES-RENEWABLES.md`.
+
+**How to refresh.** `npm run refresh:renewables`. It refuses a partial download. Workflow `.github/workflows/refresh-renewables.yml` runs quarterly and pushes only if the official files changed.
+
+**Do not.** Geocode the solar municipality names. Do not overlay the NACEI rasters on top of the pins. Do not describe the 2017 plant file as current capacity.
+
+---
+
 # 🩹 Stranded /map — HUD dark bar removed (2026-10-01, `d7adba1`, pushed to `main`)
 
 **What was wrong.** The map HUD rendered a long dark rectangle extending well past the pill content. Cause:

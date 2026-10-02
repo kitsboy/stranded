@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
 import FirstRunStrip from '@/components/FirstRunStrip'
 import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/LayerControls'
+import { emptyOverlayState, RENEWABLE_MANIFEST_URL } from '@/lib/renewable-layers'
 import DualRangeSlider from '@/components/DualRangeSlider'
 import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
@@ -161,6 +162,8 @@ function StrandedCommandCenter() {
   const emissionLabelTapRef = useRef<{ target: 'min' | 'max' | null; at: number }>({ target: null, at: 0 })
 
   const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
+  const [overlays, setOverlays] = useState(emptyOverlayState)
+  const [overlayMeta, setOverlayMeta] = useState<{ vintageNote?: string; counts?: Record<string, number> } | null>(null)
   const [choroplethMode, setChoroplethMode] = useState<ChoroplethMode>('emission')
   const [heatmapOpacity, setHeatmapOpacity] = useState(0.75)
   const [terrainExaggeration, setTerrainExaggeration] = useState(1)
@@ -196,6 +199,17 @@ function StrandedCommandCenter() {
 
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(RENEWABLE_MANIFEST_URL)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!cancelled && data) setOverlayMeta({ vintageNote: data.vintageNote, counts: data.counts })
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   /**
    * The site id a shared/deep link asks for.
@@ -933,6 +947,7 @@ function StrandedCommandCenter() {
     setOnlyMissionSites(false)
     setViewMode(filteredSites.length > 180 ? 'native-clusters' : 'precise')
     setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
+    setOverlays(emptyOverlayState())
     setRadiusFilter(null)
     if (shouldShowFilterToast('reset-filters')) {
       toast.success(t('mapShowAll'))
@@ -1201,6 +1216,10 @@ function StrandedCommandCenter() {
       onPerformanceModeChange={setPerformanceMode}
       onCopyViewport={copyViewportJson}
       copyViewportLabel={t('mapCopyViewport')}
+      overlays={overlays}
+      overlayCounts={overlayMeta?.counts}
+      overlayNote={overlayMeta?.vintageNote}
+      onToggleOverlay={(id) => setOverlays(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }))}
     />
   )
 
@@ -1844,6 +1863,7 @@ function StrandedCommandCenter() {
         showSiteLabels={showSiteLabels}
         highlightedProvinces={Array.from(selectedProvinces)}
         performanceMode={effectivePerformanceMode}
+        renewableOverlays={overlays}
         sitesLoading={loading}
         loadProgress={loadProgress}
         resizeTrigger={mapResizeNonce + (filtersCollapsed ? 0 : 1)}
@@ -2034,8 +2054,12 @@ function StrandedCommandCenter() {
       {liveStats && <EcccFreshnessBadge stats={liveStats} />}
 
       <div className="map-footer-bar absolute bottom-0 left-0 right-0 z-[58] bg-[#0f172a]/90 border-t border-white/10 px-4 py-1.5 text-gray-400 flex flex-wrap items-center justify-between gap-2">
-        <span>Data: Environment and Climate Change Canada (ECCC) GHGRP · Open Government of Canada</span>
-        <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">ECCC dataset ↗</a>
+        <span>Methane: ECCC GHGRP · Plants and remote communities: Natural Resources Canada</span>
+        <span className="flex flex-wrap gap-3">
+          <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">ECCC dataset ↗</a>
+          <a href="https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">NRCan plants ↗</a>
+          <a href="https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd" target="_blank" rel="noopener noreferrer" className="map-footer-eccc-link shrink-0">Remote communities ↗</a>
+        </span>
       </div>
 
       {/* Bottom status + view toggle */}

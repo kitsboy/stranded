@@ -1,0 +1,38 @@
+name: Refresh renewable overlays
+
+on:
+  schedule:
+    # 06:17 UTC on the 1st of Jan, Apr, Jul, Oct. These files barely move.
+    - cron: '17 6 1 1,4,7,10 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Pull official Canadian energy layers
+        run: node scripts/refresh-renewable-layers.js
+
+      - name: Guard the snapshot
+        run: node scripts/test-renewable-layers.mjs
+
+      - name: Commit if the official file changed
+        run: |
+          git config user.name "stranded-refresh"
+          git config user.email "cam@giveabit.io"
+          git add public/data/renewable-plants.geojson public/data/renewable-layers.json
+          if git diff --cached --quiet; then
+            echo "No change in the official files."
+            exit 0
+          fi
+          git commit -m "data: quarterly refresh of NRCan energy overlays"
+          git push

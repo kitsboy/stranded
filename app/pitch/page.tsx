@@ -638,6 +638,9 @@ function PitchContent() {
         <p className="mt-10 text-label text-gray-600">
           Stats generated {new Date(stats.generatedAt).toLocaleString('en-CA')} · Not financial advice
         </p>
+        <p className="mt-3 text-label text-gray-500">
+          The map can also show official NRCan renewable plants and remote communities. Those dots are government locations, not Stranded Scores. The plant file is mostly August 2017. <Link href="/map" className="text-[#5BC0BE] hover:underline">Open the map</Link> and turn on Official energy overlays.
+        </p>
       </section>
     </div>
   )

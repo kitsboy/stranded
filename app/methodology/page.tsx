@@ -20,6 +20,7 @@ export default function MethodologyPage() {
 
       <h2>Data source</h2>
       <p>All 2,611 sites are <em>mapped</em> from <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC open methane reporting</a>: 2,588 carry a reported CH₄ figure and 675 are high-confidence and emission-bearing. We only use the word &quot;verified&quot; for that high-confidence set, never the whole file. Stats regenerate on every build via <code>generate-live-stats.js</code>.</p>
+      <p>The map can also show official energy overlays, off until you turn them on. Those dots are not Stranded Scores. They are Natural Resources Canada plant and remote-community locations, with the government&apos;s own fields. The plant file is mostly August 2017 — the latest geospatial file they publish, not a current census. Geothermal has a toggle and a count of zero in that file. Sources with no coordinates are listed, not plotted. Full record: <Link href="/docs/DATA-SOURCES-RENEWABLES.md">energy overlay sources</Link>.</p>
 
       <h2>Stranded Score™ v3</h2>
       <p>Log-scaled emission is the primary driver. When ECCC does not publish grid distance or internet type, we infer proxies from source category (landfill, oil &amp; gas, power, etc.), province infrastructure, emission tier, data confidence, and reporting year. Scores span ~22–96 with meaningful elite (≥85) and high (≥65) tiers. Percentile badges compare each site to the full Canadian dataset.</p>

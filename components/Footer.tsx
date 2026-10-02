@@ -336,6 +336,15 @@ export default function Footer() {
               {t('footerEccc')}
             </a>
             <span className="text-white/15 mx-1.5">·</span>
+            <a
+              href="https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hit-area-inline text-gray-400 hover:text-[#5BC0BE] transition-colors duration-200 underline-offset-2 hover:underline"
+            >
+              NRCan plants
+            </a>
+            <span className="text-white/15 mx-1.5">·</span>
             Models illustrative — not investment advice
           </p>
           <p className="sm:text-right text-gray-500">

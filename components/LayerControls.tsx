@@ -2,6 +2,7 @@
 
 import { useLocale } from '@/lib/useLocale'
 import type { MapStyleMode } from '@/components/Map'
+import { RENEWABLE_CATS } from '@/lib/renewable-layers'
 
 export type LayerPresetId = 'analysis' | 'satellite' | 'minimal'
 
@@ -46,6 +47,10 @@ interface LayerControlsProps {
   compact?: boolean
   onCopyViewport?: () => void
   copyViewportLabel?: string
+  overlays?: Record<string, boolean>
+  overlayCounts?: Record<string, number>
+  overlayNote?: string
+  onToggleOverlay?: (id: string) => void
 }
 
 export default function LayerControls({
@@ -65,6 +70,10 @@ export default function LayerControls({
   compact = false,
   onCopyViewport,
   copyViewportLabel = 'Copy viewport JSON',
+  overlays,
+  overlayCounts,
+  overlayNote,
+  onToggleOverlay,
 }: LayerControlsProps) {
   const { t } = useLocale()
 
@@ -180,6 +189,45 @@ export default function LayerControls({
       )}
 
       <div className={`border-t border-[#5BC0BE]/20 text-micro text-gray-400 ${compact ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>{t('mapLayerNote2')}</div>
+
+      {onToggleOverlay && (
+        <details className={`border-t border-white/10 ${compact ? 'mt-2 pt-2' : 'mt-3 pt-3'}`} data-testid="energy-overlays">
+          <summary className="cursor-pointer text-micro font-semibold text-[#5BC0BE] list-none [&::-webkit-details-marker]:hidden">
+            {t('mapOverlayTitle')}
+          </summary>
+          <p className="mt-1 text-micro leading-snug text-gray-500">{t('mapOverlayLegend')}</p>
+          {overlayNote && <p className="mt-1 text-micro leading-snug text-gray-500">{overlayNote}</p>}
+          <div className="mt-1 max-h-[38vh] space-y-0.5 overflow-y-auto pr-1">
+            {RENEWABLE_CATS.map(cat => (
+              <label
+                key={cat.id}
+                className="flex min-h-[44px] cursor-pointer items-center gap-2"
+                data-testid={`overlay-${cat.id}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!overlays?.[cat.id]}
+                  onChange={() => onToggleOverlay(cat.id)}
+                  className="h-4 w-4 shrink-0"
+                  style={{ accentColor: cat.color }}
+                />
+                <span
+                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{
+                    background: cat.shape === 'plant' ? cat.color : 'transparent',
+                    boxShadow: `inset 0 0 0 2px ${cat.color}`,
+                  }}
+                  aria-hidden
+                />
+                <span className="text-micro leading-tight text-gray-300">
+                  {t(cat.labelKey)}
+                  {overlayCounts && overlayCounts[cat.id] != null ? ` (${overlayCounts[cat.id]})` : overlayCounts ? ' (0)' : ''}
+                </span>
+              </label>
+            ))}
+          </div>
+        </details>
+      )}
 
       {onCopyViewport && (
         <details className="mt-2 group">

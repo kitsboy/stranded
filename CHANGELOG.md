@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.12.0] — 2026-10-02 · Official Canadian energy overlays on the map
+
+- Map layer panel gains **Official energy overlays**. Off by default, so the methane pins are unchanged until a layer is turned on.
+- 1,049 Canadian renewable plants (1 MW or more) from NRCan NACEI, split into wind, solar, hydro, biomass, tidal, pumped storage, geothermal and other. Geothermal is in the legend with a count of 0 — the official file has no Canadian geothermal plant at that size. We did not invent one.
+- 276 remote communities from the NRCan Remote Communities Energy Database. The 2025 service did not answer; the map uses the 2018 official file and says so. Diesel / oil / gas, hydro microgrid, already-on-a-grid, and unstated are separate toggles.
+- Filled dots are plants (dark stroke, so they are not methane score pins). Rings are remote communities. A legend sits in the overlay list. Click or hover a dot for the official fields and the source link.
+- Plant reference periods run 2000–August 2017. That is the latest geospatial plant file NRCan publishes. It is not a current-year census. The map footer and the overlay note say so.
+- Sources that have no coordinates, or that would cover the whole country, are recorded in `docs/DATA-SOURCES-RENEWABLES.md` and in `public/data/renewable-layers.json`. They are not painted.
+- Quarterly refresh: `npm run refresh:renewables` and `.github/workflows/refresh-renewables.yml` (1 Jan / Apr / Jul / Oct).
+
 ## [2.11.1] — 2026-10-01 · Fix: dark bar behind the map HUD pill
 - **The map HUD had a long dark rectangle stretching past the visible-count pill** on `/map/`. Cause: the jewel-glass rule in `app/globals.css` targets `.map-command-center [class*="hud"]`, which also matched the **full-width outer wrapper** `div.map-top-hud`, not just the inner pill — so the wrapper got a gradient + border + shadow painted across the whole strip.
 - **Fix:** reset the wrapper only (`.map-command-center .map-top-hud` and its `:hover` → `background: transparent; border: none; box-shadow: none; backdrop-filter: none`). The inner `.map-top-hud__inner` pill keeps its own solid background, so the count, `/ 2,611 visible`, **Pin proof** badge, geolocate button and BTC ticker are untouched.

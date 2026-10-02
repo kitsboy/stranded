@@ -1,3 +1,11 @@
+# stranded — Last Updated 2026-10-02 by Kimi (official energy overlays)
+
+**Brief:** the map now has toggleable official energy overlays, off by default. 1,049 NRCan renewable plants (wind, solar, hydro, biomass, tidal, pumped storage; geothermal count is 0 in that file) and 276 remote communities. Plant file is mostly August 2017 — the latest geospatial file NRCan publishes, not a current census. Remote file is the 2018 official set because the 2025 service did not answer. Sources that cannot be plotted honestly are recorded, not painted. See `docs/DATA-SOURCES-RENEWABLES.md`.
+
+**Commit:** this change. Version 2.12.0.
+
+---
+
 # stranded — Last Updated 2026-10-01 by Buffy (map HUD dark bar removed, pushed to main)
 
 **Brief:** the map HUD on `/map/` showed a long dark rectangle stretching well past the pill's content

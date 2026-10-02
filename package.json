@@ -1,6 +1,6 @@
 {
   "name": "stranded",
-  "version": "2.11.0",
+  "version": "2.12.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
@@ -20,13 +20,14 @@
     "stamp:dataset:refresh": "node --import tsx scripts/stamp-dataset.js --refresh",
     "proof:refresh": "node scripts/generate-pin-proofs.js --refresh",
     "test": "npm run validate && npm run test:helpers",
-    "test:helpers": "node --import tsx scripts/test-helpers.mjs && node --import tsx scripts/test-fuel-budget.mjs && node --import tsx scripts/test-pin-proof.mjs",
+    "test:helpers": "node --import tsx scripts/test-helpers.mjs && node --import tsx scripts/test-fuel-budget.mjs && node --import tsx scripts/test-pin-proof.mjs && node scripts/test-renewable-layers.mjs",
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",
     "deploy:check": "bash scripts/deploy-check.sh",
     "deploy:check:selftest": "bash scripts/deploy-check-selftest.sh",
     "refresh-data": "node scripts/refresh-eccc-data.js",
+    "refresh:renewables": "node scripts/refresh-renewable-layers.js",
     "nightly": "bash scripts/nightly-docs-sync.sh",
     "version": "node scripts/generate-live-stats.js && node scripts/sync-docs.js && git add public/data/live-stats.json public/status.json docs/LIVE-STATS.md docs/SOURCE-OF-TRUTH.md docs/DOCUMENTATION.md STATUS.md README.md",
     "check:security": "node scripts/check-secret-hygiene.mjs"

@@ -44,6 +44,9 @@ Stranded turns wasted energy (starting with methane) into verifiable Bitcoin-pow
 
 **Data Source:**
 - Primary: Environment and Climate Change Canada (ECCC) GHGRP — https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823
+- Energy overlays (map toggles, not scores): NRCan NACEI renewable plants ≥1 MW — https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de — and NRCan Remote Communities Energy Database — https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd
+- Overlay snapshot: public/data/renewable-plants.geojson + public/data/renewable-layers.json
+- Source record (including files we refused to paint): docs/DATA-SOURCES-RENEWABLES.md
 - File: public/data/stranded-sites.geojson (2,611 features)
 - Key fields used: emission_rate_kg_day (core for gas → power → ROI), province, source_type, confidence, name, city, ch4_tonnes_year, reference_year, ghgrp_id (plus enriched: strandedScore, maxGeneratorPowerKW, recommendedGenset)
 - Generator models integrated from real specs (powerKW, eff, methaneNm3h, capexPerKW, etc.)

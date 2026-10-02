@@ -1115,6 +1115,13 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
 .maplibregl-popup.stranded-hover-popup .maplibregl-popup-tip {
   border-top-color: rgba(15, 23, 42, 0.92);
 }
+.maplibregl-popup.stranded-hover-popup .maplibregl-popup-close-button {
+  color: #e2e8f0;
+  font-size: 16px;
+  padding: 0 6px;
+  right: 2px;
+  top: 2px;
+}
 
 /* Map interaction upgrades 316–332 */
 @keyframes shimmer {

@@ -1,0 +1,126 @@
+{
+  "retrievedAt": "2026-10-02T12:20:31.448Z",
+  "featureCount": 1325,
+  "plantCount": 1049,
+  "remoteCount": 276,
+  "counts": {
+    "solar": 138,
+    "hydro": 555,
+    "wind": 241,
+    "biomass": 111,
+    "tidal": 1,
+    "pumped": 1,
+    "other": 2,
+    "remote-fossil": 208,
+    "remote-hydro": 35,
+    "remote-grid": 26,
+    "remote-unknown": 7
+  },
+  "plantPeriods": [
+    "2000",
+    "2009",
+    "201003",
+    "2012",
+    "201203",
+    "201206",
+    "201207",
+    "201302",
+    "201304",
+    "201312",
+    "2014",
+    "201401",
+    "201407",
+    "201409",
+    "201506",
+    "201511",
+    "201512",
+    "2016",
+    "201601",
+    "201604",
+    "201607",
+    "201612",
+    "201703",
+    "201704",
+    "201707",
+    "201708"
+  ],
+  "vintageNote": "Plant locations are the NRCan NACEI file (reference periods 2000–201708, mostly August 2017). That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. Remote communities are the 2018 official file: the 2025 service did not answer on this pull. The quarterly job retries 2025 first.",
+  "mappedSources": [
+    {
+      "id": "nacei-renewable-plants-1mw",
+      "title": "Renewable Energy Power Plants, 1 MW or more",
+      "publisher": "Natural Resources Canada (NACEI)",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de",
+      "serviceUrl": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/28",
+      "licence": "Open Government Licence - Canada",
+      "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
+    },
+    {
+      "id": "nrcan-rced-2018",
+      "title": "Remote Communities Energy Database",
+      "publisher": "Natural Resources Canada",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd",
+      "serviceUrl": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/remote_communities_2018_en/MapServer/0",
+      "licence": "Open Government Licence - Canada",
+      "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
+    }
+  ],
+  "remoteFallback": true,
+  "recordedNotMapped": [
+    {
+      "id": "statcan-25-10-0015",
+      "title": "Electric power generation, monthly generation by type of electricity",
+      "publisher": "Statistics Canada / Canadian Centre for Energy Information",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510001501",
+      "why": "National and provincial totals (MWh). No plant coordinates, so it is not a map layer."
+    },
+    {
+      "id": "statcan-25-10-0022",
+      "title": "Installed plants, annual generating capacity by type of electricity generation",
+      "publisher": "Statistics Canada / Canadian Centre for Energy Information",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510002201",
+      "why": "Capacity totals (MW) by source and province. No coordinates."
+    },
+    {
+      "id": "cer-renewables",
+      "title": "Canada Energy Regulator — Renewable energy and Canada’s Energy Future",
+      "publisher": "Canada Energy Regulator",
+      "url": "https://www.cer-rec.gc.ca/en/data-analysis/energy-markets/market-snapshots/index.html",
+      "why": "Market trends and projections, not a verified asset-location file."
+    },
+    {
+      "id": "nrcan-pv-potential",
+      "title": "Photovoltaic potential and solar resource maps of Canada",
+      "publisher": "Natural Resources Canada",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/8b434ac7-aedb-4698-90df-ba77424a551f",
+      "url": "https://ftp.maps.canada.ca/pub/nrcan_rncan/Solar-energy_Energie-solaire/photovoltaic_canada_photovoltaique/municip_potentiel-potential.csv",
+      "why": "Municipality table has names and kWh/kWp, not coordinates. Geocoding those names would invent locations. The raster maps would cover the whole country and hide the pins."
+    },
+    {
+      "id": "nacei-resource-potential",
+      "title": "NACEI energy resource potential (solar irradiance, wind, geothermal gradient)",
+      "publisher": "Natural Resources Canada",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674",
+      "url": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_resource_potential_of_north_america_en/MapServer",
+      "why": "Raster / WMS potential surfaces. A country-wide wash is not a toggle that can sit beside the methane pins without hiding them."
+    },
+    {
+      "id": "nrcan-hydrokinetic",
+      "title": "Hydrokinetic resource assessment near diesel-reliant communities",
+      "publisher": "Natural Resources Canada",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871",
+      "url": "https://ftp.maps.canada.ca/pub/nrcan_rncan/Energy-supply_Disponibilites-energetiques/HYDROKINETIC_Potential/SAR_derived/River_hydrokinetic_resource_assessment_using_SAR_satellite_imagery_en.SHP.zip",
+      "why": "Winter open-water polygons, not power plants. A polygon wash would cover river corridors. Kept as a research source."
+    },
+    {
+      "id": "nacei-transmission",
+      "title": "NACEI electric transmission lines and pipelines",
+      "publisher": "Natural Resources Canada",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674",
+      "url": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1",
+      "why": "Line infrastructure for all of North America. Not a renewable or stranded-energy point. Left off so it does not draw over the pins."
+    }
+  ],
+  "licence": "Open Government Licence - Canada",
+  "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
+}
