@@ -1188,6 +1188,28 @@ function StrandedCommandCenter() {
           >
             Revenue
           </button>
+          <button
+            type="button"
+            onClick={() => setChoroplethMode('renewable-gen')}
+            className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
+              choroplethMode === 'renewable-gen'
+                ? 'border-[#5BC0BE] text-[#5BC0BE] bg-[#5BC0BE]/10'
+                : 'border-white/15 text-gray-400 hover:text-white'
+            }`}
+          >
+            {t('mapChoroplethRenewableGen')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setChoroplethMode('renewable-cap')}
+            className={`flex-1 text-label px-2 py-1 rounded-lg border transition ${
+              choroplethMode === 'renewable-cap'
+                ? 'border-[#5BC0BE] text-[#5BC0BE] bg-[#5BC0BE]/10'
+                : 'border-white/15 text-gray-400 hover:text-white'
+            }`}
+          >
+            {t('mapChoroplethRenewableCap')}
+          </button>
         </div>
       )}
     </>

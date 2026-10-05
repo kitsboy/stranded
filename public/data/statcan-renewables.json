@@ -1,0 +1,260 @@
+{
+  "schema": "gab.stranded.statcan-renewables.v1",
+  "retrievedAt": "2026-10-05T01:05:40.477Z",
+  "source": {
+    "generation": {
+      "title": "Electric power generation, monthly generation by type of electricity",
+      "table": "25-10-0015-01",
+      "year": "2025",
+      "unit": "MWh",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510001501"
+    },
+    "capacity": {
+      "title": "Installed plants, annual generating capacity by type of electricity generation",
+      "table": "25-10-0022-01",
+      "year": "2024",
+      "unit": "MW",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510002201"
+    },
+    "publisher": "Statistics Canada / Canadian Centre for Energy Information",
+    "licence": "Statistics Canada Open Licence",
+    "licenceUrl": "https://www.statcan.gc.ca/en/reference/licence"
+  },
+  "note": "Province-level totals from official Statistics Canada tables. No plant coordinates exist in these tables, so this is painted as a province choropleth, not point pins.",
+  "provinces": {
+    "Alberta": {
+      "generationMWh": {
+        "hydro": 2081350,
+        "wind": 14949839,
+        "solar": 3535210,
+        "tidal": 0,
+        "biomass": 1703587
+      },
+      "generationTotalMWh": 86656456,
+      "capacityMW": {
+        "hydro": 917,
+        "wind": 4649.4,
+        "solar": 1983.9,
+        "tidal": 0,
+        "geothermal": 6
+      },
+      "capacityTotalMW": 20180.5
+    },
+    "British Columbia": {
+      "generationMWh": {
+        "hydro": 57268726,
+        "wind": 1748692,
+        "solar": 16172,
+        "tidal": 0,
+        "biomass": 3664867
+      },
+      "generationTotalMWh": 64537763,
+      "capacityMW": {
+        "hydro": 16387.2,
+        "wind": 745.4,
+        "solar": 70.7,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 18780.1
+    },
+    "Manitoba": {
+      "generationMWh": {
+        "hydro": 25418979,
+        "wind": 911308,
+        "solar": 2120,
+        "tidal": 0,
+        "biomass": 46896
+      },
+      "generationTotalMWh": 26402341,
+      "capacityMW": {
+        "hydro": 6163.5,
+        "wind": 258.5,
+        "solar": 38.5,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 6774.3
+    },
+    "New Brunswick": {
+      "generationMWh": {
+        "hydro": 2555441,
+        "wind": 1162400,
+        "solar": 1933,
+        "tidal": 0,
+        "biomass": 710726
+      },
+      "generationTotalMWh": 12937726,
+      "capacityMW": {
+        "hydro": 947.5,
+        "wind": 396.2,
+        "solar": 11.8,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 4470.5
+    },
+    "Newfoundland and Labrador": {
+      "generationMWh": {
+        "hydro": 35929208,
+        "wind": 181000,
+        "solar": 0,
+        "tidal": 0,
+        "biomass": 1846
+      },
+      "generationTotalMWh": 37360605,
+      "capacityMW": {
+        "hydro": 7586.3,
+        "wind": 54,
+        "solar": 0.4,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 8245.8
+    },
+    "Northwest Territories": {
+      "generationMWh": {
+        "hydro": 203104,
+        "wind": 22399,
+        "solar": 4577,
+        "tidal": 0,
+        "biomass": 0
+      },
+      "generationTotalMWh": 683000,
+      "capacityMW": {
+        "hydro": 55.7,
+        "wind": 12.7,
+        "solar": 1.8,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 212.5
+    },
+    "Nova Scotia": {
+      "generationMWh": {
+        "hydro": 617270,
+        "wind": 1705060,
+        "solar": 5863,
+        "tidal": 0,
+        "biomass": 354772
+      },
+      "generationTotalMWh": 9022237,
+      "capacityMW": {
+        "hydro": 375.4,
+        "wind": 623.5,
+        "solar": 79.9,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 3035.6
+    },
+    "Nunavut": {
+      "generationMWh": {
+        "hydro": 0,
+        "wind": 0,
+        "solar": 153,
+        "tidal": 0,
+        "biomass": 0
+      },
+      "generationTotalMWh": 384075,
+      "capacityMW": {
+        "hydro": 0,
+        "wind": 0,
+        "solar": 0.1,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 106.5
+    },
+    "Ontario": {
+      "generationMWh": {
+        "hydro": 38793227,
+        "wind": 14695153,
+        "solar": 2282600,
+        "tidal": 0,
+        "biomass": 1362430
+      },
+      "generationTotalMWh": 169665416,
+      "capacityMW": {
+        "hydro": 8954.8,
+        "wind": 5533.1,
+        "solar": 2857.1,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 42026.4
+    },
+    "Prince Edward Island": {
+      "generationMWh": {
+        "hydro": 0,
+        "wind": 578080,
+        "solar": 48684,
+        "tidal": 0,
+        "biomass": 4244
+      },
+      "generationTotalMWh": 633976,
+      "capacityMW": {
+        "hydro": 0,
+        "wind": 203.6,
+        "solar": 71.2,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 365.4
+    },
+    "Quebec": {
+      "generationMWh": {
+        "hydro": 177298645,
+        "wind": 11799502,
+        "solar": 12079,
+        "tidal": 0,
+        "biomass": 1376700
+      },
+      "generationTotalMWh": 191069260,
+      "capacityMW": {
+        "hydro": 40704.9,
+        "wind": 3994.8,
+        "solar": 16.2,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 46274.9
+    },
+    "Saskatchewan": {
+      "generationMWh": {
+        "hydro": 2828125,
+        "wind": 2726798,
+        "solar": 46694,
+        "tidal": 0,
+        "biomass": 63872
+      },
+      "generationTotalMWh": 25288779,
+      "capacityMW": {
+        "hydro": 862.6,
+        "wind": 812.4,
+        "solar": 99.6,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 5770.7
+    },
+    "Yukon": {
+      "generationMWh": {
+        "hydro": 377914,
+        "wind": 6815,
+        "solar": 8036,
+        "tidal": 0,
+        "biomass": 0
+      },
+      "generationTotalMWh": 570740,
+      "capacityMW": {
+        "hydro": 98,
+        "wind": 4,
+        "solar": 8.8,
+        "tidal": 0,
+        "geothermal": 0
+      },
+      "capacityTotalMW": 145.2
+    }
+  }
+}

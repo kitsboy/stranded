@@ -75,3 +75,44 @@ export function emissionFillColor(intensity: number): string {
   const a = 0.15 + t * 0.45
   return `rgba(${r},${g},${b},${a})`
 }
+
+/**
+ * Province choropleth for official Statistics Canada renewable totals.
+ * StatCan tables have province-level generation (MWh) and capacity (MW) but no
+ * plant coordinates, so this is the honest way to paint them — shade each
+ * province by its total, never inventing pin locations.
+ */
+export function renewableChoroplethGeojson(
+  totals: Record<string, number>,
+): GeoJSON.FeatureCollection {
+  const max = Math.max(...Object.values(totals), 1)
+  const features: GeoJSON.Feature[] = PROVINCE_BOXES.map(box => {
+    const value = totals[box.name] || 0
+    const intensity = value / max
+    return {
+      type: 'Feature',
+      properties: { name: box.name, value, intensity },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [box.minLng, box.minLat],
+          [box.maxLng, box.minLat],
+          [box.maxLng, box.maxLat],
+          [box.minLng, box.maxLat],
+          [box.minLng, box.minLat],
+        ]],
+      },
+    }
+  })
+  return { type: 'FeatureCollection', features }
+}
+
+/** Teal→green ramp for renewable choropleth (distinct from the orange methane ramp). */
+export function renewableFillColor(intensity: number): string {
+  const t = Math.min(1, Math.max(0, intensity))
+  const r = Math.round(16 + t * 40)
+  const g = Math.round(185 - t * 40)
+  const b = Math.round(190 - t * 30)
+  const a = 0.18 + t * 0.5
+  return `rgba(${r},${g},${b},${a})`
+}

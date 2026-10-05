@@ -33,13 +33,19 @@ Remote communities: the 2025 service (`dataset/1d912ea1-919b-449d-8e8b-eb6a2313a
 
 These are real government sources. They are not on the map because painting them would either invent a location or cover the country and hide the pins.
 
-- Statistics Canada table 25-10-0015-01, electric power generation by source. Monthly/annual MWh. No coordinates. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510001501
-- Statistics Canada table 25-10-0022-01, installed generating capacity by source. MW totals. No coordinates. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510002201
 - Canada Energy Regulator renewable-energy market notes and Canada’s Energy Future. Trends and projections, not asset locations. https://www.cer-rec.gc.ca/en/data-analysis/energy-markets/market-snapshots/index.html
 - NRCan photovoltaic potential by municipality. Names and kWh/kWp, no coordinates. Geocoding the names would invent locations. https://open.canada.ca/data/en/dataset/8b434ac7-aedb-4698-90df-ba77424a551f
 - NACEI resource-potential rasters (solar irradiance, wind, geothermal gradient). A country-wide wash. https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674
 - NRCan hydrokinetic open-water polygons near diesel communities. Research polygons, not plants. https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871
 - NACEI transmission lines and pipelines. North American linework, not stranded energy points.
+
+## Painted as a province choropleth (Statistics Canada)
+
+Statistics Canada tables 25-10-0015-01 (generation, MWh) and 25-10-0022-01 (capacity, MW) have **province-level totals but no plant coordinates**. They are painted as a **province choropleth** — each province is shaded by its renewable total — never as invented pins. Toggle on the map: **Renewable Gen** (latest full year, 2025) and **Renewable Cap** (latest full year, 2024).
+
+- Statistics Canada table 25-10-0015-01, electric power generation by source. Monthly/annual MWh. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510001501
+- Statistics Canada table 25-10-0022-01, installed generating capacity by source. MW totals. https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510002201
+- Data file: `public/data/statcan-renewables.json` (schema `gab.stranded.statcan-renewables.v1`).
 
 ## Refresh
 

@@ -6,7 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
 import { hoverTeaser, formatCount, formatMoneyShort } from '@/lib/cockpit'
-import { emissionChoroplethGeojson, revenueChoroplethGeojson } from '@/lib/province-choropleth'
+import { emissionChoroplethGeojson, revenueChoroplethGeojson, renewableChoroplethGeojson } from '@/lib/province-choropleth'
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
 import { getPinProof, loadPinProof, pinProofTeaserHtml } from '@/lib/pin-proof'
@@ -20,7 +20,7 @@ import {
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
-export type ChoroplethMode = 'emission' | 'revenue'
+export type ChoroplethMode = 'emission' | 'revenue' | 'renewable-gen' | 'renewable-cap'
 
 export type MapHandle = {
   getView: () => MapViewState | null
@@ -257,6 +257,7 @@ export default function Map({
   const renewablePopupRef = useRef<maplibregl.Popup | null>(null)
   const renewableLoadingRef = useRef(false)
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
+    const statcanRef = useRef<{ provinces?: Record<string, unknown> } | null>(null)
   const showRenewableRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
   /** Live BTC price for the hover teaser — the native handlers are attached once. */
   const btcUsdRef = useRef(liveBtcPrice)
@@ -1083,27 +1084,54 @@ export default function Map({
   }, [])
 
   const syncChoropleth = useCallback(() => {
-    const map = mapRef.current
-    if (!map) return
-    if (!map.getSource('province-choropleth') && !map.isStyleLoaded?.()) {
-      map.once('idle', () => syncChoropleth())
-      return
-    }
-    const srcId = 'province-choropleth'
-    const layerId = 'province-choropleth-fill'
-    const outlineId = 'province-choropleth-outline'
-    const totals: Record<string, number> = {}
-    sites.forEach(s => {
-      const p = s.properties.province || 'Unknown'
-      if (choroplethMode === 'revenue') {
-        totals[p] = (totals[p] || 0) + s.potentialDailyProfitUsd * 365
-      } else {
-        totals[p] = (totals[p] || 0) + s.emission
+      const map = mapRef.current
+      if (!map) return
+      if (!map.getSource('province-choropleth') && !map.isStyleLoaded?.()) {
+        map.once('idle', () => syncChoropleth())
+        return
       }
-    })
-    const geojson = choroplethMode === 'revenue'
-      ? revenueChoroplethGeojson(totals)
-      : emissionChoroplethGeojson(totals)
+      const srcId = 'province-choropleth'
+      const layerId = 'province-choropleth-fill'
+      const outlineId = 'province-choropleth-outline'
+      const isRenewable = choroplethMode === 'renewable-gen' || choroplethMode === 'renewable-cap'
+      const totals: Record<string, number> = {}
+      if (isRenewable) {
+        // Official Statistics Canada province totals (no plant coordinates).
+        // Painted as a province choropleth, never as invented pins.
+        const cached = statcanRef.current
+        if (!cached) {
+          fetch('/data/statcan-renewables.json')
+            .then(r => r.json())
+            .then((d) => { statcanRef.current = d; syncChoropleth() })
+            .catch((err) => console.warn('[Map] statcan renewable fetch failed', err))
+          return
+        }
+        for (const [prov, data] of Object.entries(cached.provinces || {})) {
+          const p = data as { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }
+          if (choroplethMode === 'renewable-gen') {
+            totals[prov] = (p.generationMWh?.hydro || 0) + (p.generationMWh?.wind || 0) +
+              (p.generationMWh?.solar || 0) + (p.generationMWh?.biomass || 0) + (p.generationMWh?.tidal || 0)
+          } else {
+            totals[prov] = (p.capacityMW?.hydro || 0) + (p.capacityMW?.wind || 0) +
+              (p.capacityMW?.solar || 0) + (p.capacityMW?.biomass || 0) + (p.capacityMW?.tidal || 0) +
+              (p.capacityMW?.geothermal || 0)
+          }
+        }
+      } else {
+        sites.forEach(s => {
+          const p = s.properties.province || 'Unknown'
+          if (choroplethMode === 'revenue') {
+            totals[p] = (totals[p] || 0) + s.potentialDailyProfitUsd * 365
+          } else {
+            totals[p] = (totals[p] || 0) + s.emission
+          }
+        })
+      }
+      const geojson = choroplethMode === 'revenue'
+              ? revenueChoroplethGeojson(totals)
+              : isRenewable
+                ? renewableChoroplethGeojson(totals)
+                                : emissionChoroplethGeojson(totals)
     const highlightList = highlightedProvinces.length ? highlightedProvinces : ['__none__']
     try {
       if (map.getSource(srcId)) {
