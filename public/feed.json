@@ -1,0 +1,129 @@
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": "Stranded \u2014 what changed",
+  "home_page_url": "https://stranded.giveabit.io",
+  "feed_url": "https://stranded.giveabit.io/feed.json",
+  "description": "Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.",
+  "items": [
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.12.4",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.12.4 \u2014 Map Layers card, footer hit-areas, welcome card reopen",
+      "content_text": "The Map Layers card anchors below the sticky navbar (it used to slide up under it and clip its own heading) and now collapses/expands with a chevron so the full map is reachable underneath. Footer source links (ECCC Open, NRCan plants) are real 44px targets again \u2014 they were inline links in a wrapping paragraph, so on a phone the next line stole the tap band.",
+      "date_published": "Fri, 02 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.12.3",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.12.3 \u2014 Map layer ticks show and hide",
+      "content_text": "Unticking Methane Sites empties the pin source and hides the cluster layers. An idle listener keeps them hidden if the style was busy. Heatmap, province colour, satellite and terrain no longer wait for the map's one-time load event. That event has already fired, so the old wait never ran.",
+      "date_published": "Fri, 02 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.12.2",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.12.2 \u2014 Map layer ticks actually show and hide",
+      "content_text": "Unticking Methane Sites now removes the pins. Ticking it puts them back. The box used to change and the map ignored it. Satellite, terrain, heatmap and the province colours follow their own boxes. Unticking satellite also leaves the street or dark map underneath, instead of a blank screen.",
+      "date_published": "Fri, 02 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.12.1",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.12.1 \u2014 Pins stay visible, Dark map is a real map, welcome card scrolls",
+      "content_text": "Dark basemap no longer uses the CARTO tile that stamps \u201cAPI KEY REQUIRED\u201d over the map. Dark is now Esri\u2019s public dark-gray canvas, which needs no key. Methane pins stay above satellite, heatmap and province fills, so turning a layer on cannot cover them.",
+      "date_published": "Fri, 02 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.12.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.12.0 \u2014 Official Canadian energy overlays on the map",
+      "content_text": "Map layer panel gains **Official energy overlays**. Off by default, so the methane pins are unchanged until a layer is turned on. 1,049 Canadian renewable plants (1 MW or more) from NRCan NACEI, split into wind, solar, hydro, biomass, tidal, pumped storage, geothermal and other. Geothermal is in the legend with a count of 0 \u2014 the official file has no Canadian geothermal plant at that size. We did not invent one.",
+      "date_published": "Fri, 02 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.11.1",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.11.1 \u2014 Fix: dark bar behind the map HUD pill",
+      "content_text": "**The map HUD had a long dark rectangle stretching past the visible-count pill** on `/map/`. Cause: the jewel-glass rule in `app/globals.css` targets `.map-command-center [class*=\"hud\"]`, which also matched the **full-width outer wrapper** `div.map-top-hud`, not just the inner pill \u2014 so the wrapper got a gradient + border + shadow painted across the whole strip. **Fix:** reset the wrapper only (`.map-command-center .map-top-hud` and its `:hover` \u2192 `background: transparent; border: none; box-shadow: none; backdrop-filter: none`). The inner `.map-top-hud__inner` pill keeps its own solid background, so the count, `/ 2,611 visible`, **Pin proof** badge, geolocate button and BTC ticker are untouched.",
+      "date_published": "Thu, 01 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.11.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.11.0 \u2014 Data refresh to the 2024 GHGRP year + honest recency/flux",
+      "content_text": "**Data is current** \u2014 refreshed from ECCC GHGRP's 2024 reporting year (1,745 sites now on 2024 filings, newest `reference_year` 2024); a site's `last_reported_year` is stored and shown so a 2011 figure is never presented as current **Never assert venting/flaring we cannot prove** \u2014 the venting/flaring split exists only for facilities that report a fugitive source (oil & gas). Landfill gas is filed under \"Waste\", so for those sites the flux UI says *no claim* instead of a false \"not flaring\"; `flux_scope: fugitive | not-applicable` records it",
+      "date_published": "Fri, 11 Sep 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.11.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.11.0 \u2014 Site cockpit: the miner stack explains itself",
+      "content_text": "**Hover before click** \u2014 a pin hover now teaches: name, measured CH\u2084/day, Stranded Score and *\"Gas supports up to 468 miners \u2248 $/day\"*, computed with the same helpers the cockpit uses (vector pins **and** DOM markers) **Click \u2192 a cockpit, not a form** \u2014 header badges first (data recency `ECCC 2023 \u00b7 high confidence`, flux when the dataset carries it, \"verify this yourself\"), then **one big number** (sats/day + $/day), then the miner-stack visual, then the readout strip, then **\"How this number is made\"** (hashprice used, above/below the network-derived estimate, power-cost assumption, data year)",
+      "date_published": "Fri, 11 Sep 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.11.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.11.0 \u2014 Update",
+      "content_text": "### Added \u2014 Fleet templates v2 (named, reusable, exportable) **Named fleet templates** \u2014 save the current miner stack under a name (inline input, no `window.prompt`), listed with Apply + delete; persisted locally in `stranded.fleets.v1`, guarded so a corrupt/stale key never white-screens the page",
+      "date_published": "Fri, 11 Sep 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.10.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.10.0 \u2014 Update",
+      "content_text": "### Added \u2014 Mega upgrade batch (~50 shipped items) **Footer** \u2014 in-flow (not sticky); fuller **4-column** layout (platform / resources / company-legal / brand); all app routes; suite + donate; giveabit wordmark (`public/images/giveabit-logo.png`); hover color transitions",
+      "date_published": "Tue, 11 Aug 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.9.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.9.0 \u2014 Update",
+      "content_text": "### Added \u2014 Megabatch upgrades #526\u2013625 (100 items across 4 waves) **Wave 1 (526\u2013550):** status health checks, provinces revenue table, global KPIs, map share URL, benchmarks top sites",
+      "date_published": "Wed, 15 Jul 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
+      "id": "https://stranded.giveabit.io/changelog#2.8.4",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.8.4 \u2014 Update",
+      "content_text": "### Added (upgrades #601\u2013625 \u2014 i18n, a11y, perf, PWA polish) **Dashboard i18n** \u2014 `dashboardOpportunityRadar*` + `dashboardCapture*` keys \u00d7 EN/FR/DE/ES; wired in `DashboardOpportunityRadar` and `DashboardCaptureSlider`",
+      "date_published": "Wed, 15 Jul 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    }
+  ]
+}
