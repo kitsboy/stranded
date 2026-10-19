@@ -25,6 +25,10 @@ export const metadata: Metadata = {
       en: '/',
       'x-default': '/',
     },
+    types: {
+      'application/rss+xml': '/feed.xml',
+      'application/feed+json': '/feed.json',
+    },
   },
   openGraph: {
     title: 'Stranded | Stranded Energy, Bitcoin Access',
