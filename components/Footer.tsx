@@ -332,7 +332,7 @@ export default function Footer() {
             <span className="text-white/15" aria-hidden>·</span>
             <a
               href="/feed.xml"
-              className="inline-flex items-center gap-1 rounded-full border border-orange-400/40 bg-orange-400/10 px-2 py-0.5 text-[10px] font-semibold text-orange-300 hover:bg-orange-400/20"
+              className="inline-flex items-center gap-1 rounded-full border border-orange-400/40 bg-orange-400/10 px-2 py-0.5 text-micro font-semibold text-orange-300 hover:bg-orange-400/20"
               title="Subscribe via RSS"
               aria-label="Subscribe via RSS"
             >
