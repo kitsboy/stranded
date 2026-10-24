@@ -1,3 +1,23 @@
+# Stranded boundaries and rivers — 2026-10-23, v2.14.0
+
+**Done:**
+- Province shades and the emission, revenue, and renewable choropleths use `public/data/province-boundaries.geojson`. It is the 2021 Census cartographic layer `lpr_000b21s_e`, generalized by the Statistics Canada map service. 13 provinces. Parts under 100 km² were dropped. A rectangle is used only if that file fails.
+- Hydrokinetic open water (81) and possible water (59) paint from `public/data/hydrokinetic.geojson`. A click names the river and the community. Mackenzie at Tsiigehtchic was checked in the browser. Ice is not painted. The community coordinate is not a second pin. `ringsReturnedByQuery` stays false.
+- The on-map legend is a short row of names, so it no longer covers the southern provinces. Province fills are a little stronger so the shapes read on the light basemap.
+- Desktop (1440) and phone (390) were checked. Fredericton hits New Brunswick only, which the old Quebec box used to cover.
+
+**Decisions:**
+- The StatCan zip download returned 403. The geometry is the cartographic service, not a hand-drawn outline and not a legal survey.
+- Nine thin hydro polygons that collapsed during simplify were restored from the original rings, not from POINT_X / POINT_Y.
+- Welcome card copy was not restyled. The three deleted images stayed deleted. `buffy/v2.11.1-hud-fix` was not merged. `public/data/live-stats.json` still says 2.12.4 until a real build.
+
+**Git State:**
+- SHA: `0b4a26d6284a46869e414d208476b208a84718d7` (`0b4a26d`) on `main`.
+- Earlier atlas: `0302dbc`. Guides: `5589371`.
+- Pushed with the handoff note that follows `0b4a26d`.
+
+---
+
 # Stranded atlas guides — 2026-10-24, v2.13.1
 
 **Done:**
