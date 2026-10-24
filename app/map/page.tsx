@@ -15,6 +15,7 @@ import SiteDetailsPanel from '@/components/SiteDetailsPanel'
 import FirstRunStrip from '@/components/FirstRunStrip'
 import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/LayerControls'
 import { emptyOverlayState, RENEWABLE_MANIFEST_URL } from '@/lib/renewable-layers'
+import { ATLAS_LAYERS, emptyAtlasState } from '@/lib/energy-atlas'
 import DualRangeSlider from '@/components/DualRangeSlider'
 import type { LiveStats } from '@/types/live-stats'
 import MissionPanel from '@/components/MissionPanel'
@@ -164,6 +165,8 @@ function StrandedCommandCenter() {
 
   const [layers, setLayers] = useState({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
   const [overlays, setOverlays] = useState(emptyOverlayState)
+  const [atlas, setAtlas] = useState(emptyAtlasState)
+  const [atlasOpacity, setAtlasOpacity] = useState(0.62)
   const [overlayMeta, setOverlayMeta] = useState<{ vintageNote?: string; counts?: Record<string, number> } | null>(null)
   const [choroplethMode, setChoroplethMode] = useState<ChoroplethMode>('emission')
   const [heatmapOpacity, setHeatmapOpacity] = useState(0.75)
@@ -950,6 +953,8 @@ function StrandedCommandCenter() {
     setViewMode(filteredSites.length > 180 ? 'native-clusters' : 'precise')
     setLayers({ sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false })
     setOverlays(emptyOverlayState())
+    setAtlas(emptyAtlasState())
+    setAtlasOpacity(0.62)
     setRadiusFilter(null)
     if (shouldShowFilterToast('reset-filters')) {
       toast.success(t('mapShowAll'))
@@ -1220,9 +1225,14 @@ function StrandedCommandCenter() {
       compact
       layers={layers}
       onToggle={(l) => {
-        setLayers(prev => ({ ...prev, [l]: !prev[l] }))
-        if (l === 'satellite' && layers.satellite) setMapStyle(mapStyle === 'dark' ? 'dark' : 'standard')
-        if (l === 'satellite' && !layers.satellite) setMapStyle('satellite')
+        setLayers(prev => {
+          const next = { ...prev, [l]: !prev[l] }
+          if (l === 'satellite') {
+            const restore = mapStyle === 'dark' ? 'dark' : 'standard'
+            queueMicrotask(() => setMapStyle(next.satellite ? 'satellite' : restore))
+          }
+          return next
+        })
       }}
       onApplyPreset={(preset: LayerPresetId) => {
         const p = LAYER_PRESETS[preset]
@@ -1248,6 +1258,10 @@ function StrandedCommandCenter() {
       overlayCounts={overlayMeta?.counts}
       overlayNote={overlayMeta?.vintageNote}
       onToggleOverlay={(id) => setOverlays(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }))}
+      atlas={atlas}
+      onToggleAtlas={(id) => setAtlas(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }))}
+      atlasOpacity={atlasOpacity}
+      onAtlasOpacityChange={setAtlasOpacity}
     />
   )
 
@@ -1893,6 +1907,8 @@ function StrandedCommandCenter() {
         highlightedProvinces={Array.from(selectedProvinces)}
         performanceMode={effectivePerformanceMode}
         renewableOverlays={overlays}
+        atlasLayers={atlas}
+        atlasOpacity={atlasOpacity}
         sitesLoading={loading}
         loadProgress={loadProgress}
         resizeTrigger={mapResizeNonce + (filtersCollapsed ? 0 : 1)}
@@ -1908,6 +1924,19 @@ function StrandedCommandCenter() {
         viewportSitesLabel={tf(locale, 'mapViewportSites', { count: '{count}' })}
         tileFallbackLabel={t('mapTileFallback')}
       />
+      {!selectedSite && ATLAS_LAYERS.some(layer => atlas[layer.id]) && (
+        <div className="map-atlas-legend" data-testid="atlas-legend">
+          {ATLAS_LAYERS.filter(layer => atlas[layer.id]).map(layer => (
+            <div key={layer.id} className="flex items-start gap-2">
+              <span className="mt-0.5 inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: layer.mark === 'wash' ? layer.swatch : layer.swatch }} aria-hidden />
+              <span className="text-micro leading-snug text-gray-200">
+                <span className="text-white">{t(layer.labelKey)}</span>
+                <span className="text-gray-400"> — {t(layer.hintKey)}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {!loading && filteredSites.length === 0 && allSites.length > 0 && (

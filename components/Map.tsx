@@ -7,6 +7,17 @@ import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
 import { hoverTeaser, formatCount, formatMoneyShort } from '@/lib/cockpit'
 import { emissionChoroplethGeojson, revenueChoroplethGeojson, renewableChoroplethGeojson } from '@/lib/province-choropleth'
+import {
+  ATLAS_LAYERS,
+  INFRA_DATA_URL,
+  PV_DATA_URL,
+  atlasLayerId,
+  atlasPopupHtml,
+  provinceShadeGeojson,
+  pvProvinceTotals,
+  shadeFillPaint,
+  statcanRenewableTotal,
+} from '@/lib/energy-atlas'
 import { boundsFromSites, padBounds, boundsToFitTuple } from '@/lib/map-bounds'
 import type { MapViewState } from '@/lib/map-view-history'
 import { getPinProof, loadPinProof, pinProofTeaserHtml } from '@/lib/pin-proof'
@@ -72,6 +83,10 @@ interface MapProps {
   tileFallbackLabel?: string
   /** Official energy overlays, keyed by category id. Off by default. */
   renewableOverlays?: Record<string, boolean>
+  /** Solar rasters, hydrokinetic images, infrastructure points, province shades. */
+  atlasLayers?: Record<string, boolean>
+  /** Opacity for the official map images. Pins stay above them. */
+  atlasOpacity?: number
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -88,6 +103,61 @@ function beforePinLayer(map: maplibregl.Map): string | undefined {
   if (map.getLayer(CLUSTER_LAYER)) return CLUSTER_LAYER
   if (map.getLayer(UNCLUSTERED_LAYER)) return UNCLUSTERED_LAYER
   return undefined
+}
+
+/** Keep renewable dots above the methane pins, in the layer-list order. */
+function raiseRenewableLayers(map: maplibregl.Map) {
+  for (const cat of RENEWABLE_CATS) {
+    const id = renewableLayerId(cat.id)
+    if (map.getLayer(id)) map.moveLayer(id)
+  }
+}
+
+const INFRA_MARK: Record<string, 'diamond' | 'square' | 'triangle'> = {
+  transmission: 'diamond',
+  'gas-pipeline': 'square',
+  'liquids-pipeline': 'triangle',
+}
+
+/** Infrastructure marks sit above methane. Plant dots stay above those marks. */
+function raiseStack(map: maplibregl.Map) {
+  for (const layer of ATLAS_LAYERS) {
+    if (layer.group !== 'infra') continue
+    const id = atlasLayerId(layer.id)
+    if (map.getLayer(id)) map.moveLayer(id)
+  }
+  raiseRenewableLayers(map)
+}
+
+function atlasMarkImage(kind: 'diamond' | 'square' | 'triangle', fill: string): ImageData {
+  const scale = 2
+  const size = 32 * scale
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const g = canvas.getContext('2d')
+  if (!g) throw new Error('canvas')
+  g.translate(size / 2, size / 2)
+  g.beginPath()
+  if (kind === 'diamond') {
+    g.moveTo(0, -11 * scale)
+    g.lineTo(11 * scale, 0)
+    g.lineTo(0, 11 * scale)
+    g.lineTo(-11 * scale, 0)
+  } else if (kind === 'square') {
+    g.rect(-8 * scale, -8 * scale, 16 * scale, 16 * scale)
+  } else {
+    g.moveTo(0, -11 * scale)
+    g.lineTo(11 * scale, 9 * scale)
+    g.lineTo(-11 * scale, 9 * scale)
+  }
+  g.closePath()
+  g.fillStyle = fill
+  g.fill()
+  g.lineWidth = 2 * scale
+  g.strokeStyle = '#0f172a'
+  g.stroke()
+  return g.getImageData(0, 0, size, size)
 }
 
 /** Run a style change now. If the style is busy, retry on idle — never on 'load', which already fired. */
@@ -242,6 +312,8 @@ export default function Map({
   viewportSitesLabel = 'in view',
   tileFallbackLabel = 'Switched to OpenStreetMap tiles',
   renewableOverlays,
+  atlasLayers,
+  atlasOpacity = 0.62,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const minimapContainer = useRef<HTMLDivElement>(null)
@@ -255,7 +327,23 @@ export default function Map({
   const nativeHandlersAttached = useRef(false)
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
   const renewablePopupRef = useRef<maplibregl.Popup | null>(null)
-  const renewableLoadingRef = useRef(false)
+  const renewableLoadRef = useRef<Promise<void> | null>(null)
+  const renewableOverlaysRef = useRef(renewableOverlays)
+  const atlasLayersRef = useRef(atlasLayers)
+  const atlasOpacityRef = useRef(atlasOpacity)
+  const atlasWaitRef = useRef(false)
+  const atlasBoundRef = useRef(new Set<string>())
+  const infraDataRef = useRef<GeoJSON.FeatureCollection | null>(null)
+  const infraLoadRef = useRef<Promise<GeoJSON.FeatureCollection | null> | null>(null)
+  const pvDataRef = useRef<{ provinces?: Record<string, { meanKwhPerKwp?: number; municipalities?: number }> } | null>(null)
+  const pvLoadRef = useRef<Promise<void> | null>(null)
+  const atlasHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
+  const atlasShadeHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
+  const showAtlasRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
+  const choroplethWaitRef = useRef(false)
+  const heatmapWaitRef = useRef(false)
+  const syncChoroplethRef = useRef<() => void>(() => {})
+  const syncHeatmapRef = useRef<(sitesToRender: EnrichedSite[]) => void>(() => {})
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
     const statcanRef = useRef<{ provinces?: Record<string, unknown> } | null>(null)
   const showRenewableRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
@@ -277,6 +365,9 @@ export default function Map({
 
   onViewChangeRef.current = onViewChange
   performanceModeRef.current = performanceMode
+  renewableOverlaysRef.current = renewableOverlays
+  atlasLayersRef.current = atlasLayers
+  atlasOpacityRef.current = atlasOpacity
   btcUsdRef.current = liveBtcPrice
 
   // The Bitcoin-anchored proof state behind every pin, loaded once per visit.
@@ -324,6 +415,61 @@ export default function Map({
       })
     }
     renewablePopupRef.current.setLngLat(hit.coords).setHTML(renewablePopupHtml(hit.props)).addTo(map)
+  }
+  atlasHitRef.current = (map, point) => {
+    const ids = ATLAS_LAYERS.filter((layer) => layer.group === 'infra').map((layer) => atlasLayerId(layer.id)).filter((id) => {
+      if (!map.getLayer(id)) return false
+      return map.getLayoutProperty(id, 'visibility') !== 'none'
+    })
+    if (!ids.length) return null
+    let hits: maplibregl.MapGeoJSONFeature[] = []
+    try {
+      hits = map.queryRenderedFeatures(
+        [[point.x - 16, point.y - 16], [point.x + 16, point.y + 16]],
+        { layers: ids },
+      )
+    } catch {
+      return null
+    }
+    let best: { d: number; coords: [number, number]; props: Record<string, unknown> } | null = null
+    for (const f of hits) {
+      if (f.geometry.type !== 'Point') continue
+      const coords = f.geometry.coordinates as [number, number]
+      const p = map.project(coords)
+      const d = Math.hypot(p.x - point.x, p.y - point.y)
+      if (d > 18) continue
+      if (!best || d < best.d) best = { d, coords, props: (f.properties || {}) as Record<string, unknown> }
+    }
+    return best
+  }
+  atlasShadeHitRef.current = (map, point) => {
+    const ids = ATLAS_LAYERS.filter((layer) => layer.group === 'shade').map((layer) => atlasLayerId(layer.id)).filter((id) => {
+      if (!map.getLayer(id)) return false
+      return map.getLayoutProperty(id, 'visibility') !== 'none'
+    })
+    if (!ids.length) return null
+    let hits: maplibregl.MapGeoJSONFeature[] = []
+    try {
+      hits = map.queryRenderedFeatures([point.x, point.y], { layers: ids })
+    } catch {
+      return null
+    }
+    const feature = hits[hits.length - 1]
+    if (!feature) return null
+    const ll = map.unproject([point.x, point.y])
+    return { coords: [ll.lng, ll.lat], props: (feature.properties || {}) as Record<string, unknown> }
+  }
+  showAtlasRef.current = (map, hit) => {
+    if (!renewablePopupRef.current) {
+      renewablePopupRef.current = new maplibregl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        className: 'stranded-hover-popup',
+        maxWidth: '280px',
+        offset: 14,
+      })
+    }
+    renewablePopupRef.current.setLngLat(hit.coords).setHTML(atlasPopupHtml(hit.props)).addTo(map)
   }
 
   const clearMarkers = () => {
@@ -509,6 +655,7 @@ export default function Map({
       })
     }
 
+    raiseStack(map)
     attachNativeHandlers(map)
   }, [attachNativeHandlers])
 
@@ -681,8 +828,12 @@ export default function Map({
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    const apply = () => {
-      if (!map.getLayer('osm')) return
+    let stopped = false
+    const apply = (): boolean => {
+      if (stopped) return true
+      if (!map.getLayer('osm')) return false
+      if (effectiveSatellite && !map.getSource('satellite')) return false
+      if (effectiveTerrain && terrainExaggeration > 0 && !map.getSource('terrain')) return false
       const layers = (map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers || {}
 
       const showDark = mapStyle === 'dark'
@@ -704,7 +855,6 @@ export default function Map({
       if (effectiveTerrain !== layers.terrain) {
         map.setPitch(effectiveTerrain ? 50 : 0)
         if (effectiveTerrain && terrainExaggeration > 0) {
-          if (!map.getSource('terrain')) return
           map.setTerrain({ source: 'terrain', exaggeration: terrainExaggeration })
           if (!map.getLayer('hillshade')) {
             map.addLayer({
@@ -726,104 +876,382 @@ export default function Map({
         }
       }
       ;(map as maplibregl.Map & { _strandedLayers?: Record<string, boolean> })._strandedLayers = layers
+      raiseStack(map)
+      return true
     }
-    if (!map.getLayer('osm')) map.once('idle', apply)
-    else apply()
+    const onIdle = () => {
+      if (apply()) map.off('idle', onIdle)
+    }
+    if (!apply()) map.on('idle', onIdle)
+    return () => {
+      stopped = true
+      map.off('idle', onIdle)
+    }
   }, [effectiveSatellite, effectiveTerrain, terrainExaggeration, mapStyle, mapLoaded])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !mapLoaded) return
     const anyOn = Object.values(renewableOverlays || {}).some(Boolean)
-    let cancelled = false
+    let alive = true
 
     const applyVisibility = () => {
+      const state = renewableOverlaysRef.current || {}
       for (const cat of RENEWABLE_CATS) {
         const id = renewableLayerId(cat.id)
         if (!map.getLayer(id)) continue
-        const on = !!renewableOverlays?.[cat.id]
-        map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
-        if (on) map.moveLayer(id)
+        map.setLayoutProperty(id, 'visibility', state[cat.id] ? 'visible' : 'none')
+      }
+      raiseStack(map)
+    }
+
+    const bindHover = (live: maplibregl.Map, id: string) => {
+      live.on('mouseenter', id, (e) => {
+        if (live.getLayoutProperty(id, 'visibility') === 'none') return
+        live.getCanvas().style.cursor = 'pointer'
+        const feature = e.features?.[0]
+        if (!feature || feature.geometry.type !== 'Point') return
+        const coords = feature.geometry.coordinates as [number, number]
+        if (!hoverPopupRef.current) {
+          hoverPopupRef.current = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'stranded-hover-popup',
+            offset: 12,
+          })
+        }
+        hoverPopupRef.current.setLngLat(coords).setHTML(renewablePopupHtml(feature.properties as Record<string, unknown>)).addTo(live)
+      })
+      live.on('mouseleave', id, () => {
+        live.getCanvas().style.cursor = ''
+        hoverPopupRef.current?.remove()
+      })
+    }
+
+    const addMissingLayers = (live: maplibregl.Map) => {
+      for (const cat of RENEWABLE_CATS) {
+        const id = renewableLayerId(cat.id)
+        if (live.getLayer(id)) continue
+        live.addLayer({
+          id,
+          type: 'circle',
+          source: RENEWABLE_SOURCE_ID,
+          filter: ['==', ['get', 'cat'], cat.id],
+          layout: { visibility: 'none' },
+          paint: cat.shape === 'plant'
+            ? {
+                'circle-color': cat.color,
+                'circle-radius': [
+                  'interpolate', ['linear'], ['get', 'mw'],
+                  0, 7,
+                  20, 9,
+                  100, 12,
+                  500, 15,
+                ],
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': 0.95,
+              }
+            : {
+                'circle-color': cat.color,
+                'circle-radius': 9,
+                'circle-stroke-width': 2.5,
+                'circle-stroke-color': cat.color,
+                'circle-opacity': 0.2,
+              },
+        })
+        bindHover(live, id)
       }
     }
 
     const ensure = async () => {
       if (map.getSource(RENEWABLE_SOURCE_ID)) {
-        applyVisibility()
+        addMissingLayers(map)
         return
       }
-      if (!anyOn || renewableLoadingRef.current) return
-      renewableLoadingRef.current = true
-      try {
-        const res = await fetch(RENEWABLE_DATA_URL)
-        if (!res.ok || cancelled || !mapRef.current) return
-        const data = await res.json()
-        if (cancelled || map.getSource(RENEWABLE_SOURCE_ID)) {
-          applyVisibility()
-          return
-        }
-        map.addSource(RENEWABLE_SOURCE_ID, { type: 'geojson', data })
-        for (const cat of RENEWABLE_CATS) {
-          const id = renewableLayerId(cat.id)
-          if (map.getLayer(id)) continue
-          map.addLayer({
-                    id,
-                    type: 'circle',
-                    source: RENEWABLE_SOURCE_ID,
-                    filter: ['==', ['get', 'cat'], cat.id],
-                    paint: cat.shape === 'plant'
-                      ? {
-                          'circle-color': cat.color,
-                          'circle-radius': [
-                            'interpolate', ['linear'], ['get', 'mw'],
-                            0, 7,
-                            20, 9,
-                            100, 12,
-                            500, 15,
-                          ],
-                          'circle-stroke-width': 2,
-                          'circle-stroke-color': '#ffffff',
-                          'circle-opacity': 0.95,
-                        }
-                      : {
-                          'circle-color': cat.color,
-                          'circle-radius': 9,
-                          'circle-stroke-width': 2.5,
-                          'circle-stroke-color': cat.color,
-                          'circle-opacity': 0.2,
-                        },
-                  })
-                  if (map.getLayer(id)) map.moveLayer(id)
-          map.on('mouseenter', id, (e) => {
-            if (map.getLayoutProperty(id, 'visibility') === 'none') return
-            map.getCanvas().style.cursor = 'pointer'
-            const feature = e.features?.[0]
-            if (!feature || feature.geometry.type !== 'Point') return
-            const coords = feature.geometry.coordinates as [number, number]
-            if (!hoverPopupRef.current) {
-              hoverPopupRef.current = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'stranded-hover-popup',
-                offset: 12,
-              })
+      if (!renewableLoadRef.current) {
+        renewableLoadRef.current = (async () => {
+          const res = await fetch(RENEWABLE_DATA_URL)
+          if (!res.ok) throw new Error(`renewable overlay HTTP ${res.status}`)
+          const data = await res.json()
+          const live = mapRef.current
+          if (!live) return
+          if (!live.getSource(RENEWABLE_SOURCE_ID)) {
+            live.addSource(RENEWABLE_SOURCE_ID, { type: 'geojson', data })
+          }
+          addMissingLayers(live)
+          // Latest ticks win, including ones that changed while this file was downloading.
+          const current = mapRef.current
+          if (current?.getSource(RENEWABLE_SOURCE_ID)) {
+            const state = renewableOverlaysRef.current || {}
+            for (const cat of RENEWABLE_CATS) {
+              const id = renewableLayerId(cat.id)
+              if (!current.getLayer(id)) continue
+              current.setLayoutProperty(id, 'visibility', state[cat.id] ? 'visible' : 'none')
             }
-            hoverPopupRef.current.setLngLat(coords).setHTML(renewablePopupHtml(feature.properties as Record<string, unknown>)).addTo(map)
-          })
-          map.on('mouseleave', id, () => {
-            map.getCanvas().style.cursor = ''
-            hoverPopupRef.current?.remove()
-          })
-        }
-        applyVisibility()
-      } finally {
-        renewableLoadingRef.current = false
+            raiseStack(current)
+          }
+        })().finally(() => {
+          renewableLoadRef.current = null
+        })
       }
+      await renewableLoadRef.current
     }
 
-    ensure().catch((err) => console.warn('[Map] renewable overlay sync failed', err))
-    return () => { cancelled = true }
+    const run = async () => {
+      if (anyOn) {
+        try {
+          await ensure()
+        } catch (err) {
+          console.warn('[Map] renewable overlay sync failed', err)
+        }
+      }
+      if (!alive || !mapRef.current?.getSource(RENEWABLE_SOURCE_ID)) return
+      applyVisibility()
+    }
+    run()
+    return () => { alive = false }
   }, [mapLoaded, renewableOverlays])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapLoaded) return
+    let alive = true
+
+    const bindHover = (id: string) => {
+      if (atlasBoundRef.current.has(id)) return
+      atlasBoundRef.current.add(id)
+      map.on('mouseenter', id, (e) => {
+        if (map.getLayoutProperty(id, 'visibility') === 'none') return
+        map.getCanvas().style.cursor = 'pointer'
+        const feature = e.features?.[0]
+        if (!feature) return
+        const coords = feature.geometry.type === 'Point'
+          ? feature.geometry.coordinates as [number, number]
+          : [e.lngLat.lng, e.lngLat.lat] as [number, number]
+        if (!hoverPopupRef.current) {
+          hoverPopupRef.current = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'stranded-hover-popup',
+            offset: 12,
+          })
+        }
+        hoverPopupRef.current
+          .setLngLat(coords)
+          .setHTML(atlasPopupHtml((feature.properties || {}) as Record<string, unknown>))
+          .addTo(map)
+      })
+      map.on('mouseleave', id, () => {
+        map.getCanvas().style.cursor = ''
+        hoverPopupRef.current?.remove()
+      })
+    }
+
+    const ensureMark = (kind: 'diamond' | 'square' | 'triangle', fill: string) => {
+      const imageId = `atlas-mark-${kind}`
+      if (!map.hasImage(imageId)) map.addImage(imageId, atlasMarkImage(kind, fill), { pixelRatio: 2 })
+      return imageId
+    }
+
+    const apply = (): boolean => {
+      const before = beforePinLayer(map)
+      if (!before) return false
+      const state = atlasLayersRef.current || {}
+      const opacity = atlasOpacityRef.current
+
+      for (const layer of ATLAS_LAYERS) {
+        if (layer.group !== 'surface' || !layer.tiles) continue
+        const id = atlasLayerId(layer.id)
+        const src = `atlas-src-${layer.id}`
+        const on = !!state[layer.id]
+        if (!on && !map.getSource(src)) continue
+        if (!map.getSource(src)) {
+          map.addSource(src, { type: 'raster', tiles: [layer.tiles], tileSize: 256 })
+        }
+        if (!map.getLayer(id)) {
+          map.addLayer({
+            id,
+            type: 'raster',
+            source: src,
+            layout: { visibility: 'none' },
+            paint: {
+              'raster-opacity': opacity,
+              'raster-fade-duration': 0,
+              'raster-resampling': 'linear',
+            },
+          }, before)
+        }
+        map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
+        map.setPaintProperty(id, 'raster-opacity', opacity)
+      }
+
+      if (infraDataRef.current) {
+        const src = 'atlas-infra'
+        if (!map.getSource(src)) map.addSource(src, { type: 'geojson', data: infraDataRef.current })
+        for (const layer of ATLAS_LAYERS) {
+          if (layer.group !== 'infra') continue
+          const id = atlasLayerId(layer.id)
+          const mark = INFRA_MARK[layer.id]
+          if (!mark) continue
+          if (!map.getLayer(id)) {
+            map.addLayer({
+              id,
+              type: 'symbol',
+              source: src,
+              filter: ['==', ['get', 'kind'], layer.id],
+              layout: {
+                'icon-image': ensureMark(mark, layer.swatch),
+                'icon-size': 0.72,
+                'icon-allow-overlap': true,
+                visibility: 'none',
+              },
+            })
+            bindHover(id)
+          }
+          map.setLayoutProperty(id, 'visibility', state[layer.id] ? 'visible' : 'none')
+        }
+      }
+
+      const paintShade = (id: string, data: GeoJSON.FeatureCollection) => {
+        const src = `atlas-src-${id}`
+        const layerId = atlasLayerId(id)
+        const lineId = `${layerId}-line`
+        if (map.getSource(src)) {
+          (map.getSource(src) as maplibregl.GeoJSONSource).setData(data)
+        } else {
+          map.addSource(src, { type: 'geojson', data })
+        }
+        const [low, high] = shadeFillPaint(id)
+        if (!map.getLayer(layerId)) {
+          map.addLayer({
+            id: layerId,
+            type: 'fill',
+            source: src,
+            layout: { visibility: 'none' },
+            paint: {
+              'fill-color': ['interpolate', ['linear'], ['get', 'intensity'], 0, low, 1, high],
+            },
+          }, beforePinLayer(map))
+          bindHover(layerId)
+        }
+        if (!map.getLayer(lineId)) {
+          map.addLayer({
+            id: lineId,
+            type: 'line',
+            source: src,
+            layout: { visibility: 'none' },
+            paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 0.7 },
+          }, beforePinLayer(map))
+        }
+        const on = !!state[id]
+        map.setLayoutProperty(layerId, 'visibility', on ? 'visible' : 'none')
+        if (map.getLayer(lineId)) map.setLayoutProperty(lineId, 'visibility', on ? 'visible' : 'none')
+      }
+
+      const cached = statcanRef.current
+      if (cached?.provinces) {
+        for (const id of ['statcan-gen', 'statcan-cap'] as const) {
+          if (!state[id] && !map.getSource(`atlas-src-${id}`)) continue
+          const mode = id === 'statcan-gen' ? 'gen' : 'cap'
+          const totals: Record<string, number> = {}
+          const extra: Record<string, Record<string, unknown>> = {}
+          for (const [name, row] of Object.entries(cached.provinces)) {
+            totals[name] = statcanRenewableTotal(row as { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }, mode)
+            extra[name] = {
+              unit: mode === 'gen' ? 'MWh in 2025' : 'MW in 2024',
+              detail: mode === 'cap' && name === 'Alberta'
+                ? 'Includes 6 MW geothermal from the capacity table. The plant layer has 0 geothermal plants of 1 MW or more.'
+                : 'Statistics Canada renewable total. Province box, not a plant pin.',
+            }
+          }
+          paintShade(id, provinceShadeGeojson(totals, extra))
+        }
+      }
+
+      if (pvDataRef.current) {
+        if (state['pv-potential'] || map.getSource('atlas-src-pv-potential')) {
+          const { totals, municipalities } = pvProvinceTotals(pvDataRef.current)
+          const extra: Record<string, Record<string, unknown>> = {}
+          for (const [name, count] of Object.entries(municipalities)) {
+            extra[name] = {
+              unit: 'kWh/kWp/year',
+              detail: `Mean of ${count} municipalities, south-facing latitude tilt. Not a town pin.`,
+            }
+          }
+          paintShade('pv-potential', provinceShadeGeojson(totals, extra))
+        }
+      }
+
+      raiseStack(map)
+      return true
+    }
+
+    const ensureInfra = async () => {
+      const wanted = ATLAS_LAYERS.some((layer) => layer.group === 'infra' && atlasLayersRef.current?.[layer.id])
+      if (!wanted || infraDataRef.current) return
+      if (!infraLoadRef.current) {
+        infraLoadRef.current = fetch(INFRA_DATA_URL).then(async (res) => {
+          if (!res.ok) throw new Error(`infrastructure HTTP ${res.status}`)
+          const data = await res.json() as GeoJSON.FeatureCollection
+          infraDataRef.current = data
+          return data
+        }).catch((err) => {
+          console.warn('[Map] infrastructure load failed', err)
+          infraLoadRef.current = null
+          return null
+        })
+      }
+      await infraLoadRef.current
+    }
+
+    const ensurePv = async () => {
+      if (pvDataRef.current || !atlasLayersRef.current?.['pv-potential']) return
+      if (!pvLoadRef.current) {
+        pvLoadRef.current = fetch(PV_DATA_URL).then(async (res) => {
+          if (!res.ok) throw new Error(`pv HTTP ${res.status}`)
+          pvDataRef.current = await res.json()
+        }).catch((err) => {
+          console.warn('[Map] pv province load failed', err)
+          pvLoadRef.current = null
+        })
+      }
+      await pvLoadRef.current
+    }
+
+    const ensureStatcan = async () => {
+      const wanted = !!(atlasLayersRef.current?.['statcan-gen'] || atlasLayersRef.current?.['statcan-cap'])
+      if (!wanted || statcanRef.current) return
+      const res = await fetch('/data/statcan-renewables.json')
+      if (!res.ok) throw new Error(`statcan HTTP ${res.status}`)
+      statcanRef.current = await res.json()
+    }
+
+    const run = async () => {
+      try {
+        await Promise.all([ensureInfra(), ensurePv(), ensureStatcan()])
+      } catch (err) {
+        console.warn('[Map] atlas sync failed', err)
+      }
+      if (!alive || !mapRef.current) return
+      let ready = false
+      try { ready = apply() } catch (err) {
+        console.warn('[Map] atlas paint failed', err)
+        ready = false
+      }
+      if (!ready && alive && !atlasWaitRef.current) {
+        atlasWaitRef.current = true
+        const retry = () => {
+          atlasWaitRef.current = false
+          map.off('idle', retry)
+          if (alive) void run()
+        }
+        map.on('idle', retry)
+      }
+    }
+    void run()
+    return () => { alive = false }
+  }, [mapLoaded, atlasLayers, atlasOpacity])
 
   useEffect(() => {
     const map = mapRef.current
@@ -1042,8 +1470,18 @@ export default function Map({
         showRenewableRef.current(map, renew)
         return
       }
+      const infra = atlasHitRef.current(map, e.point)
+      if (infra && (!best || infra.d + 4 < best.d)) {
+        showAtlasRef.current(map, infra)
+        return
+      }
       if (best) {
         onSiteClickRef.current(best.site)
+        return
+      }
+      const shade = atlasShadeHitRef.current(map, e.point)
+      if (shade) {
+        showAtlasRef.current(map, shade)
         return
       }
       /*
@@ -1087,7 +1525,15 @@ export default function Map({
       const map = mapRef.current
       if (!map) return
       if (!map.getSource('province-choropleth') && !map.isStyleLoaded?.()) {
-        map.once('idle', () => syncChoropleth())
+        if (!choroplethWaitRef.current) {
+          choroplethWaitRef.current = true
+          const retry = () => {
+            choroplethWaitRef.current = false
+            map.off('idle', retry)
+            syncChoroplethRef.current()
+          }
+          map.on('idle', retry)
+        }
         return
       }
       const srcId = 'province-choropleth'
@@ -1108,14 +1554,7 @@ export default function Map({
         }
         for (const [prov, data] of Object.entries(cached.provinces || {})) {
           const p = data as { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }
-          if (choroplethMode === 'renewable-gen') {
-            totals[prov] = (p.generationMWh?.hydro || 0) + (p.generationMWh?.wind || 0) +
-              (p.generationMWh?.solar || 0) + (p.generationMWh?.biomass || 0) + (p.generationMWh?.tidal || 0)
-          } else {
-            totals[prov] = (p.capacityMW?.hydro || 0) + (p.capacityMW?.wind || 0) +
-              (p.capacityMW?.solar || 0) + (p.capacityMW?.biomass || 0) + (p.capacityMW?.tidal || 0) +
-              (p.capacityMW?.geothermal || 0)
-          }
+          totals[prov] = statcanRenewableTotal(p, choroplethMode === 'renewable-gen' ? 'gen' : 'cap')
         }
       } else {
         sites.forEach(s => {
@@ -1213,12 +1652,21 @@ export default function Map({
       console.warn('[Map] choropleth sync failed', err)
     }
   }, [sites, showChoropleth, highlightedProvinces, choroplethMode])
+  syncChoroplethRef.current = syncChoropleth
 
   const syncHeatmap = useCallback((sitesToRender: EnrichedSite[]) => {
     const map = mapRef.current
     if (!map) return
     if (!map.getSource('emission-heat') && !map.isStyleLoaded?.()) {
-      map.once('idle', () => syncHeatmap(sitesToRender))
+      if (!heatmapWaitRef.current) {
+        heatmapWaitRef.current = true
+        const retry = () => {
+          heatmapWaitRef.current = false
+          map.off('idle', retry)
+          syncHeatmapRef.current(sitesRef.current)
+        }
+        map.on('idle', retry)
+      }
       return
     }
     const srcId = 'emission-heat'
@@ -1262,6 +1710,7 @@ export default function Map({
       console.warn('[Map] heatmap sync failed', err)
     }
   }, [showHeatmap, heatmapOpacity])
+  syncHeatmapRef.current = syncHeatmap
 
   useEffect(() => {
     syncChoropleth()

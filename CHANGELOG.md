@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.13.0] — 2026-10-24 · Official energy atlas on the map
+
+- Solar GHI and solar DNI from the live NRCan service paint under the pins. A slider sets how strong the wash is. Wind-speed and geothermal-gradient rasters are not in that service, so they are not invented.
+- Hydrokinetic open water (81) and possible water (59) paint from the official map image. The query service returns no polygon rings. Ice is not painted.
+- Canada transmission (28), gas pipeline (28) and liquids pipeline (21) records paint as point marks. The file has no corridor, so no line is drawn.
+- Renewable generation (2025), renewable capacity (2024) and solar PV potential are province shades in the layer list. PV is the mean annual latitude-tilt value. Towns are not geocoded. Alberta’s 6 MW geothermal stays a province total. The plant row stays at 0.
+- The Canada Energy Regulator link sits in the panel. It is projections, not locations.
+- `npm run refresh:atlas` rebuilds the point file, the PV province file and the atlas manifest.
+
 ## [2.12.4] — 2026-10-02 · Map Layers card, footer hit-areas, welcome card reopen
 
 - The Map Layers card anchors below the sticky navbar (it used to slide up under it and clip its own heading) and now collapses/expands with a chevron so the full map is reachable underneath.

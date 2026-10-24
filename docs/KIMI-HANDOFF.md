@@ -1,3 +1,24 @@
+# Stranded energy atlas — shipped (2026-10-24, v2.13.0)
+
+Cam asked to wire the previously unpainted official sources and update the docs. This section ships with that atlas commit. The SHA is filled in on the next handoff once the push exists.
+
+**Done:**
+- Solar GHI and DNI paint under the pins from the live NACEI export. Opacity slider. CSP allows `geoappext.nrcan.gc.ca` and `maps-cartes.services.geo.ca`.
+- Hydrokinetic open water (81) and possible water (59) paint from the official map image. Query returns no rings. Ice is not painted.
+- Transmission 28, gas 28, liquids 21 are point marks in `public/data/nacei-infrastructure.geojson`. No corridor is drawn.
+- StatCan 2025 generation, 2024 capacity, and PV province means are first-class shades. Towns are not geocoded. Geothermal plants stay 0. Alberta’s 6 MW geothermal is named on the capacity shade.
+- CER is a link in the panel.
+- Desktop and phone both scroll to that link. Ticks stick. `npm run refresh:atlas` rebuilds the files.
+
+**Decisions:**
+- Paint the honest geometry only. The earlier “do not paint” note is replaced by this rule.
+- Welcome card was not restyled. `buffy/v2.11.1-hud-fix` was not merged. The three deleted images in the tree were left deleted.
+
+**Git State:**
+- This section is part of the atlas commit on `main`. `public/data/live-stats.json` still says 2.12.4 until the next build.
+
+---
+
 # Stranded map — DONE (2026-10-02, v2.12.4)
 
 All map-layer work is shipped and CI-verified green (run on `de90636`). Cam is happy. No open job.

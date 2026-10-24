@@ -1522,11 +1522,13 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
    styling for it and it must never float over the map again. */
 .map-command-center .map-layer-stack {
   top: calc(3.5rem + 0.75rem);
-  bottom: auto;
+  /* The map is already 100dvh minus the site nav. Pin the stack above the map
+     footer so the last renewable row can scroll into view instead of being
+     clipped by the map's overflow. */
+  bottom: 2.75rem;
   right: 1rem;
   align-items: stretch;
   min-width: 11.5rem;
-  max-height: calc(100dvh - 3.5rem - 1.5rem - env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
 }
 .map-command-center .map-layer-panel-unified {
@@ -1536,6 +1538,31 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   border-radius: 0.75rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   overflow: hidden;
+}
+/* The desktop stack is a flex column with a fixed top and bottom. A flex child
+   with overflow:hidden shrinks to that box and clips the renewable rows, and
+   the stack then reports no overflow to scroll. Let this card keep its real
+   height so the stack scrolls to the last row. */
+.map-command-center .map-layer-stack > .map-layer-panel-unified {
+  overflow: visible;
+  flex-shrink: 0;
+}
+.map-command-center .map-atlas-legend {
+  position: absolute;
+  left: 50%;
+  bottom: 3.25rem;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(24rem, calc(100% - 1.5rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.85rem;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(91, 192, 190, 0.38);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 .map-command-center .map-layer-stack::-webkit-scrollbar { width: 6px; }
 .map-command-center .map-layer-stack::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }

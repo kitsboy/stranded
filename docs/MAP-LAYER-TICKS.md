@@ -1,3 +1,20 @@
+# Map Layers — current (2026-10-24, v2.13.0)
+
+The checkbox contract is `onChange` on a normal controlled checkbox. One user action, one state update. Do not go back to `readOnly` plus `preventDefault` on the label. A Playwright click on the label commits React. A click that only flips the DOM does not.
+
+Official energy rows are open in the layer panel, under **Official energy atlas**. They are not inside a closed disclosure. Plants and remote communities come first (hydro 555, wind 241, solar 138, biomass 111, other 2, tidal 1, pumped storage 1, geothermal 0, remote diesel/oil/gas 208, remote hydro 35, remote grid 26, remote source not stated 7). Under those:
+
+- Resource surfaces: solar GHI, solar DNI, hydrokinetic open water (81), hydrokinetic possible water (59). Map images, under the pins. Opacity slider when one of them is on.
+- Infrastructure records: transmission 28, gas 28, liquids 21. Point marks. No drawn corridor.
+- Province shades: Renewable generation 2025, Renewable capacity 2024, Solar PV potential. Boxes, not towns.
+- A Canada Energy Regulator link. Projections, not locations.
+
+Test ids: `overlay-<plant id>`, `atlas-<layer id>`, `atlas-opacity`, `atlas-cer`, `atlas-legend`. Geothermal stays `(0)`. Wind-speed and geothermal-gradient rasters are not in the live NRCan service. Do not invent them. Do not restyle the welcome card.
+
+The desktop stack scrolls. The phone drawer (`.map-filter-scroll` inside `[data-testid=mobile-layers-drawer]`) scrolls. Both shells render the same `LayerControls`.
+
+The sections below are the 2026-10-02 tick writeup. The `readOnly` sentence in that writeup describes the bugfix that landed then. The live contract is the paragraph above.
+
 # Map Layers ticks — DONE (2026-10-02, v2.12.4)
 
 This job is complete and CI-verified green. Cam is happy. Keep this file as the reference for the layer-tick architecture and the pass/fail checks. Repo is `/root/stranded` (github.com/kitsboy/stranded, branch `main`). Do not edit the MASTER-BRAIN mirror. Do not push `buffy/v2.11.1-hud-fix`.

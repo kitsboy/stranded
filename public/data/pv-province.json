@@ -1,0 +1,69 @@
+{
+  "schema": "gab.stranded.pv-province.v1",
+  "retrievedAt": "2026-10-24T01:42:05.400Z",
+  "column": "South-facing with latitude tilt",
+  "unit": "kWh/kWp/year",
+  "method": "Mean of the municipal Annual row. Months are not added on top of Annual. No municipality is pinned.",
+  "source": {
+    "title": "Photovoltaic potential and solar resource maps of Canada",
+    "publisher": "Natural Resources Canada",
+    "datasetUrl": "https://open.canada.ca/data/en/dataset/8b434ac7-aedb-4698-90df-ba77424a551f",
+    "url": "https://ftp.maps.canada.ca/pub/nrcan_rncan/Solar-energy_Energie-solaire/photovoltaic_canada_photovoltaique/municip_potentiel-potential.csv",
+    "licence": "Open Government Licence - Canada",
+    "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
+  },
+  "provinces": {
+    "Alberta": {
+      "meanKwhPerKwp": 1257.7,
+      "municipalities": 374
+    },
+    "British Columbia": {
+      "meanKwhPerKwp": 1061.9,
+      "municipalities": 365
+    },
+    "Manitoba": {
+      "meanKwhPerKwp": 1276,
+      "municipalities": 238
+    },
+    "New Brunswick": {
+      "meanKwhPerKwp": 1146,
+      "municipalities": 244
+    },
+    "Newfoundland and Labrador": {
+      "meanKwhPerKwp": 947,
+      "municipalities": 218
+    },
+    "Northwest Territories": {
+      "meanKwhPerKwp": 1031.8,
+      "municipalities": 33
+    },
+    "Nova Scotia": {
+      "meanKwhPerKwp": 1078.5,
+      "municipalities": 185
+    },
+    "Nunavut": {
+      "meanKwhPerKwp": 1018.9,
+      "municipalities": 27
+    },
+    "Ontario": {
+      "meanKwhPerKwp": 1170.3,
+      "municipalities": 789
+    },
+    "Prince Edward Island": {
+      "meanKwhPerKwp": 1109.5,
+      "municipalities": 39
+    },
+    "Quebec": {
+      "meanKwhPerKwp": 1150.4,
+      "municipalities": 551
+    },
+    "Saskatchewan": {
+      "meanKwhPerKwp": 1326.2,
+      "municipalities": 420
+    },
+    "Yukon": {
+      "meanKwhPerKwp": 968,
+      "municipalities": 23
+    }
+  }
+}

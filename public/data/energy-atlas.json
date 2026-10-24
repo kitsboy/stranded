@@ -1,0 +1,49 @@
+{
+  "schema": "gab.stranded.energy-atlas.v1",
+  "retrievedAt": "2026-10-24T01:42:05.400Z",
+  "infrastructure": {
+    "geometry": "Point",
+    "counts": {
+      "transmission": 28,
+      "gas-pipeline": 28,
+      "liquids-pipeline": 21
+    },
+    "note": "Canada rows on NACEI MapServer layers 1, 2 and 3. Each geometry is a point. The corridor is not published.",
+    "datasetUrl": "https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674",
+    "licence": "Open Government Licence - Canada",
+    "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
+  },
+  "hydrokinetic": {
+    "waterPolygons": 81,
+    "possiblePolygons": 59,
+    "icePolygons": 81,
+    "ringsReturnedByQuery": false,
+    "painted": [
+      "water",
+      "possible water"
+    ],
+    "notPainted": "Ice polygons, and the community point repeated on every class.",
+    "datasetUrl": "https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871",
+    "serviceUrl": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/hydrokinetic_assessment_using_SAR_for_Diesel_communities_en/MapServer"
+  },
+  "solarRasters": {
+    "service": "NACEI energy_resource_potential_of_north_america_en",
+    "painted": [
+      "layer 0 GHI",
+      "layer 1 DNI"
+    ],
+    "absentFromLiveService": [
+      "wind speed",
+      "geothermal gradient"
+    ]
+  },
+  "pv": {
+    "file": "pv-province.json",
+    "provinces": 13
+  },
+  "cer": {
+    "url": "https://www.cer-rec.gc.ca/en/data-analysis/energy-markets/market-snapshots/index.html",
+    "painted": false,
+    "why": "Market trends and projections. No coordinates."
+  }
+}

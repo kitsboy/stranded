@@ -3,6 +3,7 @@
 import { useLocale } from '@/lib/useLocale'
 import type { MapStyleMode } from '@/components/Map'
 import { RENEWABLE_CATS } from '@/lib/renewable-layers'
+import { ATLAS_GROUPS, ATLAS_LAYERS, CER_SOURCE, type AtlasMark } from '@/lib/energy-atlas'
 
 export type LayerPresetId = 'analysis' | 'satellite' | 'minimal'
 
@@ -19,6 +20,32 @@ export const LAYER_PRESETS: Record<LayerPresetId, { label: string; layers: Parti
     label: 'Minimal',
     layers: { sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false },
   },
+}
+
+function LayerCheck({
+  testId,
+  checked,
+  onChange,
+  accent,
+  compact,
+  children,
+}: {
+  testId: string
+  checked: boolean
+  onChange: () => void
+  accent: string
+  compact?: boolean
+  children: string
+}) {
+  return (
+    <label
+      data-testid={testId}
+      className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`}
+    >
+      <input type="checkbox" checked={checked} onChange={onChange} className={`w-4 h-4 shrink-0 ${accent}`} />
+      <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{children}</span>
+    </label>
+  )
 }
 
 interface LayerControlsProps {
@@ -51,6 +78,29 @@ interface LayerControlsProps {
   overlayCounts?: Record<string, number>
   overlayNote?: string
   onToggleOverlay?: (id: string) => void
+  atlas?: Record<string, boolean>
+  onToggleAtlas?: (id: string) => void
+  atlasOpacity?: number
+  onAtlasOpacityChange?: (v: number) => void
+}
+
+function AtlasSwatch({ mark, swatch }: { mark: AtlasMark; swatch: string }) {
+  if (mark === 'diamond') {
+    return <span className="inline-block h-2.5 w-2.5 shrink-0 rotate-45 border-2" style={{ borderColor: swatch, background: swatch }} aria-hidden />
+  }
+  if (mark === 'square') {
+    return <span className="inline-block h-2.5 w-2.5 shrink-0 border-2" style={{ borderColor: '#0f172a', background: swatch }} aria-hidden />
+  }
+  if (mark === 'triangle') {
+    return (
+      <span
+        className="inline-block shrink-0"
+        style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: `9px solid ${swatch}` }}
+        aria-hidden
+      />
+    )
+  }
+  return <span className="inline-block h-2.5 w-4 shrink-0 rounded-sm" style={{ background: swatch }} aria-hidden />
 }
 
 export default function LayerControls({
@@ -74,6 +124,10 @@ export default function LayerControls({
   overlayCounts,
   overlayNote,
   onToggleOverlay,
+  atlas,
+  onToggleAtlas,
+  atlasOpacity = 0.62,
+  onAtlasOpacityChange,
 }: LayerControlsProps) {
   const { t } = useLocale()
 
@@ -87,7 +141,7 @@ export default function LayerControls({
   return (
     <div
       className={`bg-[#1e293b]/95 backdrop-blur border border-[#5BC0BE]/30 rounded-xl shadow-lg no-print ${
-        compact ? 'p-2.5 text-xs max-w-[220px]' : 'p-4 text-sm'
+        compact ? 'p-2.5 text-xs w-[17.5rem] max-w-full' : 'p-4 text-sm'
       }`}
       data-compact={compact || undefined}
     >
@@ -133,49 +187,142 @@ export default function LayerControls({
       )}
 
       <div className={compact ? 'space-y-1' : 'space-y-2'}>
-        <label
-          data-testid="layer-methane"
-          className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`}
-          onClick={(e) => { e.preventDefault(); onToggle('sites') }}
-        >
-          <input type="checkbox" checked={layers.sites} readOnly className="accent-[#FF8C00] w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerMethaneSites')}</span>
-        </label>
-        <label data-testid="layer-grid" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('grid') }}>
-          <input type="checkbox" checked={layers.grid} readOnly className="accent-[#5BC0BE] w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerPowerGrid')}</span>
-        </label>
-        <label data-testid="layer-internet" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('internet') }}>
-          <input type="checkbox" checked={layers.internet} readOnly className="accent-blue-400 w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerInternet')}</span>
-        </label>
-        <label data-testid="layer-satellite" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('satellite') }}>
-          <input type="checkbox" checked={!!layers.satellite} readOnly className="accent-purple-400 w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapSatellite')}</span>
-        </label>
-        <label data-testid="layer-terrain" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('terrain') }}>
-          <input type="checkbox" checked={!!layers.terrain} readOnly className="accent-emerald-400 w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapTerrain')}</span>
-        </label>
-        <label data-testid="layer-heatmap" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('heatmap') }}>
-          <input type="checkbox" checked={!!layers.heatmap} readOnly className="accent-rose-400 w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerHeatmap')}</span>
-        </label>
-        <label data-testid="layer-choropleth" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onToggle('choropleth') }}>
-          <input type="checkbox" checked={!!layers.choropleth} readOnly className="accent-amber-400 w-4 h-4" />
-          <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapLayerChoropleth')}</span>
-        </label>
+        <LayerCheck testId="layer-methane" checked={layers.sites} onChange={() => onToggle('sites')} accent="accent-[#FF8C00]" compact={compact}>
+          {t('mapLayerMethaneSites')}
+        </LayerCheck>
+
+        {onToggleOverlay && (
+          <div className={`border-t border-white/10 ${compact ? 'mt-2 pt-2' : 'mt-3 pt-3'}`} data-testid="energy-overlays">
+            <div className="text-micro font-semibold text-[#5BC0BE]">{t('mapOverlayTitle')}</div>
+            <p className="mt-1 text-micro leading-snug text-gray-500">{t('mapOverlayLegend')}</p>
+            <div className="mt-1 space-y-0.5">
+              {RENEWABLE_CATS.map(cat => {
+                const count = overlayCounts?.[cat.id]
+                const countLabel = overlayCounts ? ` (${count ?? 0})` : ''
+                return (
+                  <label
+                    key={cat.id}
+                    className="flex min-h-[44px] cursor-pointer items-center gap-2"
+                    data-testid={`overlay-${cat.id}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!overlays?.[cat.id]}
+                      onChange={() => onToggleOverlay(cat.id)}
+                      className="h-4 w-4 shrink-0"
+                      style={{ accentColor: cat.color }}
+                    />
+                    <span
+                      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{
+                        background: cat.shape === 'plant' ? cat.color : 'transparent',
+                        boxShadow: `inset 0 0 0 2px ${cat.color}`,
+                      }}
+                      aria-hidden
+                    />
+                    <span className="text-micro leading-tight text-gray-300">
+                      {t(cat.labelKey)}
+                      {countLabel}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+            {overlayNote && <p className="mt-1 text-micro leading-snug text-gray-500">{overlayNote}</p>}
+            {onToggleAtlas && ATLAS_GROUPS.map(group => {
+              const rows = ATLAS_LAYERS.filter(layer => layer.group === group.id)
+              const surfaceOn = group.id === 'surface' && rows.some(layer => atlas?.[layer.id])
+              return (
+                <div key={group.id} className="mt-2 border-t border-white/10 pt-2">
+                  <div className="text-micro font-semibold uppercase tracking-wider text-[#5BC0BE]">{t(group.titleKey)}</div>
+                  <p className="mt-1 text-micro leading-snug text-gray-500">{t(group.blurbKey)}</p>
+                  <div className="mt-1">
+                    {rows.map(layer => (
+                      <label
+                        key={layer.id}
+                        className="flex min-h-[44px] cursor-pointer items-center gap-2"
+                        data-testid={`atlas-${layer.id}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!atlas?.[layer.id]}
+                          onChange={() => onToggleAtlas(layer.id)}
+                          className="h-4 w-4 shrink-0"
+                          style={{ accentColor: layer.mark === 'wash' ? '#5BC0BE' : layer.swatch }}
+                        />
+                        <AtlasSwatch mark={layer.mark} swatch={layer.swatch} />
+                        <span className="text-micro leading-tight text-gray-300">
+                          {t(layer.labelKey)}
+                          {layer.count != null ? ` (${layer.count})` : ''}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  {surfaceOn && onAtlasOpacityChange && (
+                    <div className="mt-1 mb-1">
+                      <label className="text-micro text-gray-400" htmlFor="atlas-opacity">
+                        {t('mapAtlasOpacity')} {Math.round(atlasOpacity * 100)}%
+                      </label>
+                      <input
+                        id="atlas-opacity"
+                        data-testid="atlas-opacity"
+                        type="range"
+                        min={0.25}
+                        max={0.9}
+                        step={0.05}
+                        value={atlasOpacity}
+                        onChange={(e) => onAtlasOpacityChange(+e.target.value)}
+                        className="w-full accent-[#5BC0BE]"
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            {onToggleAtlas && (
+              <div className="mt-2 border-t border-white/10 pt-2">
+                <a
+                  href={CER_SOURCE.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="atlas-cer"
+                  className="flex min-h-[44px] items-center text-micro leading-snug text-[#FF8C00] underline-offset-2 hover:underline"
+                >
+                  {t(CER_SOURCE.labelKey)}
+                </a>
+                <p className="text-micro leading-snug text-gray-500">{t('mapAtlasLimits')}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <LayerCheck testId="layer-grid" checked={layers.grid} onChange={() => onToggle('grid')} accent="accent-[#5BC0BE]" compact={compact}>
+          {t('mapLayerPowerGrid')}
+        </LayerCheck>
+        <LayerCheck testId="layer-internet" checked={layers.internet} onChange={() => onToggle('internet')} accent="accent-blue-400" compact={compact}>
+          {t('mapLayerInternet')}
+        </LayerCheck>
+        <LayerCheck testId="layer-satellite" checked={!!layers.satellite} onChange={() => onToggle('satellite')} accent="accent-purple-400" compact={compact}>
+          {t('mapSatellite')}
+        </LayerCheck>
+        <LayerCheck testId="layer-terrain" checked={!!layers.terrain} onChange={() => onToggle('terrain')} accent="accent-emerald-400" compact={compact}>
+          {t('mapTerrain')}
+        </LayerCheck>
+        <LayerCheck testId="layer-heatmap" checked={!!layers.heatmap} onChange={() => onToggle('heatmap')} accent="accent-rose-400" compact={compact}>
+          {t('mapLayerHeatmap')}
+        </LayerCheck>
+        <LayerCheck testId="layer-choropleth" checked={!!layers.choropleth} onChange={() => onToggle('choropleth')} accent="accent-amber-400" compact={compact}>
+          {t('mapLayerChoropleth')}
+        </LayerCheck>
         {onSiteLabelsChange && (
-          <label data-testid="layer-labels" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onSiteLabelsChange(!showSiteLabels) }}>
-            <input type="checkbox" checked={showSiteLabels} readOnly className="accent-cyan-400 w-4 h-4" />
-            <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapSiteLabels')}</span>
-          </label>
+          <LayerCheck testId="layer-labels" checked={showSiteLabels} onChange={() => onSiteLabelsChange(!showSiteLabels)} accent="accent-cyan-400" compact={compact}>
+            {t('mapSiteLabels')}
+          </LayerCheck>
         )}
         {onPerformanceModeChange && (
-          <label data-testid="layer-performance" className={`flex items-center cursor-pointer group min-h-[44px] ${compact ? 'gap-2' : 'gap-3'}`} onClick={(e) => { e.preventDefault(); onPerformanceModeChange(!performanceMode) }}>
-            <input type="checkbox" checked={performanceMode} readOnly className="accent-slate-400 w-4 h-4" />
-            <span className={`text-gray-300 group-hover:text-white ${compact ? 'text-micro leading-tight' : 'text-sm'}`}>{t('mapPerformanceMode')}</span>
-          </label>
+          <LayerCheck testId="layer-performance" checked={performanceMode} onChange={() => onPerformanceModeChange(!performanceMode)} accent="accent-slate-400" compact={compact}>
+            {t('mapPerformanceMode')}
+          </LayerCheck>
         )}
       </div>
 
@@ -193,46 +340,6 @@ export default function LayerControls({
       )}
 
       <div className={`border-t border-[#5BC0BE]/20 text-micro text-gray-400 ${compact ? 'mt-2 pt-2' : 'mt-4 pt-3'}`}>{t('mapLayerNote2')}</div>
-
-      {onToggleOverlay && (
-        <details className={`border-t border-white/10 ${compact ? 'mt-2 pt-2' : 'mt-3 pt-3'}`} data-testid="energy-overlays">
-          <summary className="cursor-pointer text-micro font-semibold text-[#5BC0BE] list-none [&::-webkit-details-marker]:hidden">
-            {t('mapOverlayTitle')}
-          </summary>
-          <p className="mt-1 text-micro leading-snug text-gray-500">{t('mapOverlayLegend')}</p>
-          {overlayNote && <p className="mt-1 text-micro leading-snug text-gray-500">{overlayNote}</p>}
-          <div className="mt-1 max-h-[38vh] space-y-0.5 overflow-y-auto pr-1">
-            {RENEWABLE_CATS.map(cat => (
-              <label
-                key={cat.id}
-                className="flex min-h-[44px] cursor-pointer items-center gap-2"
-                data-testid={`overlay-${cat.id}`}
-                onClick={(e) => { e.preventDefault(); onToggleOverlay(cat.id) }}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!overlays?.[cat.id]}
-                  readOnly
-                  className="h-4 w-4 shrink-0"
-                  style={{ accentColor: cat.color }}
-                />
-                <span
-                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{
-                    background: cat.shape === 'plant' ? cat.color : 'transparent',
-                    boxShadow: `inset 0 0 0 2px ${cat.color}`,
-                  }}
-                  aria-hidden
-                />
-                <span className="text-micro leading-tight text-gray-300">
-                  {t(cat.labelKey)}
-                  {overlayCounts && overlayCounts[cat.id] != null ? ` (${overlayCounts[cat.id]})` : overlayCounts ? ' (0)' : ''}
-                </span>
-              </label>
-            ))}
-          </div>
-        </details>
-      )}
 
       {onCopyViewport && (
         <details className="mt-2 group">

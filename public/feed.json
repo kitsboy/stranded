@@ -6,6 +6,16 @@
   "description": "Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.",
   "items": [
     {
+      "id": "https://stranded.giveabit.io/changelog#2.13.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.13.0 \u2014 Official energy atlas on the map",
+      "content_text": "Solar GHI and solar DNI from the live NRCan service paint under the pins. Hydrokinetic open water and possible water paint from the official map image. Canada transmission, gas and liquids records paint as points, not drawn corridors.",
+      "date_published": "Sat, 24 Oct 2026 12:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
       "id": "https://stranded.giveabit.io/changelog#2.12.4",
       "url": "https://stranded.giveabit.io/changelog",
       "title": "2.12.4 \u2014 Map Layers card, footer hit-areas, welcome card reopen",
