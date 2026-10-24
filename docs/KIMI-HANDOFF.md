@@ -1,3 +1,22 @@
+# Stranded banner, images, and the 2.15.0 stamp — 2026-10-24
+
+**Done:**
+- The phone install banner hides while the Layers drawer, the Filters drawer, a site card, or an energy card is open. Those nodes exist only while open, so the banner returns when they close. Checked at 390×844: banner height 92 with nothing open; with Layers or Filters open the tap lands on the drawer; Adelaide payback 1.1 years at `$70,336` was on screen and the banner did not cover it. One card, no second popup.
+- Desktop 1440: Adelaide opened one card, profit about `$70,285`, no second popup. The profit moved with the live Bitcoin price.
+- Deleted `public/images/1.jpg`, `public/images/giveabit-logo.png`, and `public/images/giveabit-mark.png`. The footer says Give A Bit in text and links to giveabit.io. The marketing hubs no longer point at `1.jpg`. Those three URLs 404, and the footer does not request them.
+- `public/data/live-stats.json` now says version 2.15.0. Site count 2,611, reported CH₄ 2,588, high-confidence 675. Province counts unchanged. Regenerated with `node scripts/generate-live-stats.js`, then the offline dataset stamp and metrics refresh. `npm run version` and `docs:sync` were not run. The Bitcoin proof on the methane file is still confirmed, block 966549. Its last check time is 2026-10-24.
+
+**Decisions:**
+- We want the version label, because the dashboard, verticals, and footer show `stats.version`. We do not need a full version bump or a docs sync. The file is the methane dataset, not the plant file. Geothermal plants stay for later.
+- Do not hand-edit live-stats numbers. Do not merge `buffy/v2.11.1-hud-fix`.
+
+**Git State:**
+- SHA: `24af5c117474001745b24d1e18c0e6a766ecfe69` (`24af5c1`) on `main`.
+- Proof refresh under it: `ddfb130`. Miner card: `44ae11c`. Handoff before that: `fdd2cce`.
+- Pushed to `origin/main`.
+
+---
+
 # Stranded miner card — 2026-10-23, v2.15.0
 
 **Done:**

@@ -1,7 +1,7 @@
-# stranded — Last Updated 2026-10-23 by Grok
+# stranded — Last Updated 2026-10-24 by Grok
 
-**Brief:** v2.15.0 opens one editable miner card on a renewable plant or remote community, only where the file records power. The double popup is gone. The home line now counts 2,611 methane sites, 1,049 plants, and 276 remote communities. Waste methane keeps the no-grid-draw claim.
+**Brief:** The phone install banner hides while Layers, Filters, a site card, or an energy card is open. Three broken images are gone and the footer says Give A Bit in text. `live-stats.json` is stamped 2.15.0. The methane counts are unchanged. Geothermal plants stay for later.
 
-**Commit:** `44ae11c` (`44ae11c762dcf8c14d8dd5d0a8250ca5397bb1d3`). Boundaries were `0b4a26d`. Guides were `5589371`. The atlas was `0302dbc`. `public/data/live-stats.json` still says 2.12.4 until the next build.
+**Commit:** `24af5c1` (`24af5c117474001745b24d1e18c0e6a766ecfe69`). The miner card was `44ae11c`. The proof refresh under it is `ddfb130`.
 
-**Docs:** `docs/DATA-SOURCES-RENEWABLES.md`, `docs/MAP-LAYER-TICKS.md`, `docs/KIMI-HANDOFF.md`.
+**Docs:** `CHANGELOG.md`, `docs/MAP-LAYER-TICKS.md`, `docs/SOURCE-OF-TRUTH.md`, `docs/KIMI-HANDOFF.md`.

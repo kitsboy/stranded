@@ -8,6 +8,9 @@
 - A remote community uses recorded annual fossil generation when the file has it, capped by recorded fossil capacity, otherwise recorded renewable or fossil kilowatts. That is recorded output, not spare power. A fuel price in dollars per litre is shown and is not used as a power price.
 - Infrastructure points, province shades, and hydrokinetic polygons stay one map card. The hydrokinetic file does not publish kilowatts, so no miner build is sized there.
 - The home line now counts 2,611 methane sites, 1,049 renewable plants, and 276 remote communities. “No grid draw” stays with waste methane.
+- On a phone, the install banner hides while the Layers drawer, the Filters drawer, a site card, or an energy card is open, and it returns when they close.
+- The footer says Give A Bit in text. The wordmark, the mark, and the marketing avatar image are gone.
+- `live-stats.json` now reports version 2.15.0. The methane counts are unchanged: 2,611 sites, 2,588 with reported CH₄, 675 high-confidence. The generator wrote the file. `npm run version` was not run.
 
 ## [2.14.0] — 2026-10-23 · Province boundaries and river polygons
 

@@ -1,6 +1,6 @@
 # Map Layers — current (2026-10-23, v2.15.0)
 
-A plant or remote pin hover is a short teaser. The click closes that teaser and opens one miner card (`energy-build-panel`). Infrastructure, province shades, and hydrokinetic polygons still open one map card. Hydrokinetic polygons do not publish kilowatts, so they do not get a miner build. The install banner hides while the phone site card or energy card is open, so it does not cover the payback.
+A plant or remote pin hover is a short teaser. The click closes that teaser and opens one miner card (`energy-build-panel`). Infrastructure, province shades, and hydrokinetic polygons still open one map card. Hydrokinetic polygons do not publish kilowatts, so they do not get a miner build. The install banner hides while the phone site card, energy card, Layers drawer, or Filters drawer is open, so it does not cover the payback or the last rows. It returns when those close.
 
 # Map Layers — current (2026-10-23, v2.14.0)
 
