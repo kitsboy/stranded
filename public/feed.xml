@@ -5,7 +5,14 @@
     <link>https://stranded.giveabit.io/changelog</link>
     <description>Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.</description>
     <language>en</language>
-    <lastBuildDate>Sat, 24 Oct 2026 01:51:01 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 02:05:52 GMT</lastBuildDate>
+    <item>
+      <title>2.13.1 — Southern Alberta, line search, plant-file age</title>
+      <link>https://stranded.giveabit.io/changelog</link>
+      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.13.1</guid>
+      <pubDate>Sat, 24 Oct 2026 12:00:00 GMT</pubDate>
+      <description>One preset, Southern Alberta, turns on methane sites, solar plants and solar GHI, and frames the map from the border to just north of Calgary. The infrastructure group can be searched by owner or line name. Montana Alberta Tie flies to that official point. The corridor is still not drawn.</description>
+    </item>
     <item>
       <title>2.13.0 — Official energy atlas on the map</title>
       <link>https://stranded.giveabit.io/changelog</link>
@@ -82,13 +89,6 @@
       <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.10.0</guid>
       <pubDate>Tue, 11 Aug 2026 12:00:00 GMT</pubDate>
       <description>### Added — Mega upgrade batch (~50 shipped items) **Footer** — in-flow (not sticky); fuller **4-column** layout (platform / resources / company-legal / brand); all app routes; suite + donate; giveabit wordmark (`public/images/giveabit-logo.png`); hover color transitions</description>
-    </item>
-    <item>
-      <title>2.9.0 — Update</title>
-      <link>https://stranded.giveabit.io/changelog</link>
-      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.9.0</guid>
-      <pubDate>Wed, 15 Jul 2026 12:00:00 GMT</pubDate>
-      <description>### Added — Megabatch upgrades #526–625 (100 items across 4 waves) **Wave 1 (526–550):** status health checks, provinces revenue table, global KPIs, map share URL, benchmarks top sites</description>
     </item>
   </channel>
 </rss>

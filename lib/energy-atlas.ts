@@ -269,3 +269,106 @@ export function atlasPopupHtml(props: Record<string, unknown> | null | undefined
     `<div class="text-micro mt-1"><a href="https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674" target="_blank" rel="noopener noreferrer" style="color:#FF8C00">NACEI infrastructure</a></div>`,
   ].filter(Boolean).join('')
 }
+
+/** One guided view: methane pins, solar plants, and solar GHI, framed on southern Alberta. */
+export const SOUTHERN_ALBERTA_PRESET = {
+  id: 'southern-alberta' as const,
+  label: 'Southern Alberta',
+  layers: {
+    sites: true,
+    grid: false,
+    internet: false,
+    satellite: false,
+    terrain: false,
+    heatmap: false,
+    choropleth: false,
+  },
+  overlays: { solar: true },
+  atlas: { 'solar-ghi': true },
+  /** Border to just north of Calgary, Rockies to Medicine Hat. */
+  fly: { lat: 50.2, lng: -112.9, zoom: 6.2 },
+}
+
+const PROVINCE_ALIAS: Record<string, string> = {
+  AB: 'Alberta',
+  Alberta: 'Alberta',
+  BC: 'British Columbia',
+  'British Columbia': 'British Columbia',
+  MB: 'Manitoba',
+  Manitoba: 'Manitoba',
+  NB: 'New Brunswick',
+  'New Brunswick': 'New Brunswick',
+  NL: 'Newfoundland and Labrador',
+  'Newfoundland and Labrador': 'Newfoundland and Labrador',
+  NT: 'Northwest Territories',
+  'Northwest Territories': 'Northwest Territories',
+  NU: 'Nunavut',
+  Nunavut: 'Nunavut',
+  NS: 'Nova Scotia',
+  'Nova Scotia': 'Nova Scotia',
+  ON: 'Ontario',
+  Ontario: 'Ontario',
+  PE: 'Prince Edward Island',
+  PEI: 'Prince Edward Island',
+  'Prince Edward Island': 'Prince Edward Island',
+  QC: 'Quebec',
+  Quebec: 'Quebec',
+  Québec: 'Quebec',
+  SK: 'Saskatchewan',
+  Saskatchewan: 'Saskatchewan',
+  YT: 'Yukon',
+  Yukon: 'Yukon',
+  'Yukon Territory': 'Yukon',
+}
+
+/** Plant-file province strings and StatCan table names do not match. */
+export function canonicalProvince(name: unknown): string {
+  const raw = String(name ?? '').trim()
+  return PROVINCE_ALIAS[raw] || ''
+}
+
+export type InfraSearchHit = {
+  id: string
+  name: string
+  owner: string
+  kind: string
+  from: string
+  to: string
+  lng: number
+  lat: number
+}
+
+/** Match owner, line name, or the recorded from / to. Empty and one-letter queries match nothing. */
+export function searchInfrastructure(
+  features: Array<{ geometry?: { type?: string; coordinates?: unknown } | null; properties?: Record<string, unknown> | null }>,
+  query: string,
+  limit = 6,
+): InfraSearchHit[] {
+  const q = query.trim().toLowerCase()
+  if (q.length < 2) return []
+  const hits: InfraSearchHit[] = []
+  for (const feature of features) {
+    const coords = feature.geometry?.type === 'Point' && Array.isArray(feature.geometry.coordinates)
+      ? feature.geometry.coordinates
+      : null
+    if (!coords) continue
+    const p = feature.properties || {}
+    const name = String(p.name || '')
+    const owner = String(p.owner || '')
+    const from = String(p.from || '')
+    const to = String(p.to || '')
+    const hay = `${name} ${owner} ${from} ${to}`.toLowerCase()
+    if (!hay.includes(q)) continue
+    const lng = Number(coords[0])
+    const lat = Number(coords[1])
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue
+    hits.push({ id: String(p.id || ''), name, owner, kind: String(p.kind || ''), from, to, lng, lat })
+  }
+  hits.sort((a, b) => {
+    const rank = (hit: InfraSearchHit) => (hit.owner.toLowerCase().includes(q) ? 0 : 1)
+    const byOwner = rank(a) - rank(b)
+    if (byOwner !== 0) return byOwner
+    return a.name.localeCompare(b.name)
+  })
+  return hits.slice(0, limit)
+}

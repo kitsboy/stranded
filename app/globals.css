@@ -1550,7 +1550,8 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
 .map-command-center .map-atlas-legend {
   position: absolute;
   left: 50%;
-  bottom: 3.25rem;
+  /* Clears the map footer and the install banner, which sits fixed at the bottom. */
+  bottom: 8.75rem;
   transform: translateX(-50%);
   z-index: 30;
   width: min(24rem, calc(100% - 1.5rem));

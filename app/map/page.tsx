@@ -1237,10 +1237,16 @@ function StrandedCommandCenter() {
       onApplyPreset={(preset: LayerPresetId) => {
         const p = LAYER_PRESETS[preset]
         setLayers(prev => ({ ...prev, ...p.layers }))
+        if (p.overlays) setOverlays({ ...emptyOverlayState(), ...p.overlays })
+        if (p.atlas) setAtlas({ ...emptyAtlasState(), ...p.atlas })
         if (preset === 'satellite') setMapStyle('satellite')
-        else if (preset === 'minimal') setMapStyle('dark')
         else setMapStyle('dark')
+        if (p.fly) setCenterTarget({ lat: p.fly.lat, lng: p.fly.lng, zoom: p.fly.zoom })
         toast.success(`Applied ${p.label} layer preset`)
+      }}
+      onFocusInfra={(hit) => {
+        if (hit.kind) setAtlas(prev => ({ ...prev, [hit.kind]: true }))
+        setCenterTarget({ lat: hit.lat, lng: hit.lng, zoom: 8 })
       }}
       heatmapOpacity={heatmapOpacity}
       onHeatmapOpacityChange={setHeatmapOpacity}
@@ -1283,7 +1289,7 @@ function StrandedCommandCenter() {
         makes the relationship structural instead of a set of magic offsets.
       */}
       <div
-        className="map-top-stack absolute left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-2 pointer-events-none no-print w-[min(94vw,52rem)]"
+        className="map-top-stack absolute left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-2 pointer-events-none no-print w-[min(94vw,52rem)] xl:w-[min(30rem,calc(100%-28rem))]"
         data-testid="map-top-stack"
       >
         {loading && loadProgress < 100 && (
@@ -2095,27 +2101,27 @@ function StrandedCommandCenter() {
       <div className="map-layer-stack absolute right-4 z-[60] hidden xl:flex flex-col gap-2">
         <ScoreLegend compact horizontal />
         <div className="map-layer-panel-unified flex flex-col">
-          <button
-            type="button"
-            onClick={() => setShowLayersPanel(v => !v)}
-            aria-expanded={showLayersPanel}
-            data-testid="layers-panel-toggle"
-            className="w-full flex items-center justify-between px-4 py-2.5 text-label uppercase tracking-wider text-[#FF8C00] hover:bg-white/5 cursor-pointer min-h-[44px]"
-          >
-            <span className="flex items-center gap-1.5"><Layers size={12} /> {t('mapLayers')}</span>
-            <span className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); reopenOnboarding(); setWelcomeKey(k => k + 1) }}
-                data-testid="show-welcome"
-                className="text-micro text-gray-400 hover:text-white px-2 py-1 rounded min-h-[44px]"
-                title="Show the welcome card again"
-              >
-                Show welcome
-              </button>
+          <div className="flex items-center justify-between gap-1 px-2 min-h-[44px] text-label uppercase tracking-wider text-[#FF8C00]">
+            <button
+              type="button"
+              onClick={() => setShowLayersPanel(v => !v)}
+              aria-expanded={showLayersPanel}
+              data-testid="layers-panel-toggle"
+              className="flex flex-1 items-center justify-between gap-2 px-2 py-2.5 hover:bg-white/5 cursor-pointer min-h-[44px] text-left"
+            >
+              <span className="flex items-center gap-1.5"><Layers size={12} /> {t('mapLayers')}</span>
               {showLayersPanel ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </span>
-          </button>
+            </button>
+            <button
+              type="button"
+              onClick={() => { reopenOnboarding(); setWelcomeKey(k => k + 1) }}
+              data-testid="show-welcome"
+              className="text-micro normal-case tracking-normal text-gray-400 hover:text-white px-2 rounded min-h-[44px]"
+              title="Show the welcome card again"
+            >
+              Show welcome
+            </button>
+          </div>
           {showLayersPanel ? (
             <>
               {layerQuickToggles}

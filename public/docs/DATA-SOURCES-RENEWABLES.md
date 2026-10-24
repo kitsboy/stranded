@@ -25,7 +25,7 @@ Filled dots are power plants. Rings are remote communities. The colours are not 
 | Remote — already on a grid | 26 | in the remote file, but the row says provincial/territorial grid |
 | Remote — source not stated | 7 | main power unknown or other |
 
-Plant file: [Renewable Energy Power Plants, 1 MW or more](https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de) (Natural Resources Canada, NACEI). Service: `MapServer/28` on `energy_infrastructure_of_north_america_en`. Canada only (1,049 of the North American rows). Reference periods in the file run from 2000 to 201708. Most rows are August 2017. That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census.
+Plant file: [Renewable Energy Power Plants, 1 MW or more](https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de) (Natural Resources Canada, NACEI). Service: `MapServer/28` on `energy_infrastructure_of_north_america_en`. Canada only (1,049 of the North American rows). Reference periods in the file run from 2000 to 201708. Most rows are August 2017. That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. The plant popup says so, and puts that plant’s file megawatts next to the province’s 2024 Statistics Canada renewable capacity. Québec in the plant file is matched to Quebec in the StatCan table. Alberta’s 2024 total includes 6 MW geothermal. That stays a province total.
 
 Remote communities: the 2025 service did not answer on the plant pull. The map uses the 2018 official file, [Remote Communities Energy Database](https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd), 276 communities. The quarterly plant job tries 2025 first.
 
@@ -58,7 +58,7 @@ Canada rows from NACEI `energy_infrastructure_of_north_america_en`. Every geomet
 | Gas pipeline points | 28 | cyan square |
 | Liquids pipeline points | 21 | magenta triangle |
 
-File: `public/data/nacei-infrastructure.geojson`. Dataset: [NACEI energy infrastructure](https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674). Reference periods in the sample rows are mid-2017.
+File: `public/data/nacei-infrastructure.geojson`. Dataset: [NACEI energy infrastructure](https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674). Reference periods in the sample rows are mid-2017. The layer panel searches owner, line name, and the recorded from / to, then flies to that point. A search does not invent a route.
 
 ## Province shades
 

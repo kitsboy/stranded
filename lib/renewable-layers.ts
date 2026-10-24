@@ -88,8 +88,19 @@ function str(value: unknown): string {
   return value == null ? '' : String(value).trim()
 }
 
+export type PlantVintage = {
+  /** Province renewable capacity from the StatCan table, not this plant. */
+  capacityMw?: number | null
+  capacityYear?: string
+  /** Extra honesty line, for example Alberta’s 6 MW geothermal inside the province total. */
+  capacityNote?: string
+}
+
 /** Click / hover card. Every number is a field from the official file. */
-export function renewablePopupHtml(props: Record<string, unknown> | null | undefined): string {
+export function renewablePopupHtml(
+  props: Record<string, unknown> | null | undefined,
+  vintage?: PlantVintage | null,
+): string {
   const p = props || {}
   const name = escapeHtml(p.name || 'Unnamed')
   const cat = RENEWABLE_CATS.find((c) => c.id === p.cat)
@@ -137,8 +148,25 @@ export function renewablePopupHtml(props: Record<string, unknown> | null | undef
     row('Status', p.status),
     row('Filing agency', p.agency),
     row('Reference period', p.period || p.vintage),
+    plantVintageLine(p, mw, vintage),
     `<div class="text-micro mt-1">${source}${p.licence ? ` · ${escapeHtml(p.licence)}` : ''}</div>`,
   ].filter(Boolean).join('')
+}
+
+function plantVintageLine(
+  p: Record<string, unknown>,
+  mw: string,
+  vintage?: PlantVintage | null,
+): string {
+  if (p.kind !== 'plant') return ''
+  const cap = Number(vintage?.capacityMw)
+  if (!Number.isFinite(cap)) return ''
+  const period = str(p.period || p.vintage) || 'the plant file'
+  const year = str(vintage?.capacityYear) || '2024'
+  const province = str(p.province) || 'This province'
+  const plantMw = mw || 'capacity not stated'
+  const note = str(vintage?.capacityNote)
+  return `<div class="text-micro text-gray-400 mt-1">Plant file ${escapeHtml(period)}: ${escapeHtml(plantMw)}. Not a current-year capacity census. ${escapeHtml(province)} renewable capacity in the ${escapeHtml(year)} Statistics Canada table: ${cap.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW.${note ? ` ${escapeHtml(note)}` : ''}</div>`
 }
 
 function num(v: unknown): number {

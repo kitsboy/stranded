@@ -1,13 +1,31 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useLocale } from '@/lib/useLocale'
 import type { MapStyleMode } from '@/components/Map'
 import { RENEWABLE_CATS } from '@/lib/renewable-layers'
-import { ATLAS_GROUPS, ATLAS_LAYERS, CER_SOURCE, type AtlasMark } from '@/lib/energy-atlas'
+import {
+  ATLAS_GROUPS,
+  ATLAS_LAYERS,
+  CER_SOURCE,
+  INFRA_DATA_URL,
+  SOUTHERN_ALBERTA_PRESET,
+  searchInfrastructure,
+  type AtlasMark,
+  type InfraSearchHit,
+} from '@/lib/energy-atlas'
 
-export type LayerPresetId = 'analysis' | 'satellite' | 'minimal'
+export type LayerPresetId = 'analysis' | 'satellite' | 'minimal' | 'southern-alberta'
 
-export const LAYER_PRESETS: Record<LayerPresetId, { label: string; layers: Partial<LayerControlsProps['layers']> }> = {
+export type LayerPreset = {
+  label: string
+  layers: Partial<LayerControlsProps['layers']>
+  overlays?: Partial<Record<string, boolean>>
+  atlas?: Partial<Record<string, boolean>>
+  fly?: { lat: number; lng: number; zoom: number }
+}
+
+export const LAYER_PRESETS: Record<LayerPresetId, LayerPreset> = {
   analysis: {
     label: 'Analysis',
     layers: { sites: true, grid: true, internet: true, heatmap: true, choropleth: false, satellite: false, terrain: false },
@@ -19,6 +37,13 @@ export const LAYER_PRESETS: Record<LayerPresetId, { label: string; layers: Parti
   minimal: {
     label: 'Minimal',
     layers: { sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: false },
+  },
+  'southern-alberta': {
+    label: SOUTHERN_ALBERTA_PRESET.label,
+    layers: SOUTHERN_ALBERTA_PRESET.layers,
+    overlays: SOUTHERN_ALBERTA_PRESET.overlays,
+    atlas: SOUTHERN_ALBERTA_PRESET.atlas,
+    fly: SOUTHERN_ALBERTA_PRESET.fly,
   },
 }
 
@@ -82,6 +107,8 @@ interface LayerControlsProps {
   onToggleAtlas?: (id: string) => void
   atlasOpacity?: number
   onAtlasOpacityChange?: (v: number) => void
+  /** Turn on that infrastructure layer and fly to the official point. */
+  onFocusInfra?: (hit: InfraSearchHit) => void
 }
 
 function AtlasSwatch({ mark, swatch }: { mark: AtlasMark; swatch: string }) {
@@ -101,6 +128,79 @@ function AtlasSwatch({ mark, swatch }: { mark: AtlasMark; swatch: string }) {
     )
   }
   return <span className="inline-block h-2.5 w-4 shrink-0 rounded-sm" style={{ background: swatch }} aria-hidden />
+}
+
+function InfraSearch({
+  onPick,
+  placeholder,
+  emptyLabel,
+}: {
+  onPick: (hit: InfraSearchHit) => void
+  placeholder: string
+  emptyLabel: string
+}) {
+  const [query, setQuery] = useState('')
+  const [features, setFeatures] = useState<GeoJSON.Feature[] | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    if (query.trim().length < 2 || features || failed) return
+    let alive = true
+    fetch(INFRA_DATA_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`infrastructure HTTP ${res.status}`)
+        return res.json() as Promise<GeoJSON.FeatureCollection>
+      })
+      .then((data) => {
+        if (alive) setFeatures(data.features || [])
+      })
+      .catch(() => {
+        if (alive) setFailed(true)
+      })
+    return () => { alive = false }
+  }, [query, features, failed])
+
+  const hits = features ? searchInfrastructure(features, query) : []
+  const showEmpty = query.trim().length >= 2 && features && hits.length === 0
+
+  return (
+    <div className="mt-1 mb-1">
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && hits[0]) {
+            e.preventDefault()
+            onPick(hits[0])
+          }
+        }}
+        placeholder={placeholder}
+        data-testid="infra-search"
+        className="w-full rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-micro text-white placeholder:text-gray-500"
+        aria-label={placeholder}
+      />
+      {hits.length > 0 && (
+        <ul className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-white/10" data-testid="infra-search-results">
+          {hits.map((hit) => (
+            <li key={hit.id || `${hit.kind}-${hit.lng}`}>
+              <button
+                type="button"
+                className="w-full px-2 py-1.5 text-left text-micro text-gray-200 hover:bg-white/5 min-h-[44px]"
+                data-testid="infra-search-hit"
+                onClick={() => onPick(hit)}
+              >
+                <span className="block text-white">{hit.owner || hit.name}</span>
+                <span className="block text-gray-400">{hit.name}{hit.from || hit.to ? ` · ${[hit.from, hit.to].filter(Boolean).join(' → ')}` : ''}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {showEmpty && <p className="mt-1 text-micro text-gray-500">{emptyLabel}</p>}
+      {failed && query.trim().length >= 2 && <p className="mt-1 text-micro text-gray-500">{emptyLabel}</p>}
+    </div>
+  )
 }
 
 export default function LayerControls({
@@ -128,6 +228,7 @@ export default function LayerControls({
   onToggleAtlas,
   atlasOpacity = 0.62,
   onAtlasOpacityChange,
+  onFocusInfra,
 }: LayerControlsProps) {
   const { t } = useLocale()
 
@@ -178,6 +279,7 @@ export default function LayerControls({
               key={id}
               type="button"
               onClick={() => onApplyPreset(id)}
+              data-testid={`layer-preset-${id}`}
               className="text-micro px-2 py-0.5 rounded-full border border-white/15 hover:border-[#FF8C00]/40"
             >
               {LAYER_PRESETS[id].label}
@@ -258,6 +360,9 @@ export default function LayerControls({
                       </label>
                     ))}
                   </div>
+                  {group.id === 'infra' && onFocusInfra && (
+                    <InfraSearch onPick={onFocusInfra} placeholder={t('mapAtlasSearch')} emptyLabel={t('mapAtlasSearchEmpty')} />
+                  )}
                   {surfaceOn && onAtlasOpacityChange && (
                     <div className="mt-1 mb-1">
                       <label className="text-micro text-gray-400" htmlFor="atlas-opacity">

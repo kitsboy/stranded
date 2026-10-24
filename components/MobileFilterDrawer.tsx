@@ -104,7 +104,7 @@ export default function MobileFilterDrawer({
                   <X size={18} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-5 py-4 map-filter-scroll" data-autofocus tabIndex={-1}>
+              <div className="flex-1 overflow-y-auto px-5 pt-4 pb-36 map-filter-scroll" data-autofocus tabIndex={-1}>
                 {children}
               </div>
             </FocusTrap>

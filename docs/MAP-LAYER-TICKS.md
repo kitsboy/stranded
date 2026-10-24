@@ -1,3 +1,7 @@
+# Map Layers — current (2026-10-24, v2.13.1)
+
+The Southern Alberta preset (`layer-preset-southern-alberta`) turns methane sites, solar plants and solar GHI on, and flies to southern Alberta. The infrastructure search box (`infra-search`) matches owner or line name and flies to the point. A plant popup names the plant-file period beside the 2024 province capacity. The layer heading (`layers-panel-toggle`) and Show welcome (`show-welcome`) are separate buttons.
+
 # Map Layers — current (2026-10-24, v2.13.0)
 
 The checkbox contract is `onChange` on a normal controlled checkbox. One user action, one state update. Do not go back to `readOnly` plus `preventDefault` on the label. A Playwright click on the label commits React. A click that only flips the DOM does not.

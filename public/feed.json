@@ -6,6 +6,16 @@
   "description": "Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.",
   "items": [
     {
+      "id": "https://stranded.giveabit.io/changelog#2.13.1",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.13.1 — Southern Alberta, line search, plant-file age",
+      "content_text": "A Southern Alberta preset turns on methane sites, solar plants and solar GHI. Infrastructure search flies to an official point such as Montana Alberta Tie. A plant popup shows the plant-file megawatts beside that province’s 2024 capacity. The plant file is not a current-year census.",
+      "date_published": "Sat, 24 Oct 2026 18:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
       "id": "https://stranded.giveabit.io/changelog#2.13.0",
       "url": "https://stranded.giveabit.io/changelog",
       "title": "2.13.0 \u2014 Official energy atlas on the map",

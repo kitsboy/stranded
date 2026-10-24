@@ -1,3 +1,22 @@
+# Stranded atlas guides — 2026-10-24, v2.13.1
+
+**Done:**
+- Southern Alberta preset turns on methane, solar plants and solar GHI and frames southern Alberta.
+- Infrastructure search matches owner or line name (Montana Alberta Tie) and flies to the official point. No corridor is drawn.
+- Plant popups show the plant-file period and megawatts beside that province’s 2024 StatCan renewable capacity. Alberta’s note includes 6 MW geothermal in the province total. Plant count stays 0.
+- Show welcome is no longer a button inside the layer-heading button. The atlas legend clears the install banner. The top guidance strip stays clear of the layer panel on a wide screen.
+
+**Decisions:**
+- Province shades are still boxes. Real boundaries are the next batch.
+- Hydrokinetic is still the official image. Clickable river polygons are the next batch.
+- Welcome card copy was not restyled. The three deleted images stayed deleted. `buffy/v2.11.1-hud-fix` was not merged.
+
+**Git State:**
+- Atlas: `0302dbc` on `main` (pushed).
+- This section ships with the 2.13.1 commit. `public/data/live-stats.json` still says 2.12.4 until the next build.
+
+---
+
 # Stranded energy atlas — shipped (2026-10-24, v2.13.0)
 
 Cam asked to wire the previously unpainted official sources and update the docs. This section ships with that atlas commit. The SHA is filled in on the next handoff once the push exists.

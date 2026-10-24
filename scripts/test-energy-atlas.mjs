@@ -9,7 +9,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
-const { ATLAS_LAYERS, statcanRenewableTotal, pvProvinceTotals, atlasPopupHtml } = await import('../lib/energy-atlas.ts')
+const { ATLAS_LAYERS, statcanRenewableTotal, pvProvinceTotals, atlasPopupHtml, canonicalProvince, searchInfrastructure, SOUTHERN_ALBERTA_PRESET } = await import('../lib/energy-atlas.ts')
+const { renewablePopupHtml } = await import('../lib/renewable-layers.ts')
 const { mapTileUrlsCoveredByCsp } = await import('../lib/map-csp.ts')
 
 const infra = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/nacei-infrastructure.geojson'), 'utf8'))
@@ -78,5 +79,42 @@ assert.ok(limitIds.includes('geothermal-plants-canada'))
 assert.ok(limitIds.includes('nrcan-pv-municipalities'))
 assert.ok(!manifest.recordedNotMapped.some((item) => /Left off so it does not draw/.test(item.why)))
 assert.strictEqual(manifest.counts.geothermal || 0, 0)
+
+assert.strictEqual(canonicalProvince('Québec'), 'Quebec')
+assert.strictEqual(canonicalProvince('YT'), 'Yukon')
+assert.strictEqual(canonicalProvince('AB'), 'Alberta')
+const albertaCap = statcanRenewableTotal(alberta, 'cap')
+const vintage = renewablePopupHtml({
+  kind: 'plant',
+  cat: 'wind',
+  name: 'Box Springs',
+  province: 'Alberta',
+  mw: 6,
+  period: '201612',
+}, {
+  capacityMw: albertaCap,
+  capacityYear: '2024',
+  capacityNote: 'The 2024 total includes 6 MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.',
+})
+assert.match(vintage, /201612/)
+assert.match(vintage, /6 MW/)
+assert.match(vintage, /Not a current-year capacity census/)
+assert.match(vintage, /2024/)
+const formattedCap = albertaCap.toLocaleString(undefined, { maximumFractionDigits: 1 })
+assert.ok(vintage.includes(`${formattedCap} MW`), formattedCap)
+assert.match(vintage, /0 geothermal plants/)
+assert.ok(!renewablePopupHtml({ kind: 'remote', name: 'A remote place', province: 'Nunavut', mw: 1 }, { capacityMw: 10 }).includes('capacity census'))
+
+const tie = searchInfrastructure(infra.features, 'Montana Alberta Tie')
+assert.ok(tie.length >= 1)
+assert.match(tie[0].owner, /Montana Alberta Tie/)
+assert.ok(tie[0].lng < -110 && tie[0].lng > -115 && tie[0].lat < 50 && tie[0].lat > 48)
+assert.strictEqual(searchInfrastructure(infra.features, 'z').length, 0)
+
+assert.strictEqual(SOUTHERN_ALBERTA_PRESET.layers.sites, true)
+assert.strictEqual(SOUTHERN_ALBERTA_PRESET.overlays.solar, true)
+assert.strictEqual(SOUTHERN_ALBERTA_PRESET.atlas['solar-ghi'], true)
+assert.ok(SOUTHERN_ALBERTA_PRESET.fly.lat > 49 && SOUTHERN_ALBERTA_PRESET.fly.lat < 51.5)
+assert.ok(SOUTHERN_ALBERTA_PRESET.fly.lng < -110 && SOUTHERN_ALBERTA_PRESET.fly.lng > -115)
 
 console.log(`energy atlas ok: ${infra.features.length} infrastructure points, ${Object.keys(totals).length} province shades`)

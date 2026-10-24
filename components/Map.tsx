@@ -13,6 +13,7 @@ import {
   PV_DATA_URL,
   atlasLayerId,
   atlasPopupHtml,
+  canonicalProvince,
   provinceShadeGeojson,
   pvProvinceTotals,
   shadeFillPaint,
@@ -345,7 +346,8 @@ export default function Map({
   const syncChoroplethRef = useRef<() => void>(() => {})
   const syncHeatmapRef = useRef<(sitesToRender: EnrichedSite[]) => void>(() => {})
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
-    const statcanRef = useRef<{ provinces?: Record<string, unknown> } | null>(null)
+  const statcanRef = useRef<{ provinces?: Record<string, { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }> } | null>(null)
+  const plantPopupRef = useRef<(props: Record<string, unknown>) => string>((props) => renewablePopupHtml(props))
   const showRenewableRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
   /** Live BTC price for the hover teaser — the native handlers are attached once. */
   const btcUsdRef = useRef(liveBtcPrice)
@@ -369,11 +371,36 @@ export default function Map({
   atlasLayersRef.current = atlasLayers
   atlasOpacityRef.current = atlasOpacity
   btcUsdRef.current = liveBtcPrice
+  plantPopupRef.current = (props) => {
+    const key = canonicalProvince(props.province)
+    const row = key ? statcanRef.current?.provinces?.[key] : undefined
+    const capacityMw = row ? statcanRenewableTotal(row, 'cap') : null
+    const geothermal = Number(row?.capacityMW?.geothermal) || 0
+    return renewablePopupHtml(props, {
+      capacityMw,
+      capacityYear: '2024',
+      capacityNote: geothermal > 0
+        ? `The 2024 total includes ${geothermal} MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.`
+        : '',
+    })
+  }
 
   // The Bitcoin-anchored proof state behind every pin, loaded once per visit.
   useEffect(() => {
     void loadPinProof()
   }, [])
+
+  useEffect(() => {
+    if (!mapLoaded || statcanRef.current) return
+    let alive = true
+    fetch('/data/statcan-renewables.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (alive && data?.provinces) statcanRef.current = data
+      })
+      .catch(() => { /* popup still shows the plant file without the 2024 total */ })
+    return () => { alive = false }
+  }, [mapLoaded])
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
@@ -414,7 +441,7 @@ export default function Map({
         offset: 14,
       })
     }
-    renewablePopupRef.current.setLngLat(hit.coords).setHTML(renewablePopupHtml(hit.props)).addTo(map)
+    renewablePopupRef.current.setLngLat(hit.coords).setHTML(plantPopupRef.current(hit.props)).addTo(map)
   }
   atlasHitRef.current = (map, point) => {
     const ids = ATLAS_LAYERS.filter((layer) => layer.group === 'infra').map((layer) => atlasLayerId(layer.id)).filter((id) => {
@@ -920,7 +947,7 @@ export default function Map({
             offset: 12,
           })
         }
-        hoverPopupRef.current.setLngLat(coords).setHTML(renewablePopupHtml(feature.properties as Record<string, unknown>)).addTo(live)
+        hoverPopupRef.current.setLngLat(coords).setHTML(plantPopupRef.current(feature.properties as Record<string, unknown>)).addTo(live)
       })
       live.on('mouseleave', id, () => {
         live.getCanvas().style.cursor = ''

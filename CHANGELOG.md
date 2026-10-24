@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1] — 2026-10-24 · Southern Alberta, line search, plant-file age
+
+- One preset, Southern Alberta, turns on methane sites, solar plants and solar GHI, and frames the map from the border to just north of Calgary.
+- The infrastructure group can be searched by owner or line name. Montana Alberta Tie flies to that official point. The corridor is still not drawn.
+- A plant popup shows the plant-file megawatts beside that province’s 2024 Statistics Canada renewable capacity. The plant file is not a current-year census. Alberta’s line includes the 6 MW geothermal that sits in the province total. Geothermal plants stay at 0.
+- The layer heading and “Show welcome” are separate buttons. The atlas legend sits above the install banner. On a wide screen the top guidance strip no longer covers the layer panel.
+
 ## [2.13.0] — 2026-10-24 · Official energy atlas on the map
 
 - Solar GHI and solar DNI from the live NRCan service paint under the pins. A slider sets how strong the wash is. Wind-speed and geothermal-gradient rasters are not in that service, so they are not invented.
