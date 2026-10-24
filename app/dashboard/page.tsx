@@ -140,6 +140,9 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <div className="mx-auto max-w-6xl px-6 pt-10">
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />
+        <p className="mt-3 max-w-3xl text-sm text-gray-400">
+          These KPIs are the live methane dataset ({stats.siteCount.toLocaleString()} sites). The map also carries 1,049 renewable plants and 276 remote communities. A miner build on those pins is sized only where the file records power, and it does not claim a free grid.
+        </p>
       </div>
 
       <div className="dashboard-hero-bleed">

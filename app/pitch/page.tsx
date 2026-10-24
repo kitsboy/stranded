@@ -20,6 +20,7 @@ import type { LiveStats } from '@/types/live-stats'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
+import { OFFICIAL_PLANT_COUNT, OFFICIAL_REMOTE_COUNT } from '@/lib/energy-build'
 import { SENSITIVITY_PRESETS, type SensitivityPresetId, applyPresetRevenueBand } from '@/lib/sensitivity-presets'
 import { formatCompactNumber } from '@/lib/format-number'
 import { provinceOpportunities, scoreHistogramToScores } from '@/lib/pitch-metrics'
@@ -614,7 +615,11 @@ function PitchContent() {
       <section data-pitch-section className="mx-auto max-w-4xl px-6 pb-20 text-center">
         <h2 className="mb-4 text-3xl font-bold">{t('pitchCtaTitle')}</h2>
         <p className="mb-8 text-gray-400">
-          {tf(locale, 'pitchCtaDesc', { count: fmt(stats.siteCount) })}
+          {tf(locale, 'pitchCtaDesc', {
+            count: fmt(stats.siteCount),
+            plants: OFFICIAL_PLANT_COUNT.toLocaleString(),
+            remote: OFFICIAL_REMOTE_COUNT.toLocaleString(),
+          })}
           {' '}Production: <a href={PROD_URL} className="text-[#5BC0BE] hover:underline">{PROD_URL}</a>
         </p>
         <div className="flex flex-wrap justify-center gap-4">
@@ -623,7 +628,7 @@ function PitchContent() {
                     <Link href="/investors" className="rounded-xl border border-[#FF8C00]/50 px-6 py-3 text-[#FFB347] transition hover:bg-[#FF8C00]/10">Investor &amp; Partner Materials</Link>
           <a
             href={buildNostrShareUrl(
-              `Stranded Value — ${fmt(stats.siteCount)} mapped methane sites across Canada. Stranded methane → Bitcoin.`,
+              `Stranded Value — ${fmt(stats.siteCount)} methane sites, ${OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants, ${OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities. Miner math only where power is recorded.`,
               `${PROD_URL}/pitch`,
             )}
             target="_blank"

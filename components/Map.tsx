@@ -14,6 +14,7 @@ import {
   PV_DATA_URL,
   atlasLayerId,
   atlasPopupHtml,
+  atlasTeaserHtml,
   canonicalProvince,
   provinceShadeGeojson,
   pvProvinceTotals,
@@ -30,6 +31,7 @@ import {
   renewableLayerId,
   renewablePopupHtml,
 } from '@/lib/renewable-layers'
+import { assessEnergyLocation, energyPinTeaserHtml, type StatcanFile } from '@/lib/energy-build'
 
 export type MapViewMode = 'precise' | 'dom' | 'native-clusters'
 export type MapStyleMode = 'dark' | 'standard' | 'satellite' | 'terrain'
@@ -89,6 +91,8 @@ interface MapProps {
   atlasLayers?: Record<string, boolean>
   /** Opacity for solar images and hydrokinetic polygons. Pins stay above them. */
   atlasOpacity?: number
+  /** Plant or remote pin. One build card, not a second map popup. */
+  onEnergyBuild?: (hit: { props: Record<string, unknown>; lng: number; lat: number }) => void
 }
 
 /** MapLibre native cluster source + layer ids (upgrade 166-175) */
@@ -316,6 +320,7 @@ export default function Map({
   renewableOverlays,
   atlasLayers,
   atlasOpacity = 0.62,
+  onEnergyBuild,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const minimapContainer = useRef<HTMLDivElement>(null)
@@ -324,6 +329,7 @@ export default function Map({
   const markersRef = useRef<maplibregl.Marker[]>([])
   const sitesRef = useRef(filteredSites)
   const onSiteClickRef = useRef(onSiteClick)
+  const onEnergyBuildRef = useRef(onEnergyBuild)
   const onViewChangeRef = useRef(onViewChange)
   const performanceModeRef = useRef(performanceMode)
   const nativeHandlersAttached = useRef(false)
@@ -355,6 +361,7 @@ export default function Map({
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
   const statcanRef = useRef<{ provinces?: Record<string, { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }> } | null>(null)
   const plantPopupRef = useRef<(props: Record<string, unknown>) => string>((props) => renewablePopupHtml(props))
+  const energyTeaserRef = useRef<(props: Record<string, unknown>) => string>(() => '')
 
   const ensureBoundaries = useCallback(async () => {
     if (boundaryGeomRef.current || boundaryFailedRef.current) return
@@ -428,6 +435,8 @@ export default function Map({
 
   sitesRef.current = filteredSites
   onSiteClickRef.current = onSiteClick
+  onEnergyBuildRef.current = onEnergyBuild
+  energyTeaserRef.current = (props) => energyPinTeaserHtml(props, assessEnergyLocation(props, statcanRef.current as StatcanFile | null))
 
   renewableHitRef.current = (map, point) => {
     const ids = RENEWABLE_CATS.map(c => renewableLayerId(c.id)).filter((id) => {
@@ -456,6 +465,7 @@ export default function Map({
     return best
   }
   showRenewableRef.current = (map, hit) => {
+    hoverPopupRef.current?.remove()
     if (!renewablePopupRef.current) {
       renewablePopupRef.current = new maplibregl.Popup({
         closeButton: true,
@@ -545,6 +555,7 @@ export default function Map({
     return { coords: [ll.lng, ll.lat], props: (feature.properties || {}) as Record<string, unknown> }
   }
   showAtlasRef.current = (map, hit) => {
+    hoverPopupRef.current?.remove()
     if (!renewablePopupRef.current) {
       renewablePopupRef.current = new maplibregl.Popup({
         closeButton: true,
@@ -1005,7 +1016,7 @@ export default function Map({
             offset: 12,
           })
         }
-        hoverPopupRef.current.setLngLat(coords).setHTML(plantPopupRef.current(feature.properties as Record<string, unknown>)).addTo(live)
+        hoverPopupRef.current.setLngLat(coords).setHTML(energyTeaserRef.current(feature.properties as Record<string, unknown>)).addTo(live)
       })
       live.on('mouseleave', id, () => {
         live.getCanvas().style.cursor = ''
@@ -1124,7 +1135,7 @@ export default function Map({
         }
         hoverPopupRef.current
           .setLngLat(coords)
-          .setHTML(atlasPopupHtml((feature.properties || {}) as Record<string, unknown>))
+          .setHTML(atlasTeaserHtml((feature.properties || {}) as Record<string, unknown>))
           .addTo(map)
       })
       map.on('mouseleave', id, () => {
@@ -1619,15 +1630,24 @@ export default function Map({
       // A methane pin still wins when it is the closer target. An overlay wins
       // only when the tap is on it and not on a nearer methane pin.
       if (renew && (!best || renew.d + 4 < best.d)) {
-        showRenewableRef.current(map, renew)
+        hoverPopupRef.current?.remove()
+        renewablePopupRef.current?.remove()
+        if (onEnergyBuildRef.current) {
+          onEnergyBuildRef.current({ props: renew.props, lng: renew.coords[0], lat: renew.coords[1] })
+        } else {
+          showRenewableRef.current(map, renew)
+        }
         return
       }
       const infra = atlasHitRef.current(map, e.point)
       if (infra && (!best || infra.d + 4 < best.d)) {
+        hoverPopupRef.current?.remove()
         showAtlasRef.current(map, infra)
         return
       }
       if (best) {
+        hoverPopupRef.current?.remove()
+        renewablePopupRef.current?.remove()
         onSiteClickRef.current(best.site)
         return
       }

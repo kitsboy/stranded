@@ -35,7 +35,7 @@ export function buildDashboardOnePagerHtml(stats: OnePagerStats, opts: OnePagerO
   const provinces = (stats.topProvinces || []).slice(0, 6)
   const thesis =
     opts.thesis ||
-    'Turn stranded methane into verifiable Bitcoin-powered wealth with no net draw on the electrical grid — 2,611 mapped sites across Canada (2,588 with reported CH₄ · 675 high-confidence).'
+    'Turn stranded methane into verifiable Bitcoin-powered wealth with no net draw on the electrical grid — 2,611 mapped sites across Canada (2,588 with reported CH₄ · 675 high-confidence). The map also shows 1,049 renewable plants (mostly August 2017) and 276 remote communities (2018). Miner math on those pins uses recorded power and a labelled power price. It does not claim free grid electricity.'
   const modelNote =
     'Model scenarios use a hashprice of 0.0000009 BTC/TH/day, ABOVE the network-derived estimate (~0.00000041 BTC/TH/day) — optimistic-scenario figures, not a neutral forecast. Burning methane still emits CO₂; the honest claim is ~28–80× lower warming per molecule (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80), never "no emissions".'
 

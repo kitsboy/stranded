@@ -1,5 +1,16 @@
 # Official energy atlas — source record
 
+## Miner build (v2.15.0)
+
+A click on a plant or remote pin opens one editable miner card. The ASIC list is the same menu used on methane sites. The miner count stops at the kilowatts the file supports.
+
+- Wind, solar, hydro, and tidal: plant-file nameplate times that province’s 2025 generation divided by its 2024 capacity (Statistics Canada tables 25-10-0015-01 and 25-10-0022-01), over 8,760 hours. The factor is the province total, not a meter on the plant. If generation exceeded the 2024 capacity, the build uses the nameplate.
+- Biomass, pumped storage, other, and geothermal: no payback. Biomass has 2025 generation and no 2024 capacity. Geothermal plants in this file: 0.
+- Remote communities: average fossil generation when annual megawatt-hours are recorded, capped by recorded fossil capacity. Otherwise recorded renewable or fossil kilowatts. This is recorded output, not spare power. A fuel price in $/l is shown and is not a power price.
+- Infrastructure points, province shades, solar images, and hydrokinetic polygons are not miner sites. The hydrokinetic GeoJSON has river, community, kind, and province only.
+
+Power price starts at 0.04 USD/kWh, the site-wide default, and can be edited. Zero is not used. Hashprice 0.0000009 BTC/TH/day is labelled optimistic. The network-derived rate (450 / 1,100,000,000) is shown beside it. Setup is the site-wide 25,000 CAD default, not a quote. No generator capex and no carbon credit.
+
 Pulled October 2026. Licence for every mapped government file: [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada).
 
 The map paints a source only in a form the file actually supports. A raster stays a raster. A point stays a point. A province total stays a province shade. Nothing in this list is a guessed town, a drawn corridor, or an invented geothermal plant.

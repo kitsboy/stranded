@@ -6,7 +6,7 @@ const NOTES = [
   {
     id: 'hook',
     title: 'Hook',
-    body: '2,611 mapped methane sites (2,588 with reported CH₄, 675 high-confidence). Fuel is free relative to grid power. Bitcoin is the offtake that does not need a pipeline.',
+    body: '2,611 mapped methane sites (2,588 with reported CH₄, 675 high-confidence). Fuel is free relative to grid power. Bitcoin is the offtake that does not need a pipeline. The map also shows 1,049 renewable plants and 276 remote communities. Those are separate files. A miner build there uses recorded power and a labelled power price. It is not the no-grid-draw claim.',
   },
   {
     id: 'problem',

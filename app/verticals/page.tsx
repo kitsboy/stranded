@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ENERGY_VERTICALS } from '@/lib/verticals'
+import { OFFICIAL_PLANT_COUNT, OFFICIAL_PLANT_COUNTS, OFFICIAL_REMOTE_COUNT, OFFICIAL_REMOTE_COUNTS } from '@/lib/energy-build'
 import { emissionTierItems } from '@/lib/dashboard-metrics'
 import type { LiveStats } from '@/types/live-stats'
 
@@ -54,7 +55,7 @@ export default function VerticalsPage() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold tracking-tighter mb-2">Energy Verticals</h1>
       <p className="text-gray-400 mb-10">
-        Methane is live today. Wind, solar, waste heat, biomass, and hydro spill are expanding the Stranded Value ecosystem.
+        Methane is live today: 2,611 ECCC sites, with generator ROI. The official plant file adds {OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants (mostly August 2017) and {OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities (2018). A miner build on those pins uses recorded power only. The older counts on the cards below are separate claims. They are not that plant file.
         {stats && (
           <span className="text-gray-400"> · Live dataset v{stats.version} · {stats.siteCount.toLocaleString()} sites</span>
         )}
@@ -107,6 +108,21 @@ export default function VerticalsPage() {
                 </div>
               </div>
               <p className="text-sm text-gray-400 mb-4">{v.description}</p>
+              {v.id === 'wind' && (
+                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.wind.toLocaleString()} wind plants. The {v.potentialSites.toLocaleString()} figure on this card is a beta curtailment claim, not that file, and not unused power.</p>
+              )}
+              {v.id === 'solar' && (
+                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.solar.toLocaleString()} solar plants. The {v.potentialSites.toLocaleString()} figure is a separate beta claim, not that file.</p>
+              )}
+              {v.id === 'hydro' && (
+                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.hydro.toLocaleString()} hydro plants. The {v.potentialSites.toLocaleString()} hydro-spill figure is a separate roadmap claim, not that file. A miner build uses nameplate times the province capacity factor. It is not spare spill.</p>
+              )}
+              {v.id === 'biomass' && (
+                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.biomass.toLocaleString()} biomass plants. Statistics Canada publishes 2025 biomass generation and no 2024 biomass capacity, so those plants are not given a miner payback. The {v.potentialSites.toLocaleString()} figure is a separate roadmap claim, not that file.</p>
+              )}
+              {v.id === 'waste-heat' && (
+                <p className="text-xs text-gray-300 mb-3">No official waste-heat site file is on the map. The {v.potentialSites.toLocaleString()} figure is a beta claim, not a pin count.</p>
+              )}
 
               {v.id === 'methane' && methaneTiers.length > 0 && (
                 <div className="text-xs space-y-1.5 mb-4 rounded-xl border border-[#FF8C00]/20 bg-[#FF8C00]/5 p-3">
@@ -148,6 +164,16 @@ export default function VerticalsPage() {
           )
         })}
       </div>
+
+      <section className="mt-10 rounded-2xl border border-white/10 p-6" data-testid="official-energy-counts">
+        <h2 className="text-xl font-semibold mb-2">Official files on the map</h2>
+        <p className="text-sm text-gray-400 mb-4">
+          These counts are the shipped plant and remote files. Geothermal plants in that file: {OFFICIAL_PLANT_COUNTS.geothermal}. Tidal: {OFFICIAL_PLANT_COUNTS.tidal}. Pumped storage: {OFFICIAL_PLANT_COUNTS.pumped}. Other renewable: {OFFICIAL_PLANT_COUNTS.other}. Remote diesel, oil, or gas: {OFFICIAL_REMOTE_COUNTS['remote-fossil']}. Remote hydro: {OFFICIAL_REMOTE_COUNTS['remote-hydro']}. Already on a grid: {OFFICIAL_REMOTE_COUNTS['remote-grid']}. Source not stated: {OFFICIAL_REMOTE_COUNTS['remote-unknown']}.
+        </p>
+        <p className="text-sm text-gray-400">
+          Infrastructure points, province shades, solar images, and hydrokinetic polygons are on the map and are not miner sites. The hydrokinetic file does not publish kilowatts.
+        </p>
+      </section>
     </div>
   )
 }

@@ -14,6 +14,7 @@ import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
 import { useLocale } from '@/lib/useLocale'
 import { tf } from '@/lib/i18n'
+import { OFFICIAL_PLANT_COUNT, OFFICIAL_REMOTE_COUNT } from '@/lib/energy-build'
 import CountUp from '@/components/CountUp'
 import SectionDivider from '@/components/SectionDivider'
 import { useReducedMotion } from '@/lib/useReducedMotion'
@@ -71,7 +72,7 @@ export default function LandingPage() {
         '@type': 'WebSite',
         name: 'Stranded Value',
         url: 'https://stranded.giveabit.io',
-        description: `${siteCount.toLocaleString()} mapped stranded methane sites (with reported CH₄) across Canada with Bitcoin-powered ROI modeling — optimistic scenarios always labelled as such`,
+        description: `${siteCount.toLocaleString()} mapped methane sites, plus ${OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants and ${OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities. Waste-methane mining has no grid draw. A miner build on a plant or community is sized only where the file records real power.`,
         publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io' },
         ...(schemaExtras ?? {}),
       },
@@ -129,7 +130,11 @@ export default function LandingPage() {
           <span className="text-[#FF8C00]">{t('heroTitle2')}</span>
         </h1>
         <p className="max-w-2xl mx-auto text-2xl text-gray-300 mb-10">
-          {tf(locale, 'heroSubtitle', { count: siteCount.toLocaleString() })}
+          {tf(locale, 'heroSubtitle', {
+            count: siteCount.toLocaleString(),
+            plants: OFFICIAL_PLANT_COUNT.toLocaleString(),
+            remote: OFFICIAL_REMOTE_COUNT.toLocaleString(),
+          })}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -298,7 +303,7 @@ export default function LandingPage() {
         </div>
         <div className="grid md:grid-cols-4 gap-6">
           {[
-            { num: "01", title: "Discover", desc: "Explore 2,611 real sites on the live map with filters, scores, and generator recommendations.", cta: "Open Map", href: "/map" },
+            { num: "01", title: "Discover", desc: `Explore ${siteCount.toLocaleString()} methane sites, plus ${OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants and ${OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities, on the live map.`, cta: "Open Map", href: "/map" },
             { num: "02", title: "Learn Value", desc: "Dive into the Education Center: simulators, real machines, per-site ROI with CapEx & financing.", cta: "Start Learning", href: "/education" },
             { num: "03", title: "Build Mission", desc: "Select sites, model with real generators + ASICs, simulate portfolio returns and methane value created.", cta: "Build Portfolio", href: "/map" },
             { num: "04", title: "Fund & Deploy", desc: "Download docs from the Marketing Hub, connect to CETA/Canadian capital, or contact us to activate.", cta: "Get the Hub", href: "/Marketing-Hub.html" },
@@ -311,7 +316,7 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-400 mt-6">Every step uses live data from the 2,611-site dataset for honest, bankable Stranded Value.</p>
+        <p className="text-center text-xs text-gray-400 mt-6">Methane steps use the live {siteCount.toLocaleString()}-site dataset. Plant and remote counts come from the official energy files. A miner build is sized only where those files record power.</p>
       </div>
 
       {/* Choose Your Path - Persona Driven Business Flow */}
@@ -322,7 +327,7 @@ export default function LandingPage() {
         </div>
         <div className="grid md:grid-cols-4 gap-4">
           {[
-            { icon: "⚙️", title: "For Operators & Miners", desc: "Source sites, model real generator + ASIC economics, deploy fast with no net draw on the grid.", cta: "Explore Sites", href: "/sites" },
+            { icon: "⚙️", title: "For Operators & Miners", desc: "On methane sites, model generator + ASIC economics with no grid draw. On a renewable plant or remote community, size miners only from recorded power.", cta: "Explore Sites", href: "/sites" },
             { icon: "💰", title: "For Capital Providers", desc: "Transparent per-site ROI, generator CapEx, financed paybacks, methane value created. De-risked opportunities.", cta: "See the Data", href: "/map" },
             { icon: "🏛️", title: "For Government & Provinces", desc: "Regional impact dashboards, CETA alignment, job creation, CO₂e avoided at scale. Policy intelligence.", cta: "View by Province", href: "/map" },
             { icon: "🤝", title: "For Landowners & Communities", desc: "Real revenue potential from your land, remediation funding, First Nations wealth creation.", cta: "Calculate Your Value", href: "/education" },

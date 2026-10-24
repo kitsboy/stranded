@@ -5,7 +5,14 @@
     <link>https://stranded.giveabit.io/changelog</link>
     <description>Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.</description>
     <language>en</language>
-    <lastBuildDate>Sat, 24 Oct 2026 02:30:37 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 03:24:17 GMT</lastBuildDate>
+    <item>
+      <title>2.15.0 — One miner card on recorded energy</title>
+      <link>https://stranded.giveabit.io/changelog</link>
+      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.15.0</guid>
+      <pubDate>Fri, 23 Oct 2026 12:00:00 GMT</pubDate>
+      <description>A plant or remote pin opens one build card. The hover card is a short teaser, so the old pair of different-sized popups does not stay open. The card uses the same ASIC menu as a methane site. The count cannot pass the kilowatts the file supports. Optimistic hashprice stays labelled, with the network-derived rate beside it. Power price starts at the site-wide 0.04 USD/kWh and is editable. Zero is not used. No generator and no carbon credit are added.</description>
+    </item>
     <item>
       <title>2.14.0 — Province boundaries and river polygons</title>
       <link>https://stranded.giveabit.io/changelog</link>
@@ -82,13 +89,6 @@
       <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.0</guid>
       <pubDate>Fri, 11 Sep 2026 12:00:00 GMT</pubDate>
       <description>**Hover before click** — a pin hover now teaches: name, measured CH₄/day, Stranded Score and *"Gas supports up to 468 miners ≈ $/day"*, computed with the same helpers the cockpit uses (vector pins **and** DOM markers) **Click → a cockpit, not a form** — header badges first (data recency `ECCC 2023 · high confidence`, flux when the dataset carries it, "verify this yourself"), then **one big number** (sats/day + $/day), then the miner-stack visual, then the readout strip, then **"How this number is made"** (hashprice used, above/below the network-derived estimate, power-cost assumption, data year)</description>
-    </item>
-    <item>
-      <title>2.11.0 — Update</title>
-      <link>https://stranded.giveabit.io/changelog</link>
-      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.0</guid>
-      <pubDate>Fri, 11 Sep 2026 12:00:00 GMT</pubDate>
-      <description>### Added — Fleet templates v2 (named, reusable, exportable) **Named fleet templates** — save the current miner stack under a name (inline input, no `window.prompt`), listed with Apply + delete; persisted locally in `stranded.fleets.v1`, guarded so a corrupt/stale key never white-screens the page</description>
     </item>
   </channel>
 </rss>

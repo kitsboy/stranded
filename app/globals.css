@@ -1567,6 +1567,11 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }
+/* The install banner sits above the map sheet and covers the payback. Hide it while a site or energy card is open. */
+body:has([data-testid="mobile-energy-sheet"]) [data-testid="pwa-install-prompt"],
+body:has([data-testid="mobile-site-sheet"]) [data-testid="pwa-install-prompt"] {
+  display: none;
+}
 .map-command-center .map-layer-stack::-webkit-scrollbar { width: 6px; }
 .map-command-center .map-layer-stack::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 .map-command-center .map-layer-panel-unified > div:last-child {

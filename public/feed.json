@@ -6,6 +6,16 @@
   "description": "Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.",
   "items": [
     {
+      "id": "https://stranded.giveabit.io/changelog#2.15.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.15.0 — One miner card on recorded energy",
+      "content_text": "A plant or remote pin opens one editable miner card. The count stops at the kilowatts the file records. Wind, solar, hydro, and tidal use the plant nameplate times that province’s official capacity factor. Remote communities use recorded generation or capacity, not spare power. A fuel price in dollars per litre is not a power price. Infrastructure, shades, and rivers are not miner sites. The home line now includes 1,049 renewable plants and 276 remote communities beside the 2,611 methane sites.",
+      "date_published": "Fri, 23 Oct 2026 23:40:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
       "id": "https://stranded.giveabit.io/changelog#2.14.0",
       "url": "https://stranded.giveabit.io/changelog",
       "title": "2.14.0 — Province boundaries and river polygons",

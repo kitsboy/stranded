@@ -1,3 +1,7 @@
+# Map Layers — current (2026-10-23, v2.15.0)
+
+A plant or remote pin hover is a short teaser. The click closes that teaser and opens one miner card (`energy-build-panel`). Infrastructure, province shades, and hydrokinetic polygons still open one map card. Hydrokinetic polygons do not publish kilowatts, so they do not get a miner build. The install banner hides while the phone site card or energy card is open, so it does not cover the payback.
+
 # Map Layers — current (2026-10-23, v2.14.0)
 
 Province shades use `public/data/province-boundaries.geojson` (2021 Census cartographic file, generalized). The emission, revenue, and renewable choropleths use that same file. A rectangle appears only if the file fails. Hydrokinetic open water and possible water are polygons in `public/data/hydrokinetic.geojson`. A click names the river and the community. Ice is not painted. The community point is not drawn.

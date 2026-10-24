@@ -12,6 +12,8 @@ import {
 import { toast } from 'sonner'
 
 import SiteDetailsPanel from '@/components/SiteDetailsPanel'
+import EnergyBuildPanel, { type EnergyMapHit } from '@/components/EnergyBuildPanel'
+import type { StatcanFile } from '@/lib/energy-build'
 import FirstRunStrip from '@/components/FirstRunStrip'
 import LayerControls, { LAYER_PRESETS, type LayerPresetId } from '@/components/LayerControls'
 import { emptyOverlayState, RENEWABLE_MANIFEST_URL } from '@/lib/renewable-layers'
@@ -127,6 +129,9 @@ function StrandedCommandCenter() {
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSite, setSelectedSite] = useState<EnrichedSite | null>(null)
+  const [energyHit, setEnergyHit] = useState<EnergyMapHit | null>(null)
+  const [statcanDoc, setStatcanDoc] = useState<StatcanFile | null>(null)
+  const [statcanStatus, setStatcanStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   /** Fleet template decoded from the share link, bound to the site it came with */
   const [fleetUrlState, setFleetUrlState] = useState<{ siteId: string; template: FleetTemplate } | null>(null)
   const [urlFiat, setUrlFiat] = useState<string | undefined>(undefined)
@@ -136,6 +141,21 @@ function StrandedCommandCenter() {
   const didAutoCluster = useRef(false)
   const missionRef = useRef<HTMLDivElement>(null)
   const liveBtcPrice = useBtcUsd()
+
+  useEffect(() => {
+    let alive = true
+    fetch('/data/statcan-renewables.json')
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then((data) => {
+        if (!alive) return
+        setStatcanDoc(data)
+        setStatcanStatus('ready')
+      })
+      .catch(() => {
+        if (alive) setStatcanStatus('error')
+      })
+    return () => { alive = false }
+  }, [])
   const { locale, t } = useLocale()
   const reducedMotion = useReducedMotion()
   const [isXlViewport, setIsXlViewport] = useState(true)
@@ -654,7 +674,14 @@ function StrandedCommandCenter() {
   // Note: Global CommandPalette is now handled at root layout via GlobalCommand.tsx + Nav Cmd+K
 
 
+  const handleEnergyBuild = (hit: EnergyMapHit) => {
+    setSelectedSite(null)
+    setEnergyHit(hit)
+    setMobileSiteSheet('peek')
+  }
+
   const handleSelectSite = (site: EnrichedSite) => {
+    setEnergyHit(null)
     setSelectedSite(site)
     setMobileSiteSheet('peek')
     recordRecentSite(site)
@@ -864,8 +891,13 @@ function StrandedCommandCenter() {
     if (selectedSite) {
       if (mobileSiteSheet === 'expanded') { setMobileSiteSheet('peek'); return }
       setSelectedSite(null)
+      return
     }
-  }, [showKeyboardHelp, showCompare, showMobileFilters, showMobileLayers, showLayersPanel, selectedSite, mobileSiteSheet, filtersCollapsed, isXlViewport, setFiltersCollapsedPersisted])
+    if (energyHit) {
+      if (mobileSiteSheet === 'expanded') { setMobileSiteSheet('peek'); return }
+      setEnergyHit(null)
+    }
+  }, [showKeyboardHelp, showCompare, showMobileFilters, showMobileLayers, showLayersPanel, selectedSite, energyHit, mobileSiteSheet, filtersCollapsed, isXlViewport, setFiltersCollapsedPersisted])
 
   const isTypingTarget = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement | null
@@ -1149,7 +1181,7 @@ function StrandedCommandCenter() {
     return () => clearInterval(id)
   }, [allSites])
 
-  const showRightColumn = !!(selectedSite || portfolio.length > 0 || compareSites.length >= 2)
+  const showRightColumn = !!(selectedSite || energyHit || portfolio.length > 0 || compareSites.length >= 2)
 
   /*
    * Layer controls live in two shells: the desktop corner panel (.map-layer-stack,
@@ -1892,6 +1924,7 @@ function StrandedCommandCenter() {
         sites={allSites}
         filteredSites={filteredSites}
         onSiteClick={handleSelectSite}
+        onEnergyBuild={handleEnergyBuild}
         selectedId={selectedSite?.id}
         portfolioIds={portfolio.map(p => p.id)}
         showMissionRing={showMissionRing}
@@ -1930,7 +1963,7 @@ function StrandedCommandCenter() {
         viewportSitesLabel={tf(locale, 'mapViewportSites', { count: '{count}' })}
         tileFallbackLabel={t('mapTileFallback')}
       />
-      {!selectedSite && ATLAS_LAYERS.some(layer => atlas[layer.id]) && (
+      {!selectedSite && !energyHit && ATLAS_LAYERS.some(layer => atlas[layer.id]) && (
         <div className="map-atlas-legend" data-testid="atlas-legend">
           {ATLAS_LAYERS.filter(layer => atlas[layer.id]).map(layer => (
             <span key={layer.id} className="inline-flex items-center gap-1.5" title={t(layer.hintKey)}>
@@ -2001,10 +2034,53 @@ function StrandedCommandCenter() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {energyHit && !selectedSite && (
+          <motion.div
+            className="xl:hidden fixed inset-x-0 bottom-0 z-[82] pointer-events-auto"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={reducedMotion ? { duration: 0 } : { type: 'spring', damping: 30, stiffness: 340 }}
+            drag={reducedMotion ? false : 'y'}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.1}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 90 || info.velocity.y > 520) setEnergyHit(null)
+              else if (info.offset.y < -50) setMobileSiteSheet('expanded')
+            }}
+            data-testid="mobile-energy-sheet"
+          >
+            <div className="mx-auto w-full max-w-lg max-h-[85dvh] overflow-y-auto flex flex-col pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-2 mt-2 shrink-0" aria-hidden />
+              <EnergyBuildPanel
+                key={String(energyHit.props.id || energyHit.props.name)}
+                hit={energyHit}
+                statcan={statcanDoc}
+                statcanStatus={statcanStatus}
+                liveBtcPrice={liveBtcPrice}
+                onClose={() => setEnergyHit(null)}
+                compact={mobileSiteSheet === 'peek'}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Right side — docked site cockpit + Mission (desktop ≥1280px); hidden when empty */}
       {showRightColumn && (
       <div className="map-right-column absolute top-16 right-2 md:right-4 z-[65] hidden xl:flex flex-col gap-3 w-[480px] min-[1600px]:w-[560px]" data-testid="map-right-column">
         <AnimatePresence mode="wait">
+          {energyHit && !selectedSite && (
+            <EnergyBuildPanel
+              key={String(energyHit.props.id || energyHit.props.name)}
+              hit={energyHit}
+              statcan={statcanDoc}
+              statcanStatus={statcanStatus}
+              liveBtcPrice={liveBtcPrice}
+              onClose={() => setEnergyHit(null)}
+            />
+          )}
           {selectedSite && (
             <SiteDetailsPanel
               key={selectedSite.id}

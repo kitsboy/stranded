@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.15.0] — 2026-10-23 · One miner card on recorded energy
+
+- A plant or remote pin opens one build card. The hover card is a short teaser, so the old pair of different-sized popups does not stay open.
+- The card uses the same ASIC menu as a methane site. The count cannot pass the kilowatts the file supports. Optimistic hashprice stays labelled, with the network-derived rate beside it. Power price starts at the site-wide 0.04 USD/kWh and is editable. Zero is not used. No generator and no carbon credit are added.
+- A wind, solar, hydro, or tidal plant uses its file nameplate times that province’s 2025 generation divided by its 2024 capacity. The factor is the province total, not a meter on the plant. If 2025 generation exceeded the 2024 capacity, the build uses the nameplate. Biomass, pumped storage, and other plants are not given a payback, because that capacity factor is not in the table.
+- A remote community uses recorded annual fossil generation when the file has it, capped by recorded fossil capacity, otherwise recorded renewable or fossil kilowatts. That is recorded output, not spare power. A fuel price in dollars per litre is shown and is not used as a power price.
+- Infrastructure points, province shades, and hydrokinetic polygons stay one map card. The hydrokinetic file does not publish kilowatts, so no miner build is sized there.
+- The home line now counts 2,611 methane sites, 1,049 renewable plants, and 276 remote communities. “No grid draw” stays with waste methane.
+
 ## [2.14.0] — 2026-10-23 · Province boundaries and river polygons
 
 - Province shades and the emission, revenue, and renewable choropleths use the 2021 Census cartographic boundaries. Statistics Canada generalized them. Parts under 100 km² are dropped. A rectangle is used only if that file fails to load.

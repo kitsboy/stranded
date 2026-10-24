@@ -8,7 +8,7 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-07-16 — **v2.9.0** live (pitch + dashboard elite, 100-upgrade megabatch #526–625: status health, sites/compare exports, HomeKpiStrip, i18n/a11y, PWA v13). See `SESSION-SUMMARY-2026-07-16.md` + `docs/UPGRADES-526-625.md`.
+**Last Major Update:** 2026-10-23 — **v2.15.0** one miner card on recorded energy pins (1,049 plants, 276 remote communities). Methane stays 2,611. Optimistic hashprice stays labelled. `public/data/live-stats.json` still says 2.12.4 until a real build. Earlier: 2026-07-16 v2.9.0.
 
 **Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
 **Local dev:** http://localhost:3003  

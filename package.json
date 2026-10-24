@@ -1,6 +1,6 @@
 {
   "name": "stranded",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
@@ -20,7 +20,7 @@
     "stamp:dataset:refresh": "node --import tsx scripts/stamp-dataset.js --refresh",
     "proof:refresh": "node scripts/generate-pin-proofs.js --refresh",
     "test": "npm run validate && npm run test:helpers",
-    "test:helpers": "node --import tsx scripts/test-helpers.mjs && node --import tsx scripts/test-fuel-budget.mjs && node --import tsx scripts/test-pin-proof.mjs && node scripts/test-renewable-layers.mjs && node --import tsx scripts/test-energy-atlas.mjs",
+    "test:helpers": "node --import tsx scripts/test-helpers.mjs && node --import tsx scripts/test-fuel-budget.mjs && node --import tsx scripts/test-pin-proof.mjs && node scripts/test-renewable-layers.mjs && node --import tsx scripts/test-energy-atlas.mjs && node --import tsx scripts/test-energy-build.mjs",
     "docs:sync": "node scripts/generate-live-stats.js && node scripts/sync-docs.js",
     "verify": "bash scripts/verify-pipeline.sh",
     "e2e": "playwright test",

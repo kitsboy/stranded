@@ -1215,11 +1215,18 @@ export default function EducationContent() {
         </ul>
       </div>
 
+      <div className="mb-12 glass p-6 rounded-2xl border border-[#5BC0BE]/25" data-testid="edu-energy-files">
+        <h2 className="text-xl font-semibold mb-2">Other energy on the same map</h2>
+        <p className="text-sm text-gray-300">
+          The methane file stays 2,611 sites (2,588 with reported CH₄, 675 high-confidence). Beside it, the map carries 1,049 renewable plants from the NRCan file (mostly August 2017, not a current-year census) and 276 remote communities from the 2018 database. A miner card opens on those pins only where the file records power: a plant nameplate times that province’s official capacity factor, or a community’s recorded kilowatts or annual generation. Biomass has generation and no 2024 capacity, so those plants are not given a payback. Rivers, province shades, and infrastructure points are not generation sites. “No net draw on the grid” is the waste-methane genset claim. A grid-connected plant already sells its power. The hashprice on every build stays the labelled optimistic rate, with the network-derived rate beside it.
+        </p>
+      </div>
+
       {/* 11-20: Additional polish sections */}
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Key Takeaways</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          {["Capturing methane is roughly 28–80× less warming than venting (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80) — and flaring already burns it; mining monetises that same destruction", "2,611 mapped Canadian sites — 2,588 with reported CH₄, 675 high-confidence (\"verified\" only for that set)", "Bitcoin mining is the technology that profitably turns this liability into sovereign wealth with no net draw on the grid — optimistic hashprice scenarios always labelled as such"].map((t, i) => (
+          {["Capturing methane is roughly 28–80× less warming than venting (GWP₁₀₀ ≈ 28, GWP₂₀ ≈ 80) — and flaring already burns it; mining monetises that same destruction", "2,611 mapped Canadian methane sites — 2,588 with reported CH₄, 675 high-confidence (\"verified\" only for that set)", "Bitcoin mining at a waste-methane site turns that liability into sovereign wealth with no net draw on the grid — optimistic hashprice scenarios always labelled as such", "1,049 renewable plants and 276 remote communities are on the map. A miner card opens only where the file records power. Grid plants are not free electricity."].map((t, i) => (
             <div key={i} className="glass p-5 rounded-2xl text-sm border-l-4 border-[#FF8C00]">{t}</div>
           ))}
         </div>

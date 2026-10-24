@@ -231,6 +231,21 @@ function fmtNum(value: unknown): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: 1 })
 }
 
+/** Short hover. The click card is the full popup, so the two cannot stack as twin cards. */
+export function atlasTeaserHtml(props: Record<string, unknown> | null | undefined): string {
+  const p = props || {}
+  if (p.kind === 'water' || p.kind === 'possible') {
+    const river = escapeHtml(p.river || 'Unnamed river')
+    return `<div class="text-xs font-semibold truncate max-w-[210px]">${river}</div><div class="text-micro text-gray-300 mt-0.5">No kilowatts in this assessment</div>`
+  }
+  if (p.kind === 'shade') {
+    const name = escapeHtml(p.name || 'Province')
+    return `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div><div class="text-micro text-gray-300 mt-0.5">Province total, not a plant pin</div>`
+  }
+  const name = escapeHtml(p.name || 'Infrastructure')
+  return `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div><div class="text-micro text-gray-300 mt-0.5">Not a generation site</div>`
+}
+
 /** Hover / click card for an infrastructure point or a province shade. */
 export function atlasPopupHtml(props: Record<string, unknown> | null | undefined): string {
   const p = props || {}
@@ -242,6 +257,7 @@ export function atlasPopupHtml(props: Record<string, unknown> | null | undefined
       `<div class="text-micro text-gray-300 mt-0.5">${klass}</div>`,
       row('Community', p.community),
       `<div class="text-micro text-gray-400 mt-1">Official open-water polygon. The community is named on the polygon. It is not a second pin. Ice is not painted.</div>`,
+      `<div class="text-micro text-gray-400 mt-1">This assessment does not publish kilowatts for the polygon, so no miner build is sized.</div>`,
       `<div class="text-micro mt-1"><a href="https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871" target="_blank" rel="noopener noreferrer" style="color:#FF8C00">Hydrokinetic assessment</a></div>`,
     ].join('')
   }
@@ -257,6 +273,7 @@ export function atlasPopupHtml(props: Record<string, unknown> | null | undefined
       `<div class="text-micro text-gray-500 mt-1">${p.boundary === 'cartographic'
         ? '2021 Census cartographic boundary, generalized by the Statistics Canada map service.'
         : 'Province box, not a legal boundary.'}</div>`,
+      `<div class="text-micro text-gray-400 mt-1">A province total is not a plant, so no miner build is sized on the shade.</div>`,
     ].filter(Boolean).join('')
   }
 
@@ -279,7 +296,7 @@ export function atlasPopupHtml(props: Record<string, unknown> | null | undefined
     row('Product', p.product),
     row('Reference period', p.period),
     row('Filing source', p.source),
-    `<div class="text-micro text-gray-400 mt-1">Official point for this line. The corridor is not in the file, so the route is not drawn.</div>`,
+    `<div class="text-micro text-gray-400 mt-1">Official point for this line. The corridor is not in the file, so the route is not drawn. Not a generation site, so no miner build is sized here.</div>`,
     `<div class="text-micro mt-1"><a href="https://open.canada.ca/data/en/dataset/aae6619f-f9f3-435d-bc32-42decd58b674" target="_blank" rel="noopener noreferrer" style="color:#FF8C00">NACEI infrastructure</a></div>`,
   ].filter(Boolean).join('')
 }
