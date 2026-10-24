@@ -1,5 +1,12 @@
-/** Simplified province bounding boxes for emission choropleth overlay (WGS84). */
+/**
+ * Province boxes are the fallback when `/data/province-boundaries.geojson` fails.
+ * The live shades use the 2021 Census cartographic file, generalized by the StatCan service.
+ */
 export type ProvinceBox = { name: string; minLng: number; maxLng: number; minLat: number; maxLat: number }
+
+export const PROVINCE_BOUNDARY_URL = '/data/province-boundaries.geojson'
+
+export type ProvinceRings = GeoJSON.Polygon | GeoJSON.MultiPolygon
 
 export const PROVINCE_BOXES: ProvinceBox[] = [
   { name: 'Alberta', minLng: -120.5, maxLng: -110, minLat: 49, maxLat: 60 },
@@ -17,54 +24,81 @@ export const PROVINCE_BOXES: ProvinceBox[] = [
   { name: 'Nunavut', minLng: -120, maxLng: -61, minLat: 51, maxLat: 83 },
 ]
 
-export function emissionChoroplethGeojson(
+function boxGeometry(box: ProvinceBox): GeoJSON.Polygon {
+  return {
+    type: 'Polygon',
+    coordinates: [[
+      [box.minLng, box.minLat],
+      [box.maxLng, box.minLat],
+      [box.maxLng, box.maxLat],
+      [box.minLng, box.maxLat],
+      [box.minLng, box.minLat],
+    ]],
+  }
+}
+
+/** Keep a polygon only when its name is one of the 13 StatCan keys. */
+export function boundariesFromGeojson(
+  doc: { features?: Array<{ properties?: { name?: unknown } | null; geometry?: { type?: string; coordinates?: unknown } | null }> } | null | undefined,
+): Record<string, ProvinceRings> {
+  const allowed = new Set(PROVINCE_BOXES.map((box) => box.name))
+  const out: Record<string, ProvinceRings> = {}
+  for (const feature of doc?.features || []) {
+    const name = String(feature.properties?.name || '')
+    const geom = feature.geometry
+    if (!allowed.has(name) || !geom) continue
+    if (geom.type !== 'Polygon' && geom.type !== 'MultiPolygon') continue
+    if (!Array.isArray(geom.coordinates) || geom.coordinates.length === 0) continue
+    out[name] = geom as ProvinceRings
+  }
+  return out
+}
+
+function shapeFor(
+  box: ProvinceBox,
+  boundaries?: Record<string, ProvinceRings> | null,
+): { geometry: ProvinceRings; boundary: 'cartographic' | 'box' } {
+  const geom = boundaries?.[box.name]
+  if (geom && (geom.type === 'Polygon' || geom.type === 'MultiPolygon')) {
+    return { geometry: geom, boundary: 'cartographic' }
+  }
+  return { geometry: boxGeometry(box), boundary: 'box' }
+}
+
+function choroplethFeatures(
   totals: Record<string, number>,
-): GeoJSON.FeatureCollection {
+  valueKey: 'emission' | 'revenue' | 'value',
+  boundaries?: Record<string, ProvinceRings> | null,
+): GeoJSON.Feature[] {
   const max = Math.max(...Object.values(totals), 1)
-  const features: GeoJSON.Feature[] = PROVINCE_BOXES.map(box => {
-    const emission = totals[box.name] || 0
-    const intensity = emission / max
+  return PROVINCE_BOXES.map((box) => {
+    const amount = totals[box.name] || 0
+    const shape = shapeFor(box, boundaries)
     return {
       type: 'Feature',
-      properties: { name: box.name, emission, intensity },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[
-          [box.minLng, box.minLat],
-          [box.maxLng, box.minLat],
-          [box.maxLng, box.maxLat],
-          [box.minLng, box.maxLat],
-          [box.minLng, box.minLat],
-        ]],
+      properties: {
+        name: box.name,
+        [valueKey]: amount,
+        intensity: amount / max,
+        boundary: shape.boundary,
       },
+      geometry: shape.geometry,
     }
   })
-  return { type: 'FeatureCollection', features }
+}
+
+export function emissionChoroplethGeojson(
+  totals: Record<string, number>,
+  boundaries?: Record<string, ProvinceRings> | null,
+): GeoJSON.FeatureCollection {
+  return { type: 'FeatureCollection', features: choroplethFeatures(totals, 'emission', boundaries) }
 }
 
 export function revenueChoroplethGeojson(
   totals: Record<string, number>,
+  boundaries?: Record<string, ProvinceRings> | null,
 ): GeoJSON.FeatureCollection {
-  const max = Math.max(...Object.values(totals), 1)
-  const features: GeoJSON.Feature[] = PROVINCE_BOXES.map(box => {
-    const revenue = totals[box.name] || 0
-    const intensity = revenue / max
-    return {
-      type: 'Feature',
-      properties: { name: box.name, revenue, intensity },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[
-          [box.minLng, box.minLat],
-          [box.maxLng, box.minLat],
-          [box.maxLng, box.maxLat],
-          [box.minLng, box.maxLat],
-          [box.minLng, box.minLat],
-        ]],
-      },
-    }
-  })
-  return { type: 'FeatureCollection', features }
+  return { type: 'FeatureCollection', features: choroplethFeatures(totals, 'revenue', boundaries) }
 }
 
 export function emissionFillColor(intensity: number): string {
@@ -84,27 +118,9 @@ export function emissionFillColor(intensity: number): string {
  */
 export function renewableChoroplethGeojson(
   totals: Record<string, number>,
+  boundaries?: Record<string, ProvinceRings> | null,
 ): GeoJSON.FeatureCollection {
-  const max = Math.max(...Object.values(totals), 1)
-  const features: GeoJSON.Feature[] = PROVINCE_BOXES.map(box => {
-    const value = totals[box.name] || 0
-    const intensity = value / max
-    return {
-      type: 'Feature',
-      properties: { name: box.name, value, intensity },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[
-          [box.minLng, box.minLat],
-          [box.maxLng, box.minLat],
-          [box.maxLng, box.maxLat],
-          [box.minLng, box.maxLat],
-          [box.minLng, box.minLat],
-        ]],
-      },
-    }
-  })
-  return { type: 'FeatureCollection', features }
+  return { type: 'FeatureCollection', features: choroplethFeatures(totals, 'value', boundaries) }
 }
 
 /** Teal→green ramp for renewable choropleth (distinct from the orange methane ramp). */

@@ -28,7 +28,9 @@ export const MAP_CSP_FONT_DOMAINS = [] as const
 
 /**
  * Official NRCan map images. `{bbox-epsg-3857}` is filled by MapLibre.
- * Solar layers: 0 = GHI, 1 = DNI. Hydrokinetic: 1 = open water, 2 = possible water.
+ * Solar layers are painted: 0 = GHI, 1 = DNI.
+ * Hydrokinetic export URLs stay listed so CSP still allows that host.
+ * The map paints open water from the local shapefile and does not request those images.
  */
 const NACEI_SOLAR_EXPORT =
   'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_resource_potential_of_north_america_en/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers='

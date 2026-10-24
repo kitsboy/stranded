@@ -105,7 +105,7 @@
       "publisher": "Natural Resources Canada",
       "datasetUrl": "https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871",
       "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/hydrokinetic_assessment_using_SAR_for_Diesel_communities_en/MapServer",
-      "why": "The query endpoint returns attributes and no rings. Open water and possible water are painted from the official map image. Ice is not painted. The community coordinate on that file repeats the remote community and is not added as a second pin."
+      "why": "The query endpoint returns attributes and no rings. Open water and possible water polygons are painted from the official shapefile. Ice is not painted. The community coordinate is not a second pin. Nine thin polygons were restored from the original rings after simplify collapsed them."
     },
     {
       "id": "geothermal-plants-canada",

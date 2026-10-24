@@ -231,6 +231,8 @@ async function main() {
       icePolygons: ice,
       ringsReturnedByQuery: false,
       painted: ['water', 'possible water'],
+      geometryFile: 'public/data/hydrokinetic.geojson',
+      geometrySource: 'Official shapefile. The query returns no rings. Nine thin polygons that collapsed during simplify were restored from the original rings, not from the community point.',
       notPainted: 'Ice polygons, and the community point repeated on every class.',
       datasetUrl: 'https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871',
       serviceUrl: HYDRO,
@@ -241,6 +243,12 @@ async function main() {
       absentFromLiveService: ['wind speed', 'geothermal gradient'],
     },
     pv: { file: 'pv-province.json', provinces: Object.keys(provinces).length },
+    provinces: {
+      file: 'province-boundaries.geojson',
+      features: 13,
+      source: '2021 Census cartographic boundary, layer lpr_000b21s_e, generalized by the Statistics Canada map service. Parts under 100 km² were dropped. A province box is used only if this file fails to load.',
+      datasetUrl: 'https://open.canada.ca/data/en/dataset/ef70dc3b-1069-4037-9bce-61f47e628a1d',
+    },
     cer: {
       url: 'https://www.cer-rec.gc.ca/en/data-analysis/energy-markets/market-snapshots/index.html',
       painted: false,

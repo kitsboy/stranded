@@ -4,7 +4,7 @@
  */
 
 import { ATLAS_RASTER_TILES } from '@/lib/map-csp'
-import { renewableChoroplethGeojson } from '@/lib/province-choropleth'
+import { renewableChoroplethGeojson, type ProvinceRings } from '@/lib/province-choropleth'
 import { escapeHtml } from '@/lib/renewable-layers'
 
 export type AtlasLayerId =
@@ -36,6 +36,7 @@ export type AtlasLayer = {
 
 export const INFRA_DATA_URL = '/data/nacei-infrastructure.geojson'
 export const PV_DATA_URL = '/data/pv-province.json'
+export const HYDRO_DATA_URL = '/data/hydrokinetic.geojson'
 
 export const CER_SOURCE = {
   href: 'https://www.cer-rec.gc.ca/en/data-analysis/energy-markets/market-snapshots/index.html',
@@ -69,7 +70,6 @@ export const ATLAS_LAYERS: AtlasLayer[] = [
     swatch: '#005ce6',
     mark: 'wash',
     count: 81,
-    tiles: ATLAS_RASTER_TILES['hydrokinetic-water'],
   },
   {
     id: 'hydrokinetic-possible',
@@ -79,7 +79,6 @@ export const ATLAS_LAYERS: AtlasLayer[] = [
     swatch: '#38bdf8',
     mark: 'wash',
     count: 59,
-    tiles: ATLAS_RASTER_TILES['hydrokinetic-possible'],
   },
   {
     id: 'transmission',
@@ -189,9 +188,9 @@ export function pvProvinceTotals(doc: {
 }
 
 const SHADE_PAINT: Record<string, [string, string]> = {
-  'statcan-gen': ['rgba(45,212,191,0.06)', 'rgba(13,148,136,0.40)'],
-  'statcan-cap': ['rgba(251,191,36,0.06)', 'rgba(217,119,6,0.38)'],
-  'pv-potential': ['rgba(253,224,71,0.06)', 'rgba(202,138,4,0.36)'],
+  'statcan-gen': ['rgba(45,212,191,0.12)', 'rgba(13,148,136,0.55)'],
+  'statcan-cap': ['rgba(251,191,36,0.12)', 'rgba(180,83,9,0.58)'],
+  'pv-potential': ['rgba(253,224,71,0.12)', 'rgba(202,138,4,0.52)'],
 }
 
 export function shadeFillPaint(id: string): [string, string] {
@@ -201,8 +200,9 @@ export function shadeFillPaint(id: string): [string, string] {
 export function provinceShadeGeojson(
   totals: Record<string, number>,
   extra?: Record<string, Record<string, unknown>>,
+  boundaries?: Record<string, ProvinceRings> | null,
 ): GeoJSON.FeatureCollection {
-  const base = renewableChoroplethGeojson(totals)
+  const base = renewableChoroplethGeojson(totals, boundaries)
   return {
     type: 'FeatureCollection',
     features: base.features.map((feature) => {
@@ -234,6 +234,18 @@ function fmtNum(value: unknown): string {
 /** Hover / click card for an infrastructure point or a province shade. */
 export function atlasPopupHtml(props: Record<string, unknown> | null | undefined): string {
   const p = props || {}
+  if (p.kind === 'water' || p.kind === 'possible') {
+    const river = escapeHtml(p.river || 'Unnamed river')
+    const klass = p.kind === 'water' ? 'Open water' : 'Possible open water'
+    return [
+      `<div class="text-xs font-semibold max-w-[240px]">${river}</div>`,
+      `<div class="text-micro text-gray-300 mt-0.5">${klass}</div>`,
+      row('Community', p.community),
+      `<div class="text-micro text-gray-400 mt-1">Official open-water polygon. The community is named on the polygon. It is not a second pin. Ice is not painted.</div>`,
+      `<div class="text-micro mt-1"><a href="https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871" target="_blank" rel="noopener noreferrer" style="color:#FF8C00">Hydrokinetic assessment</a></div>`,
+    ].join('')
+  }
+
   if (p.kind === 'shade') {
     const name = escapeHtml(p.name || 'Province')
     const value = fmtNum(p.value)
@@ -242,7 +254,9 @@ export function atlasPopupHtml(props: Record<string, unknown> | null | undefined
       `<div class="text-xs font-semibold max-w-[240px]">${name}</div>`,
       value ? `<div class="text-micro text-gray-300 mt-0.5">${escapeHtml(value)}${unit ? ` ${unit}` : ''}</div>` : '',
       p.detail ? `<div class="text-micro text-gray-400 mt-1">${escapeHtml(p.detail)}</div>` : '',
-      `<div class="text-micro text-gray-500 mt-1">Province box, not a legal boundary.</div>`,
+      `<div class="text-micro text-gray-500 mt-1">${p.boundary === 'cartographic'
+        ? '2021 Census cartographic boundary, generalized by the Statistics Canada map service.'
+        : 'Province box, not a legal boundary.'}</div>`,
     ].filter(Boolean).join('')
   }
 

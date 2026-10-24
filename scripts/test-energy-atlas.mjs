@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const { ATLAS_LAYERS, statcanRenewableTotal, pvProvinceTotals, atlasPopupHtml, canonicalProvince, searchInfrastructure, SOUTHERN_ALBERTA_PRESET } = await import('../lib/energy-atlas.ts')
+const { boundariesFromGeojson, PROVINCE_BOXES } = await import('../lib/province-choropleth.ts')
 const { renewablePopupHtml } = await import('../lib/renewable-layers.ts')
 const { mapTileUrlsCoveredByCsp } = await import('../lib/map-csp.ts')
 
@@ -38,6 +39,46 @@ for (const layer of ATLAS_LAYERS.filter((item) => item.group === 'infra')) {
 assert.strictEqual(atlas.hydrokinetic.waterPolygons, ATLAS_LAYERS.find((item) => item.id === 'hydrokinetic-water').count)
 assert.strictEqual(atlas.hydrokinetic.possiblePolygons, ATLAS_LAYERS.find((item) => item.id === 'hydrokinetic-possible').count)
 assert.strictEqual(atlas.hydrokinetic.ringsReturnedByQuery, false)
+assert.match(atlas.hydrokinetic.geometrySource, /shapefile/)
+assert.match(atlas.hydrokinetic.notPainted, /Ice/)
+assert.ok(!ATLAS_LAYERS.find((item) => item.id === 'hydrokinetic-water').tiles)
+assert.ok(!ATLAS_LAYERS.find((item) => item.id === 'hydrokinetic-possible').tiles)
+
+const hydro = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/hydrokinetic.geojson'), 'utf8'))
+const hydroCounts = {}
+for (const feature of hydro.features) {
+  const props = feature.properties || {}
+  assert.ok(props.kind === 'water' || props.kind === 'possible', props.kind)
+  assert.ok(feature.geometry && feature.geometry.type !== 'Point')
+  assert.ok(!('POINT_X' in props) && !('POINT_Y' in props))
+  hydroCounts[props.kind] = (hydroCounts[props.kind] || 0) + 1
+}
+assert.strictEqual(hydroCounts.water, 81)
+assert.strictEqual(hydroCounts.possible, 59)
+const mackenzie = hydro.features.find((feature) => feature.properties.river === 'Mackenzie' && feature.properties.community === 'Tsiigehtchic')
+assert.ok(mackenzie, 'Mackenzie at Tsiigehtchic')
+assert.ok(mackenzie.geometry.coordinates.length > 0)
+const riverHtml = atlasPopupHtml({ kind: 'water', river: 'Mackenzie', community: 'Tsiigehtchic' })
+assert.match(riverHtml, /Mackenzie/)
+assert.match(riverHtml, /Tsiigehtchic/)
+assert.match(riverHtml, /not a second pin/)
+assert.match(riverHtml, /Ice is not painted/)
+
+const boundaryDoc = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/data/province-boundaries.geojson'), 'utf8'))
+const rings = boundariesFromGeojson(boundaryDoc)
+assert.strictEqual(Object.keys(rings).length, 13)
+for (const box of PROVINCE_BOXES) assert.ok(rings[box.name], box.name)
+assert.strictEqual(boundaryDoc.features.find((feature) => feature.properties.name === 'Quebec').properties.name, 'Quebec')
+assert.ok(!JSON.stringify(boundaryDoc).includes('Yukon Territory'))
+assert.ok(fs.statSync(path.join(ROOT, 'public/data/province-boundaries.geojson')).size < 500_000)
+const albertaShape = rings.Alberta
+const albertaVerts = JSON.stringify(albertaShape.coordinates).split('[').length
+assert.ok(albertaVerts > 40, `Alberta boundary too coarse (${albertaVerts})`)
+const cartographic = atlasPopupHtml({ kind: 'shade', name: 'Alberta', value: 12, unit: 'MW', boundary: 'cartographic' })
+assert.match(cartographic, /cartographic boundary/)
+assert.ok(!cartographic.includes('Province box'))
+const boxed = atlasPopupHtml({ kind: 'shade', name: 'Alberta', value: 12, boundary: 'box' })
+assert.match(boxed, /Province box/)
 assert.ok(atlas.solarRasters.absentFromLiveService.includes('geothermal gradient'))
 assert.ok(atlas.solarRasters.absentFromLiveService.includes('wind speed'))
 

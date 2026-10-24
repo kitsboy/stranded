@@ -1,3 +1,7 @@
+# Map Layers — current (2026-10-23, v2.14.0)
+
+Province shades use `public/data/province-boundaries.geojson` (2021 Census cartographic file, generalized). The emission, revenue, and renewable choropleths use that same file. A rectangle appears only if the file fails. Hydrokinetic open water and possible water are polygons in `public/data/hydrokinetic.geojson`. A click names the river and the community. Ice is not painted. The community point is not drawn.
+
 # Map Layers — current (2026-10-24, v2.13.1)
 
 The Southern Alberta preset (`layer-preset-southern-alberta`) turns methane sites, solar plants and solar GHI on, and flies to southern Alberta. The infrastructure search box (`infra-search`) matches owner or line name and flies to the point. A plant popup names the plant-file period beside the 2024 province capacity. The layer heading (`layers-panel-toggle`) and Show welcome (`show-welcome`) are separate buttons.
@@ -8,9 +12,9 @@ The checkbox contract is `onChange` on a normal controlled checkbox. One user ac
 
 Official energy rows are open in the layer panel, under **Official energy atlas**. They are not inside a closed disclosure. Plants and remote communities come first (hydro 555, wind 241, solar 138, biomass 111, other 2, tidal 1, pumped storage 1, geothermal 0, remote diesel/oil/gas 208, remote hydro 35, remote grid 26, remote source not stated 7). Under those:
 
-- Resource surfaces: solar GHI, solar DNI, hydrokinetic open water (81), hydrokinetic possible water (59). Map images, under the pins. Opacity slider when one of them is on.
+- Resource surfaces: solar GHI, solar DNI, hydrokinetic open water (81), hydrokinetic possible water (59). Solar layers are map images. Hydrokinetic layers are polygons from the official shapefile. All of them sit under the pins. Opacity slider when one of them is on.
 - Infrastructure records: transmission 28, gas 28, liquids 21. Point marks. No drawn corridor.
-- Province shades: Renewable generation 2025, Renewable capacity 2024, Solar PV potential. Boxes, not towns.
+- Province shades: Renewable generation 2025, Renewable capacity 2024, Solar PV potential. 2021 Census boundaries, not towns.
 - A Canada Energy Regulator link. Projections, not locations.
 
 Test ids: `overlay-<plant id>`, `atlas-<layer id>`, `atlas-opacity`, `atlas-cer`, `atlas-legend`. Geothermal stays `(0)`. Wind-speed and geothermal-gradient rasters are not in the live NRCan service. Do not invent them. Do not restyle the welcome card.

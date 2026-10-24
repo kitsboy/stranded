@@ -1933,13 +1933,10 @@ function StrandedCommandCenter() {
       {!selectedSite && ATLAS_LAYERS.some(layer => atlas[layer.id]) && (
         <div className="map-atlas-legend" data-testid="atlas-legend">
           {ATLAS_LAYERS.filter(layer => atlas[layer.id]).map(layer => (
-            <div key={layer.id} className="flex items-start gap-2">
-              <span className="mt-0.5 inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: layer.mark === 'wash' ? layer.swatch : layer.swatch }} aria-hidden />
-              <span className="text-micro leading-snug text-gray-200">
-                <span className="text-white">{t(layer.labelKey)}</span>
-                <span className="text-gray-400"> — {t(layer.hintKey)}</span>
-              </span>
-            </div>
+            <span key={layer.id} className="inline-flex items-center gap-1.5" title={t(layer.hintKey)}>
+              <span className="inline-block h-2 w-2 shrink-0 rounded-sm" style={{ background: layer.swatch }} aria-hidden />
+              <span className="text-micro text-white">{t(layer.labelKey)}{layer.count != null ? ` (${layer.count})` : ''}</span>
+            </span>
           ))}
         </div>
       )}

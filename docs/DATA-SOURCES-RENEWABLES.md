@@ -39,14 +39,14 @@ Drawn under the pins, at an opacity you can turn down. The methane clusters and 
 | --- | --- |
 | Solar irradiance (GHI) | NACEI resource-potential MapServer, layer 0, NSRDB global horizontal irradiance. Live map image. |
 | Solar irradiance (DNI) | Same service, layer 1, direct normal irradiance. |
-| Hydrokinetic open water (81) | Official map image of open water in ice-covered rivers near diesel-reliant communities. |
-| Hydrokinetic possible water (59) | Same service, the “possibly water” class. |
+| Hydrokinetic open water (81) | Official shapefile polygons. A click names the river and the community on that polygon. |
+| Hydrokinetic possible water (59) | Same file, the “possibly water” class. |
 
 Solar service: `https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_resource_potential_of_north_america_en/MapServer`. The live service has those two solar layers only. Wind-speed and geothermal-gradient rasters are not in it, so they are not invented.
 
-Hydrokinetic service: [Open water regions in ice-covered rivers](https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871). The query endpoint returns attributes and no polygon rings, so the map uses the official export image. Ice polygons are not painted. The community coordinate on that file repeats the remote community, so it is not added as a second pin.
+Hydrokinetic file: [Open water regions in ice-covered rivers](https://open.canada.ca/data/en/dataset/b102925f-aa0c-41ad-9cc6-979072fc4871), saved as `public/data/hydrokinetic.geojson`. The query endpoint still returns attributes and no rings. The map paints the official shapefile. Nine thin polygons that collapsed while simplifying were restored from the original rings, not from the community point. Ice is not painted. The community is named on the polygon and is not a second pin.
 
-These images need `geoappext.nrcan.gc.ca` and `maps-cartes.services.geo.ca` on `img-src` and `connect-src` in `public/_headers`.
+Solar images need `geoappext.nrcan.gc.ca` on `img-src` and `connect-src` in `public/_headers`. `maps-cartes.services.geo.ca` stays allowed. The hydro polygons do not request it.
 
 ## Infrastructure point records
 
@@ -62,7 +62,9 @@ File: `public/data/nacei-infrastructure.geojson`. Dataset: [NACEI energy infrast
 
 ## Province shades
 
-Boxes, not legal boundaries, and not town pins. A darker box is a higher official total. They sit under the pins.
+The 2021 Census cartographic boundary, layer `lpr_000b21s_e`, generalized by the Statistics Canada map service. File: `public/data/province-boundaries.geojson`. Names match the StatCan keys (`Quebec`, `Yukon`). Parts under 100 km² were dropped, so this is not a legal survey. A rectangle is painted only if the file fails to load. A darker province is a higher official total. These are not town pins. They sit under the pins.
+
+Source: [2021 census boundary files](https://open.canada.ca/data/en/dataset/ef70dc3b-1069-4037-9bce-61f47e628a1d).
 
 | Layer | What the number is |
 | --- | --- |
@@ -72,7 +74,7 @@ Boxes, not legal boundaries, and not town pins. A darker box is a higher officia
 
 Files: `public/data/statcan-renewables.json`, `public/data/pv-province.json`. PV source: [Photovoltaic potential and solar resource maps of Canada](https://open.canada.ca/data/en/dataset/8b434ac7-aedb-4698-90df-ba77424a551f). Municipality names have no coordinates and are not geocoded.
 
-The older Province Emission Choropleth box is still the methane emission / revenue shade. Renewable Gen and Renewable Cap on that box use the same StatCan totals.
+The older province choropleth (methane emission, revenue, renewable generation, renewable capacity) uses the same boundary file.
 
 ## Shown, not painted
 

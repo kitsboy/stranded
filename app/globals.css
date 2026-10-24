@@ -1554,11 +1554,13 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   bottom: 8.75rem;
   transform: translateX(-50%);
   z-index: 30;
-  width: min(24rem, calc(100% - 1.5rem));
+  width: min(40rem, calc(100% - 1.5rem));
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.55rem 0.7rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.85rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 0.85rem;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(91, 192, 190, 0.38);

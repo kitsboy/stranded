@@ -6,6 +6,16 @@
   "description": "Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.",
   "items": [
     {
+      "id": "https://stranded.giveabit.io/changelog#2.14.0",
+      "url": "https://stranded.giveabit.io/changelog",
+      "title": "2.14.0 — Province boundaries and river polygons",
+      "content_text": "Province shades use the 2021 Census cartographic boundaries. Hydrokinetic open water and possible water are clickable polygons from the official shapefile. A click names the river and the community. Ice is not painted.",
+      "date_published": "Fri, 23 Oct 2026 22:00:00 GMT",
+      "tags": [
+        "own-page"
+      ]
+    },
+    {
       "id": "https://stranded.giveabit.io/changelog#2.13.1",
       "url": "https://stranded.giveabit.io/changelog",
       "title": "2.13.1 — Southern Alberta, line search, plant-file age",

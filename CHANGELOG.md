@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.14.0] — 2026-10-23 · Province boundaries and river polygons
+
+- Province shades and the emission, revenue, and renewable choropleths use the 2021 Census cartographic boundaries. Statistics Canada generalized them. Parts under 100 km² are dropped. A rectangle is used only if that file fails to load.
+- Hydrokinetic open water (81) and possible water (59) are clickable polygons from the official shapefile. A click names the river and the community. Ice is not painted. The community coordinate is not a second pin. The query service still returns no rings.
+- Coastlines and river strokes are drawn a little heavier so the shapes read under the pins. The on-map legend is a short row of names, so it no longer covers the southern provinces.
+
 ## [2.13.1] — 2026-10-24 · Southern Alberta, line search, plant-file age
 
 - One preset, Southern Alberta, turns on methane sites, solar plants and solar GHI, and frames the map from the border to just north of Calgary.

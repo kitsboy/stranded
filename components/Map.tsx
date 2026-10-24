@@ -6,9 +6,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Compass, Copy, AlertTriangle } from 'lucide-react'
 import { EnrichedSite, scoreTierColor } from '@/lib/sites'
 import { hoverTeaser, formatCount, formatMoneyShort } from '@/lib/cockpit'
-import { emissionChoroplethGeojson, revenueChoroplethGeojson, renewableChoroplethGeojson } from '@/lib/province-choropleth'
+import { boundariesFromGeojson, emissionChoroplethGeojson, PROVINCE_BOUNDARY_URL, revenueChoroplethGeojson, renewableChoroplethGeojson, type ProvinceRings } from '@/lib/province-choropleth'
 import {
   ATLAS_LAYERS,
+  HYDRO_DATA_URL,
   INFRA_DATA_URL,
   PV_DATA_URL,
   atlasLayerId,
@@ -84,9 +85,9 @@ interface MapProps {
   tileFallbackLabel?: string
   /** Official energy overlays, keyed by category id. Off by default. */
   renewableOverlays?: Record<string, boolean>
-  /** Solar rasters, hydrokinetic images, infrastructure points, province shades. */
+  /** Solar rasters, hydrokinetic polygons, infrastructure points, province shades. */
   atlasLayers?: Record<string, boolean>
-  /** Opacity for the official map images. Pins stay above them. */
+  /** Opacity for solar images and hydrokinetic polygons. Pins stay above them. */
   atlasOpacity?: number
 }
 
@@ -336,10 +337,16 @@ export default function Map({
   const atlasBoundRef = useRef(new Set<string>())
   const infraDataRef = useRef<GeoJSON.FeatureCollection | null>(null)
   const infraLoadRef = useRef<Promise<GeoJSON.FeatureCollection | null> | null>(null)
+  const hydroDataRef = useRef<GeoJSON.FeatureCollection | null>(null)
+  const hydroLoadRef = useRef<Promise<GeoJSON.FeatureCollection | null> | null>(null)
+  const boundaryGeomRef = useRef<Record<string, ProvinceRings> | null>(null)
+  const boundaryLoadRef = useRef<Promise<void> | null>(null)
+  const boundaryFailedRef = useRef(false)
   const pvDataRef = useRef<{ provinces?: Record<string, { meanKwhPerKwp?: number; municipalities?: number }> } | null>(null)
   const pvLoadRef = useRef<Promise<void> | null>(null)
   const atlasHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
   const atlasShadeHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
+  const atlasHydroHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
   const showAtlasRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
   const choroplethWaitRef = useRef(false)
   const heatmapWaitRef = useRef(false)
@@ -348,6 +355,23 @@ export default function Map({
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
   const statcanRef = useRef<{ provinces?: Record<string, { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }> } | null>(null)
   const plantPopupRef = useRef<(props: Record<string, unknown>) => string>((props) => renewablePopupHtml(props))
+
+  const ensureBoundaries = useCallback(async () => {
+    if (boundaryGeomRef.current || boundaryFailedRef.current) return
+    if (!boundaryLoadRef.current) {
+      boundaryLoadRef.current = fetch(PROVINCE_BOUNDARY_URL).then(async (res) => {
+        if (!res.ok) throw new Error(`boundaries HTTP ${res.status}`)
+        const rings = boundariesFromGeojson(await res.json())
+        if (Object.keys(rings).length < 13) throw new Error(`boundaries short ${Object.keys(rings).length}`)
+        boundaryGeomRef.current = rings
+      }).catch((err) => {
+        console.warn('[Map] province boundary load failed', err)
+        boundaryFailedRef.current = true
+        boundaryLoadRef.current = null
+      })
+    }
+    await boundaryLoadRef.current
+  }, [])
   const showRenewableRef = useRef<(map: maplibregl.Map, hit: { coords: [number, number]; props: Record<string, unknown> }) => void>(() => {})
   /** Live BTC price for the hover teaser — the native handlers are attached once. */
   const btcUsdRef = useRef(liveBtcPrice)
@@ -468,6 +492,40 @@ export default function Map({
       if (!best || d < best.d) best = { d, coords, props: (f.properties || {}) as Record<string, unknown> }
     }
     return best
+  }
+  atlasHydroHitRef.current = (map, point) => {
+    const visible = (id: string) => {
+      if (!map.getLayer(id)) return false
+      return map.getLayoutProperty(id, 'visibility') !== 'none'
+    }
+    const fills: string[] = []
+    const lines: string[] = []
+    for (const layerId of ['hydrokinetic-water', 'hydrokinetic-possible']) {
+      const fill = atlasLayerId(layerId)
+      const line = `${fill}-line`
+      if (visible(fill)) fills.push(fill)
+      if (visible(line)) lines.push(line)
+    }
+    if (!fills.length && !lines.length) return null
+    const read = (hits: maplibregl.MapGeoJSONFeature[]) => {
+      const feature = hits[hits.length - 1]
+      if (!feature) return null
+      const ll = map.unproject([point.x, point.y])
+      return { coords: [ll.lng, ll.lat] as [number, number], props: (feature.properties || {}) as Record<string, unknown> }
+    }
+    try {
+      const atPoint = map.queryRenderedFeatures([point.x, point.y], { layers: [...fills, ...lines] })
+      const direct = read(atPoint)
+      if (direct) return direct
+      if (!lines.length) return null
+      const box = map.queryRenderedFeatures(
+        [[point.x - 8, point.y - 8], [point.x + 8, point.y + 8]],
+        { layers: lines },
+      )
+      return read(box)
+    } catch {
+      return null
+    }
   }
   atlasShadeHitRef.current = (map, point) => {
     const ids = ATLAS_LAYERS.filter((layer) => layer.group === 'shade').map((layer) => atlasLayerId(layer.id)).filter((id) => {
@@ -1113,6 +1171,48 @@ export default function Map({
         map.setPaintProperty(id, 'raster-opacity', opacity)
       }
 
+      if (hydroDataRef.current) {
+        const src = 'atlas-hydro'
+        if (!map.getSource(src)) map.addSource(src, { type: 'geojson', data: hydroDataRef.current })
+        for (const layer of ATLAS_LAYERS) {
+          if (layer.id !== 'hydrokinetic-water' && layer.id !== 'hydrokinetic-possible') continue
+          const id = atlasLayerId(layer.id)
+          const lineId = `${id}-line`
+          const kind = layer.id === 'hydrokinetic-water' ? 'water' : 'possible'
+          const on = !!state[layer.id]
+          if (!map.getLayer(id)) {
+            map.addLayer({
+              id,
+              type: 'fill',
+              source: src,
+              filter: ['==', ['get', 'kind'], kind],
+              layout: { visibility: 'none' },
+              paint: { 'fill-color': layer.swatch, 'fill-opacity': opacity },
+            }, before)
+            bindHover(id)
+          }
+          if (!map.getLayer(lineId)) {
+            map.addLayer({
+              id: lineId,
+              type: 'line',
+              source: src,
+              filter: ['==', ['get', 'kind'], kind],
+              layout: { visibility: 'none' },
+              paint: {
+                'line-color': layer.swatch,
+                'line-width': 1.4,
+                'line-opacity': Math.min(1, opacity + 0.2),
+              },
+            }, before)
+            bindHover(lineId)
+          }
+          map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
+          map.setLayoutProperty(lineId, 'visibility', on ? 'visible' : 'none')
+          map.setPaintProperty(id, 'fill-opacity', opacity)
+          map.setPaintProperty(lineId, 'line-opacity', Math.min(1, opacity + 0.2))
+        }
+      }
+
       if (infraDataRef.current) {
         const src = 'atlas-infra'
         if (!map.getSource(src)) map.addSource(src, { type: 'geojson', data: infraDataRef.current })
@@ -1168,7 +1268,7 @@ export default function Map({
             type: 'line',
             source: src,
             layout: { visibility: 'none' },
-            paint: { 'line-color': 'rgba(255,255,255,0.3)', 'line-width': 0.7 },
+            paint: { 'line-color': 'rgba(255,255,255,0.55)', 'line-width': 1.15 },
           }, beforePinLayer(map))
         }
         const on = !!state[id]
@@ -1189,10 +1289,10 @@ export default function Map({
               unit: mode === 'gen' ? 'MWh in 2025' : 'MW in 2024',
               detail: mode === 'cap' && name === 'Alberta'
                 ? 'Includes 6 MW geothermal from the capacity table. The plant layer has 0 geothermal plants of 1 MW or more.'
-                : 'Statistics Canada renewable total. Province box, not a plant pin.',
+                : 'Statistics Canada renewable total. Not a plant pin.',
             }
           }
-          paintShade(id, provinceShadeGeojson(totals, extra))
+          paintShade(id, provinceShadeGeojson(totals, extra, boundaryGeomRef.current))
         }
       }
 
@@ -1206,7 +1306,7 @@ export default function Map({
               detail: `Mean of ${count} municipalities, south-facing latitude tilt. Not a town pin.`,
             }
           }
-          paintShade('pv-potential', provinceShadeGeojson(totals, extra))
+          paintShade('pv-potential', provinceShadeGeojson(totals, extra, boundaryGeomRef.current))
         }
       }
 
@@ -1254,9 +1354,34 @@ export default function Map({
       statcanRef.current = await res.json()
     }
 
+    const ensureHydro = async () => {
+      const wanted = !!(atlasLayersRef.current?.['hydrokinetic-water'] || atlasLayersRef.current?.['hydrokinetic-possible'])
+      if (!wanted || hydroDataRef.current) return
+      if (!hydroLoadRef.current) {
+        hydroLoadRef.current = fetch(HYDRO_DATA_URL).then(async (res) => {
+          if (!res.ok) throw new Error(`hydro HTTP ${res.status}`)
+          const data = await res.json() as GeoJSON.FeatureCollection
+          hydroDataRef.current = data
+          return data
+        }).catch((err) => {
+          console.warn('[Map] hydrokinetic load failed', err)
+          hydroLoadRef.current = null
+          return null
+        })
+      }
+      await hydroLoadRef.current
+    }
+
     const run = async () => {
+      const shadeOn = !!(atlasLayersRef.current?.['statcan-gen'] || atlasLayersRef.current?.['statcan-cap'] || atlasLayersRef.current?.['pv-potential'])
       try {
-        await Promise.all([ensureInfra(), ensurePv(), ensureStatcan()])
+        await Promise.all([
+          ensureInfra(),
+          ensurePv(),
+          ensureStatcan(),
+          ensureHydro(),
+          shadeOn ? ensureBoundaries() : Promise.resolve(),
+        ])
       } catch (err) {
         console.warn('[Map] atlas sync failed', err)
       }
@@ -1506,6 +1631,11 @@ export default function Map({
         onSiteClickRef.current(best.site)
         return
       }
+      const hydro = atlasHydroHitRef.current(map, e.point)
+      if (hydro) {
+        showAtlasRef.current(map, hydro)
+        return
+      }
       const shade = atlasShadeHitRef.current(map, e.point)
       if (shade) {
         showAtlasRef.current(map, shade)
@@ -1593,11 +1723,17 @@ export default function Map({
           }
         })
       }
+      if (showChoropleth && !boundaryGeomRef.current && !boundaryFailedRef.current) {
+        void ensureBoundaries().then(() => {
+          if (boundaryGeomRef.current) syncChoroplethRef.current()
+        })
+      }
+      const rings = boundaryGeomRef.current
       const geojson = choroplethMode === 'revenue'
-              ? revenueChoroplethGeojson(totals)
+              ? revenueChoroplethGeojson(totals, rings)
               : isRenewable
-                ? renewableChoroplethGeojson(totals)
-                                : emissionChoroplethGeojson(totals)
+                ? renewableChoroplethGeojson(totals, rings)
+                                : emissionChoroplethGeojson(totals, rings)
     const highlightList = highlightedProvinces.length ? highlightedProvinces : ['__none__']
     try {
       if (map.getSource(srcId)) {

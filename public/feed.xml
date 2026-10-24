@@ -5,7 +5,14 @@
     <link>https://stranded.giveabit.io/changelog</link>
     <description>Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.</description>
     <language>en</language>
-    <lastBuildDate>Sat, 24 Oct 2026 02:05:52 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2026 02:30:37 GMT</lastBuildDate>
+    <item>
+      <title>2.14.0 — Province boundaries and river polygons</title>
+      <link>https://stranded.giveabit.io/changelog</link>
+      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.14.0</guid>
+      <pubDate>Fri, 23 Oct 2026 12:00:00 GMT</pubDate>
+      <description>Province shades and the emission, revenue, and renewable choropleths use the 2021 Census cartographic boundaries. Statistics Canada generalized them. Parts under 100 km² are dropped. A rectangle is used only if that file fails to load. Hydrokinetic open water (81) and possible water (59) are clickable polygons from the official shapefile. A click names the river and the community. Ice is not painted. The community coordinate is not a second pin. The query service still returns no rings.</description>
+    </item>
     <item>
       <title>2.13.1 — Southern Alberta, line search, plant-file age</title>
       <link>https://stranded.giveabit.io/changelog</link>
@@ -82,13 +89,6 @@
       <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.0</guid>
       <pubDate>Fri, 11 Sep 2026 12:00:00 GMT</pubDate>
       <description>### Added — Fleet templates v2 (named, reusable, exportable) **Named fleet templates** — save the current miner stack under a name (inline input, no `window.prompt`), listed with Apply + delete; persisted locally in `stranded.fleets.v1`, guarded so a corrupt/stale key never white-screens the page</description>
-    </item>
-    <item>
-      <title>2.10.0 — Update</title>
-      <link>https://stranded.giveabit.io/changelog</link>
-      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.10.0</guid>
-      <pubDate>Tue, 11 Aug 2026 12:00:00 GMT</pubDate>
-      <description>### Added — Mega upgrade batch (~50 shipped items) **Footer** — in-flow (not sticky); fuller **4-column** layout (platform / resources / company-legal / brand); all app routes; suite + donate; giveabit wordmark (`public/images/giveabit-logo.png`); hover color transitions</description>
     </item>
   </channel>
 </rss>
