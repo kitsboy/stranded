@@ -1,3 +1,45 @@
+# Stranded footer wordmark restored — 2026-10-24
+
+## Latest Session Summary (from 2026-10-24 goodbye)
+
+**Chat Topic:** Put an honest miner card on the new energy pins, then keep the phone install banner and the Give A Bit footer logo honest.
+
+**Key Things We Did:**
+- Shipped one editable miner card for plants and remote communities that record power (v2.15.0, `44ae11c`).
+- Hid the phone install banner while Layers, Filters, a site card, or an energy card is open (`24af5c1`).
+- Stamped `live-stats.json` to 2.15.0 without changing the methane counts (2,611 / 2,588 / 675).
+- Briefly removed three images. Cam asked for the footer logo back. Restored `giveabit-logo.png`, `giveabit-mark.png`, and `1.jpg`, and put the wordmark back in the footer (`203ef3e`).
+
+**Finished in this session:**
+- Footer shows the Give A Bit wordmark again. Checked at 1440 and 390: the image is 112×56, the file is 670×335, and `/images/giveabit-logo.png`, the mark, and `1.jpg` all return 200.
+- Docs, feed, and this handoff match that.
+
+**Still to do:**
+- Geothermal plants, when Cam asks. The plant row stays 0. Alberta’s 6 MW stays a province total.
+- Phone energy card: put profit and payback above the long explanation.
+- Let truncated filter province names wrap.
+- Shrink the empty bottom pad in the phone Layers drawer.
+- Do not merge `buffy/v2.11.1-hud-fix`.
+
+**Update / Status:** As of 2026-10-24, main is `203ef3e` plus this docs note. The miner card, the banner hide, the 2.15.0 stats stamp, and the footer wordmark are on `origin/main`. The live site picks them up when Cloudflare Pages finishes that deploy.
+
+**Key Decisions / Notes:**
+- Miner math stays on recorded kilowatts. No spare-power claim for grid plants. No miner build on rivers, shades, or infrastructure points.
+- `live-stats.json` is regenerated with `node scripts/generate-live-stats.js`. Do not hand-edit it. Do not run `npm run version` unless Cam wants a docs sync.
+- The footer logo stays. Do not delete `public/images/giveabit-logo.png`.
+
+**Next for Kimi:** Integrate this summary into MASTER-BRAIN.md / Kanban / Obsidian vault. Update any maps. Educate Hermes. Use the giveabit-project-handoff skill for future projects.
+
+**Mission Tie-in:** Stranded maps real Canadian energy so people can see an honest Bitcoin build. The Give A Bit wordmark in the footer keeps the family link to giveabit.io.
+
+**Git State:**
+- SHA: `203ef3e5d49a604fad3b6d393b8653ab1fbf984a` (`203ef3e`) on `main`.
+- Docs note follows this handoff commit.
+- Banner and stamp: `24af5c1`. Miner card: `44ae11c`.
+- Pushed to `origin/main`.
+
+---
+
 # Stranded banner, images, and the 2.15.0 stamp — 2026-10-24
 
 **Done:**

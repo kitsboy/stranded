@@ -1,7 +1,7 @@
 # stranded — Last Updated 2026-10-24 by Grok
 
-**Brief:** The phone install banner hides while Layers, Filters, a site card, or an energy card is open. Three broken images are gone and the footer says Give A Bit in text. `live-stats.json` is stamped 2.15.0. The methane counts are unchanged. Geothermal plants stay for later.
+**Brief:** The Give A Bit wordmark is back in the footer. The logo, mark, and marketing avatar files are restored. The phone install banner still hides while a drawer or a card is open. `live-stats.json` stays stamped 2.15.0.
 
-**Commit:** `24af5c1` (`24af5c117474001745b24d1e18c0e6a766ecfe69`). The miner card was `44ae11c`. The proof refresh under it is `ddfb130`.
+**Commit:** `203ef3e` (`203ef3e5d49a604fad3b6d393b8653ab1fbf984a`). Banner and stamp were `24af5c1`. Miner card was `44ae11c`.
 
-**Docs:** `CHANGELOG.md`, `docs/MAP-LAYER-TICKS.md`, `docs/SOURCE-OF-TRUTH.md`, `docs/KIMI-HANDOFF.md`.
+**Docs:** `CHANGELOG.md`, `docs/SOURCE-OF-TRUTH.md`, `docs/KIMI-HANDOFF.md`, `SESSION-SUMMARY-2026-10-24.md`.
