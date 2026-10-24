@@ -1,3 +1,24 @@
+# Stranded miner card — 2026-10-23, v2.15.0
+
+**Done:**
+- A plant or remote pin opens one miner card. The hover teaser is short, and the click closes it, so the two different-sized popups do not stay up.
+- The card uses the existing ASIC menu. The count stops at recorded kilowatts. Wind, solar, hydro, and tidal use the plant-file nameplate times that province’s 2025 generation divided by its 2024 capacity. Biomass, pumped storage, and other plants do not get a payback. Remote communities use recorded annual generation or recorded kilowatts, labelled as recorded output, not spare power. A fuel price in $/l is shown and is not used as a power price.
+- Infrastructure points, province shades, and hydrokinetic polygons stay one map card. The hydrokinetic file has no kilowatt field.
+- Optimistic hashprice 0.0000009 stays labelled. The network-derived rate is beside it. Power price starts at 0.04 USD/kWh. Zero is not used. No genset and no carbon credit.
+- Home, pitch, education, dashboard, verticals, about, and the map metadata now say 2,611 methane sites plus 1,049 renewable plants and 276 remote communities. “No grid draw” stays with waste methane.
+- Desktop 1440: Adelaide opened one card, 4,484 S21 XP miners, about $70,338/day optimistic, and editing the count to 3 changed the profit. Phone 390: one card, no second popup. The install banner is hidden while that phone card is open.
+
+**Decisions:**
+- Do not invent a capacity factor when Statistics Canada has no matching capacity. Do not treat grid plants as free power. Do not size miners on rivers, shades, or infrastructure points.
+- The three deleted images stayed deleted. `buffy/v2.11.1-hud-fix` was not merged. `public/data/live-stats.json` still says 2.12.4 until a real build.
+
+**Git State:**
+- SHA: `44ae11c762dcf8c14d8dd5d0a8250ca5397bb1d3` (`44ae11c`) on `main`.
+- Boundaries and rivers: `0b4a26d`. Handoff before this: `1cc0cc6`. Guides: `5589371`. Atlas: `0302dbc`.
+- Unpushed until this handoff commit is pushed. Image deletions remain unstaged.
+
+---
+
 # Stranded boundaries and rivers — 2026-10-23, v2.14.0
 
 **Done:**
