@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Briefcase, ExternalLink } from 'lucide-react'
@@ -185,8 +186,15 @@ export default function Footer() {
               <span className="text-label uppercase tracking-[0.14em] text-gray-500 group-hover:text-gray-300 transition-colors">
                 {t('footerBy')}
               </span>
-              <span className="inline-flex items-center text-[1.35rem] font-semibold tracking-tight text-white/90 group-hover:text-white transition-colors">
-                Give A Bit
+              {/* Prefer wordmark; mark is fallback if wordmark missing later */}
+              <span className="inline-flex items-center gap-2">
+                <Image
+                  src="/images/giveabit-logo.png"
+                  alt="giveabit.io"
+                  width={280}
+                  height={72}
+                  className="h-14 w-auto opacity-85 group-hover:opacity-100 transition-opacity duration-200"
+                />
               </span>
               <span className="text-label text-gray-500 group-hover:text-[#FF8C00] transition-colors">
                 giveabit.io ↗
