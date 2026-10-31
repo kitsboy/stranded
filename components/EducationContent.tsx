@@ -452,7 +452,7 @@ export default function EducationContent() {
         </div>
         <div className="grid md:grid-cols-4 gap-4 text-center">
           {[
-            { icon: <TrendingUpIcon className="mx-auto text-[#FF8C00]" size={28} />, label: "Economic Value", stat: "Up to $500M+ potential per large site cluster in BTC revenue" },
+            { icon: <TrendingUpIcon className="mx-auto text-[#FF8C00]" size={28} />, label: "Economic Value", stat: "Modeled BTC-revenue from full capture of all 2,611 mapped sites: ~2,100 BTC/yr (≈ $178.5M at $85,000/BTC, 2026-10-31) — illustrative, not a forecast (see Methodology)" },
             { icon: <GlobeIcon className="mx-auto text-[#5BC0BE]" size={28} />, label: "Climate Value", stat: "~28× CO₂ warming (100-yr) cut at source = real, verifiable impact" },
             { icon: <UsersIcon className="mx-auto text-emerald-400" size={28} />, label: "Community Value", stat: "Landowner + First Nations revenue + jobs in remote regions" },
             { icon: <ZapIcon className="mx-auto text-[#FF8C00]" size={28} />, label: "Bitcoin Value", stat: "Off-grid, location-agnostic mining turns waste into hard money" },
@@ -465,6 +465,25 @@ export default function EducationContent() {
           ))}
         </div>
         <p className="text-center text-label text-gray-400 mt-4">Every simulator and visualization below quantifies this multi-dimensional Value.</p>
+      </div>
+
+      {/* Value in Numbers Dashboard (item 17) — placed beside the headline claim so the two cannot contradict */}
+      <div className="mb-16 glass p-8 rounded-3xl border border-[#FF8C00]/20">
+        <h3 className="font-semibold mb-4 text-xl">Stranded Value in Numbers (at $85,000/BTC · 2026-10-31)</h3>
+        <div className="grid md:grid-cols-4 gap-4">
+          {[
+            { label: "Modeled BTC-revenue from full capture of all 2,611 mapped sites", val: "~2,100 BTC/yr", sub: "≈ $178.5M/yr at $85,000/BTC (2026-10-31) — illustrative, not a forecast (see Methodology)" },
+            { label: "CO₂e Avoided per Year", val: "~11.5M tonnes", sub: "25× potency multiplier applied" },
+            { label: "Community Revenue Potential", val: "Hundreds of $M", sub: "landowners + First Nations + provinces" },
+            { label: "CETA + Canadian Capital Accessible", val: "$200B+ pool", sub: "capital pool via trade agreements & incentives" },
+          ].map((item, i) => (
+            <div key={i} className="glass p-5 rounded-2xl border-l-4 border-[#FF8C00]">
+              <div className="text-2xl font-semibold text-[#FF8C00]">{item.val}</div>
+              <div className="text-sm mt-1">{item.label}</div>
+              <div className="text-label text-gray-400 mt-1">{item.sub}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Methane GWP calculator widget */}
@@ -1105,25 +1124,6 @@ export default function EducationContent() {
       </div>
 
       <EducationCharts provinceData={provinceData} sourceData={sourceData} liveBtc={liveBtc} />
-
-      {/* Value in Numbers Dashboard (item 17) */}
-      <div className="mb-16">
-        <h3 className="font-semibold mb-4 text-xl">Stranded Value in Numbers (at current BTC price)</h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          {[
-            { label: "Potential Annual BTC from Full Capture", val: "~2,100 BTC", sub: "at 100% of 2,611 sites" },
-            { label: "CO₂e Avoided per Year", val: "~11.5M tonnes", sub: "25× potency multiplier applied" },
-            { label: "Community Revenue Potential", val: "Hundreds of $M", sub: "landowners + First Nations + provinces" },
-            { label: "CETA + Canadian Capital Accessible", val: "$200B+ pool", sub: "via trade agreements & incentives" },
-          ].map((item, i) => (
-            <div key={i} className="glass p-5 rounded-2xl border-l-4 border-[#FF8C00]">
-              <div className="text-2xl font-semibold text-[#FF8C00]">{item.val}</div>
-              <div className="text-sm mt-1">{item.label}</div>
-              <div className="text-label text-gray-400 mt-1">{item.sub}</div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* 5. Methodology Deep Dive - now with interactive sliders (item 18) */}
       <div className="mb-16 glass p-8 rounded-3xl">
