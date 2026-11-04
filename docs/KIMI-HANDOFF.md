@@ -14,7 +14,8 @@
 - English on this story is intentional.
 
 **Git State:**
-- Parent: `57496f635fe696f1cc88688ec93db9f4f0f5728d` (`57496f6`, chore(proof): refresh dataset proof status).
+- SHA: `a2f0c6d1fa1999b580a5a8f238d0502821256e2d` (`a2f0c6d`, feat(methane): price the biggest reported sites on today's network).
+- Parent: `57496f635fe696f1cc88688ec93db9f4f0f5728d` (`57496f6`).
 - Cam asked to commit the 2025 StatCan tables, the 2025 remote-community file, and the methane story, then push `main`. The live site updates from that push.
 - Tests that passed: `scripts/test-methane-capture.mjs`, `scripts/test-energy-build.mjs`, `scripts/test-energy-atlas.mjs`, `scripts/test-renewable-layers.mjs`.
 - Browser: home and dashboard at 1440 and 390, map shade stamp on desktop and in the phone Layers drawer.
