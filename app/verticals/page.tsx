@@ -55,7 +55,7 @@ export default function VerticalsPage() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold tracking-tighter mb-2">Energy Verticals</h1>
       <p className="text-gray-400 mb-10">
-        Methane is live today: 2,611 ECCC sites, with generator ROI. The official plant file adds {OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants (mostly August 2017) and {OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities (2018). A miner build on those pins uses recorded power only. The older counts on the cards below are separate claims. They are not that plant file.
+        Methane is live today: 2,611 ECCC sites, with generator ROI. The official plant file adds {OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants (mostly August 2017) and {OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities (2025). A miner build on those pins uses recorded power only. The older counts on the cards below are separate claims. They are not that plant file.
         {stats && (
           <span className="text-gray-400"> · Live dataset v{stats.version} · {stats.siteCount.toLocaleString()} sites</span>
         )}
@@ -118,7 +118,7 @@ export default function VerticalsPage() {
                 <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.hydro.toLocaleString()} hydro plants. The {v.potentialSites.toLocaleString()} hydro-spill figure is a separate roadmap claim, not that file. A miner build uses nameplate times the province capacity factor. It is not spare spill.</p>
               )}
               {v.id === 'biomass' && (
-                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.biomass.toLocaleString()} biomass plants. Statistics Canada publishes 2025 biomass generation and no 2024 biomass capacity, so those plants are not given a miner payback. The {v.potentialSites.toLocaleString()} figure is a separate roadmap claim, not that file.</p>
+                <p className="text-xs text-gray-300 mb-3">Official plant file: {OFFICIAL_PLANT_COUNTS.biomass.toLocaleString()} biomass plants. Statistics Canada publishes 2025 biomass generation and no 2025 biomass capacity, so those plants are not given a miner payback. The {v.potentialSites.toLocaleString()} figure is a separate roadmap claim, not that file.</p>
               )}
               {v.id === 'waste-heat' && (
                 <p className="text-xs text-gray-300 mb-3">No official waste-heat site file is on the map. The {v.potentialSites.toLocaleString()} figure is a beta claim, not a pin count.</p>

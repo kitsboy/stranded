@@ -9,6 +9,7 @@ import type { LiveStats } from '@/types/live-stats'
 import { scoreTierClass } from '@/lib/scoring'
 import { formatEmissionCompact, readinessMini, websiteSchemaExtras } from '@/lib/home-metrics'
 import HomeKpiStrip from '@/components/HomeKpiStrip'
+import MethaneCaptureStory from '@/components/MethaneCaptureStory'
 import OnboardingChecklist from '@/components/OnboardingChecklist'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
@@ -156,6 +157,10 @@ export default function LandingPage() {
       </div>
 
       <HomeKpiStrip stats={stats} />
+
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <MethaneCaptureStory />
+      </div>
 
       <div className="max-w-5xl mx-auto px-6 pt-8">
         <OnboardingChecklist />

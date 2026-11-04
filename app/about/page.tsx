@@ -14,7 +14,7 @@ export default function AboutPage() {
       <PageHeader
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'About' }]}
         title="About Stranded"
-        subtitle="2,611 mapped methane sites (2,588 with reported CH₄ · 675 high-confidence), plus 1,049 renewable plants and 276 remote communities. Waste methane is mined with no grid draw. Other locations get a miner build only where the file records power."
+        subtitle="2,611 mapped methane sites (2,588 with reported CH₄ · 675 high-confidence), plus 1,049 renewable plants and 207 remote communities. Waste methane is mined with no grid draw. Other locations get a miner build only where the file records power."
         actions={
           <>
             <ButtonLink href="/pitch" variant="primary" className="text-sm px-4 py-2">
@@ -33,7 +33,7 @@ export default function AboutPage() {
         Stranded Canada turns wasted methane emissions into Bitcoin-powered environmental remediation.
         By mapping 2,611 ECCC-reported methane sites and showing per-site mining ROI (optimistic scenarios always labelled as such), we make sovereign,
         feel-good giving simple — turning pollution into productive off-grid Bitcoin under Give A Bit&apos;s Safe Harbour framework.
-        The same map now carries 1,049 renewable plants (mostly August 2017) and 276 remote communities (2018). Those pins are not free grid power. A miner card opens only where the file records kilowatts or a province capacity factor.
+        The same map now carries 1,049 renewable plants (mostly August 2017) and 207 remote communities (2025). Those pins are not free grid power. A miner card opens only where the file records kilowatts or a province capacity factor.
       </p>
 
       <div className="flex flex-wrap gap-3 mb-10">

@@ -90,6 +90,8 @@ export default function EnergyBuildPanel({ hit, statcan, statcanStatus, liveBtcP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationId, asicId, model?.ceiling])
 
+  const capYear = statcan?.source?.capacity?.year || 'the published'
+  const genYear = statcan?.source?.generation?.year || 'the published'
   const name = String(props.name || 'Unnamed location')
   const kindLabel = assessment.kind === 'remote' ? 'Remote community' : assessment.kind === 'plant' ? 'Renewable plant' : 'Energy record'
   const cfPct = assessment.capacityFactor != null
@@ -126,15 +128,15 @@ export default function EnergyBuildPanel({ hit, statcan, statcanStatus, liveBtcP
         <p className="text-xs text-gray-400 mb-3">
           Plant file {assessment.period || 'period not stated'}: {assessment.nameplateMw != null ? `${assessment.nameplateMw.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW` : 'capacity not stated'}.
           {' '}Not a current-year capacity census.
-          {assessment.province ? ` ${assessment.province} renewable capacity in the 2024 Statistics Canada table: ${assessment.provinceCapacityMw.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW.` : ''}
-          {assessment.geothermalInProvinceMw > 0 ? ` The 2024 total includes ${assessment.geothermalInProvinceMw} MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.` : ''}
+          {assessment.province ? ` ${assessment.province} renewable capacity in the ${capYear} Statistics Canada table: ${assessment.provinceCapacityMw.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW.` : ''}
+          {assessment.geothermalInProvinceMw > 0 ? ` The ${capYear} total includes ${assessment.geothermalInProvinceMw} MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.` : ''}
         </p>
       )}
 
       {cfPct && (
         <p className="text-xs text-gray-400 mb-3">
           Province capacity factor used here: {cfPct}
-          {assessment.capacityFactorCapped ? ' (capped at 100% because 2025 generation exceeded the 2024 capacity).' : '.'}
+          {assessment.capacityFactorCapped ? ` (capped at 100% because ${genYear} generation exceeded the ${capYear} capacity).` : '.'}
           {' '}Average power for the build: {assessment.powerKw != null ? fmtKw(assessment.powerKw) : '—'}.
         </p>
       )}
@@ -146,7 +148,7 @@ export default function EnergyBuildPanel({ hit, statcan, statcanStatus, liveBtcP
       )}
 
       {waiting && (
-        <p className="text-sm text-[#5BC0BE]" data-testid="energy-build-waiting">Loading the 2024 capacity and 2025 generation tables…</p>
+        <p className="text-sm text-[#5BC0BE]" data-testid="energy-build-waiting">Loading the Statistics Canada capacity and generation tables…</p>
       )}
 
       {blocked && !waiting && (

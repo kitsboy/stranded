@@ -105,6 +105,26 @@ function num(v) {
   return Number.isFinite(n) ? n : 0
 }
 
+function latestFullGenerationYear(rows) {
+  const months = new Map()
+  for (const row of rows) {
+    const date = String(row.REF_DATE || '')
+    const match = date.match(/^(\d{4})-(\d{2})$/)
+    if (!match) continue
+    if (!months.has(match[1])) months.set(match[1], new Set())
+    months.get(match[1]).add(match[2])
+  }
+  const full = [...months.entries()].filter(([, set]) => set.size >= 12).map(([year]) => year).sort()
+  if (!full.length) fail('No generation year with 12 months')
+  return full[full.length - 1]
+}
+
+function latestCapacityYear(rows) {
+  const years = [...new Set(rows.map((row) => String(row.REF_DATE || '')).filter((year) => /^\d{4}$/.test(year)))].sort()
+  if (!years.length) fail('No annual capacity year')
+  return years[years.length - 1]
+}
+
 function aggregate(rows, renewMap, totalKey, year, isCapacity) {
   const totals = {}
   const all = {}
@@ -139,9 +159,11 @@ async function main() {
   const capRows = parseCsv(path.join(tmp, '25100022.csv'))
   if (!genRows.length || !capRows.length) fail('StatCan CSV parse returned no rows')
 
-  // Latest full year: generation is monthly (YYYY-MM), capacity is annual (YYYY).
-  const genYear = [...new Set(genRows.map((r) => r['REF_DATE'].slice(0, 4)))].filter((y) => y < '2026').sort().pop()
-  const capYear = [...new Set(capRows.map((r) => r['REF_DATE']))].filter((y) => y < '2025').sort().pop()
+  // Generation is monthly. A full year has 12 months. The current calendar
+  // year is partial (2026 runs through August in the November pull), so it
+  // is not used. Capacity is an annual table: the latest published year.
+  const genYear = latestFullGenerationYear(genRows)
+  const capYear = latestCapacityYear(capRows)
   if (!genYear || !capYear) fail('Could not determine latest full year')
 
   const gen = aggregate(genRows, GEN_RENEW, 'Total all types of electricity generation', genYear, false)

@@ -109,7 +109,7 @@ const RECORDED_NOT_MAPPED = [
     publisher: 'Natural Resources Canada',
     datasetUrl: 'https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de',
     url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/28',
-    why: 'Count is 0 in the plant file. The toggle stays, with (0). No guessed sites. Alberta’s 2024 capacity table includes 6 MW geothermal; that is a province total, not a pin.',
+    why: 'Count is 0 in the plant file. The toggle stays, with (0). No guessed sites. Alberta’s 2025 capacity table includes 6 MW geothermal; that is a province total, not a pin.',
   },
 ]
 
@@ -259,7 +259,71 @@ function toPlant(feature, source) {
   }
 }
 
+const PROVINCE_NAME = {
+  AB: 'Alberta',
+  BC: 'British Columbia',
+  MB: 'Manitoba',
+  NB: 'New Brunswick',
+  NL: 'Newfoundland and Labrador',
+  NT: 'Northwest Territories',
+  NU: 'Nunavut',
+  NS: 'Nova Scotia',
+  ON: 'Ontario',
+  PE: 'Prince Edward Island',
+  QC: 'Quebec',
+  SK: 'Saskatchewan',
+  YT: 'Yukon',
+}
+
+function provinceName(raw) {
+  const name = str(raw)
+  return PROVINCE_NAME[name] || name
+}
+
 function toRemote(feature, source, vintageLabel) {
+  const p = feature.properties || {}
+  if (p.Community_Name != null || p.Primary_Electricity_Source != null) {
+    return toRemote2025(feature, source, vintageLabel)
+  }
+  return toRemote2018(feature, source, vintageLabel)
+}
+
+function toRemote2025(feature, source, vintageLabel) {
+  const p = feature.properties || {}
+  const coords = (feature.geometry && feature.geometry.coordinates) || []
+  const lng = Number(p.Longitude____ != null ? p.Longitude____ : coords[0])
+  const lat = Number(p.Latitude____ != null ? p.Latitude____ : coords[1])
+  if (!inCanada(lng, lat)) return null
+  const annualMwh = num(p.Annual_System_Total_Electricity)
+  return {
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: [round5(lng), round5(lat)] },
+    properties: {
+      id: `rced-${p.OBJECTID}`,
+      kind: 'remote',
+      cat: remoteCategory(p.Primary_Electricity_Source),
+      name: str(p.Community_Name) || 'Unnamed community',
+      province: provinceName(p.Province_Territory),
+      mw: annualMwh > 0 ? Math.round((annualMwh / 8760) * 1000) / 1000 : 0,
+      population: num(p.Population),
+      mainPower: str(p.Primary_Electricity_Source),
+      secondaryPower: str(p.Secondary_Electricity_Source),
+      annualMwh,
+      roadAccess: str(p.Is_There_Year_Round_Road_Access),
+      provider: str(p.Electricity_Service_Provider),
+      indigenous: str(p.Indigenous_Distinction),
+      indigenousGroup: str(p.Indigenous_Distinction_Group),
+      communityType: str(p.Community_Classification),
+      region: str(p.Region),
+      sourceUrl: source.datasetUrl,
+      sourceTitle: source.title,
+      licence: source.licence,
+      vintage: vintageLabel,
+    },
+  }
+}
+
+function toRemote2018(feature, source, vintageLabel) {
   const p = feature.properties || {}
   const coords = (feature.geometry && feature.geometry.coordinates) || []
   const lng = Number(p.LONGITUDE != null ? p.LONGITUDE : coords[0])

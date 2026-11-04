@@ -1,3 +1,24 @@
+## Session — 2026-11-04
+
+**Done:**
+- Refreshed Statistics Canada. Generation year 2025, table 25-10-0015-01. Capacity year 2025, table 25-10-0022-01. Pulled 2026-11-04. The shade list and the province popup show that date. Alberta wind 5,684 MW, solar 2,348.4 MW, hydro 914 MW, geothermal 6 MW as a province total. Biomass still has no capacity type, so still no payback.
+- The 2025 Remote Communities Energy Database answered. 207 communities: 143 fossil, 32 hydro, 32 still on a provincial grid, 0 unknown. 111 have annual megawatt-hours. 96 are unsized and stay unsized. Annual megawatt-hours are not stored as fossil generation. The 2018 mapper remains for an old-shaped row.
+- Home and dashboard: a methane story. Biggest reports first, presets 10 / 30 / 80, any machine from the existing ASIC list. Power uses the same Jenbacher 90% daily-average rule. Bitcoin uses a live mempool.space window (last 144 blocks over the hours they took, divided by the reported hashrate). If that check fails, the bitcoin line stays blank. The optimistic 0.0000009 rate is not used here.
+- Checked on the evening of 2026-11-04: network about 1,021.6 EH/s, 452.4 bitcoin over 24.1 hours, checked 2026-11-04 20:53 UTC. Top 10% of reported methane is 6 sites, 202 tonnes a day, about 40.8 MW, about 10,084 Antminer S21 XP, about 3.03 EH/s, about 1.32 bitcoin a day before costs. Of that slice, about 17.2 tonnes a day is the published vented (into the air) part, about 0.11 bitcoin a day. The rest is flared, other facility methane, or a report with no vent/flare split.
+- Copy that still said 276 communities, a 2018 remote file, or 2024 capacity now says 207 and 2025. Pitch and funding sliders are unchanged. Methane geojson was not rebuilt. Version stays 2.15.0.
+
+**Decisions:**
+- "Into the air" means only kilograms Ottawa marked as vented, and only where the filing published a fugitive split. A missing split is not zero venting. Vent plus flare is often less than the facility total. That remainder is shown as other methane, not as evaporation.
+- The capture bar keeps whole sites, largest first, and shows the actual share.
+- Dollars appear only when the CoinGecko price is not stale.
+- English on this story is intentional.
+
+**Git State:**
+- Parent: `57496f635fe696f1cc88688ec93db9f4f0f5728d` (`57496f6`, chore(proof): refresh dataset proof status).
+- Cam asked to commit the 2025 StatCan tables, the 2025 remote-community file, and the methane story, then push `main`. The live site updates from that push.
+- Tests that passed: `scripts/test-methane-capture.mjs`, `scripts/test-energy-build.mjs`, `scripts/test-energy-atlas.mjs`, `scripts/test-renewable-layers.mjs`.
+- Browser: home and dashboard at 1440 and 390, map shade stamp on desktop and in the phone Layers drawer.
+
 # Stranded footer wordmark restored — 2026-10-24
 
 ## Latest Session Summary (from 2026-10-24 goodbye)

@@ -4,14 +4,14 @@
 
 A click on a plant or remote pin opens one editable miner card. The ASIC list is the same menu used on methane sites. The miner count stops at the kilowatts the file supports.
 
-- Wind, solar, hydro, and tidal: plant-file nameplate times that province’s 2025 generation divided by its 2024 capacity (Statistics Canada tables 25-10-0015-01 and 25-10-0022-01), over 8,760 hours. The factor is the province total, not a meter on the plant. If generation exceeded the 2024 capacity, the build uses the nameplate.
-- Biomass, pumped storage, other, and geothermal: no payback. Biomass has 2025 generation and no 2024 capacity. Geothermal plants in this file: 0.
-- Remote communities: average fossil generation when annual megawatt-hours are recorded, capped by recorded fossil capacity. Otherwise recorded renewable or fossil kilowatts. This is recorded output, not spare power. A fuel price in $/l is shown and is not a power price.
+- Wind, solar, hydro, and tidal: plant-file nameplate times that province’s 2025 generation divided by its 2025 capacity (Statistics Canada tables 25-10-0015-01 and 25-10-0022-01), over 8,760 hours. The factor is the province total, not a meter on the plant. If generation exceeded the 2025 capacity, the build uses the nameplate.
+- Biomass, pumped storage, other, and geothermal: no payback. Biomass has 2025 generation and no 2025 biomass capacity. Geothermal plants in this file: 0.
+- Remote communities: where the 2025 file records annual megawatt-hours, average power is that figure divided by 8,760. The file does not publish a kilowatt split. Communities with no annual figure are not sized. This is recorded output, not spare power.
 - Infrastructure points, province shades, solar images, and hydrokinetic polygons are not miner sites. The hydrokinetic GeoJSON has river, community, kind, and province only.
 
 Power price starts at 0.04 USD/kWh, the site-wide default, and can be edited. Zero is not used. Hashprice 0.0000009 BTC/TH/day is labelled optimistic. The network-derived rate (450 / 1,100,000,000) is shown beside it. Setup is the site-wide 25,000 CAD default, not a quote. No generator capex and no carbon credit.
 
-Pulled October 2026. Licence for every mapped government file: [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada).
+StatCan tables pulled 2026-11-04. Remote communities pulled 2026-11-04. Licence for every mapped government file: [Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada).
 
 The map paints a source only in a form the file actually supports. A raster stays a raster. A point stays a point. A province total stays a province shade. Nothing in this list is a guessed town, a drawn corridor, or an invented geothermal plant.
 
@@ -31,14 +31,14 @@ Filled dots are power plants. Rings are remote communities. The colours are not 
 | Pumped storage | 1 | same file |
 | Geothermal | 0 | category exists; this official file has no Canadian geothermal plant at 1 MW or more |
 | Other renewable | 2 | same file, primary source recorded as Other |
-| Remote — diesel, oil or gas | 208 | not on the North American grid or piped gas |
-| Remote — hydro microgrid | 35 | remote, main power is hydro |
-| Remote — already on a grid | 26 | in the remote file, but the row says provincial/territorial grid |
-| Remote — source not stated | 7 | main power unknown or other |
+| Remote — diesel, oil or gas | 143 | 2025 file, primary source diesel, heavy fuel oil, or natural gas |
+| Remote — hydro | 32 | 2025 file, primary source hydro |
+| Remote — already on a grid | 32 | 2025 file, primary source says provincial or territorial grid |
+| Remote — source not stated | 0 | category stays, with a count of 0 |
 
-Plant file: [Renewable Energy Power Plants, 1 MW or more](https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de) (Natural Resources Canada, NACEI). Service: `MapServer/28` on `energy_infrastructure_of_north_america_en`. Canada only (1,049 of the North American rows). Reference periods in the file run from 2000 to 201708. Most rows are August 2017. That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. The plant popup says so, and puts that plant’s file megawatts next to the province’s 2024 Statistics Canada renewable capacity. Québec in the plant file is matched to Quebec in the StatCan table. Alberta’s 2024 total includes 6 MW geothermal. That stays a province total.
+Plant file: [Renewable Energy Power Plants, 1 MW or more](https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de) (Natural Resources Canada, NACEI). Service: `MapServer/28` on `energy_infrastructure_of_north_america_en`. Canada only (1,049 of the North American rows). Reference periods in the file run from 2000 to 201708. Most rows are August 2017. That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. The plant popup says so, and puts that plant’s file megawatts next to the province’s 2025 Statistics Canada renewable capacity. Québec in the plant file is matched to Quebec in the StatCan table. Alberta’s 2025 total includes 6 MW geothermal. That stays a province total.
 
-Remote communities: the 2025 service did not answer on the plant pull. The map uses the 2018 official file, [Remote Communities Energy Database](https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd), 276 communities. The quarterly plant job tries 2025 first.
+Remote communities: the 2025 service answered on 4 Nov 2026. The map uses [Remote Communities Energy Database (2025)](https://open.canada.ca/data/en/dataset/1d912ea1-919b-449d-8e8b-eb6a2313a401), 207 communities. A miner build uses recorded annual megawatt-hours divided by 8,760 where that figure is present (111 communities). The file does not publish a kilowatt split, and 96 communities have no annual generation, so those are not sized. Primary source: diesel, heavy fuel oil, or natural gas 143; hydro 32; provincial or territorial grid 32.
 
 Snapshot: `public/data/renewable-plants.geojson` and `public/data/renewable-layers.json`.
 
@@ -79,8 +79,8 @@ Source: [2021 census boundary files](https://open.canada.ca/data/en/dataset/ef70
 
 | Layer | What the number is |
 | --- | --- |
-| Renewable generation, 2025 | Statistics Canada table 25-10-0015-01. Hydro, wind, solar, biomass and tidal megawatt-hours. |
-| Renewable capacity, 2024 | Table 25-10-0022-01, same sources plus geothermal. Alberta’s row includes 6 MW geothermal. That is a province total. The plant layer still has 0 geothermal plants. |
+| Renewable generation, 2025 | Statistics Canada table 25-10-0015-01. Hydro, wind, solar, biomass and tidal megawatt-hours. Full year, 12 months. Pulled 2026-11-04. 2026 is partial and is not used. |
+| Renewable capacity, 2025 | Table 25-10-0022-01, same sources plus geothermal. Alberta’s row includes 6 MW geothermal and 5,684 MW wind. That is a province total. The plant layer still has 0 geothermal plants. Pulled 2026-11-04. |
 | Solar PV potential | Mean of the municipal **Annual** row, south-facing latitude tilt, in kWh/kWp/year. Months are not added on top of Annual. |
 
 Files: `public/data/statcan-renewables.json`, `public/data/pv-province.json`. PV source: [Photovoltaic potential and solar resource maps of Canada](https://open.canada.ca/data/en/dataset/8b434ac7-aedb-4698-90df-ba77424a551f). Municipality names have no coordinates and are not geocoded.

@@ -11,7 +11,7 @@ An open, public dataset from Environment & Climate Change Canada (ECCC) showing 
 
 We integrate real generator models (Jenbacher, Caterpillar, MAN, etc.) to turn that gas into on-site power, then Bitcoin mining — creating BTC with no net draw on the grid while destroying potent methane and generating verifiable economic value ("Stranded Value").
 
-The map also carries 1,049 renewable plants from the NRCan file (mostly August 2017) and 276 remote communities from the 2018 database. A miner build on those pins uses recorded power only: plant nameplate times that province’s official capacity factor, or a community’s recorded kilowatts or annual generation. Infrastructure points, province shades, and hydrokinetic polygons are not given a miner payback. The “no net draw” claim stays with waste-methane gensets.
+The map also carries 1,049 renewable plants from the NRCan file (mostly August 2017) and 207 remote communities from the 2025 Remote Communities Energy Database. A miner build on those pins uses recorded power only: plant nameplate times that province’s official capacity factor, or a community’s recorded kilowatts or annual generation. Infrastructure points, province shades, and hydrokinetic polygons are not given a miner payback. The “no net draw” claim stays with waste-methane gensets.
 
 This project is the definitive interactive experience for that thesis:
 

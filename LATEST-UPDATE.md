@@ -1,7 +1,7 @@
-# stranded — Last Updated 2026-10-24 by Grok
+# stranded — Last Updated 2026-11-04 by Grok
 
-**Brief:** The Give A Bit wordmark is back in the footer. The logo, mark, and marketing avatar files are restored. The phone install banner still hides while a drawer or a card is open. `live-stats.json` stays stamped 2.15.0.
+Brief: StatCan capacity is 2025, the 2025 remote file answered (207 communities), and the home page shows how much reported methane would earn on today's Bitcoin network.
 
-**Commit:** `203ef3e` (`203ef3e5d49a604fad3b6d393b8653ab1fbf984a`). Banner and stamp were `24af5c1`. Miner card was `44ae11c`.
+Commit: this push of `main`. Parent was `57496f635fe696f1cc88688ec93db9f4f0f5728d`.
 
-**Docs:** `CHANGELOG.md`, `docs/SOURCE-OF-TRUTH.md`, `docs/KIMI-HANDOFF.md`, `SESSION-SUMMARY-2026-10-24.md`.
+Checked: methane slice test, energy-build, energy atlas, renewable layers, and the story in the browser at desktop and phone width. Version stays 2.15.0.

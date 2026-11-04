@@ -231,6 +231,23 @@ export default function LayerControls({
   onFocusInfra,
 }: LayerControlsProps) {
   const { t } = useLocale()
+  const [shadeStamp, setShadeStamp] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    fetch('/data/statcan-renewables.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!alive || !data?.source) return
+        const gen = data.source.generation
+        const cap = data.source.capacity
+        const pulled = String(data.retrievedAt || '').slice(0, 10)
+        if (!gen?.year || !cap?.year || !pulled) return
+        setShadeStamp(`Generation ${gen.year}, table ${gen.table}. Capacity ${cap.year}, table ${cap.table}. Pulled ${pulled}.`)
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   const styleButtons: { id: MapStyleMode; label: string }[] = [
     { id: 'standard', label: t('mapStyleStandard') },
@@ -360,6 +377,9 @@ export default function LayerControls({
                       </label>
                     ))}
                   </div>
+                  {group.id === 'shade' && shadeStamp && (
+                    <p className="mt-1 text-micro leading-snug text-gray-500" data-testid="statcan-shade-stamp">{shadeStamp}</p>
+                  )}
                   {group.id === 'infra' && onFocusInfra && (
                     <InfraSearch onPick={onFocusInfra} placeholder={t('mapAtlasSearch')} emptyLabel={t('mapAtlasSearchEmpty')} />
                   )}

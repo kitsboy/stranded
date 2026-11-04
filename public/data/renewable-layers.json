@@ -1,8 +1,8 @@
 {
-  "retrievedAt": "2026-10-02T12:20:31.448Z",
-  "featureCount": 1325,
+  "retrievedAt": "2026-11-04T20:37:42.598Z",
+  "featureCount": 1256,
   "plantCount": 1049,
-  "remoteCount": 276,
+  "remoteCount": 207,
   "counts": {
     "solar": 138,
     "hydro": 555,
@@ -11,10 +11,9 @@
     "tidal": 1,
     "pumped": 1,
     "other": 2,
-    "remote-fossil": 208,
-    "remote-hydro": 35,
-    "remote-grid": 26,
-    "remote-unknown": 7
+    "remote-fossil": 143,
+    "remote-hydro": 32,
+    "remote-grid": 32
   },
   "plantPeriods": [
     "2000",
@@ -44,7 +43,7 @@
     "201707",
     "201708"
   ],
-  "vintageNote": "Plant locations are the NRCan NACEI file (reference periods 2000–201708, mostly August 2017). That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. Remote communities are the 2018 official file: the 2025 service did not answer on this pull. The quarterly job retries 2025 first.",
+  "vintageNote": "Plant locations are the NRCan NACEI file (reference periods 2000–201708, mostly August 2017). That is the latest geospatial plant file NRCan publishes. It is not a current-year capacity census. Remote communities: 2025 Remote Communities Energy Database service answered.",
   "mappedSources": [
     {
       "id": "nacei-renewable-plants-1mw",
@@ -56,16 +55,16 @@
       "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
     },
     {
-      "id": "nrcan-rced-2018",
-      "title": "Remote Communities Energy Database",
+      "id": "nrcan-rced-2025",
+      "title": "Remote Communities Energy Database (2025)",
       "publisher": "Natural Resources Canada",
-      "datasetUrl": "https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd",
-      "serviceUrl": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/remote_communities_2018_en/MapServer/0",
+      "datasetUrl": "https://open.canada.ca/data/en/dataset/1d912ea1-919b-449d-8e8b-eb6a2313a401",
+      "serviceUrl": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/remote_communities_2025_en/MapServer/0",
       "licence": "Open Government Licence - Canada",
       "licenceUrl": "https://open.canada.ca/en/open-government-licence-canada"
     }
   ],
-  "remoteFallback": true,
+  "remoteFallback": false,
   "energyAtlas": "public/data/energy-atlas.json",
   "recordedNotMapped": [
     {
@@ -113,7 +112,7 @@
       "publisher": "Natural Resources Canada",
       "datasetUrl": "https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de",
       "url": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/28",
-      "why": "Count is 0 in the plant file. The toggle stays, with (0). No guessed sites. Alberta’s 2024 capacity table includes 6 MW geothermal; that is a province total, not a pin."
+      "why": "Count is 0 in the plant file. The toggle stays, with (0). No guessed sites. Alberta’s 2025 capacity table includes 6 MW geothermal; that is a province total, not a pin."
     }
   ],
   "licence": "Open Government Licence - Canada",

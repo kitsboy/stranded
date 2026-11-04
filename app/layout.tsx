@@ -15,7 +15,7 @@ import TooltipBinder from '@/components/TooltipBinder'
 
 export const metadata: Metadata = {
   title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
-  description: '2,611 mapped methane sites, plus 1,049 renewable plants and 276 remote communities. Waste-methane mining has no grid draw. A miner build elsewhere is sized only where the file records real power. Optimistic scenarios stay labelled.',
+  description: '2,611 mapped methane sites, plus 1,049 renewable plants and 207 remote communities. Waste-methane mining has no grid draw. A miner build elsewhere is sized only where the file records real power. Optimistic scenarios stay labelled.',
   icons: { icon: ['/favicon.svg', '/favicon-32x32.png', '/favicon-16x16.png'], apple: ['/apple-touch-icon.png'] },
   manifest: '/manifest.json',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stranded.giveabit.io'),
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Stranded | Stranded Energy, Bitcoin Access',
-    description: '2,611 methane sites, 1,049 renewable plants, and 276 remote communities. Honest miner math where the file records power. Optimistic hashprice stays labelled.',
+    description: '2,611 methane sites, 1,049 renewable plants, and 207 remote communities. Honest miner math where the file records power. Optimistic hashprice stays labelled.',
     images: [{ url: '/images/3.jpg' }],
   },
 }
@@ -47,7 +47,7 @@ export default function RootLayout({
     '@type': 'WebApplication',
     name: 'Stranded Value',
     url: 'https://stranded.giveabit.io',
-    description: '2,611 methane sites, 1,049 renewable plants, and 276 remote communities, with Bitcoin miner math only where power is recorded',
+    description: '2,611 methane sites, 1,049 renewable plants, and 207 remote communities, with Bitcoin miner math only where power is recorded',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' },

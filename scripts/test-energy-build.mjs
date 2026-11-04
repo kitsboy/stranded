@@ -38,7 +38,7 @@ for (const [key, count] of Object.entries(OFFICIAL_PLANT_COUNTS)) {
   assert.strictEqual(manifest.counts[key] || 0, count, key)
 }
 for (const [key, count] of Object.entries(OFFICIAL_REMOTE_COUNTS)) {
-  assert.strictEqual(manifest.counts[key], count, key)
+  assert.strictEqual(manifest.counts[key] || 0, count, key)
 }
 assert.strictEqual(
   Object.values(OFFICIAL_PLANT_COUNTS).reduce((sum, n) => sum + n, 0),
@@ -65,23 +65,39 @@ assert.ok(Math.abs(adelaideAssess.powerKw - adelaide.properties.mw * 1000 * adel
 assert.match(adelaideAssess.basis, /not a meter on this plant/)
 assert.match(energyPinTeaserHtml(adelaide.properties, adelaideAssess), /Click to build it/)
 
-const magdalen = plants.features.find((feature) => feature.properties.id === 'rced-1')
-assert.strictEqual(magdalen.properties.fuelUnits, '$/l')
-const expectedAvg = magdalen.properties.annualFossilMwh * 1000 / ENERGY_HOURS_PER_YEAR
-assert.ok(expectedAvg < magdalen.properties.fossilKw)
-const remote = assessEnergyLocation(magdalen.properties, statcan)
+const fort = plants.features.find((feature) => feature.properties.name === 'Fort Chipewyan')
+assert.strictEqual(fort.properties.vintage, '2025')
+assert.ok(fort.properties.annualMwh > 0)
+const expectedAvg = fort.properties.annualMwh * 1000 / ENERGY_HOURS_PER_YEAR
+const remote = assessEnergyLocation(fort.properties, statcan)
 assert.strictEqual(remote.basisId, 'remote-average')
 assert.ok(Math.abs(remote.powerKw - expectedAvg) < 1e-6)
 assert.strictEqual(remote.fuelUsedInRoi, false)
-assert.strictEqual(remote.fuelPrice, 0.7)
+assert.strictEqual(remote.fuelPrice, null)
+assert.match(remote.basis, /2025/)
 assert.match(remote.basis, /not spare power/)
+assert.match(remote.basis, /does not publish a kilowatt split/)
+
+const oldRemote = assessEnergyLocation({
+  kind: 'remote',
+  vintage: '2018',
+  annualFossilMwh: 1000,
+  fossilKw: 50,
+  fuelPrice: 0.7,
+  fuelUnits: '$/l',
+}, statcan)
+assert.strictEqual(oldRemote.basisId, 'remote-average')
+assert.strictEqual(oldRemote.powerKw, 50)
+assert.strictEqual(oldRemote.fuelPrice, 0.7)
+assert.match(oldRemote.basis, /2018/)
+assert.match(oldRemote.basis, /not spare power/)
 
 const biomass = plants.features.find((feature) => feature.properties.cat === 'biomass')
 assert.ok(biomass, 'biomass plant')
 const bio = assessEnergyLocation(biomass.properties, statcan)
 assert.strictEqual(bio.buildable, false)
 assert.strictEqual(bio.powerKw, null)
-assert.match(bio.basis, /no 2024 biomass capacity/)
+assert.match(bio.basis, new RegExp(`no ${statcan.source.capacity.year} biomass capacity`))
 assert.doesNotMatch(energyPinTeaserHtml(biomass.properties, bio), /Click to build it/)
 
 const pumped = plants.features.find((feature) => feature.properties.cat === 'pumped')

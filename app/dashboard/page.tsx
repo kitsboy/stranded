@@ -17,7 +17,7 @@ import DashboardHero from '@/components/dashboard/DashboardHero'
 import DashboardStatGrid from '@/components/dashboard/DashboardStatGrid'
 import DashboardOpportunityRadar from '@/components/dashboard/DashboardOpportunityRadar'
 import DashboardLiveTicker from '@/components/dashboard/DashboardLiveTicker'
-import DashboardCaptureSlider from '@/components/dashboard/DashboardCaptureSlider'
+import MethaneCaptureStory from '@/components/MethaneCaptureStory'
 import DashboardEmissionTiers from '@/components/dashboard/DashboardEmissionTiers'
 import DashboardSourceMix from '@/components/dashboard/DashboardSourceMix'
 import DashboardGensetMix from '@/components/dashboard/DashboardGensetMix'
@@ -141,7 +141,7 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-6xl px-6 pt-10">
         <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]} />
         <p className="mt-3 max-w-3xl text-sm text-gray-400">
-          These KPIs are the live methane dataset ({stats.siteCount.toLocaleString()} sites). The map also carries 1,049 renewable plants and 276 remote communities. A miner build on those pins is sized only where the file records power, and it does not claim a free grid.
+          These KPIs are the live methane dataset ({stats.siteCount.toLocaleString()} sites). The map also carries 1,049 renewable plants and 207 remote communities (2025 file). A miner build on those pins is sized only where the file records power, and it does not claim a free grid.
         </p>
       </div>
 
@@ -159,7 +159,7 @@ export default function DashboardPage() {
         <DataFreshnessLine className="mb-3" />
         <DashboardStatGrid stats={stats} btcUsd={btc} />
         <DashboardOpportunityRadar stats={stats} />
-        <DashboardCaptureSlider stats={stats} btcUsd={btc} />
+        <MethaneCaptureStory />
 
         <div className="mb-6 flex flex-wrap gap-2">
           <DashboardExportButton stats={stats} />

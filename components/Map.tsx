@@ -359,7 +359,11 @@ export default function Map({
   const syncChoroplethRef = useRef<() => void>(() => {})
   const syncHeatmapRef = useRef<(sitesToRender: EnrichedSite[]) => void>(() => {})
   const renewableHitRef = useRef<(map: maplibregl.Map, point: { x: number; y: number }) => { d: number; coords: [number, number]; props: Record<string, unknown> } | null>(() => null)
-  const statcanRef = useRef<{ provinces?: Record<string, { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }> } | null>(null)
+  const statcanRef = useRef<{
+    retrievedAt?: string
+    source?: { generation?: { year?: string }; capacity?: { year?: string } }
+    provinces?: Record<string, { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }>
+  } | null>(null)
   const plantPopupRef = useRef<(props: Record<string, unknown>) => string>((props) => renewablePopupHtml(props))
   const energyTeaserRef = useRef<(props: Record<string, unknown>) => string>(() => '')
 
@@ -407,11 +411,12 @@ export default function Map({
     const row = key ? statcanRef.current?.provinces?.[key] : undefined
     const capacityMw = row ? statcanRenewableTotal(row, 'cap') : null
     const geothermal = Number(row?.capacityMW?.geothermal) || 0
+    const capYear = statcanRef.current?.source?.capacity?.year || 'the published'
     return renewablePopupHtml(props, {
       capacityMw,
-      capacityYear: '2024',
+      capacityYear: capYear,
       capacityNote: geothermal > 0
-        ? `The 2024 total includes ${geothermal} MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.`
+        ? `The ${capYear} total includes ${geothermal} MW geothermal. The plant file has 0 geothermal plants of 1 MW or more.`
         : '',
     })
   }
@@ -1294,13 +1299,18 @@ export default function Map({
           const mode = id === 'statcan-gen' ? 'gen' : 'cap'
           const totals: Record<string, number> = {}
           const extra: Record<string, Record<string, unknown>> = {}
+          const genYear = cached.source?.generation?.year || 'the published generation year'
+          const capYear = cached.source?.capacity?.year || 'the published capacity year'
+          const pulled = String(cached.retrievedAt || '').slice(0, 10)
+          const pulledNote = pulled ? ` Pulled ${pulled}.` : ''
           for (const [name, row] of Object.entries(cached.provinces)) {
             totals[name] = statcanRenewableTotal(row as { generationMWh?: Record<string, number>; capacityMW?: Record<string, number> }, mode)
+            const geo = Number((row as { capacityMW?: Record<string, number> }).capacityMW?.geothermal) || 0
             extra[name] = {
-              unit: mode === 'gen' ? 'MWh in 2025' : 'MW in 2024',
-              detail: mode === 'cap' && name === 'Alberta'
-                ? 'Includes 6 MW geothermal from the capacity table. The plant layer has 0 geothermal plants of 1 MW or more.'
-                : 'Statistics Canada renewable total. Not a plant pin.',
+              unit: mode === 'gen' ? `MWh in ${genYear}` : `MW in ${capYear}`,
+              detail: mode === 'cap' && geo > 0
+                ? `Includes ${geo} MW geothermal from the ${capYear} capacity table. The plant layer has 0 geothermal plants of 1 MW or more. Statistics Canada renewable total.${pulledNote} Not a plant pin.`
+                : `Statistics Canada renewable total.${pulledNote} Not a plant pin.`,
             }
           }
           paintShade(id, provinceShadeGeojson(totals, extra, boundaryGeomRef.current))

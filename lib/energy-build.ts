@@ -20,7 +20,7 @@ export const ENERGY_HOURS_PER_YEAR = 8760
 
 /** NRCan plant file, Canada rows. Asserted against renewable-layers.json in tests. */
 export const OFFICIAL_PLANT_COUNT = 1049
-export const OFFICIAL_REMOTE_COUNT = 276
+export const OFFICIAL_REMOTE_COUNT = 207
 export const OFFICIAL_PLANT_COUNTS = {
   solar: 138,
   hydro: 555,
@@ -32,10 +32,10 @@ export const OFFICIAL_PLANT_COUNTS = {
   geothermal: 0,
 } as const
 export const OFFICIAL_REMOTE_COUNTS = {
-  'remote-fossil': 208,
-  'remote-hydro': 35,
-  'remote-grid': 26,
-  'remote-unknown': 7,
+  'remote-fossil': 143,
+  'remote-hydro': 32,
+  'remote-grid': 32,
+  'remote-unknown': 0,
 } as const
 
 const PLANT_CATS = new Set(['wind', 'solar', 'hydro', 'biomass', 'tidal', 'pumped', 'geothermal', 'other'])
@@ -48,6 +48,11 @@ const CF_TECH: Record<string, 'hydro' | 'wind' | 'solar' | 'tidal'> = {
 }
 
 export type StatcanFile = {
+  retrievedAt?: string
+  source?: {
+    generation?: { year?: string; table?: string }
+    capacity?: { year?: string; table?: string }
+  }
   provinces?: Record<string, StatcanProvinceRow>
 }
 
@@ -176,9 +181,10 @@ function fuelFields(props: Record<string, unknown>): { fuelPrice: number | null;
   return { fuelPrice: Number(raw), fuelUnits: text(props.fuelUnits) }
 }
 
-function plantTechReason(cat: string): string {
+function plantTechReason(cat: string, capacityYear: string): string {
+  const year = capacityYear || 'the published'
   if (cat === 'biomass') {
-    return 'Statistics Canada publishes 2025 biomass generation and no 2024 biomass capacity, so a capacity factor is not invented and miners are not sized.'
+    return `Statistics Canada publishes biomass generation and no ${year} biomass capacity, so a capacity factor is not invented and miners are not sized.`
   }
   if (cat === 'geothermal') {
     return 'The plant file has no geothermal plants of 1 MW or more. Where a province total includes geothermal megawatts, that figure is not this plant and is not a miner build.'
@@ -217,8 +223,20 @@ export function assessEnergyLocation(
   if (kind === 'remote') {
     const fossilKw = num(p.fossilKw)
     const renewableKw = num(p.renewableKw)
+    const annualSystem = num(p.annualMwh)
     const annual = num(p.annualFossilMwh)
+    const fileYear = period || 'the community file'
     const shared = { kind, period, province: provinceRaw, needsStatcan: false, ...fuel } as const
+    if (annualSystem > 0) {
+      const powerKw = (annualSystem * 1000) / ENERGY_HOURS_PER_YEAR
+      return emptyAssessment({
+        ...shared,
+        buildable: powerKw > 0,
+        basisId: 'remote-average',
+        powerKw,
+        basis: `Recorded annual electricity in the ${fileYear} file, megawatt-hours per year divided by 8,760. The file does not publish a kilowatt split. This is recorded output, not spare power.`,
+      })
+    }
     if (annual > 0) {
       const averageKw = (annual * 1000) / ENERGY_HOURS_PER_YEAR
       const capped = fossilKw > 0 && averageKw > fossilKw
@@ -229,8 +247,8 @@ export function assessEnergyLocation(
         basisId: 'remote-average',
         powerKw,
         basis: capped
-          ? 'Average fossil generation in the 2018 file is above the recorded fossil capacity, so the build uses that capacity. This is recorded output, not spare power.'
-          : 'Average fossil generation in the 2018 file, megawatt-hours per year divided by 8,760. It is capped by recorded fossil capacity when that figure is lower. This is recorded output, not spare power.',
+          ? `Average fossil generation in the ${fileYear} file is above the recorded fossil capacity, so the build uses that capacity. This is recorded output, not spare power.`
+          : `Average fossil generation in the ${fileYear} file, megawatt-hours per year divided by 8,760. It is capped by recorded fossil capacity when that figure is lower. This is recorded output, not spare power.`,
       })
     }
     if (renewableKw > 0) {
@@ -239,7 +257,7 @@ export function assessEnergyLocation(
         buildable: true,
         basisId: 'remote-renewable',
         powerKw: renewableKw,
-        basis: 'Recorded renewable capacity in the 2018 file. Not a measured annual output, and not spare power.',
+        basis: `Recorded renewable capacity in the ${fileYear} file. Not a measured annual output, and not spare power.`,
       })
     }
     if (fossilKw > 0) {
@@ -248,7 +266,7 @@ export function assessEnergyLocation(
         buildable: true,
         basisId: 'remote-fossil',
         powerKw: fossilKw,
-        basis: 'Recorded fossil capacity in the 2018 file. Annual generation was not stated, so this is nameplate, not measured output, and not spare power.',
+        basis: `Recorded fossil capacity in the ${fileYear} file. Annual generation was not stated, so this is nameplate, not measured output, and not spare power.`,
       })
     }
     return emptyAssessment({
@@ -287,7 +305,7 @@ export function assessEnergyLocation(
     return emptyAssessment({
       ...sharedPlant,
       basisId: 'unavailable',
-      basis: plantTechReason(cat),
+      basis: plantTechReason(cat, text(statcan?.source?.capacity?.year)),
     })
   }
 
@@ -309,6 +327,8 @@ export function assessEnergyLocation(
     })
   }
 
+  const capYear = text(statcan?.source?.capacity?.year) || 'the published'
+  const genYear = text(statcan?.source?.generation?.year) || 'the published'
   const cap = Number(row.capacityMW?.[tech])
   const gen = row.generationMWh?.[tech]
   const genN = Number(gen)
@@ -319,8 +339,8 @@ export function assessEnergyLocation(
       needsStatcan,
       basisId: 'unavailable',
       basis: missingCap
-        ? `Statistics Canada’s 2024 ${tech} capacity for ${province || provinceRaw} is missing or zero, so miners are not sized from a made-up capacity factor.`
-        : `Statistics Canada’s 2025 table has no ${tech} generation for ${province || provinceRaw}, so miners are not sized.`,
+        ? `Statistics Canada’s ${capYear} ${tech} capacity for ${province || provinceRaw} is missing or zero, so miners are not sized from a made-up capacity factor.`
+        : `Statistics Canada’s ${genYear} table has no ${tech} generation for ${province || provinceRaw}, so miners are not sized.`,
     })
   }
 
@@ -330,8 +350,8 @@ export function assessEnergyLocation(
   const powerKw = nameplateMw * 1000 * cf
   const periodLabel = period || 'the plant file'
   const basis = capped
-    ? `Nameplate ${nameplateMw} MW is the plant file (${periodLabel}). 2025 ${tech} generation in ${province} exceeded the 2024 capacity figure, so the build uses the nameplate, not a factor above 1. The factor is the province total, not a meter on this plant.`
-    : `Nameplate ${nameplateMw} MW is the plant file (${periodLabel}). Average power uses ${province}’s 2025 ${tech} generation divided by its 2024 ${tech} capacity over 8,760 hours. The factor is the province total, not a meter on this plant.`
+    ? `Nameplate ${nameplateMw} MW is the plant file (${periodLabel}). ${genYear} ${tech} generation in ${province} exceeded the ${capYear} capacity figure, so the build uses the nameplate, not a factor above 1. The factor is the province total, not a meter on this plant.`
+    : `Nameplate ${nameplateMw} MW is the plant file (${periodLabel}). Average power uses ${province}’s ${genYear} ${tech} generation divided by its ${capYear} ${tech} capacity over 8,760 hours. The factor is the province total, not a meter on this plant.`
   return emptyAssessment({
     ...sharedPlant,
     buildable: powerKw > 0,

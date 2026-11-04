@@ -274,7 +274,7 @@ export default function OpenDataPage() {
       <p>
         Facility methane reporting: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC open dataset</a>.
         Renewable plant locations: <a href="https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de" target="_blank" rel="noopener noreferrer">NRCan NACEI, 1 MW or more</a> (mostly August 2017 — not a current census).
-        Remote communities: <a href="https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd" target="_blank" rel="noopener noreferrer">NRCan Remote Communities Energy Database (2018 file; the 2025 service did not answer on the last pull)</a>.
+        Remote communities: <a href="https://open.canada.ca/data/en/dataset/1d912ea1-919b-449d-8e8b-eb6a2313a401" target="_blank" rel="noopener noreferrer">NRCan Remote Communities Energy Database (2025, 207 communities)</a>.
         The overlay files are <a href="/data/renewable-plants.geojson">renewable-plants.geojson</a> and <a href="/data/renewable-layers.json">renewable-layers.json</a>.
         Stranded Score™, genset recommendations, and ROI fields are <strong>model enrichments</strong> by Stranded Value — not government numbers.
       </p>
