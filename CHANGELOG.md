@@ -1,5 +1,22 @@
 # Changelog
 
+## [2026-11-07] — Docs index and the financing screen
+
+Version stays 2.15.0.
+
+- The visitor docs index is `/docs`. The footer, the sitemap, and `llms.txt` point at it.
+- A labelled financing screen is in `docs/FINANCING-SCREEN.md`. It uses the 4 Nov 2026 public-chain window and the machine cards already on the site. It is not a calculator on the site, not a vendor invoice, and not a grant award. Reported methane stays in that screen. The one-site example is published vented gas at TransCanada Pipeline, Ontario, 2024. The expansion example is the biggest 10% of reported methane.
+- Pitch and funding sliders are unchanged.
+
+## [2026-11-04] — Current tables and the methane story
+
+Version stays 2.15.0. This note is the data refresh on top of that release.
+
+- Statistics Canada generation and capacity are both the 2025 tables (25-10-0015-01 and 25-10-0022-01), pulled 4 Nov 2026. The map shade list and the province popup show that pull date. Alberta wind is 5,684 MW. Biomass still has no capacity type, so still no payback. Geothermal plants stay 0. Alberta’s 6 MW stays a province total.
+- The 2025 Remote Communities Energy Database answered: 207 communities (143 fossil, 32 hydro, 32 already on a provincial grid). 111 have annual megawatt-hours and can be sized. 96 stay unsized. That annual total is not stored as fossil generation.
+- Home and dashboard: take the biggest reported-methane sites first (10%, 30%, 80%, or any share). Pick a machine from the existing list. Electricity uses the same Jenbacher 90% daily-average rule. Bitcoin uses the public chain that day. The optimistic 0.0000009 rate is not used on this panel. “Into the air” is only the published vented split.
+- Docs index: `/docs`. The living source record is `docs/DATA-SOURCES-RENEWABLES.md`.
+
 ## [2.15.0] — 2026-10-23 · One miner card on recorded energy
 
 - A plant or remote pin opens one build card. The hover card is a short teaser, so the old pair of different-sized popups does not stay open.

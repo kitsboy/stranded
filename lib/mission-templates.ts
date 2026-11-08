@@ -37,7 +37,7 @@ const TEMPLATE_DEFS: Omit<MissionTemplate, 'pick'>[] = [
   {
     id: 'alberta-high',
     name: 'Alberta High Emitters',
-    description: 'Large vent rates in Alberta with strong scores',
+    description: 'Large reported methane in Alberta with strong scores',
     minScore: 65,
     minEmission: 3000,
     maxSites: 10,

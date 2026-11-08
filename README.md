@@ -18,7 +18,8 @@ This project is the definitive interactive experience for that thesis:
 - **Command Center Map** (`/map`) — Live filters (provinces, sources), 2,611 sites, generator sizing in details, per-site Value/ROI (CapEx, methane loss opportunity cost, financing), portfolio "Mission" simulator, deep links.
 - **Education Center** (`/education`) — World-class: simulators with live BTC + real gensets, 6+ generator models with specs/prices, per-site Value explorer wired to real geojson (emission → power kW → ASICs → daily BTC revenue + CapEx + financed payback), animated chemistry, Stranded Value IQ quiz, risk matrix, timeline, Value Toolkit + downloads.
 - **All Sites** (`/sites`) — Explorer with generator power kW + recommended genset columns.
-- **Home** — Clear "Stranded Value Flow" (Discover → Learn → Build → Fund) + persona-driven business paths (Operators, Capital, Gov, Landowners).
+- **Home** — Clear "Stranded Value Flow" (Discover → Learn → Build → Fund) + persona-driven business paths (Operators, Capital, Gov, Landowners). Under the headline numbers, the methane story takes the biggest reported sites first and prices that gas on the public Bitcoin network that day.
+- **Docs** (`/docs`) — The current counts, the methodology, the open-data checks, and the energy source record, in one list. The financing screen is `docs/FINANCING-SCREEN.md` (a planning note, not a calculator on the site).
 - **Pitch Deck** (`/pitch`) — Live investor page with auto-updating charts, province/emission/genset breakdowns, BTC revenue model, top sites table.
 - **Marketing Hub** (`/Marketing-Hub.html`) — Self-contained professional suite with 5 docs, visuals, charts, print/PDF.
 - Every single one of the 2,611 original properties is preserved and explorable with honest, dynamic calcs.

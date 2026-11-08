@@ -21,7 +21,7 @@
 
 ## The Opportunity
 
-Canada possesses an extraordinary, largely invisible energy asset: **2,611 mapped sites where natural gas is vented or flared** because the infrastructure to capture it is uneconomical (2,588 with reported CH₄, 675 high-confidence). 
+Canada possesses an extraordinary, largely invisible energy asset: **2,611 mapped facilities that report methane** (2,588 with a reported CH₄ figure, 675 high-confidence). A vent or flare number exists only where the filing published that split. Many sites, including a lot of landfills, have no split, so the whole file is not “vented or flared.” 
 
 This is stranded methane—one of the planet's highest-impact climate challenges and simultaneously one of the most compelling, under-monetized investment opportunities available.
 

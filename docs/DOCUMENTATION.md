@@ -1,7 +1,10 @@
 # Stranded — Documentation Index
 
-**Live:** https://stranded.giveabit.io  
+**Live:** https://stranded.giveabit.io/docs
 **Repo:** https://github.com/kitsboy/stranded
+**Current:** 2026-11-07. Version 2.15.0. Methane file unchanged (2,611 / 2,588 / 675, newest filing year 2024). StatCan generation and capacity are both 2025, pulled 2026-11-04. Remote communities are the 2025 file, 207 places. The home story uses a live chain window, not the optimistic hashprice. The financing screen is [FINANCING-SCREEN.md](./FINANCING-SCREEN.md). It is a planning note, not a page on the site.
+
+The auto-synced block at the bottom of this file is the last `generate-live-stats.js` run. It was not regenerated on 4 Nov 2026. The methane counts in it still match the file. The energy dates above are the newer fact.
 
 ---
 
@@ -28,6 +31,7 @@ Numbers in docs stay current via the build pipeline:
 | [MISSION.md](./MISSION.md) | Mission alignment |
 | [STATUS.md](../STATUS.md) | Current status snapshot |
 | [README.md](../README.md) | Developer onboarding |
+| [FINANCING-SCREEN.md](./FINANCING-SCREEN.md) | 4 Nov 2026 planning screen. Methane stays. Not a site calculator. |
 
 ## Marketing
 
@@ -44,7 +48,8 @@ Numbers in docs stay current via the build pipeline:
 
 | Route | Description |
 |-------|-------------|
-| `/` | Home — Stranded Value flow + personas |
+| `/docs` | Current counts and links to every public document |
+| `/` | Home — Stranded Value flow, plus the methane capture story |
 | `/map` | Command Center — 2,611 sites, filters, ROI |
 | `/education` | Education Center — simulators, quiz, toolkit |
 | `/sites` | All sites explorer |

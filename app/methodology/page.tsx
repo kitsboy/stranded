@@ -20,7 +20,8 @@ export default function MethodologyPage() {
 
       <h2>Data source</h2>
       <p>All 2,611 sites are <em>mapped</em> from <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC open methane reporting</a>: 2,588 carry a reported CH₄ figure and 675 are high-confidence and emission-bearing. We only use the word &quot;verified&quot; for that high-confidence set, never the whole file. Stats regenerate on every build via <code>generate-live-stats.js</code>.</p>
-      <p>The map can also show official energy overlays, off until you turn them on. Those dots are not Stranded Scores. They are Natural Resources Canada plant and remote-community locations, with the government&apos;s own fields. The plant file is mostly August 2017 — the latest geospatial file they publish, not a current census. Geothermal has a toggle and a count of zero in that file. Sources with no coordinates are listed, not plotted. Full record: <Link href="/docs/DATA-SOURCES-RENEWABLES.md">energy overlay sources</Link>.</p>
+      <p>The map can also show official energy overlays, off until you turn them on. Those dots are not Stranded Scores. They are Natural Resources Canada plant and remote-community locations, with the government&apos;s own fields. The plant file is mostly August 2017 — the latest geospatial file they publish, not a current census. Province capacity factors use Statistics Canada generation and capacity for 2025, pulled 4 Nov 2026. Remote communities are the 2025 database, 207 places. Geothermal has a toggle and a count of zero in that file. Sources with no coordinates are listed, not plotted. Full record: <Link href="/docs/DATA-SOURCES-RENEWABLES.md">energy overlay sources</Link>. The short index is <Link href="/docs">/docs</Link>.</p>
+      <p>The home and dashboard story takes the biggest reported-methane sites first. A vent or flare kilogram is used only where the filing published a fugitive split. Electricity is the Jenbacher-class rule on this page, at 90% of listed power, averaged over the day. Bitcoin on that story is the public chain that day: coins paid in the last 144 blocks, divided by the hours those blocks took and by the hashrate reported then. It is not the optimistic rate below.</p>
 
       <h2>Stranded Score™ v3</h2>
       <p>Log-scaled emission is the primary driver. When ECCC does not publish grid distance or internet type, we infer proxies from source category (landfill, oil &amp; gas, power, etc.), province infrastructure, emission tier, data confidence, and reporting year. Scores span ~22–96 with meaningful elite (≥85) and high (≥65) tiers. Percentile badges compare each site to the full Canadian dataset.</p>
@@ -61,7 +62,7 @@ kWh/day ÷ 24                    = average electrical kW`}</pre>
           <p className="text-xs text-gray-400 mt-2">Derived live from the two editable inputs in the site panel: daily BTC issuance (≈450 BTC/day subsidy + fees) ÷ network hashrate (≈1.1 ZH/s). Moves with price and difficulty.</p>
         </div>
       </div>
-      <p className="text-sm text-gray-400">Formula: <code>networkDerived = dailyBtcIssuance ÷ networkHashrate</code>. The numbers in the site panel recompute when you edit those two inputs; this page shows the shipped <code>@/lib/fleet-model.ts</code> defaults.</p>
+      <p className="text-sm text-gray-400">Formula: <code>networkDerived = dailyBtcIssuance ÷ networkHashrate</code>. The numbers in the site panel recompute when you edit those two inputs; this page shows the shipped <code>@/lib/fleet-model.ts</code> defaults. The home story ignores both frozen rates and reads mempool.space instead.</p>
 
       <h2>Bank packs</h2>
       <p>Export diligence packages from the map site panel, mission panel, or sites browser: Markdown brief (score factors + peers + sensitivity), CSV, Excel-friendly TSV, printable HTML, and JSON. No account required — files download locally.</p>
@@ -76,7 +77,7 @@ kWh/day ÷ 24                    = average electrical kW`}</pre>
       </ul>
 
       <h2>Updates</h2>
-      <p>Live metrics: <Link href="/data/live-stats.json">live-stats.json</Link> · API docs: <Link href="/docs/api">/docs/api</Link> · Status: <Link href="/status">/status</Link> · <Link href="/open-data">Open Data</Link> · <Link href="/roadmap">Roadmap</Link> · <Link href="/privacy">Privacy</Link></p>
+      <p>Index: <Link href="/docs">/docs</Link> · Live metrics: <Link href="/data/live-stats.json">live-stats.json</Link> · API docs: <Link href="/docs/api">/docs/api</Link> · Status: <Link href="/status">/status</Link> · <Link href="/open-data">Open Data</Link> · <Link href="/roadmap">Roadmap</Link> · <Link href="/privacy">Privacy</Link></p>
     </div>
   )
 }

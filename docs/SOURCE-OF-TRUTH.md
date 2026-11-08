@@ -8,7 +8,7 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-11-04 — StatCan capacity year is 2025, pulled that day. Remote communities are the 2025 file, 207 places. **v2.15.0** miner card still sizes only recorded power (1,049 plants). Methane stays 2,611. Optimistic hashprice stays labelled. `public/data/live-stats.json` is stamped 2.15.0 by `generate-live-stats.js`. The methane counts did not change. The footer shows the Give A Bit wordmark again. Geothermal plants stay for later. Earlier: 2026-07-16 v2.9.0.
+**Last Major Update:** 2026-11-07 — Visitor index at `/docs`. Financing screen recorded in `docs/FINANCING-SCREEN.md` (4 Nov 2026 chain window, site machine cards, methane kept in the model). That screen is not a site page. **v2.15.0** stands. Earlier the same week, 2026-11-04: StatCan capacity year is 2025, pulled that day. Remote communities are the 2025 file, 207 places. The miner card still sizes only recorded power (1,049 plants). Methane stays 2,611. Optimistic hashprice stays labelled. `public/data/live-stats.json` is stamped 2.15.0 by `generate-live-stats.js`. The methane counts did not change. The footer shows the Give A Bit wordmark again. Geothermal plants stay for later. Earlier: 2026-07-16 v2.9.0.
 
 **Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
 **Local dev:** http://localhost:3003  
@@ -44,9 +44,10 @@ Stranded turns wasted energy (starting with methane) into verifiable Bitcoin-pow
 
 **Data Source:**
 - Primary: Environment and Climate Change Canada (ECCC) GHGRP — https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823
-- Energy overlays (map toggles, not scores): NRCan NACEI renewable plants ≥1 MW — https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de — and NRCan Remote Communities Energy Database — https://open.canada.ca/data/en/dataset/0e76433c-7aeb-46dc-a019-11db10ee28dd
-- Overlay snapshot: public/data/renewable-plants.geojson + public/data/renewable-layers.json
-- Energy atlas (solar GHI/DNI images, hydrokinetic polygons, infrastructure points, PV province means): public/data/energy-atlas.json, public/data/hydrokinetic.geojson, public/data/nacei-infrastructure.geojson, public/data/pv-province.json, public/data/province-boundaries.geojson. Province shades use the 2021 Census cartographic boundaries and public/data/statcan-renewables.json. A rectangle is the fallback if the boundary file fails. No geocoded towns, no drawn corridors, no ice, geothermal plant count stays 0. A hydrokinetic click names the river and the community on the polygon. Infrastructure search flies to an official point. A plant popup pairs the plant-file megawatts with that province’s 2024 StatCan capacity.
+- Energy overlays (map toggles, not scores): NRCan NACEI renewable plants ≥1 MW — https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de — and the 2025 Remote Communities Energy Database — https://open.canada.ca/data/en/dataset/1d912ea1-919b-449d-8e8b-eb6a2313a401 — 207 communities.
+- Overlay snapshot: public/data/renewable-plants.geojson + public/data/renewable-layers.json, rewritten 2026-11-04.
+- Energy atlas (solar GHI/DNI images, hydrokinetic polygons, infrastructure points, PV province means): public/data/energy-atlas.json, public/data/hydrokinetic.geojson, public/data/nacei-infrastructure.geojson, public/data/pv-province.json, public/data/province-boundaries.geojson. Province shades use the 2021 Census cartographic boundaries and public/data/statcan-renewables.json. Generation and capacity in that file are both 2025, pulled 2026-11-04. A rectangle is the fallback if the boundary file fails. No geocoded towns, no drawn corridors, no ice, geothermal plant count stays 0. A hydrokinetic click names the river and the community on the polygon. Infrastructure search flies to an official point. A plant popup pairs the plant-file megawatts with that province’s 2025 StatCan capacity.
+- Visitor index: https://stranded.giveabit.io/docs
 - Source record: docs/DATA-SOURCES-RENEWABLES.md
 - File: public/data/stranded-sites.geojson (2,611 features)
 - Key fields used: emission_rate_kg_day (core for gas → power → ROI), province, source_type, confidence, name, city, ch4_tonnes_year, reference_year, ghgrp_id (plus enriched: strandedScore, maxGeneratorPowerKW, recommendedGenset)
@@ -67,6 +68,8 @@ Stranded turns wasted energy (starting with methane) into verifiable Bitcoin-pow
 Bitcoin sovereignty, environmental remediation through energy capture + mining, education on real Value (climate + capital + community), transparent data-driven tools, linking to giveabit.io. Positive, approachable, focused on actionable sovereign wealth from stranded resources.
 
 **Gaps / Next Opportunities:**
+- Financing sheet on the site, only if Cam asks. The numbers are already in `docs/FINANCING-SCREEN.md`. Next chat reminds him of that plan first: TransCanada vented pilot, top 10% expansion, full file as the ceiling, pension scale, labelled optimistic rate, methane stays.
+- Home and some education lines still say the gas is vented or flared. Pitch and funding still use the optimistic straight-line slider.
 - Live API for newest ECCC data refreshes + auto-enrichment
 - Stronger per-site ROI directly in /map SiteDetails + clusters (education explorer is currently richest)
 - Gas treatment derate + LCOE visible on map/panel too

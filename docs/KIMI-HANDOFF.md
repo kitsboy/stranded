@@ -1,3 +1,56 @@
+## Session — 2026-11-07
+
+**Next chat: remind Cam of this plan before other work.**
+
+The plan is the financing screen in `docs/FINANCING-SCREEN.md`. Methane stays in it. The deal he can stand behind is the published vented gas at TransCanada Pipeline, Ontario, 2024: 14,442 kg/day, about 2.9 MW, 720 Antminer S21 XP, about 35 BTC/year, about $3.9 million CAD/year at the 4 Nov 2026 CoinGecko price ($112,377 CAD). Planning hardware $6.1 million at the site card ($8,500). Generators about $3.1 million at the site’s $1,050/kW figure. Gross payback about 1.6 years on miners and about 2.3 years with generators, before pool fees, downtime, permits, tax, interconnect, and gas treatment.
+
+The expansion is the biggest 10% of reported methane: 6 sites, 40.8 MW, 10,084 S21 XP, about 489 BTC/year on the network rate, about $55 million CAD/year gross, about $86 million of miner cards and $43 million of generators. The full file is the ceiling. The whole-file published vented split is about the same coins as that top 10%. The optimistic 0.0000009 rate is about twice that window and stays labelled. It changes coins, not machine count. When gas is the scarce input, the S21 XP leads this list.
+
+CPP Investments net assets were $863.6 billion at 30 June 2026. One year of that top-10% gross is about 0.006% of the fund. This can be a producing pilot. It does not fund the pension. Tax is on profit after costs. A federal bitcoin treasury owned by every Canadian is a separate policy decision. Funding-page CETA ceilings and the education “$200B+” line are not award letters. Market listings that day were a 270 TH unit (and a used-sale median that did not prove 270 against 300). The site card stays 300 TH / 4,050 W at $8,500 CAD until a quote names that spec. He has not asked for the sheet on the site. Do not build it until he does.
+
+## Latest Session Summary (from 2026-11-07 goodbye)
+
+**Chat Topic:** Make the methane story honest and current, put the docs where a visitor can find them, then write down a financing screen Cam can stand behind.
+
+**Key Things We Did:**
+- Refreshed StatCan generation and capacity to the 2025 tables, pulled 4 Nov 2026, and loaded the 2025 remote-community file (207 places, 111 sized, 96 unsized).
+- Put a biggest-first methane story on the home page and the dashboard. Bitcoin comes from a live mempool.space window. “Into the air” is only the published vented split.
+- Added a visitor docs index at `/docs` and pointed the footer, sitemap, and `llms.txt` at it.
+- Wrote the financing screen into `docs/FINANCING-SCREEN.md` and into workspace memory so the next login opens with it.
+
+**Finished in this session:**
+- The 4 Nov data refresh is already on `origin/main` as `a2f0c6d` (SHA note `df8f0a6`).
+- The docs index and the financing note are in this goodbye.
+- Version stays 2.15.0. `npm run version` was not run. `buffy/v2.11.1-hud-fix` was not merged.
+
+**Still to do:**
+- Remind Cam of the plan at the next login, then wait for a yes before putting the sheet on the site.
+- Home and some education lines still say the gas is vented or flared. Pitch and funding still use the optimistic straight-line slider.
+- A printable top-10% card, and a last-good network window for a room whose wifi blocks mempool.space.
+- One demo path: home story, Top 10%, then one pin. TransCanada is the into-the-air example. Essex-Windsor and Twin Creeks have no vent split.
+- Geothermal plants stay 0 until Cam asks. Phone energy-card profit above the long explanation, wrapping filter names, and the empty pad in the phone Layers drawer are still open.
+- Other operators’ posts were never pasted. Do not invent them.
+
+**Update / Status:** As of 2026-11-07 the live site is stranded.giveabit.io, Cloudflare Pages project `strandedbuild`, version 2.15.0. Pushing `main` publishes this docs index. The financing screen is a repository note, not a new calculator.
+
+**Key Decisions / Notes:**
+- Machine count is watts. The bitcoin rate does not add machines.
+- English on the trust copy is intentional.
+- Dollars on the home story appear only when the CoinGecko price is not stale.
+- Do not regenerate live-stats or re-stamp the methane proof unless Cam asks.
+
+**Next for Kimi:** Integrate this summary into MASTER-BRAIN.md / Kanban / Obsidian vault. Update any maps. Educate Hermes. The full screen is `docs/FINANCING-SCREEN.md`. Obsidian is on THOR. This file is the handoff.
+
+**Mission Tie-in:** Stranded keeps a real methane filing attached to an honest Bitcoin build, so a small pilot can be explained without inventing power, prices, or a pension.
+
+**Git State:**
+- SHA: `SHA_AFTER_COMMIT`
+- Parent on origin before this goodbye: `df8f0a6` (docs SHA note) on top of `a2f0c6d` (methane story, 2025 StatCan, 2025 remote file).
+- Unpushed: this goodbye, until `git push origin main`.
+- Tests from the 4 Nov refresh stayed as already recorded. This goodbye did not rebuild methane geojson and did not run `npm run version`.
+
+---
+
 ## Session — 2026-11-04
 
 **Done:**

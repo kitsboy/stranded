@@ -275,7 +275,10 @@ export default function OpenDataPage() {
         Facility methane reporting: <a href="https://open.canada.ca/data/en/dataset/a8ba14b7-7f23-462a-bdbb-83b0ef629823" target="_blank" rel="noopener noreferrer">ECCC open dataset</a>.
         Renewable plant locations: <a href="https://open.canada.ca/data/en/dataset/490db619-ab58-4a2a-a245-2376ce1840de" target="_blank" rel="noopener noreferrer">NRCan NACEI, 1 MW or more</a> (mostly August 2017 — not a current census).
         Remote communities: <a href="https://open.canada.ca/data/en/dataset/1d912ea1-919b-449d-8e8b-eb6a2313a401" target="_blank" rel="noopener noreferrer">NRCan Remote Communities Energy Database (2025, 207 communities)</a>.
+        Province generation and capacity: Statistics Canada tables 25-10-0015-01 and 25-10-0022-01, both 2025, pulled 4 Nov 2026 (<a href="/data/statcan-renewables.json">statcan-renewables.json</a>).
+        The capture story reads <a href="/data/methane-capture.json">methane-capture.json</a>, built from the methane file. A vent or flare figure is present only where the filing published a fugitive split.
         The overlay files are <a href="/data/renewable-plants.geojson">renewable-plants.geojson</a> and <a href="/data/renewable-layers.json">renewable-layers.json</a>.
+        Start at <Link href="/docs">the docs index</Link>.
         Stranded Score™, genset recommendations, and ROI fields are <strong>model enrichments</strong> by Stranded Value — not government numbers.
       </p>
 
@@ -303,7 +306,7 @@ export default function OpenDataPage() {
               ['company', 'string', 'Reporting organization'],
               ['province', 'string', 'Canadian province or territory'],
               ['city', 'string', 'Nearest municipality (if reported)'],
-              ['emission_rate_kg_day', 'number', 'Daily methane vent rate (kg CH₄/day)'],
+              ['emission_rate_kg_day', 'number', 'Reported methane, kilograms per day. Not a vent measurement.'],
               ['ch4_tonnes_year', 'number', 'Annual methane (tonnes)'],
               ['source_type', 'string', 'Industrial category (oil_gas_extraction, landfill_waste, …)'],
               ['confidence', 'string', 'Data quality: high | medium | low'],

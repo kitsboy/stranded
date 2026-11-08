@@ -99,7 +99,7 @@ export default function ApiDocsPage() {
           <h2 className="font-semibold text-[#FF8C00] mb-2">GET /data/stranded-sites.geojson</h2>
           <p className="text-gray-400">2,611 FeatureCollection. Key properties:</p>
           <ul className="list-disc pl-5 mt-2 text-gray-300 space-y-1">
-            <li><code>emission_rate_kg_day</code> — daily methane vent rate</li>
+            <li><code>emission_rate_kg_day</code> — reported methane, kilograms per day. Not a vent measurement.</li>
             <li><code>province</code>, <code>source_type</code>, <code>confidence</code></li>
             <li><code>ch4_tonnes_year</code>, <code>distance_to_grid_km</code></li>
             <li><code>ghgrp_id</code> — unique site identifier</li>

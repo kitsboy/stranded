@@ -144,7 +144,7 @@ This is already one of the most advanced public intelligence platforms in the st
 Three reasons the window is open right now:
 
 **1. Data Exists**  
-ECCC verified 2,611 sites. It's public. It's clean. It's ready to be analyzed at scale.
+ECCC reporting covers 2,611 mapped sites. 2,588 have a reported methane figure. 675 are high-confidence. The file is public.
 
 **2. Technology Works**  
 Mobile Bitcoin mining is proven and rapidly improving. We can deploy, operate, and profitably monetize stranded power.
