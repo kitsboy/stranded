@@ -44,9 +44,9 @@ CPP Investments net assets were $863.6 billion at 30 June 2026. One year of that
 **Mission Tie-in:** Stranded keeps a real methane filing attached to an honest Bitcoin build, so a small pilot can be explained without inventing power, prices, or a pension.
 
 **Git State:**
-- SHA: `SHA_AFTER_COMMIT`
+- SHA: `46644972ae3a5838daa12d674819b2dd6a7277ec` (`4664497`, docs: publish the docs index and record the financing screen).
 - Parent on origin before this goodbye: `df8f0a6` (docs SHA note) on top of `a2f0c6d` (methane story, 2025 StatCan, 2025 remote file).
-- Unpushed: this goodbye, until `git push origin main`.
+- This SHA line sits on top of `4664497`. End of session pushes `origin/main`.
 - Tests from the 4 Nov refresh stayed as already recorded. This goodbye did not rebuild methane geojson and did not run `npm run version`.
 
 ---

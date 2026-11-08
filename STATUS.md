@@ -2,7 +2,7 @@
 
 **Updated:** 2026-11-07 by Grok
 **Site:** https://stranded.giveabit.io (Cloudflare Pages · project `strandedbuild`)
-**GitHub:** https://github.com/kitsboy/stranded (`main`, SHA recorded in `docs/KIMI-HANDOFF.md`)
+**GitHub:** https://github.com/kitsboy/stranded (`main` at `4664497`)
 **Build:** Next.js static export — `npm run build` → `dist/`
 **Dev:** `npm run dev` → `localhost:3003`
 **Version:** **2.15.0**
@@ -11,7 +11,7 @@
 **Story:** `/` and `/dashboard` price a top share of reported methane on a live mempool.space window. Vented gas is only the published fugitive split.
 **Financing screen:** `docs/FINANCING-SCREEN.md`. Planning note from the 4 Nov 2026 window. Not a page on the site. Methane stays. Remind Cam of this plan at the next login.
 **Docs:** https://stranded.giveabit.io/docs
-**Status:** Live. The 2026-11-04 refresh is `a2f0c6d`. The docs index and this financing note follow it.
+**Status:** Live. The 2026-11-04 refresh is `a2f0c6d`. The docs index and this financing note are `4664497`.
 
 The release notes below this header stop at v2.11. The current release list is `CHANGELOG.md` and `/changelog`.
 
