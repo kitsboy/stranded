@@ -85,6 +85,7 @@ import MinerStackCockpit, { type CockpitPreview } from '@/components/MinerStackC
 import MinerStackThumbBar from '@/components/MinerStackThumbBar'
 import BuildSummary from '@/components/BuildSummary'
 import FleetTemplateShelf, { type ShelfResult } from '@/components/FleetTemplateShelf'
+import { sizeCaptureHutsForBuild } from '@/lib/capture-huts'
 
 const FIAT_OPTIONS = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -397,6 +398,14 @@ export default function SiteDetailsPanel({
       const sats = satsPerDay(c.effectiveDailyBtc).toLocaleString()
       const scoreTierLabel = site.strandedScore >= 85 ? 'Elite' : site.strandedScore >= 65 ? 'High' : site.strandedScore >= 45 ? 'Med' : 'Low'
       const mapUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'}/map?site=${site.id}`
+      const hutBom = sizeCaptureHutsForBuild({
+        powerKw: c.usedPowerKw,
+        minerCount: c.effectiveMachineCount,
+        sourceType: p.source_type,
+      })
+      const perMinerDailySats = c.effectiveMachineCount > 0 ? Math.round(satsPerDay(c.effectiveDailyBtc) / c.effectiveMachineCount) : 0
+      const annualGrossBtc = c.dailyRevenueBtc * 365
+      const annualPensionBtc = annualGrossBtc * 0.10
       const lines: string[] = []
       lines.push('══════════════════════════════════════════════════════════')
       lines.push('STRANDED VALUE — ROI SUMMARY')
@@ -412,9 +421,12 @@ export default function SiteDetailsPanel({
       lines.push(`  Data:         ECCC ${p.reference_year || '—'} · ${p.confidence || '—'} confidence`)
       lines.push(`  Map:          ${mapUrl}`)
       lines.push('')
-      lines.push('BUILD')
-      lines.push(`  Miners:       ${c.effectiveMachineCount.toLocaleString()} × ${selectedASIC.name} (${selectedASIC.hashrate_ths} TH/s @ ${selectedASIC.power_w} W)`)
+      lines.push('BUILD & CAPTURE HUTS (TURNKEY BOM)')
+      lines.push(`  Miners:       ${c.effectiveMachineCount.toLocaleString()} × ${selectedASIC.name} (${selectedASIC.hashrate_ths} TH/s @ ${selectedASIC.power_w} W · C$${selectedASIC.cost_cad.toLocaleString()}/unit)`)
       lines.push(`  Generator:    ${c.gensetName} (${c.generatorPowerKw.toFixed(1)} kW from site gas)`)
+      lines.push(`  Capture Hut:  ${hutBom.hutCount} × ${hutBom.hutSpec.name} (${hutBom.hutSpec.footprint} · C$${hutBom.totalHutCapexCad.toLocaleString()})`)
+      lines.push(`  Gas Scrubber: ${hutBom.conditioning.name} (C$${hutBom.conditioningCapexCad.toLocaleString()})`)
+      lines.push(`  Sourcing:     ${hutBom.hutSpec.sourcingRegions.join(' · ')}`)
       lines.push(`  Power used:   ${c.usedPowerKw.toFixed(1)} of ${c.generatorPowerKw.toFixed(1)} kW (gas ceiling)`)
       lines.push(`  Mode:         ${stackMode === 'auto' ? 'Fill the gas (max capture)' : 'My build (manual)'}`)
       lines.push('')
@@ -424,18 +436,20 @@ export default function SiteDetailsPanel({
       lines.push(`  Maintenance:  ${fmtBtc(c.dailyMaintBtc)} BTC (${fmt(c.dailyMaintFiat)})`)
       lines.push(`  NET PROFIT:   ${fmtBtc(c.dailyProfitBtc)} BTC (${fmt(c.dailyProfitFiat)}/day)`)
       lines.push(`  Monthly net:  ${fmtBtc(c.monthlyProfitBtc)} BTC (${fmt(c.monthlyProfitFiat)})`)
-      lines.push(`  Sats/day:     ${sats} sats`)
+      lines.push(`  Sats/day:     ${sats} sats (${perMinerDailySats.toLocaleString()} sats/day per ASIC)`)
       lines.push('')
       lines.push('INVESTMENT')
       lines.push(`  Hardware:     ${c.hardwareCostBtc.toFixed(4)} BTC (${fmt(c.hardwareCostFiat)})`)
       lines.push(`  Fixed setup:  ${c.fixedCostBtc.toFixed(4)} BTC (${fmt(c.fixedCostFiat)})`)
       lines.push(`  Generator:    ${c.gensetCapexBtc.toFixed(4)} BTC (${c.gensetName})`)
+      lines.push(`  Hut+Scrubber: C$${hutBom.totalEnclosureAndGasTrainCad.toLocaleString()} (${hutBom.hutCount} × ${hutBom.hutSpec.footprint.split(' ')[0]} + H₂S train)`)
       lines.push(`  TOTAL:        ${c.totalInvestmentBtc.toFixed(4)} BTC (${fmt(c.totalInvestmentFiat)})`)
       lines.push('')
-      lines.push('PAYBACK')
+      lines.push('PAYBACK & 10% SOVEREIGN PENSION COMPACT')
       lines.push(`  Total capital:  ${payback(c.paybackDays)}`)
       lines.push(`  Marginal (per extra miner): ${payback(c.marginalPayback)}`)
       lines.push(`  Financed (${debtPercent}% debt @ ${interestRate}%): ${payback(c.financedPaybackDays)}`)
+      lines.push(`  10% Sovereign Pension Contribution: ${annualPensionBtc.toFixed(4)} BTC/yr (90% retained by operator/partners)`)
       lines.push('')
       lines.push('METHANE IMPACT')
       lines.push(`  Captured:     ${(siteEmission * 0.96).toLocaleString()} kg/day (est. 96%)`)
@@ -1325,6 +1339,32 @@ export default function SiteDetailsPanel({
         <div className="flex justify-between"><span className="text-gray-400">Total Power (ASICs)</span><span className="text-[#5BC0BE]">{calculations.totalPowerKw.toFixed(1)} kW</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Generator Power (from site gas)</span><span className="text-[#FF8C00]">{calculations.generatorPowerKw.toFixed(1)} kW ({calculations.gensetName})</span></div>
         <div className="flex justify-between"><span className="text-gray-400">Hardware Cost</span><span className="text-white">{calculations.hardwareCostBtc.toFixed(6)} BTC <span className="text-xs text-gray-400">({fmt(calculations.hardwareCostFiat)})</span></span></div>
+        {(() => {
+          const hutBom = sizeCaptureHutsForBuild({
+            powerKw: calculations.usedPowerKw,
+            minerCount: calculations.effectiveMachineCount,
+            sourceType: p.source_type,
+          })
+          return (
+            <div className="pt-2 mt-2 border-t border-slate-700/80 space-y-1 text-xs" data-testid="site-capture-hut-bom">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Capture Hut BOM</span>
+                <span className="font-mono text-[#5BC0BE]">{hutBom.hutCount} × {hutBom.hutSpec.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Gas Conditioning</span>
+                <span className="text-gray-300">{hutBom.conditioning.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Hut + Scrubber + Switchgear</span>
+                <span className="font-mono text-[#FF8C00]">C${hutBom.totalEnclosureAndGasTrainCad.toLocaleString()}</span>
+              </div>
+              <div className="text-[11px] text-gray-400">
+                Global sourcing: {hutBom.hutSpec.sourcingRegions.join(' · ')}
+              </div>
+            </div>
+          )
+        })()}
       </div>
       <div className={`mb-4${sectionOff('build')}`} data-testid="site-asic-select">
         <label className="text-sm font-semibold text-[#5BC0BE]">ASIC Model</label>

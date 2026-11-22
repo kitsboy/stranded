@@ -11,6 +11,9 @@ import { formatEmissionCompact, readinessMini, websiteSchemaExtras } from '@/lib
 import HomeKpiStrip from '@/components/HomeKpiStrip'
 import MethaneCaptureStory from '@/components/MethaneCaptureStory'
 import OnboardingChecklist from '@/components/OnboardingChecklist'
+import HowTheMathWorks from '@/components/HowTheMathWorks'
+import CaptureHutSizer from '@/components/CaptureHutSizer'
+import SovereignPensionPlan from '@/components/SovereignPensionPlan'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
 import JsonLd from '@/components/JsonLd'
 import { useLocale } from '@/lib/useLocale'
@@ -138,7 +141,7 @@ export default function LandingPage() {
           })}
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
           <Link
             href="/map"
             prefetch
@@ -148,6 +151,9 @@ export default function LandingPage() {
           </Link>
           <Link href="/pitch" prefetch className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#FF8C00]/50 text-[#FF8C00] hover:bg-[#FF8C00]/10 text-lg transition">
             {t('heroLivePitch')}
+          </Link>
+          <Link href="/funding" prefetch className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 text-lg transition">
+            Funding &amp; Grants →
           </Link>
           <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
             {tf(locale, 'heroBrowseSites', { count: siteCount.toLocaleString() })}
@@ -160,6 +166,13 @@ export default function LandingPage() {
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <MethaneCaptureStory />
+      </div>
+
+      {/* Codified 6-Step Math Walkthrough + Capture Huts + Sovereign Pension Plan */}
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-10">
+        <HowTheMathWorks />
+        <CaptureHutSizer />
+        <SovereignPensionPlan fullPortfolioAnnualBtc={stats?.valueModel?.annualBtc ?? 7079.73} />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 pt-8">

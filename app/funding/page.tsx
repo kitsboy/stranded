@@ -19,6 +19,8 @@ import TermSheetCard from '@/components/TermSheetCard'
 import AmortizationTable from '@/components/AmortizationTable'
 import CapexFxControls from '@/components/CapexFxControls'
 import EuFundingExplorer from '@/components/EuFundingExplorer'
+import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
+import SovereignPensionPlan from '@/components/SovereignPensionPlan'
 import { USD_PER_CAD_FALLBACK } from '@/lib/capex-fx'
 
 const CETA_PROGRAMS = [
@@ -215,9 +217,22 @@ export default function FundingPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold tracking-tighter mb-2">CETA Funding Pathway</h1>
-            <p className="text-gray-400 mb-8">Interactive wizard for Canadian-EU trade agreement aligned cleantech capital. Estimates only — verify with program officers.</p>
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="inline-flex items-center gap-2 rounded-full border border-[#FF8C00]/35 bg-[#FF8C00]/10 px-3.5 py-1 text-xs font-semibold tracking-wider text-[#FF8C00] mb-3">
+        GLOBAL CAPITAL &amp; GRANT STACK · CANADA · AB · BC · ON/SK · USA · EUROPE
+      </div>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-2">Funding, Grants &amp; Sovereign Capital</h1>
+      <p className="text-gray-300 max-w-3xl mb-8">
+        How to finance single-site pilots (C$500K–C$5M) up to multi-billion-dollar sovereign portfolios across Canada, the United States, and Europe — combining non-dilutive methane-abatement grants, Clean Tech ITCs, senior generator debt, and the 10% Sovereign Canadian Bitcoin Pension compact.
+      </p>
+
+      <div className="mb-10">
+        <GlobalCapitalDirectory />
+      </div>
+
+      <div className="mb-10">
+        <SovereignPensionPlan fullPortfolioAnnualBtc={liveStats?.valueModel?.annualBtc ?? 7079.73} />
+      </div>
 
             {/* Horizon Europe / EU Funding — self-evolving suite */}
             <section className="mb-10 rounded-2xl border border-[#FF8C00]/30 bg-gradient-to-r from-[#FF8C00]/10 via-transparent to-[#5BC0BE]/10 p-6 md:p-8">

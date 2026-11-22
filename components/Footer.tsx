@@ -122,6 +122,7 @@ export default function Footer() {
     { href: '/open-data', label: t('footerOpenData') },
     { href: '/open-data#verify', label: 'Verify the dataset' },
     { href: '/funding', label: t('funding') },
+    { href: '/investors', label: 'Investors & Partners' },
     { href: '/partnerships', label: t('partnerships') },
     { href: '/verticals', label: t('verticals') },
     { href: '/benchmarks', label: t('benchmarks') },

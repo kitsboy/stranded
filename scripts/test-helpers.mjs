@@ -1287,5 +1287,34 @@ assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele }), nul
 assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 900 }), 900)
 assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: null }), null)
 
+// (e) v2.16.0: Capture Huts, Sovereign Pension Plan, Global Capital Directory & Nuclear SMR vertical
+const { CAPTURE_HUT_SPECS, sizeCaptureHutsForBuild } = await import('../lib/capture-huts.ts')
+const { computeSovereignPension } = await import('../lib/pension-model.ts')
+const { CAPITAL_DIRECTORY, CAPITAL_JURISDICTIONS } = await import('../lib/capital-directory.ts')
+const { ENERGY_VERTICALS } = await import('../lib/verticals.ts')
+
+assert.ok(CAPTURE_HUT_SPECS.length >= 4, 'capture huts must cover 10ft/20ft/40ft air & hydro/immersion')
+const bomLandfill = sizeCaptureHutsForBuild({ powerKw: 850, minerCount: 210, sourceType: 'landfill_waste' })
+assert.equal(bomLandfill.hutCount, 1)
+assert.equal(bomLandfill.conditioning.id, 'full-landfill-siloxane')
+assert.ok(bomLandfill.totalEnclosureAndGasTrainCad > 150000)
+
+const pension20 = computeSovereignPension({
+  annualPortfolioBtc: 2000,
+  btcPriceFiat: 115000,
+  flatTaxPct: 10,
+  communitySharePct: 15,
+  horizonYears: 20,
+  btcCagrPct: 0,
+})
+assert.equal(pension20.annualTaxBtc, 200)
+assert.equal(pension20.annualOperatorRetainedBtc, 1500)
+assert.equal(pension20.schedule.length, 20)
+assert.ok(pension20.cumulativeBtcAtHorizon > 2000 && pension20.cumulativeBtcAtHorizon < 4000, 'halving retention factor bounds 20yr BTC accumulation')
+
+assert.ok(CAPITAL_DIRECTORY.length >= 12, 'global capital directory must cover CA, AB, BC, ON/SK, US, EU, Institutional')
+assert.ok(CAPITAL_JURISDICTIONS.some(j => j.id === 'alberta') && CAPITAL_JURISDICTIONS.some(j => j.id === 'bc') && CAPITAL_JURISDICTIONS.some(j => j.id === 'europe'))
+assert.ok(ENERGY_VERTICALS.some(v => v.id === 'nuclear-smr'), 'Nuclear SMR Phase 3 vertical must be registered')
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)

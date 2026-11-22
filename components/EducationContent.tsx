@@ -364,7 +364,8 @@ export default function EducationContent() {
   // Share simulator
   const shareSimulator = () => {
     const text = `Stranded Value Impact: Capturing ${currentImpact.captured} sites could unlock ${currentImpact.dailyMethane.toLocaleString()} kg methane/day in value, avoid ${currentImpact.co2e.toLocaleString()} tonnes CO₂e/year, and produce ~${currentImpact.btc} BTC annually.`
-    navigator.clipboard.writeText(text + "\n\nExplore: https://localhost:3003/education")
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://stranded.giveabit.io'
+    navigator.clipboard.writeText(`${text}\n\nExplore: ${origin}/education`)
     toast.success('Simulator results copied to clipboard')
   }
 
@@ -708,7 +709,7 @@ export default function EducationContent() {
         </div>
 
         <div className="mt-6 p-4 bg-[#0f172a] rounded-2xl border border-[#5BC0BE]/30 text-sm">
-          <strong className="text-[#5BC0BE]">Coming soon — Real Site Integration:</strong> When connected to the live 2,611-site dataset, each location will show recommended generator model(s) + exact ASIC ROI using the production-side generator data + your mining calc. Per-site Stranded Value numbers, tailored to emission rate, gas quality, and location.
+          <strong className="text-[#5BC0BE]">Live on the 2,611-Site Map Now:</strong> Every location in the dataset displays its recommended generator model(s), turnkey Methane Capture Hut &amp; H₂S scrubber BOM, and exact per-ASIC ROI using both live network and optimistic hashprice scenarios. <Link href="/map" className="text-[#FF8C00] underline ml-1">Open the Live Map →</Link>
         </div>
 
         {/* Live Power Plant Configurator (integrates generator data + ASIC side) */}

@@ -103,9 +103,10 @@ export default function Nav() {
           {navLink('/education', t('education'))}
           {navLink('/sites', t('sites'))}
           {navLink('/pitch', t('pitch'))}
+          {navLink('/funding', t('funding'))}
           {navLink('/dashboard', t('dashboard'), { liveDot: true })}
           <span className="hidden lg:inline">{navLink('/verticals', t('verticals'))}</span>
-          <span className="hidden xl:inline">{navLink('/bookmarks', t('bookmarks'))}</span>
+          <span className="hidden xl:inline">{navLink('/investors', 'Investors')}</span>
         </div>
 
         {/* Right cluster.

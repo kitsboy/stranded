@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import SovereignPensionPlan from '@/components/SovereignPensionPlan'
+import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
+import HowTheMathWorks from '@/components/HowTheMathWorks'
 
 export const metadata: Metadata = {
   title: 'Investor & Partner Materials | Stranded Value',
@@ -53,10 +56,20 @@ export default function InvestorsPage() {
           <Link href="/pitch" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FF8C00] font-semibold text-[#1e293b] transition hover:bg-[#FF8C00]/90">
             View Live Pitch
           </Link>
+          <Link href="/funding" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#FF8C00]/50 text-[#FFB347] transition hover:bg-[#FF8C00]/10">
+            Global Grants &amp; Capital Stack
+          </Link>
           <Link href="/map" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] transition hover:bg-[#5BC0BE]/10">
             Explore the Platform
           </Link>
         </div>
+      </div>
+
+      {/* Codified 6-Step Math + Sovereign Pension Compact + Global Capital Stack */}
+      <div className="mb-12 space-y-10">
+        <HowTheMathWorks />
+        <SovereignPensionPlan fullPortfolioAnnualBtc={7079.73} />
+        <GlobalCapitalDirectory />
       </div>
 
       {/* Featured: Board Deck */}

@@ -1,62 +1,47 @@
 # Stranded Value — Technical Architecture One-Pager
 
-**Live:** https://stranded.giveabit.io · **Repo:** https://github.com/kitsboy/stranded · **Version:** `2.3.7`
+**Live:** [https://stranded.giveabit.io](https://stranded.giveabit.io) · **Repo:** [https://github.com/kitsboy/stranded](https://github.com/kitsboy/stranded) · **Version:** `2.16.0`
 
-## Stack
-React/Vite · map/data UX · ECCC dataset · generator models · Cloudflare Pages
+## 1. Stack & Runtime Architecture
+- **Framework:** Next.js 14 (App Router, static export `output: 'export'` to `dist/`) + TypeScript 5 + Tailwind CSS.
+- **Geospatial Engine:** MapLibre GL JS 5 with native GPU pin clustering, province emission/renewable choropleths, NSRDB solar irradiance rasters, and hydrokinetic polygons.
+- **Deep-Link Fast Path:** Pre-generated per-site JSON records (`/public/data/site/<GHGRP_ID>.json`, ~587 B gzipped across 2,611 sites) warm-start deep links (`/map?site=G10365`) in milliseconds before the 2.85 MB full GeoJSON finishes hydrating.
+- **Offline-First PWA:** Service Worker + IndexedDB GeoJSON caching (`lib/offline-db.ts`) and local-first storage for missions, bookmarks, watchlists, and custom fleet templates.
+- **Cryptographic Provenance:** Dataset SHA-256 and per-pin proofs anchored to the Bitcoin blockchain via OpenTimestamps (`lib/satohash.ts`, `lib/pin-proof.ts`).
 
-## System map (boxes)
+## 2. System Data Flow
 ```
-[User browser]
-     |
-     v
-[SPA / static app on Cloudflare Pages]
-     |
-        +--------+--------+
-|                 |
-        v                 v
-[Public APIs / LN / Nostr / OTS]   [Optional M3/M4 services]
+[ECCC Open GHGRP (2,611 sites) + NRCan Renewables (1,049) + Remote Communities (207) + StatCan 2025]
+       │
+       ▼  (Build-time deterministic pipeline: scripts/generate-live-stats.js & generate-site-records.mjs)
+[public/data/stranded-sites.geojson + live-stats.json + methane-capture.json + 2,611 site/<id>.json]
+       │
+       ▼  (Client runtime: zero backend lock-in, live mempool.space + CoinGecko multi-fiat feeds)
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│  • 6-Step Codified Math Engine (HowTheMathWorks.tsx)                                   │
+│  • Miner Stack Cockpit & Shared Fuel-Budget Dispatcher (lib/fleet-model.ts)            │
+│  • Capture Hut & Gas Scrubber BOM Sizer (lib/capture-huts.ts)                          │
+│  • Sovereign Canadian Bitcoin Pension Simulator (lib/pension-model.ts)                 │
+│  • Multi-Jurisdiction Capital & Grants Directory (lib/capital-directory.ts)            │
+│  • 5-Format Bank Pack & Branded PDF Diligence Exporter (lib/bank-pack.ts)              │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Architecture notes
-- Frontend map + site explorer
-- Static/structured site dataset (2,611 CA sites)
-- Generator + ASIC economics calculators
-- Education center content
-- Auto-deploy via GitHub → CF Pages
+## 3. Verification & Quality Gates
+Every build executes automated verification before deployment:
+1. `npm run validate` — validates all 2,611 GeoJSON features, Stranded Score™ v3 distribution, and byte-exact parity across all 2,611 individual site records.
+2. `npm run test:helpers` — unit-tests fuel budget dispatch, `÷ 24` daily-energy-to-average-kW physics, pin proofs, NRCan renewable overlays, StatCan capacity factors, capture huts, and pension math.
+3. `npx tsc -p tsconfig.json --noEmit` & `npm run lint` — strict zero-error TypeScript and Next/React lint checks.
+4. `npm run check:security` — secret hygiene scan across the repository.
 
-## Deploy path
-git push main → Cloudflare Pages auto
-
-## Data & privacy posture
-Prefer client-side and user-held keys. Minimize PII. Bitcoin rails where payments exist. See project privacy/security docs if present.
-
-## MVP boundary
-- **In MVP now:** Map, education, site economics, marketing hub live.
-- **Explicitly later:** Global datasets, multi-energy verticals, certified program, equipment marketplace.
-
-## Dependencies
-ECCC data lineage; live BTC price feeds optional
-
-## How a technical helper starts (15 min)
+## 4. Quick Start (Local Development)
 ```bash
 git clone https://github.com/kitsboy/stranded.git
 cd stranded
-# typically:
 npm install
-npm run dev
+npm test
+npm run dev   # http://localhost:3003
 ```
-Read `README.md`, `docs/DEPLOYMENT.md` (or `DEPLOY.md`), and this file.
-
-## Known gaps (full disclosure)
-See Investor one-pager risks + project `LATEST-UPDATE.md` / handoffs. Do not claim production hardness without tests/deploy verification.
-
-## Related
-- [Investor one-pager](./INVESTOR-ONEPAGER.md)
-- [Ask sheet](./ASK-SHEET.md)
-- Deeper docs: `docs/ARCHITECTURE.md` (if present), `SOURCE-OF-TRUTH.md`, `docs/.ai_docs/`
 
 ---
-**Safe Harbour:** Educational / informational only. Not financial, legal, or investment advice.
-Bitcoin involves risk. DYOR. Not your keys, not your cheese.
-Part of the [Give A Bit](https://giveabit.io) family.
+**Safe Harbour:** Educational / informational only. Part of the [Give A Bit](https://giveabit.io) family.

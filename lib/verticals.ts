@@ -100,4 +100,24 @@ export const ENERGY_VERTICALS: EnergyVertical[] = [
     avgPowerKw: 3000,
     btcFit: 'Excellent — baseload + spill capture',
   },
+  {
+    id: 'nuclear-smr',
+    name: 'Nuclear & SMR Baseload',
+    icon: '⚛️',
+    color: '#A78BFA',
+    status: 'roadmap',
+    description: 'CANDU off-peak surplus & Small Modular Reactors (ON, SK, NB, AB) paired with interruptible sovereign Bitcoin compute.',
+    potentialSites: 18,
+    avgPowerKw: 15000,
+    btcFit: 'Phase 3 Sovereign Scale — 24/7 zero-carbon baseload + instant grid frequency response',
+    section: {
+      headline: 'Phase 3 Horizon: Nuclear & Small Modular Reactors (SMRs)',
+      bullets: [
+        'Methane is our Lead Story today because it is the only stranded energy class in Canada with 2,611 facility-level federal ECCC filings (675 high-confidence)',
+        'Next horizon: Ontario (Darlington SMR / Bruce / Pickering), New Brunswick (Point Lepreau), and Saskatchewan/Alberta SMR corridors need a flexible, behind-the-meter first-customer load',
+        'Containerized Bitcoin ASICs absorb 100% of off-peak nuclear surplus and drop to 0 MW in milliseconds during peak residential demand — underwriting SMR CapEx while feeding the Sovereign Bitcoin Pension Plan',
+      ],
+      mapHint: 'Methane is live on the map now; Nuclear/SMR is our Phase 3 baseload expansion',
+    },
+  },
 ]

@@ -14,6 +14,7 @@ const VERTICAL_SOURCE_MAP: Record<string, string[]> = {
   'waste-heat': ['pulp_paper', 'refinery', 'industrial_other'],
   biomass: ['landfill_waste', 'pulp_paper'],
   hydro: ['power_generation'],
+  'nuclear-smr': ['power_generation'],
 }
 
 const VERTICAL_PROVINCES: Record<string, string[]> = {
@@ -22,6 +23,7 @@ const VERTICAL_PROVINCES: Record<string, string[]> = {
   'waste-heat': ['Alberta', 'Ontario', 'British Columbia'],
   biomass: ['Ontario', 'Quebec', 'Alberta'],
   hydro: ['British Columbia', 'Quebec', 'Manitoba'],
+  'nuclear-smr': ['Ontario', 'New Brunswick', 'Saskatchewan', 'Alberta'],
 }
 
 function provinceCards(stats: LiveStats, provinces: string[]) {
@@ -122,6 +124,9 @@ export default function VerticalsPage() {
               )}
               {v.id === 'waste-heat' && (
                 <p className="text-xs text-gray-300 mb-3">No official waste-heat site file is on the map. The {v.potentialSites.toLocaleString()} figure is a beta claim, not a pin count.</p>
+              )}
+              {v.id === 'nuclear-smr' && (
+                <p className="text-xs text-gray-300 mb-3">Phase 3 sovereign horizon: pairs off-peak CANDU surplus &amp; future Small Modular Reactors (ON, NB, SK, AB) with interruptible Bitcoin ASIC compute. Methane is our live, verified lead story today.</p>
               )}
 
               {v.id === 'methane' && methaneTiers.length > 0 && (

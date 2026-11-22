@@ -32,6 +32,10 @@ import { useReducedMotion } from '@/lib/useReducedMotion'
 import { buildNostrShareUrl } from '@/lib/nostr-share'
 import { markPageReady } from '@/lib/performance'
 import PitchSpeakerNotes from '@/components/PitchSpeakerNotes'
+import HowTheMathWorks from '@/components/HowTheMathWorks'
+import CaptureHutSizer from '@/components/CaptureHutSizer'
+import SovereignPensionPlan from '@/components/SovereignPensionPlan'
+import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
@@ -437,6 +441,26 @@ function PitchContent() {
         revenueLabel={t('pitchCaptureRevenue')}
         powerLabel={t('pitchCapturePower')}
       />
+
+      {/* Codified 6-Step Math Walkthrough */}
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-8">
+        <HowTheMathWorks />
+      </section>
+
+      {/* Methane Capture Huts & Turnkey ASIC BOM */}
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-8">
+        <CaptureHutSizer />
+      </section>
+
+      {/* Sovereign Canadian Bitcoin Pension Plan (10% Flat Tax Compact) */}
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-8">
+        <SovereignPensionPlan fullPortfolioAnnualBtc={stats.valueModel.annualBtc} />
+      </section>
+
+      {/* Global Capital & Grants Directory */}
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 py-8">
+        <GlobalCapitalDirectory />
+      </section>
 
       {/* NEW: Province Opportunity Rank */}
       <PitchProvinceRank

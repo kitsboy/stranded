@@ -6,6 +6,16 @@ export const metadata = {
   description: 'Public product roadmap: shipped client features and backend-dependent work.',
 }
 
+const SHIPPED_V216 = [
+  'Codified 6-Step Math Walkthrough (HowTheMathWorks): kg CH₄/day → Nm³/day → average kW → ASIC ceiling → Capture Huts → Sats & 10% Pension',
+  'Vendor-Neutral Methane Capture Huts & Gas Scrubber BOM Sizer (10ft Arctic Skid, 20ft Biogas Container, 40ft Air Hut, 40ft Immersion Pod)',
+  'Sovereign Canadian Bitcoin Pension Plan Simulator (10% flat BTC production tax compact + 4-year halving schedule + Phase 3 Nuclear SMR toggle)',
+  'Global Capital & Grants Directory (13+ verified programs across Canada Federal, Alberta ERA/AIOC, CleanBC/FNCEBF, ON/SK, USA IRA/DOE, EU Horizon/EUMER)',
+  'Phase 3 Nuclear & Small Modular Reactor (SMR) Baseload vertical added alongside the verified 2,611-site Methane lead story',
+  'Enriched Copy ROI Summary & Site Details Panel with turnkey Capture Hut BOM and 10% Sovereign Pension contribution line',
+  'Updated Diligence Pack (investor-onepager.md, ask-sheet.md, architecture-onepager.md) to v2.16.0',
+]
+
 const SHIPPED_V28 = [
   'Dashboard command center elite batch (readiness gauge, capture slider, emission tiers)',
   'DashboardLiveTicker + province revenue leaders + confidence breakdown',
@@ -78,10 +88,17 @@ export default function RoadmapPage() {
         subtitle="Transparent plan. Client-first now; backends when Cam configures them."
         badge={
           <span className="inline-block text-xs text-[#5BC0BE] px-2 py-0.5 rounded-full border border-[#5BC0BE]/30 bg-[#5BC0BE]/10">
-            v2.8.3 · Batch 3 upgrades 576–600 shipped 2026-07-15
+            v2.16.0 · Public Pitch &amp; Sovereign Pension Overhaul shipped
           </span>
         }
       />
+
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-[#34D399] mb-3">Shipped — v2.16.0 (Public Pitch, Capture Huts, Global Capital &amp; Sovereign Pension)</h2>
+        <ul className="space-y-1.5 text-sm text-gray-300">
+          {SHIPPED_V216.map(i => <li key={i} className="flex gap-2"><span className="text-[#34D399]">✓</span>{i}</li>)}
+        </ul>
+      </section>
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-[#FF8C00] mb-3">Shipped — v2.8.x (dashboard + marketing polish)</h2>

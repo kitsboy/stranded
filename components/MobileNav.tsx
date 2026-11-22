@@ -16,6 +16,7 @@ const LINK_KEYS = [
   { href: '/sites', key: 'sites' },
   { href: '/verticals', key: 'verticals' },
   { href: '/funding', key: 'funding' },
+  { href: '/investors', key: 'investors' },
   { href: '/partnerships', key: 'partnerships' },
   { href: '/bookmarks', key: 'bookmarks' },
   { href: '/methodology', key: 'methodology' },
