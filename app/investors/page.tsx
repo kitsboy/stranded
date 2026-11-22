@@ -5,8 +5,16 @@ import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
 import HowTheMathWorks from '@/components/HowTheMathWorks'
 
 export const metadata: Metadata = {
-  title: 'Investor & Partner Materials | Stranded Value',
-  description: 'Board deck, diligence pack, and live pitch for Stranded Value — turning stranded methane into Bitcoin. Horizon Europe funding strategy, honest economics, open methodology.',
+  title: 'Investor & Partner Materials | Sound Money & Sovereign Wealth Diligence | Stranded Value',
+  description: 'Board deck, diligence pack, codified 6-step math, 10% Sovereign Bitcoin Pension model, and Two-SPV capital directory for Stranded Value — turning stranded methane into sound money and clean abatement.',
+  keywords: [
+    'bitcoin mining due diligence pack',
+    'sovereign wealth fund bitcoin model',
+    'sound money energy infrastructure',
+    'methane abatement investment memo',
+    'Horizon Europe board deck',
+    'Canadian stranded gas SPV term sheet',
+  ],
   alternates: { canonical: '/investors' },
 }
 

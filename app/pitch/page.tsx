@@ -39,6 +39,40 @@ import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
 
 const PROD_URL = 'https://stranded.giveabit.io'
 
+const SOURCE_TYPE_LABELS: Record<string, string> = {
+  landfill_waste: 'Landfill & Municipal Waste',
+  oil_gas_extraction: 'Oil & Gas Wellheads',
+  oil_sands: 'Oil Sands Operations',
+  coal_mining: 'Coal Mining Venting',
+  gas_processing: 'Gas Processing Plants',
+  pipeline_transmission: 'Pipeline & Transmission',
+  industrial_other: 'Industrial Facilities',
+  power_generation: 'Power Generation',
+  pulp_paper: 'Pulp & Paper Mills',
+  refinery: 'Refineries',
+  oil_gas_support: 'Oil & Gas Support',
+}
+
+const GENSET_LABELS: Record<string, string> = {
+  mobile250: 'Mobile 250 kW Skid',
+  jenbacher316: 'INNIO Jenbacher J316 (850 kW)',
+  cat3520: 'Caterpillar G3520H (2.0 MW)',
+  man: 'MAN 20V35/44G (10.5 MW)',
+  cummins1500: 'Cummins QSK60G (1.5 MW)',
+  capstone200: 'Capstone C200 (200 kW)',
+  wartsila34sg: 'Wärtsilä 20V34SG (9.5 MW)',
+  fuelcell500: 'Solid Oxide Fuel Cell (500 kW)',
+}
+
+const PROVINCE_SHORT_NAMES: Record<string, string> = {
+  'British Columbia': 'B.C.',
+  'Nova Scotia': 'Nova Scotia',
+  'New Brunswick': 'New Brunswick',
+  'Newfoundland and Labrador': 'Nfld & Lab.',
+  'Northwest Territories': 'N.W.T.',
+  'Prince Edward Island': 'P.E.I.',
+}
+
 const COLORS = ['#FF8C00', '#5BC0BE', '#A78BFA', '#34D399', '#F472B6', '#60A5FA', '#FBBF24', '#FB7185', '#4ADE80', '#C084FC', '#38BDF8', '#F97316', '#2DD4BF']
 
 function fmt(n: number) {
@@ -185,7 +219,7 @@ function PitchContent() {
       const chart = new Chart(canvas, {
         type: 'bar',
         data: {
-          labels: stats.provinces.slice(0, 10).map(p => p.name.split(' ')[0]),
+          labels: stats.provinces.slice(0, 10).map(p => PROVINCE_SHORT_NAMES[p.name] || p.name),
           datasets: [{
             label: 'Sites',
             data: stats.provinces.slice(0, 10).map(p => p.count),
@@ -221,13 +255,13 @@ function PitchContent() {
 
   const monteCarlo = useMemo(() => {
     if (!stats) return { low: 0, mid: 0, high: 0 }
-    const base = stats.valueModel.annualRevenueUsd
+    const base = Math.round(stats.valueModel.annualBtc * btc)
     return {
       low: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.bear),
       mid: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.base),
       high: applyPresetRevenueBand(base, SENSITIVITY_PRESETS.bull),
     }
-  }, [stats])
+  }, [stats, btc])
 
   const applySensitivityPreset = (id: SensitivityPresetId) => {
     const preset = SENSITIVITY_PRESETS[id]
@@ -249,7 +283,7 @@ function PitchContent() {
       .sort((a, b) => b.value - a.value)
   }, [stats])
 
-  const provinceRank = useMemo(() => (stats ? provinceOpportunities(stats) : []), [stats])
+  const provinceRank = useMemo(() => (stats ? provinceOpportunities(stats, adjustedBtc) : []), [stats, adjustedBtc])
 
   const histogramScores = useMemo(() => {
     if (!stats?.scoreHistogram?.length) return []
@@ -361,7 +395,14 @@ function PitchContent() {
       {/* Headline stats — fixed grid */}
       <section data-pitch-section className="border-b border-white/10 bg-black/25 px-6 py-10 pitch-print">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
-          <PitchStatCard label={t('pitchVerifiedSites')} value={fmt(stats.siteCount)} icon={MapPin} accent="#FF8C00" delay={0} />
+          <PitchStatCard
+            label={t('pitchVerifiedSites')}
+            value={fmt(stats.siteCount)}
+            sub={`${fmt(stats.withReportedCh4 ?? 2588)} w/ CH₄ · ${fmt(stats.highConfidenceWithEmission ?? 675)} high-conf`}
+            icon={MapPin}
+            accent="#FF8C00"
+            delay={0}
+          />
           <PitchStatCard
             label={t('pitchDailyMethane')}
             value={`${fmt(totals.emissionKgDay)} kg`}
@@ -419,7 +460,7 @@ function PitchContent() {
               style={{ backgroundColor: `${COLORS[idx % COLORS.length]}22`, borderColor: `${COLORS[idx % COLORS.length]}66` }}
             >
               <div className="text-base font-bold tabular-nums md:text-lg">{p.count}</div>
-              <div className="truncate text-label text-gray-300 md:text-label">{p.name.split(' ')[0]}</div>
+              <div className="truncate text-label text-gray-300 md:text-label" title={p.name}>{PROVINCE_SHORT_NAMES[p.name] || p.name}</div>
               <div className="text-label text-gray-400 md:text-label">{p.pct}%</div>
             </motion.div>
           ))}
@@ -497,7 +538,7 @@ function PitchContent() {
           <div className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#A78BFA]">{t('pitchSourceTypes')}</h3>
             <DonutRing segments={stats.sourceTypes.slice(0, 6).map((s, idx) => ({
-              label: s.name,
+              label: SOURCE_TYPE_LABELS[s.name] || s.name.replace(/_/g, ' '),
               value: s.count,
               color: COLORS[idx % COLORS.length],
             }))} />
@@ -505,7 +546,7 @@ function PitchContent() {
           <div className="pitch-panel rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#34D399]">{t('pitchRecommendedGensets')}</h3>
             <BarChart items={stats.gensetRecommendations.map(g => ({
-              label: g.id,
+              label: GENSET_LABELS[g.id] || g.id,
               value: g.count,
               pct: g.pct,
             }))} maxBars={5} />
@@ -627,11 +668,66 @@ function PitchContent() {
                       {site.score}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">{site.genset}</td>
+                  <td className="px-4 py-3 text-xs text-gray-300">{GENSET_LABELS[site.genset] || site.genset}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Codified Terminology & Sound Money Lexicon */}
+      <section data-pitch-section className="mx-auto max-w-6xl px-6 pb-14" data-testid="pitch-terminology-lexicon">
+        <div className="rounded-3xl border border-[#5BC0BE]/30 bg-gradient-to-br from-[#0f172a] via-[#111c2d] to-[#0b111f] p-6 md:p-8">
+          <div className="mb-5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#5BC0BE]/35 bg-[#5BC0BE]/10 px-3 py-1 text-xs font-semibold tracking-wider text-[#5BC0BE]">
+              CODIFIED TERMINOLOGY · HONEST DEFINITIONS
+            </span>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-white">
+              Sound Money, Sovereign Wealth &amp; Environmental Abatement — Key Terms Defined
+            </h2>
+            <p className="mt-1 text-sm text-gray-300 max-w-3xl">
+              To align energy operators, fiscal conservatives, environmental engineers, and institutional capital, every term on this platform follows strict physical and financial definitions:
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 text-xs">
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#FF8C00] mb-1">Sound Money &amp; Hard-Asset Treasury</div>
+              <p className="text-gray-300 leading-relaxed">
+                Bitcoin has a mathematically fixed supply of 21,000,000 coins secured by thermodynamic Proof-of-Work. Converting vented waste methane into Bitcoin turns a decaying environmental liability into an un-debaseable sovereign reserve asset.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#5BC0BE] mb-1">Sovereign Wealth Fund (10% Flat Royalty)</div>
+              <p className="text-gray-300 leading-relaxed">
+                Modeled on Norway&apos;s Government Pension Fund Global and the Alberta Heritage Savings Trust Fund: a proposed 10% flat production royalty in native BTC on off-grid stranded mining (0 kW grid draw), held long-term for Canadian citizens.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#34D399] mb-1">GWP₁₀₀ (28×) vs. GWP₂₀ (80×) Methane Destruction</div>
+              <p className="text-gray-300 leading-relaxed">
+                Methane traps ~28× more heat than CO₂ over 100 years and ~80× over 20 years (IPCC AR5). Combusting CH₄ in a reciprocating generator converts it to CO₂ + H₂O — never &quot;zero emissions&quot;, but a ~28–80× warming reduction per molecule vs. raw venting.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#FBBF24] mb-1">Live Network vs. Optimistic Hashprice</div>
+              <p className="text-gray-300 leading-relaxed">
+                <strong>Live Network (~0.41 sat/TH/d)</strong> is strictly derived from the Bitcoin blockchain (daily block issuance ÷ ~1.1 ZH/s global hashrate). <strong>Optimistic Model (0.90 sat/TH/d)</strong> models a higher hashprice cycle or co-product uplift and is always explicitly labelled.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#A78BFA] mb-1">Two-SPV Ring-Fenced Capital Stack</div>
+              <p className="text-gray-300 leading-relaxed">
+                Most federal/provincial grants and 30% Clean Tech ITCs exclude ASIC miners. <strong>SPV 1 (Clean Abatement Power Co.)</strong> owns the scrubber, genset, and co-gen heat loop (grant-eligible); <strong>SPV 2 (Compute Offtaker Co.)</strong> owns the ASIC capture huts and signs a behind-the-meter PPA.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+              <div className="font-semibold text-[#F472B6] mb-1">ECCC GHGRP Open Data &amp; Flux Split</div>
+              <p className="text-gray-300 leading-relaxed">
+                Of 2,611 mapped ECCC facilities, 2,588 report CH₄ and 675 are high-confidence. Only 1,064 sites publish a venting vs. flaring split (800 flaring, 747 venting); for the remaining 1,547 (mostly landfills filed under &quot;Waste&quot;), we never invent a split.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -172,19 +172,44 @@ button:focus-visible,
 }
 
 /* Header background image — tree-and-birds landscape, full-width, colour, at
-   20% opacity, layered behind the glass mesh. Remove this block to drop it. */
+   22% opacity, layered behind the glass mesh with a gentle zero-CPU GPU Ken Burns drift. */
+@keyframes hero-bg-gentle-drift {
+  0% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-48.5%, -1.5%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-51.5%, 1%, 0) scale(1.03);
+  }
+}
+
+.hero-mesh {
+  overflow: hidden;
+}
+
 .hero-mesh::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -4%;
+  bottom: -4%;
   left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
+  width: 106vw;
+  transform: translate3d(-50%, 0, 0) scale(1);
   z-index: -1;
   pointer-events: none;
   background: url('/images/header-bg.jpg') center / cover no-repeat;
-  opacity: 0.2;
+  opacity: 0.22;
+  will-change: transform;
+  animation: hero-bg-gentle-drift 28s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mesh::after {
+    animation: none !important;
+    transform: translateX(-50%) !important;
+  }
 }
 
 /* Featured site card lift */

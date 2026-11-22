@@ -30,6 +30,17 @@ type FormState = Record<FieldKey, string>
 const empty: FormState = { name: '', email: '', org: '', province: '', sites: '' }
 
 const CONTACT_TO = 'hello@giveabit.io'
+const CONTACT_CC = 'kimi@giveabit.io'
+
+const JOB_ROLES = [
+  'Field Genset & Reciprocating Engine Technician (AB / BC / ON)',
+  'Containerized ASIC & Capture Hut Electrical Lead (CSA / 600V)',
+  'Gas Conditioning & H₂S / Siloxane Scrubber Engineer',
+  'EU / CETA Grant & Project Finance Structuring Lead',
+  'First Nations & Landowner Partnerships Director',
+  'Full-Stack Geospatial & Bitcoin Telemetry Engineer',
+  'General / Open Application',
+] as const
 
 export default function CertifiedLeadForm() {
   const searchParams = useSearchParams()
@@ -100,6 +111,7 @@ export default function CertifiedLeadForm() {
 
   const buildBody = (lead: Record<string, string>) =>
     `Stranded Value Certified — local application (please review)\n\n` +
+    `To: ${CONTACT_TO} (CC: ${CONTACT_CC})\n` +
     `Name: ${lead.name}\nEmail: ${lead.email}\nOrg: ${lead.org}\nProvince: ${lead.province}\nSites: ${lead.sites || '—'}\n` +
     (lead.fleet ? `Build link: ${lead.fleet}\n` : '') +
     `Category: ${lead.category}${lead.specify ? ` (${lead.specify})` : ''}\nAt: ${lead.at}\n\n` +
@@ -107,10 +119,10 @@ export default function CertifiedLeadForm() {
 
   const copyEmail = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(CONTACT_TO)
+      await navigator.clipboard.writeText(`${CONTACT_TO}, ${CONTACT_CC}`)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-      toast.success(`${CONTACT_TO} copied`)
+      toast.success(`${CONTACT_TO} & ${CONTACT_CC} copied`)
     } catch {
       toast.error('Could not copy — tap the link below to open your email app.')
     }
@@ -179,7 +191,7 @@ export default function CertifiedLeadForm() {
   const emailDraft = () => {
     if (!lastLead) return
     const body = encodeURIComponent(buildBody(lastLead))
-    window.location.href = `mailto:${CONTACT_TO}?subject=${encodeURIComponent(subject)}&body=${body}`
+    window.location.href = `mailto:${CONTACT_TO}?cc=${encodeURIComponent(CONTACT_CC)}&subject=${encodeURIComponent(subject)}&body=${body}`
   }
 
   const setField = (key: FieldKey) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -233,12 +245,30 @@ export default function CertifiedLeadForm() {
           <label htmlFor="lead-specify" className="block text-xs text-gray-400 mb-1">
             Specify (optional) — e.g. job title, site name
           </label>
+          {category === 'Job posting' && (
+            <div className="mb-2 flex flex-wrap gap-1.5" data-testid="job-role-presets">
+              {JOB_ROLES.map(role => (
+                <button
+                  key={role}
+                  type="button"
+                  onClick={() => setSpecify(role)}
+                  className={`rounded-lg border px-2.5 py-1 text-[11px] transition ${
+                    specify === role
+                      ? 'border-[#FF8C00] bg-[#FF8C00]/20 text-[#FF8C00] font-semibold'
+                      : 'border-white/15 bg-black/30 text-gray-300 hover:border-[#5BC0BE]/40'
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
+          )}
           <input
             id="lead-specify"
             name="specify"
             type="text"
             autoComplete="off"
-            placeholder="e.g. Site supervisor, Bighorn site"
+            placeholder={category === 'Job posting' ? 'Select a role above or type your specialty…' : 'e.g. Site supervisor, Bighorn site'}
             value={specify}
             onChange={e => setSpecify(e.target.value)}
             className="w-full bg-black/30 border border-white/15 rounded-lg px-4 py-2.5 text-sm"
@@ -290,17 +320,17 @@ export default function CertifiedLeadForm() {
             onClick={copyEmail}
             className="px-3 py-1.5 rounded-lg bg-[#5BC0BE]/20 border border-[#5BC0BE]/40 text-[#5BC0BE] text-xs font-semibold hover:bg-[#5BC0BE]/30"
           >
-            {copied ? 'Copied ✓' : `Copy ${CONTACT_TO}`}
+            {copied ? 'Copied ✓' : `Copy ${CONTACT_TO} & ${CONTACT_CC}`}
           </button>
           <a
-            href={`mailto:${CONTACT_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildBody(lastLead || { name: form.name, email: form.email, org: form.org, province: form.province, sites: form.sites, category, specify, fleet: fleetLink, at: '' }))}`}
+            href={`mailto:${CONTACT_TO}?cc=${encodeURIComponent(CONTACT_CC)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildBody(lastLead || { name: form.name, email: form.email, org: form.org, province: form.province, sites: form.sites, category, specify, fleet: fleetLink, at: '' }))}`}
             className="px-3 py-1.5 rounded-lg bg-[#FF8C00] text-black text-xs font-semibold hover:bg-[#ff9d33]"
           >
-            Open email → {CONTACT_TO}
+            Open email → {CONTACT_TO} (CC Kimi)
           </a>
         </div>
         <div className="text-label text-gray-500">
-          Email: <span className="text-gray-300">{CONTACT_TO}</span> · Subject: <span className="text-gray-300">{subject || 'Stranded Energy — <category>'}</span>
+          Email: <span className="text-gray-300">{CONTACT_TO}</span> · CC: <span className="text-gray-300">{CONTACT_CC}</span> · Subject: <span className="text-gray-300">{subject || 'Stranded Energy — <category>'}</span>
         </div>
       </div>
     </div>

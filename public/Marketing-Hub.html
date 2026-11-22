@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stranded | Marketing & Sales Hub | GiveAbit Intelligence</title>
-    <link rel="canonical" href="https://stranded.giveabit.io/" />
-    <link rel="alternate" hreflang="en" href="https://stranded.giveabit.io/" />
-    <link rel="alternate" hreflang="x-default" href="https://stranded.giveabit.io/" />
-    <meta name="description" content="Professional marketing collateral for Stranded: Executive Summary, One-Pager, Mission & Vision, Roadmap & Funding. Stranded Energy, Bitcoin Access. Powered by GiveAbit Intelligence.">
-    <meta name="keywords" content="stranded energy, bitcoin mining, methane capture, CETA funding, Canada energy grants, stranded methane, GiveAbit Intelligence">
-    <meta property="og:title" content="Stranded | Marketing & Sales Hub">
-    <meta property="og:description" content="Turn wasted energy into verifiable wealth. Download our full suite of professional marketing documents.">
+    <title>Stranded | Marketing &amp; Sales Hub | Sovereign Wealth, Sound Money &amp; Methane Abatement</title>
+    <link rel="canonical" href="https://stranded.giveabit.io/Marketing-Hub.html" />
+    <link rel="alternate" hreflang="en" href="https://stranded.giveabit.io/Marketing-Hub.html" />
+    <link rel="alternate" hreflang="x-default" href="https://stranded.giveabit.io/Marketing-Hub.html" />
+    <meta name="description" content="Professional marketing, investor, and policy collateral for Stranded Value: Executive Summary, One-Pager, Mission &amp; Vision, Roadmap, 10% Sovereign Bitcoin Pension Plan, and Global Capital Directory. 2,611 ECCC methane sites.">
+    <meta name="keywords" content="sovereign wealth fund, sound money, bitcoin reserve asset, stranded energy, methane capture, flare gas bitcoin mining, Canadian pension plan bitcoin, CETA funding, Alberta energy, CleanBC, environment, green energy transition, hard money, GiveAbit Intelligence">
+    <meta property="og:title" content="Stranded Value | Marketing &amp; Sales Hub | Sovereign Wealth &amp; Sound Money">
+    <meta property="og:description" content="Turn wasted methane into verifiable sound money and sovereign wealth. Live Bitcoin blockchain pricing + 5 illustrated strategy documents.">
     <meta property="og:image" content="/images/3.jpg">
-    <meta property="og:url" content="https://stranded.giveabit.io/map">
+    <meta property="og:url" content="https://stranded.giveabit.io/Marketing-Hub.html">
     <link rel="stylesheet" href="/marketing-hub.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -351,7 +351,7 @@
                         <i class="fa-solid fa-map mr-2"></i>
                         <span>Live Platform</span>
                     </a>
-                    <a href="mailto:hello@giveabit.io" 
+                    <a href="mailto:hello@giveabit.io?cc=kimi@giveabit.io" 
                        class="inline-flex items-center px-5 py-2 text-sm font-semibold bg-[#FF8C00] text-[#0b111f] rounded-xl hover:bg-[#ff9d33] transition">
                         <i class="fa-solid fa-envelope mr-2"></i>
                         <span>Contact</span>
@@ -413,42 +413,60 @@
 
     <div class="max-w-7xl mx-auto px-6">
         
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-8 border-b border-white/10">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-[#FF8C00]/10 flex items-center justify-center">
-                    <i class="fa-solid fa-map text-[#FF8C00] text-2xl"></i>
+        <!-- Quick Stats + Live Blockchain Ticker (auto-refreshes every 10 minutes + on page load) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 py-8 border-b border-white/10" data-testid="marketing-hub-live-strip">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-[#FF8C00]/10 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-map text-[#FF8C00] text-xl"></i>
                 </div>
                 <div>
-                    <div class="font-mono text-3xl font-semibold tracking-tighter">2,611</div>
-                    <div class="text-sm text-gray-400 -mt-1">Mapped Sites</div>
+                    <div id="mh-site-count" class="font-mono text-2xl font-semibold tracking-tighter">2,611</div>
+                    <div class="text-xs text-gray-400 -mt-0.5">Mapped Sites</div>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-[#5BC0BE]/10 flex items-center justify-center">
-                    <i class="fa-solid fa-chart-line text-[#5BC0BE] text-2xl"></i>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-amber-400/15 flex items-center justify-center shrink-0">
+                    <i class="fa-brands fa-bitcoin text-amber-400 text-xl"></i>
                 </div>
                 <div>
-                    <div class="font-mono text-3xl font-semibold tracking-tighter">5</div>
-                    <div class="text-sm text-gray-400 -mt-1">Professional Documents</div>
+                    <div id="mh-btc-usd" class="font-mono text-2xl font-semibold tracking-tighter text-amber-400">$85,000</div>
+                    <div id="mh-btc-cad" class="text-[11px] text-gray-400 -mt-0.5">Live BTC (10m sync)</div>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center">
-                    <i class="fa-solid fa-globe text-white text-2xl"></i>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-400/15 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-bolt text-emerald-400 text-xl"></i>
                 </div>
                 <div>
-                    <div class="font-mono text-3xl font-semibold tracking-tighter">4</div>
-                    <div class="text-sm text-gray-400 -mt-1">Capital Pools</div>
+                    <div id="mh-portfolio-rev" class="font-mono text-2xl font-semibold tracking-tighter text-emerald-400">$601.8M</div>
+                    <div class="text-[11px] text-gray-400 -mt-0.5">Model Rev @ Live BTC</div>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-[#FF8C00]/10 flex items-center justify-center">
-                    <i class="fa-solid fa-rocket text-[#FF8C00] text-2xl"></i>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-[#5BC0BE]/15 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-landmark text-[#5BC0BE] text-xl"></i>
                 </div>
                 <div>
-                    <div class="font-mono text-3xl font-semibold tracking-tighter">2028</div>
-                    <div class="text-sm text-gray-400 -mt-1">Full Ecosystem Live</div>
+                    <div id="mh-pension-10pct" class="font-mono text-2xl font-semibold tracking-tighter text-[#5BC0BE]">708.0 BTC</div>
+                    <div class="text-[11px] text-gray-400 -mt-0.5">10% Sovereign Pension/yr</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-purple-400/15 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-cubes text-purple-400 text-xl"></i>
+                </div>
+                <div>
+                    <div id="mh-block-height" class="font-mono text-2xl font-semibold tracking-tighter text-purple-300">#892,100</div>
+                    <div id="mh-hashprice" class="text-[11px] text-gray-400 -mt-0.5">Bitcoin Chain Live</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-globe text-white text-xl"></i>
+                </div>
+                <div>
+                    <div class="font-mono text-2xl font-semibold tracking-tighter">16+</div>
+                    <div class="text-xs text-gray-400 -mt-0.5">Capital &amp; Grant Pools</div>
                 </div>
             </div>
         </div>
@@ -752,10 +770,10 @@
                     <i class="fa-solid fa-globe"></i>
                     <span>Launch the Command Center</span>
                 </a>
-                <a href="mailto:hello@giveabit.io" 
+                <a href="mailto:hello@giveabit.io?cc=kimi@giveabit.io" 
                    class="inline-flex items-center justify-center gap-3 px-8 py-4 border border-white/20 hover:bg-white/5 font-medium rounded-2xl">
                     <i class="fa-solid fa-handshake"></i>
-                    <span>Start a Partnership Conversation</span>
+                    <span>Start a Partnership Conversation (hello@ &amp; kimi@giveabit.io)</span>
                 </a>
             </div>
             
@@ -847,13 +865,90 @@
             }
         });
         
+        // Live Bitcoin Blockchain + Live Stats 10-minute (600,000ms) lightweight sync
+        let mhAnnualBtc = 7079.73;
+        async function refreshMarketingHubLive() {
+            if (document.visibilityState === 'hidden') return;
+            try {
+                const statsRes = await fetch('/data/live-stats.json');
+                if (statsRes.ok) {
+                    const st = await statsRes.json();
+                    if (st && st.siteCount) {
+                        const scEl = document.getElementById('mh-site-count');
+                        if (scEl) scEl.textContent = Number(st.siteCount).toLocaleString('en-CA');
+                    }
+                    if (st && st.valueModel && st.valueModel.annualBtc) {
+                        mhAnnualBtc = Number(st.valueModel.annualBtc);
+                        const penEl = document.getElementById('mh-pension-10pct');
+                        if (penEl) penEl.textContent = (mhAnnualBtc * 0.10).toFixed(1) + ' BTC';
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
+            let usd = 0;
+            let cad = 0;
+            try {
+                const mpRes = await fetch('https://mempool.space/api/v1/prices');
+                if (mpRes.ok) {
+                    const mp = await mpRes.json();
+                    usd = Number(mp.USD) || 0;
+                    cad = Number(mp.CAD) || Math.round(usd * 1.38);
+                }
+            } catch (e) { /* fallback to coingecko */ }
+
+            if (!usd) {
+                try {
+                    const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,cad');
+                    if (cgRes.ok) {
+                        const cg = await cgRes.json();
+                        usd = Number(cg?.bitcoin?.usd) || 0;
+                        cad = Number(cg?.bitcoin?.cad) || Math.round(usd * 1.38);
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            if (usd > 1000) {
+                const usdEl = document.getElementById('mh-btc-usd');
+                const cadEl = document.getElementById('mh-btc-cad');
+                const revEl = document.getElementById('mh-portfolio-rev');
+                const penEl = document.getElementById('mh-pension-10pct');
+                if (usdEl) usdEl.textContent = '$' + Math.round(usd).toLocaleString('en-CA');
+                if (cadEl) cadEl.textContent = 'C$' + Math.round(cad).toLocaleString('en-CA') + ' · 10m sync';
+                const totalRev = mhAnnualBtc * usd;
+                if (revEl) {
+                    revEl.textContent = totalRev >= 1e9
+                        ? '$' + (totalRev / 1e9).toFixed(2) + 'B'
+                        : '$' + (totalRev / 1e6).toFixed(1) + 'M';
+                }
+                if (penEl && cad > 1000) {
+                    const penCadM = (mhAnnualBtc * 0.10 * cad) / 1e6;
+                    penEl.title = 'C$' + penCadM.toFixed(1) + 'M/yr into Sovereign Pension @ live CAD BTC';
+                }
+            }
+
+            try {
+                const bhRes = await fetch('https://mempool.space/api/blocks/tip/height');
+                if (bhRes.ok) {
+                    const tip = (await bhRes.text()).trim();
+                    const bhEl = document.getElementById('mh-block-height');
+                    if (bhEl && /^\d+$/.test(tip)) {
+                        bhEl.textContent = '#' + Number(tip).toLocaleString('en-CA');
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         // Initialize everything
         function init() {
             initializeTailwind();
             initializeChart();
-            
+            refreshMarketingHubLive();
+            setInterval(refreshMarketingHubLive, 600000); // Every 10 minutes
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') refreshMarketingHubLive();
+            });
             // Subtle scroll hint
-            console.log('%c[Stranded] Marketing Hub initialized. Professional assets ready.', 'color:#64748b');
+            console.log('%c[Stranded] Marketing Hub initialized. Live blockchain sync active (10m).', 'color:#64748b');
         }
         
         window.onload = init;

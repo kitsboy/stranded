@@ -11,12 +11,15 @@ import { exportCompareCsv } from '@/lib/compare-export'
 import { downloadBlob } from '@/lib/export-formats'
 import { buildMapUrl } from '@/lib/map-url'
 import { sizeCaptureHutsForBuild } from '@/lib/capture-huts'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
+import { scalePotentialUsd } from '@/lib/portfolio'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 type CompareSlot = 'a' | 'b' | 'c'
 
 function CompareContent() {
+  const btc = useBtcUsd()
   const searchParams = useSearchParams()
   const idA = searchParams.get('a') || ''
   const idB = searchParams.get('b') || ''
@@ -55,18 +58,18 @@ function CompareContent() {
       { label: 'Confidence', pick: s => s.properties.confidence || '—' },
       { label: 'Genset', pick: s => s.recommendedGenset || '—' },
       { label: 'Generator kW', pick: s => String(s.maxGeneratorPowerKW) },
-      { label: 'Daily profit (USD, optimistic @$85k)', pick: s => `$${s.potentialDailyProfitUsd.toLocaleString()}` },
+      { label: `Daily profit (USD, optimistic @$${Math.round(btc / 1000)}k)`, pick: s => `$${scalePotentialUsd(s.potentialDailyProfitUsd, btc).toLocaleString()}` },
       {
         label: 'Annual BTC (est.)',
         pick: s => {
-          const roi = computeSiteValue(s)
+          const roi = computeSiteValue(s, 'jenbacher316', 200, 3500, 5500, btc)
           return `${(roi.dailyBtc * 365).toFixed(4)} BTC`
         },
       },
       {
         label: 'Payback (days)',
         pick: s => {
-          const roi = computeSiteValue(s)
+          const roi = computeSiteValue(s, 'jenbacher316', 200, 3500, 5500, btc)
           return isFinite(roi.paybackDays) ? `${roi.paybackDays.toLocaleString()} d` : '—'
         },
       },

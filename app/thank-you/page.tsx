@@ -31,7 +31,7 @@ export default function ThankYouPage() {
         <section className="rounded-2xl border border-[#5BC0BE]/30 bg-[#5BC0BE]/5 p-6">
           <h2 className="text-xl font-semibold mb-3 text-[#5BC0BE]">Application received</h2>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Your application has been delivered to <strong className="text-white">hello@giveabit.io</strong>.
+            Your application has been delivered to <strong className="text-white">hello@giveabit.io</strong> (with <strong className="text-[#5BC0BE]">kimi@giveabit.io</strong> copied).
             The Stranded Value team has been notified and will get back to you — real people, no tickets.
             A copy is also saved in your browser under &ldquo;Stranded&nbsp;Value&nbsp;Certified&rdquo;.
           </p>
@@ -53,10 +53,10 @@ export default function ThankYouPage() {
           <h2 className="text-xl font-semibold mb-3 text-white">Follow up or keep exploring</h2>
           <div className="flex flex-wrap gap-3">
             <a
-              href="mailto:hello@giveabit.io"
+              href="mailto:hello@giveabit.io?cc=kimi@giveabit.io"
               className="px-5 py-2.5 rounded-xl bg-[#FF8C00] text-black text-sm font-semibold hover:bg-[#FF8C00]/90"
             >
-              Email the team →
+              Email hello@giveabit.io &amp; Kimi →
             </a>
             <Link
               href="/funding"

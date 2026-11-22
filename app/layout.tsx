@@ -14,8 +14,31 @@ import StaleDataBanner from '@/components/StaleDataBanner'
 import TooltipBinder from '@/components/TooltipBinder'
 
 export const metadata: Metadata = {
-  title: 'Stranded | Stranded Energy, Bitcoin Access | Stranded Value',
-  description: '2,611 mapped methane sites, plus 1,049 renewable plants and 207 remote communities. Waste-methane mining has no grid draw. A miner build elsewhere is sized only where the file records real power. Optimistic scenarios stay labelled.',
+  title: 'Stranded Value | Sovereign Wealth, Sound Money & Stranded Methane Bitcoin Mining',
+  description: '2,611 mapped Canadian methane sites, plus 1,049 renewable plants and 207 remote communities. Turn vented & flared methane into sound money, clean off-grid Bitcoin, and a 10% Canadian Sovereign Wealth & Pension Fund with zero grid draw.',
+  keywords: [
+    'sovereign wealth fund',
+    'sound money',
+    'hard money',
+    'strategic bitcoin reserve',
+    'Canadian Bitcoin pension plan',
+    'Alberta Heritage Savings Trust Fund',
+    'Norway sovereign wealth model',
+    'stranded energy',
+    'methane abatement',
+    'flare gas bitcoin mining',
+    'landfill gas to energy',
+    'GHG emissions reduction',
+    'GWP 28x 80x methane destruction',
+    'off-grid reciprocating generators',
+    'ASIC mining capture huts',
+    'energy sovereignty',
+    'free market environmentalism',
+    'Indigenous clean energy equity',
+    'CETA Horizon Europe cleantech grants',
+    'Clean Tech ITC 30%',
+    'Nuclear SMR baseload',
+  ],
   icons: { icon: ['/favicon.svg', '/favicon-32x32.png', '/favicon-16x16.png'], apple: ['/apple-touch-icon.png'] },
   manifest: '/manifest.json',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stranded.giveabit.io'),
@@ -23,6 +46,9 @@ export const metadata: Metadata = {
     canonical: '/',
     languages: {
       en: '/',
+      fr: '/',
+      de: '/',
+      es: '/',
       'x-default': '/',
     },
     types: {
@@ -31,9 +57,15 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Stranded | Stranded Energy, Bitcoin Access',
-    description: '2,611 methane sites, 1,049 renewable plants, and 207 remote communities. Honest miner math where the file records power. Optimistic hashprice stays labelled.',
+    title: 'Stranded Value | Sound Money, Sovereign Wealth & Methane Abatement',
+    description: '2,611 ECCC methane sites, 1,049 renewable plants, and 207 remote communities. Turn wasted methane into sound money and a 10% Canadian Sovereign Bitcoin Pension with zero grid draw.',
     images: [{ url: '/images/3.jpg' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Stranded Value | Sound Money, Sovereign Wealth & Methane Abatement',
+    description: '2,611 mapped Canadian methane sites · Turn waste gas into Sound Money & a 10% Sovereign Pension · Zero grid draw.',
+    images: ['/images/3.jpg'],
   },
 }
 

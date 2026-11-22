@@ -5,6 +5,7 @@ import {
   DEFAULT_BTC_FIATS,
   DEFAULT_BTC_USD,
   fetchBtcPrices,
+  readCachedBtcPrices,
   type BtcFiatMap,
 } from '@/lib/btc-price'
 
@@ -24,7 +25,11 @@ const BtcPriceContext = createContext<BtcPriceContextValue>({
   refresh: () => {},
 })
 
-const POLL_MS = 95_000
+/**
+ * Lightweight 10-minute (600s) background refresh interval + instant fetch on
+ * every page load/refresh and tab wake-up. Zero background CPU usage.
+ */
+const POLL_MS = 600_000
 
 export function BtcPriceProvider({ children }: { children: React.ReactNode }) {
   const [fiats, setFiats] = useState<BtcFiatMap>(DEFAULT_BTC_FIATS)
@@ -33,6 +38,14 @@ export function BtcPriceProvider({ children }: { children: React.ReactNode }) {
   const [tick, setTick] = useState(0)
 
   const refresh = useCallback(() => setTick(t => t + 1), [])
+
+  // Seed immediately from last-known localStorage cache on client mount before network resolves
+  useEffect(() => {
+    const cached = readCachedBtcPrices()
+    if (cached) {
+      setFiats(cached)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -55,8 +68,20 @@ export function BtcPriceProvider({ children }: { children: React.ReactNode }) {
   }, [tick])
 
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), POLL_MS)
-    return () => clearInterval(id)
+    const id = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+      setTick(t => t + 1)
+    }, POLL_MS)
+    const onVisible = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        setTick(t => t + 1)
+      }
+    }
+    window.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(id)
+      window.removeEventListener('visibilitychange', onVisible)
+    }
   }, [])
 
   const value = useMemo(

@@ -19,6 +19,7 @@ import { rateHeaders, sanitizeStr, isValidEmail } from '../lib/guard.js'
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xpqgopvd'
 const ALLOWED_ORIGIN = 'https://stranded.giveabit.io'
 const CONTACT_TO = 'hello@giveabit.io'
+const CONTACT_CC = 'kimi@giveabit.io'
 
 const CATEGORIES = [
   'Site application',
@@ -112,6 +113,8 @@ export async function onRequestPost(context) {
         _subject: subject,
         message: bodyText,
         CONTACT_TO,
+        CONTACT_CC,
+        _cc: CONTACT_CC,
         _replyto: email,
       }),
     })

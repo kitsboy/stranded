@@ -77,7 +77,7 @@ export default function LandingPage() {
         name: 'Stranded Value',
         url: 'https://stranded.giveabit.io',
         description: `${siteCount.toLocaleString()} mapped methane sites, plus ${OFFICIAL_PLANT_COUNT.toLocaleString()} renewable plants and ${OFFICIAL_REMOTE_COUNT.toLocaleString()} remote communities. Waste-methane mining has no grid draw. A miner build on a plant or community is sized only where the file records real power.`,
-        publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io' },
+        publisher: { '@type': 'Organization', name: 'GiveAbit Intelligence', url: 'https://giveabit.io', email: 'hello@giveabit.io' },
         ...(schemaExtras ?? {}),
       },
       {
@@ -88,6 +88,35 @@ export default function LandingPage() {
         distribution: { '@type': 'DataDownload', contentUrl: 'https://stranded.giveabit.io/data/stranded-sites.geojson', encodingFormat: 'application/geo+json' },
         creator: { '@type': 'Organization', name: 'Environment and Climate Change Canada' },
         numberOfItems: siteCount,
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How does Stranded Value turn methane emissions into Bitcoin and a Sovereign Wealth Fund?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Stranded Value maps 2,611 ECCC-reported methane sites across Canada. Reciprocating gas generators combust vented or flared methane on-site (reducing warming impact ~28–80× vs. raw venting with 0 kW grid draw) to power modular ASIC Bitcoin Capture Huts. Under the proposed 10% Sovereign Bitcoin Pension Compact, a flat 10% production royalty in sound money flows directly into a Canadian Sovereign Wealth & Pension Reserve.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Why is Bitcoin Sound Money the ideal offtaker for stranded energy and environmental abatement?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Unlike pipelines or high-voltage transmission lines that take years and ratusan of millions in CapEx, containerized ASIC Capture Huts deploy in 4–12 weeks anywhere on Earth, operate 100% off-grid via Starlink, and monetize stranded methane, curtailed wind/solar, and Phase 3 Nuclear SMR baseload.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What grants and capital programs fund Canadian stranded methane projects?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Through a Two-SPV structure (SPV 1 Clean Abatement Power Plant + SPV 2 Compute Offtaker), projects stack the 30% Federal Clean Tech ITC, Emissions Reduction Alberta (ERA), CleanBC Industry Fund, AIOC Indigenous loan guarantees, and CETA / Horizon Europe Cluster 5 grants.',
+            },
+          },
+        ],
       },
     ],
   }
@@ -153,7 +182,7 @@ export default function LandingPage() {
             {t('heroLivePitch')}
           </Link>
           <Link href="/funding" prefetch className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[#5BC0BE]/50 text-[#5BC0BE] hover:bg-[#5BC0BE]/10 text-lg transition">
-            Funding &amp; Grants →
+            {t('funding')} →
           </Link>
           <Link href="/sites" className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/30 hover:bg-white/5 text-lg transition">
             {tf(locale, 'heroBrowseSites', { count: siteCount.toLocaleString() })}
@@ -229,7 +258,7 @@ export default function LandingPage() {
       <div className="max-w-5xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 gap-12">
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-[#5BC0BE]">The Problem</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-[#5BC0BE]">{t('homeProblem')}</h2>
             <p className="text-gray-300 leading-relaxed">
               Stranded methane is natural gas that is uneconomical to capture and transport through pipelines.
               It is routinely vented or flared. Methane&apos;s global warming potential is ~28× CO₂ over 100 years and ~80× over 20 years (IPCC AR5).
@@ -243,7 +272,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-[#5BC0BE]">The Opportunity</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-[#5BC0BE]">{t('homeOpportunity')}</h2>
             <ul className="space-y-3 text-gray-300">
               <li className="flex gap-3"><span className="text-[#FF8C00]">→</span> Reduce methane emissions at source</li>
               <li className="flex gap-3"><span className="text-[#FF8C00]">→</span> Generate Bitcoin using otherwise wasted energy</li>
@@ -251,7 +280,7 @@ export default function LandingPage() {
               <li className="flex gap-3"><span className="text-[#FF8C00]">→</span> Zero additional load on the electrical grid</li>
             </ul>
             <div className="mt-6">
-              <Link href="/education" className="hit-area-inline text-[#5BC0BE] hover:underline">Learn more in Education →</Link>
+              <Link href="/education" className="hit-area-inline text-[#5BC0BE] hover:underline">{t('eduLearnMore')}</Link>
             </div>
           </div>
         </div>
@@ -288,10 +317,10 @@ export default function LandingPage() {
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-semibold">Featured Opportunities</h2>
-            <p className="text-gray-400 text-sm">Top sites by Stranded Score • Highest potential impact</p>
+            <h2 className="text-2xl font-semibold">{t('homeFeatured')}</h2>
+            <p className="text-gray-400 text-sm">{t('homeFeaturedDesc')}</p>
           </div>
-          <Link href="/sites" className="text-sm link-animated">See all →</Link>
+          <Link href="/sites" className="text-sm link-animated">{t('homeSeeAll')}</Link>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {(featured.length ? featured : [{ name: 'Loading top sites…', province: '', emission: 0, score: 0, link: '/map' }]).map((site, i) => (
@@ -316,8 +345,8 @@ export default function LandingPage() {
       {/* How Stranded Value Works - Clear Business Flow */}
       <div className="max-w-5xl mx-auto px-6 py-12 border-t border-white/10">
         <div className="text-center mb-10">
-          <div className="text-[#FF8C00] text-xs tracking-[3px]">THE STRANDED VALUE FLOW</div>
-          <h2 className="text-3xl font-semibold tracking-tighter mt-1">From Data to Deployed Capital in 4 Steps</h2>
+          <div className="text-[#FF8C00] text-xs tracking-[3px]">{t('homeFlow')}</div>
+          <h2 className="text-3xl font-semibold tracking-tighter mt-1">{t('homeFlowTitle')}</h2>
         </div>
         <div className="grid md:grid-cols-4 gap-6">
           {[
@@ -340,8 +369,8 @@ export default function LandingPage() {
       {/* Choose Your Path - Persona Driven Business Flow */}
       <div className="max-w-5xl mx-auto px-6 py-12 border-t border-white/10">
         <div className="text-center mb-8">
-          <div className="text-[#FF8C00] text-xs tracking-[3px]">TAILORED FOR YOU</div>
-          <h2 className="text-3xl font-semibold tracking-tighter mt-1">Stranded Value for Every Stakeholder</h2>
+          <div className="text-[#FF8C00] text-xs tracking-[3px]">{t('homePersonas')}</div>
+          <h2 className="text-3xl font-semibold tracking-tighter mt-1">{t('homePersonasTitle')}</h2>
         </div>
         <div className="grid md:grid-cols-4 gap-4">
           {[
@@ -414,17 +443,49 @@ export default function LandingPage() {
       <div className="max-w-4xl mx-auto px-6 text-center py-14 border-t border-white/10">
         <div className="mx-auto mb-5 w-11 h-11 rounded-full bg-[#FF8C00]/10 flex items-center justify-center"><Rocket className="text-[#FF8C00]" /></div>
         <h2 className="text-5xl font-bold tracking-tighter leading-none mb-4">This is what fixing the world looks like.</h2>
-        <p className="text-xl text-gray-300 max-w-lg mx-auto">Not another tax. Not another rule. Just the hardest money ever invented, quietly eating one of the dirtiest problems on Earth — one small, profitable, beautiful site at a time.</p>
+        <p className="text-xl text-gray-300 max-w-lg mx-auto">Not another punitive tax. Not another bureaucratic rule. Just the hardest Sound Money ever invented, quietly eating one of the dirtiest greenhouse gas problems on Earth — building a Canadian Sovereign Wealth &amp; Pension Reserve one profitable site at a time.</p>
       </div>
+
+      {/* SEO & Thesis Pillars: Sound Money · Sovereign Wealth · Environmental Abatement */}
+      <section className="max-w-6xl mx-auto px-6 pb-14" aria-label="Core Thesis Pillars">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
+          <div className="text-center mb-6">
+            <span className="text-[11px] font-semibold uppercase tracking-[2.5px] text-[#5BC0BE]">UNIFIED NATIONAL THESIS</span>
+            <h3 className="text-2xl font-bold tracking-tight text-white mt-1">
+              Where Sound Money, Sovereign Wealth &amp; Practical Environmental Stewardship Converge
+            </h3>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3 text-xs text-gray-300">
+            <div className="rounded-2xl border border-[#FF8C00]/25 bg-black/25 p-4">
+              <div className="font-semibold text-[#FF8C00] text-sm mb-1.5">1. Sound Money &amp; Energy Sovereignty</div>
+              <p className="leading-relaxed">
+                Backed by thermodynamic Proof-of-Work and a fixed 21M supply cap, Bitcoin converts stranded Canadian wellhead and landfill gas into hard, inflation-resistant treasury reserves without adding a single watt of demand to provincial power grids.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#5BC0BE]/25 bg-black/25 p-4">
+              <div className="font-semibold text-[#5BC0BE] text-sm mb-1.5">2. Canadian Sovereign Wealth &amp; 10% Pension Compact</div>
+              <p className="leading-relaxed">
+                Inspired by the Alberta Heritage Savings Trust Fund and Norway&apos;s Government Pension Fund Global: a single 10% flat production royalty in native Bitcoin compounds national and provincial pension wealth while leaving 90% to operators, landowners, and First Nations.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#34D399]/25 bg-black/25 p-4">
+              <div className="font-semibold text-[#34D399] text-sm mb-1.5">3. Market-Driven Methane &amp; GHG Abatement</div>
+              <p className="leading-relaxed">
+                Methane carries a 28× (GWP₁₀₀) to 80× (GWP₂₀) warming multiplier over CO₂. Private capital deploys reciprocating generators and Arctic Capture Huts in 6–10 weeks — destroying methane at the source and recovering co-gen heat for Canadian greenhouses.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* In-page CTAs (scroll with content). Footer is in-flow at page bottom (not sticky/fixed). */}
       <div className="max-w-6xl mx-auto px-6 pb-16 text-center">
         <div className="text-xs tracking-[3px] text-[#FF8C00] mb-3">THE DATA IS OPEN. THE TOOLS ARE READY.</div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/map" className="px-9 py-4 rounded-2xl bg-[#FF8C00] text-[#0b111f] font-semibold text-lg hover:bg-[#ff9d33] active:scale-[0.985] touch-manipulation">Open the Live Command Center</Link>
-          <Link href="/education" className="px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/5 text-lg touch-manipulation">Dive deeper in the Education Center</Link>
+          <Link href="/map" className="px-9 py-4 rounded-2xl bg-[#FF8C00] text-[#0b111f] font-semibold text-lg hover:bg-[#ff9d33] active:scale-[0.985] touch-manipulation">{t('homeOpenCommand')}</Link>
+          <Link href="/education" className="px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/5 text-lg touch-manipulation">{t('homeDiveEducation')}</Link>
         </div>
-        <p className="mt-4 text-xs text-gray-400 tracking-widest">EVERYTHING IS VERIFIABLE • ⌘K ANYWHERE TO SEARCH THE 2,611</p>
+        <p className="mt-4 text-xs text-gray-400 tracking-widest">{t('homeVerifiable')}</p>
         <p className="mt-6 text-label text-gray-400">
           Full professional marketing suite available in the <a href="/Marketing-Hub.html" className="underline hover:text-[#FF8C00]">Marketing Hub</a> (includes all 5 documents + visuals)
         </p>

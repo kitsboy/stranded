@@ -158,7 +158,7 @@ export default function DashboardPage() {
             KPI figures below are only as fresh as this line says. */}
         <DataFreshnessLine className="mb-3" />
         <DashboardStatGrid stats={stats} btcUsd={btc} />
-        <DashboardOpportunityRadar stats={stats} />
+        <DashboardOpportunityRadar stats={stats} btcUsd={btc} />
         <MethaneCaptureStory />
 
         <div className="mb-6 flex flex-wrap gap-2">
@@ -204,7 +204,7 @@ export default function DashboardPage() {
             projectName="Stranded Canada pilot"
             siteCount={Math.min(25, stats.siteCount)}
             totalCapexCad={8_000_000}
-            annualRevenueUsd={Math.round((stats.valueModel?.annualRevenueUsd || 2_000_000) * 0.05)}
+            annualRevenueUsd={Math.round(((stats.valueModel?.annualBtc ? stats.valueModel.annualBtc * btc : stats.valueModel?.annualRevenueUsd) || 2_000_000) * 0.05)}
             co2eTonnesYear={stats.impact?.co2eAvoided5PctTonnes}
           />
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">

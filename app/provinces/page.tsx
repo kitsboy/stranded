@@ -7,6 +7,7 @@ import Breadcrumbs from '@/components/Breadcrumbs'
 import { loadSites, EnrichedSite } from '@/lib/sites'
 import type { LiveStats } from '@/types/live-stats'
 import { recencyBreakdown, fluxBreakdown } from '@/lib/map-filters'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 
 function fmtUsd(n: number) {
   if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
@@ -16,6 +17,7 @@ function fmtUsd(n: number) {
 }
 
 function ProvincesContent() {
+  const btc = useBtcUsd()
   const searchParams = useSearchParams()
   const selected = searchParams.get('name') || ''
   const [sites, setSites] = useState<EnrichedSite[]>([])
@@ -29,11 +31,15 @@ function ProvincesContent() {
 
   const liveByProvince = useMemo(() => {
     const m = new Map<string, { emissionKgDay?: number; estRevenueUsd?: number }>()
+    const btcRatio = stats?.valueModel?.defaultBtcUsd ? btc / stats.valueModel.defaultBtcUsd : 1
     stats?.provinces?.forEach(p => {
-      m.set(p.name, { emissionKgDay: p.emissionKgDay, estRevenueUsd: p.estRevenueUsd })
+      m.set(p.name, {
+        emissionKgDay: p.emissionKgDay,
+        estRevenueUsd: p.estRevenueUsd != null ? Math.round(p.estRevenueUsd * btcRatio) : undefined,
+      })
     })
     return m
-  }, [stats])
+  }, [stats, btc])
 
   const hasLiveColumns = stats?.provinces?.some(p => p.emissionKgDay != null || p.estRevenueUsd != null)
 

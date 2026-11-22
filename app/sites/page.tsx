@@ -26,7 +26,8 @@ import {
   type RecencyFilter,
   type FluxFilter,
 } from '@/lib/map-filters'
-import { addSitesToMission } from '@/lib/portfolio'
+import { addSitesToMission, scalePotentialUsd } from '@/lib/portfolio'
+import { useBtcUsd } from '@/components/BtcPriceProvider'
 import { toast } from 'sonner'
 import ScoreLegend from '@/components/ScoreLegend'
 import DataQualityBadge from '@/components/DataQualityBadge'
@@ -35,6 +36,7 @@ import { tf } from '@/lib/i18n'
 
 export default function AllSitesExplorer() {
   const { locale, t } = useLocale()
+  const btc = useBtcUsd()
   const [allSites, setAllSites] = useState<EnrichedSite[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -101,14 +103,15 @@ export default function AllSitesExplorer() {
     if (!provinceFilter || !liveStats) return null
     const p = liveStats.provinces.find(x => x.name === provinceFilter)
     if (!p?.estRevenueUsd) return null
-    const usd = p.estRevenueUsd
+    const btcRatio = liveStats.valueModel.defaultBtcUsd > 0 ? btc / liveStats.valueModel.defaultBtcUsd : 1
+    const usd = Math.round(p.estRevenueUsd * btcRatio)
     const label = usd >= 1_000_000_000
       ? `$${(usd / 1_000_000_000).toFixed(2)}B`
       : usd >= 1_000_000
         ? `$${(usd / 1_000_000).toFixed(1)}M`
         : `$${usd.toLocaleString('en-CA')}`
     return { label, sites: p.count, pct: p.pct }
-  }, [provinceFilter, liveStats])
+  }, [provinceFilter, liveStats, btc])
 
   const provinces = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.province))).filter(Boolean).sort(), [allSites])
   const sources = useMemo(() => Array.from(new Set(allSites.map(s => s.properties.source_type))).filter(Boolean).sort(), [allSites])
@@ -413,7 +416,7 @@ export default function AllSitesExplorer() {
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-[#5BC0BE]">Potential daily (USD)</div>
-                    <div className="font-mono text-lg">${site.potentialDailyProfitUsd.toLocaleString()}</div>
+                    <div className="font-mono text-lg">${scalePotentialUsd(site.potentialDailyProfitUsd, btc).toLocaleString()}</div>
                   </div>
                 </div>
 
@@ -473,7 +476,7 @@ export default function AllSitesExplorer() {
                     })()}
                   </td>
                   <td className="p-4 text-right font-mono text-[#FF8C00]">{site.emission.toLocaleString()}</td>
-                  <td className="p-4 text-right font-mono text-[#5BC0BE]">${site.potentialDailyProfitUsd.toLocaleString()}</td>
+                  <td className="p-4 text-right font-mono text-[#5BC0BE]">${scalePotentialUsd(site.potentialDailyProfitUsd, btc).toLocaleString()}</td>
                   <td className="p-4 text-right font-mono">{site.maxGeneratorPowerKW || 'N/A'} kW</td>
                   <td className="p-4 text-right"><span className={`stranded-score ${scoreTierClass(site.strandedScore)}`}>{site.strandedScore}</span></td>
                   <td className="p-4 text-right">

@@ -9,16 +9,18 @@ export type ProvinceOpportunity = {
   estBtcYr: number
 }
 
-export function provinceOpportunities(stats: LiveStats): ProvinceOpportunity[] {
+export function provinceOpportunities(stats: LiveStats, liveBtcUsd?: number): ProvinceOpportunity[] {
   const { emissionKgDay } = stats.totals
-  const { annualRevenueUsd, annualBtc } = stats.valueModel
+  const { annualRevenueUsd, annualBtc, defaultBtcUsd } = stats.valueModel
+  const btcRatio = liveBtcUsd && defaultBtcUsd > 0 ? liveBtcUsd / defaultBtcUsd : 1
   return stats.provinces
     .map(p => {
       const share = p.pct / 100
       const estKgDay = p.emissionKgDay ?? Math.round(emissionKgDay * share)
-      const estRevenueUsd = p.estRevenueUsd ?? Math.round(annualRevenueUsd * share)
-      const estBtcYr = estRevenueUsd > 0 && annualRevenueUsd > 0
-        ? annualBtc * (estRevenueUsd / annualRevenueUsd)
+      const baseRev = p.estRevenueUsd ?? Math.round(annualRevenueUsd * share)
+      const estRevenueUsd = Math.round(baseRev * btcRatio)
+      const estBtcYr = baseRev > 0 && annualRevenueUsd > 0
+        ? annualBtc * (baseRev / annualRevenueUsd)
         : annualBtc * share
       return {
         name: p.name,

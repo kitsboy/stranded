@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.18.0] — 2026-11-22 · Live BTC Pegging Across Whole Site, Pitch Terminology & Honesty Overhaul, Marketing Hub 10m Chain Sync, Header Gentle Motion, SEO & Careers/Email Upgrade
+
+- **`/pitch/` Terminology & Honesty Overhaul (`app/pitch/page.tsx`, `lib/pitch-metrics.ts`)**:
+  - Replaced truncated `p.name.split(' ')[0]` labels (`"British"`, `"Nova"`, `"New"`, `"Northwest"`, `"Prince"`) in the Canada Site Density grid and Chart.js bar chart with proper province/territory names (`B.C.`, `Nova Scotia`, `New Brunswick`, `Nfld & Lab.`, `N.W.T.`, `P.E.I.`).
+  - Mapped raw internal source and generator codes (`landfill_waste`, `man`, `cat3520`, `jenbacher316`, `mobile250`) to full human-readable engineering labels (`Landfill & Municipal Waste`, `MAN 20V35/44G (10.5 MW)`, `Caterpillar G3520H (2.0 MW)`, `INNIO Jenbacher J316 (850 kW)`, `Mobile 250 kW Skid`).
+  - Added the honest ECCC split subtitle (`2,588 w/ CH₄ · 675 high-conf`) on the headline Mapped Sites card and added a dedicated **Codified Terminology & Sound Money Lexicon** section defining Sound Money, Sovereign Wealth Fund (10% Flat Royalty), GWP₁₀₀ (28×) vs. GWP₂₀ (80×), Live Network vs. Optimistic Hashprice, Two-SPV Capital Stack, and ECCC Flux Split.
+- **Whole-Site Live Bitcoin Market Pegging + Zero-CPU 10-Minute Refresh (`lib/btc-price.ts`, `components/BtcPriceProvider.tsx`, `app/pitch/page.tsx`, `app/dashboard/page.tsx`, `app/provinces/page.tsx`, `app/sites/page.tsx`, `app/compare/page.tsx`, `components/EducationContent.tsx`)**:
+  - Upgraded `fetchBtcPrices` to a resilient 3-tier chain (`mempool.space/api/v1/prices` → `CoinGecko` → `blockchain.info/ticker` → last-known `localStorage` cache) so the site never gets stuck on a stale static fallback when a single API rate-limits.
+  - Pegged every remaining static `$85,000` revenue/payback calculation on `/pitch` (Bear/Base/Bull sensitivity & Province Opportunity Rank), `/dashboard` (Opportunity Radar & Term Sheet), `/provinces` (`Est. revenue`), `/sites` (`Potential daily USD`), `/compare` (`Daily profit`, `Annual BTC`, `Payback days`), and `/education` (`Stranded Value in Numbers`) to the live Bitcoin market price on every page refresh and every 10 minutes (`600,000ms`), pausing automatically when a browser tab is hidden (`document.visibilityState === 'hidden'`) for zero background CPU usage.
+- **Marketing Hub Live Blockchain Sync (`public/Marketing-Hub.html`)**:
+  - Added a 6-card Live Blockchain & Portfolio Strip (`Mapped Sites`, `Live BTC USD/CAD (10m sync)`, `Model Rev @ Live BTC`, `10% Sovereign Pension/yr`, `Bitcoin Block Height`, and `16+ Capital Pools`) that fetches live Bitcoin price & block height from `mempool.space` + `/data/live-stats.json` on load and every 10 minutes. Fixed canonical & OG URLs to `/Marketing-Hub.html`.
+- **Home Header Background Gentle Motion (`app/globals.css`)**:
+  - Added a GPU-composited (`translate3d` + `scale`) 28-second Ken Burns gentle drift (`@keyframes hero-bg-gentle-drift`) on `.hero-mesh::after` (`/images/header-bg.jpg`), automatically disabled under `prefers-reduced-motion: reduce`.
+- **Comprehensive SEO & JSON-LD Structured Data (`app/layout.tsx`, `app/ page.tsx`, route layouts)**:
+  - Added comprehensive keyword coverage and `FAQPage` + `WebSite` + `Dataset` JSON-LD across **"Sovereign wealth fund"**, **"Sound Money"**, **"Hard Money"**, **"Strategic Bitcoin Reserve"**, **"Canadian Bitcoin Pension Plan"**, **"Methane abatement"**, **"GWP 28x 80x"**, **"Flare gas Bitcoin mining"**, **"Free-market environmentalism"**, **"CETA Horizon Europe grants"**, and **"Nuclear SMR baseload"**, plus a new **Unified National Thesis** section on `/`.
+- **Email Correspondence (`hello@giveabit.io` + `kimi@giveabit.io`) & Intelligent Engineering Job Board (`components/CertifiedLeadForm.tsx`, `functions/api/contact.js`, `app/partnerships/page.tsx`, `app/thank-you/page.tsx`)**:
+  - Verified Cloudflare MX & Formspree relay (`xpqgopvd`), added `kimi@giveabit.io` as `CONTACT_CC` / `_cc` across the server relay, mailto fallbacks, and copy buttons, and added a 6-role **Careers & Field Engineering Job Board** on `/partnerships` with 1-click role presets in `CertifiedLeadForm`.
+
 ## [2.17.0] — 2026-11-22 · Top 25 Public Pitch Upgrades, Map Hover Fix & Full Knowledge Sync
 
 - **Map Hover Popup Fix (`components/Map.tsx`, `app/globals.css`)**: Fixed the hover tooltip disappearing before the user could click `"Click to build it →"`. Added a 340ms hover bridge, `pointer-events: auto` with a `-12px` invisible cursor cushion, and interactive click handlers inside the popup so clicking `"Click to build it →"` or `"Click to expand cluster →"` opens the build panel or expands the cluster immediately.

@@ -104,12 +104,13 @@ function FactorTile({ icon: Icon, label, value, sub, accent, delay }: FactorTile
 
 type Props = {
   stats: LiveStats
+  btcUsd?: number
 }
 
-export default function DashboardOpportunityRadar({ stats }: Props) {
+export default function DashboardOpportunityRadar({ stats, btcUsd }: Props) {
   const { locale, t } = useLocale()
   const readiness = useMemo(() => deploymentReadiness(stats), [stats])
-  const leaders = useMemo(() => provinceRevenueLeaders(stats, 5), [stats])
+  const leaders = useMemo(() => provinceRevenueLeaders(stats, 5, btcUsd), [stats, btcUsd])
 
   const megaLargeCount =
     (stats.emissionTiers.mega || 0) + (stats.emissionTiers.large || 0)

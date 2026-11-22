@@ -47,15 +47,21 @@ export function deploymentReadiness(stats: LiveStats): DeploymentReadiness {
   return { score, label, factors }
 }
 
-export function provinceRevenueLeaders(stats: LiveStats, limit = 6): ProvinceRevenueLeader[] {
+export function provinceRevenueLeaders(stats: LiveStats, limit = 6, liveBtcUsd?: number): ProvinceRevenueLeader[] {
+  const btcRatio = liveBtcUsd && stats.valueModel.defaultBtcUsd > 0
+    ? liveBtcUsd / stats.valueModel.defaultBtcUsd
+    : 1
   return stats.provinces
-    .map(p => ({
-      name: p.name,
-      sites: p.count,
-      pct: p.pct,
-      revenueUsd: p.estRevenueUsd ?? Math.round(stats.valueModel.annualRevenueUsd * (p.pct / 100)),
-      emissionKgDay: p.emissionKgDay ?? Math.round(stats.totals.emissionKgDay * (p.pct / 100)),
-    }))
+    .map(p => {
+      const baseRev = p.estRevenueUsd ?? Math.round(stats.valueModel.annualRevenueUsd * (p.pct / 100))
+      return {
+        name: p.name,
+        sites: p.count,
+        pct: p.pct,
+        revenueUsd: Math.round(baseRev * btcRatio),
+        emissionKgDay: p.emissionKgDay ?? Math.round(stats.totals.emissionKgDay * (p.pct / 100)),
+      }
+    })
     .sort((a, b) => b.revenueUsd - a.revenueUsd)
     .slice(0, limit)
 }

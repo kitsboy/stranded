@@ -97,7 +97,7 @@ Future: Deploy to https://stranded.giveabit.io (Cloudflare Pages from this GitHu
 Built with love for the orange pill and the blue planet.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T21:59:09.677Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T23:03:26.346Z
 
 | Metric | Value |
 |--------|-------|

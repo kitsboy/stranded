@@ -1332,5 +1332,19 @@ assert.ok(CAPITAL_DIRECTORY.length >= 12, 'global capital directory must cover C
 assert.ok(CAPITAL_JURISDICTIONS.some(j => j.id === 'alberta') && CAPITAL_JURISDICTIONS.some(j => j.id === 'bc') && CAPITAL_JURISDICTIONS.some(j => j.id === 'europe'))
 assert.ok(ENERGY_VERTICALS.some(v => v.id === 'nuclear-smr'), 'Nuclear SMR Phase 3 vertical must be registered')
 
+// (f) v2.18.0: Live BTC price pegging across pitch & dashboard province revenue helpers + i18n parity
+const { LOCALES: I18N_LOCALES, keyCount: i18nKeyCount } = await import('../lib/i18n.ts')
+const liveStatsSample = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'data', 'live-stats.json'), 'utf8'))
+const provAt85 = provinceOpportunities(liveStatsSample, 85000)
+const provAt100 = provinceOpportunities(liveStatsSample, 100000)
+assert.ok(provAt100[0].estRevenueUsd > provAt85[0].estRevenueUsd, 'provinceOpportunities must scale dynamically with live BTC price')
+const leadersAt85 = provinceRevenueLeaders(liveStatsSample, 5, 85000)
+const leadersAt100 = provinceRevenueLeaders(liveStatsSample, 5, 100000)
+assert.ok(leadersAt100[0].revenueUsd > leadersAt85[0].revenueUsd, 'provinceRevenueLeaders must scale dynamically with live BTC price')
+const enCount = i18nKeyCount('en')
+for (const loc of I18N_LOCALES) {
+  assert.equal(i18nKeyCount(loc.code), enCount, `i18n locale ${loc.code} must have exact key parity with en (${enCount})`)
+}
+
 console.log('test-helpers: ALL PASSED')
 console.log(`  elite=${elite.length} top_score=${seed.strandedScore} peers=${peers.length} tornado=${tornado.length}`)
