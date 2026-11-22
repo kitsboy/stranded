@@ -2,7 +2,7 @@
 
 **Live:** https://stranded.giveabit.io/docs
 **Repo:** https://github.com/kitsboy/stranded
-**Current:** 2026-11-07. Version 2.15.0. Methane file unchanged (2,611 / 2,588 / 675, newest filing year 2024). StatCan generation and capacity are both 2025, pulled 2026-11-04. Remote communities are the 2025 file, 207 places. The home story uses a live chain window, not the optimistic hashprice. The financing screen is [FINANCING-SCREEN.md](./FINANCING-SCREEN.md). It is a planning note, not a page on the site.
+**Current:** 2026-11-22. Version **2.17.0**. Methane file unchanged (2,611 / 2,588 / 675, newest filing year 2024). StatCan generation and capacity are both 2025, pulled 2026-11-04. Remote communities are the 2025 file, 207 places. Public Pitch & Sovereign Pension Overhaul (`HowTheMathWorks`, `CaptureHutSizer`, `SovereignPensionPlan`, `GlobalCapitalDirectory`, Phase 3 Nuclear SMR simulator, and interactive Map hover popups) shipped across `/`, `/pitch`, `/funding`, `/investors`, `/education`, `/verticals`, and `/map`.
 
 The auto-synced block at the bottom of this file is the last `generate-live-stats.js` run. It was not regenerated on 4 Nov 2026. The methane counts in it still match the file. The energy dates above are the newer fact.
 
@@ -78,7 +78,7 @@ npm run verify       # Full pipeline check
 *Safe Harbour · Part of the [Give A Bit](https://giveabit.io) family.*
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T20:45:06.205Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T21:59:09.677Z
 
 | Metric | Value |
 |--------|-------|

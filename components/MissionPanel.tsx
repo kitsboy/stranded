@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { X, TrendingUp, Zap, Leaf } from 'lucide-react'
+import { X, TrendingUp, Zap, Leaf, QrCode } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { EnrichedSite, GENSET_DATA } from '@/lib/sites'
 import { bankPackMarkdown, bankPackCsv, bankPackTsv, bankPackHtml, bankPackJson } from '@/lib/bank-pack'
 import { downloadBlob } from '@/lib/export-formats'
-import { portfolioDailyPotentialUsd } from '@/lib/portfolio'
+import { portfolioDailyPotentialUsd, portfolioShareUrl } from '@/lib/portfolio'
 import { USD_PER_CAD_FALLBACK } from '@/lib/capex-fx'
 import { projectBtcRevenue } from '@/lib/halving'
 import { toast } from 'sonner'
@@ -38,6 +39,7 @@ export default function MissionPanel({
 }: MissionPanelProps) {
   const { locale, t } = useLocale()
   const [showPreview, setShowPreview] = useState(false)
+  const [showQr, setShowQr] = useState(false)
   const [exportFmt, setExportFmt] = useState<ExportFormat>('md')
 
   if (portfolio.length === 0) return null
@@ -215,7 +217,25 @@ export default function MissionPanel({
           >
             Timeline CSV
           </button>
+          <button
+            type="button"
+            className="text-label px-2 py-1 rounded border border-white/20 text-gray-300 hover:border-[#5BC0BE]/40 inline-flex items-center gap-1"
+            onClick={() => setShowQr(v => !v)}
+            data-testid="mission-qr-toggle"
+          >
+            <QrCode size={11} /> QR
+          </button>
         </div>
+        {showQr && (
+          <div className="mt-3 rounded-xl border border-white/15 bg-white p-3 text-center text-black" data-testid="mission-qr-box">
+            <div className="flex justify-center">
+              <QRCodeSVG value={portfolioShareUrl(portfolio)} size={128} />
+            </div>
+            <div className="mt-1.5 text-[10px] font-mono text-slate-700">
+              Scan to open this {portfolio.length}-site mission on mobile
+            </div>
+          </div>
+        )}
       </div>
 
       <BankPackPreview

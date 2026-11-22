@@ -15,7 +15,7 @@ import {
   type InfraSearchHit,
 } from '@/lib/energy-atlas'
 
-export type LayerPresetId = 'analysis' | 'satellite' | 'minimal' | 'southern-alberta'
+export type LayerPresetId = 'analysis' | 'satellite' | 'minimal' | 'southern-alberta' | 'nuclear-corridor'
 
 export type LayerPreset = {
   label: string
@@ -44,6 +44,12 @@ export const LAYER_PRESETS: Record<LayerPresetId, LayerPreset> = {
     overlays: SOUTHERN_ALBERTA_PRESET.overlays,
     atlas: SOUTHERN_ALBERTA_PRESET.atlas,
     fly: SOUTHERN_ALBERTA_PRESET.fly,
+  },
+  'nuclear-corridor': {
+    label: '⚛️ Nuclear SMR Corridor',
+    layers: { sites: true, grid: false, internet: false, satellite: false, terrain: false, heatmap: false, choropleth: true },
+    atlas: { transmission: true, 'statcan-cap': true },
+    fly: { lat: 44.3, lng: -80.2, zoom: 6.2 },
   },
 }
 

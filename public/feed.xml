@@ -5,7 +5,21 @@
     <link>https://stranded.giveabit.io/changelog</link>
     <description>Public changelog for the Stranded map. Own notes only. Sibling news is not mixed in.</description>
     <language>en</language>
-    <lastBuildDate>Sun, 22 Nov 2026 20:45:06 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 22 Nov 2026 21:59:10 GMT</lastBuildDate>
+    <item>
+      <title>2.17.0 — Top 25 Public Pitch Upgrades, Map Hover Fix &amp; Full Knowledge Sync</title>
+      <link>https://stranded.giveabit.io/changelog</link>
+      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.17.0</guid>
+      <pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate>
+      <description>**Map Hover Popup Fix (`components/Map.tsx`, `app/globals.css`)**: Fixed the hover tooltip disappearing before the user could click `"Click to build it →"`. Added a 340ms hover bridge, `pointer-events: auto` with a `-12px` invisible cursor cushion, and interactive click handlers inside the popup so clicking `"Click to build it →"` or `"Click to expand cluster →"` opens the build panel or expands the cluster immediately. **Map Workflow &amp; Clutter Polish (`app/map/page.tsx`, `components/SiteDetailsPanel.tsx`, `components/LayerControls.tsx`, `components/MissionPanel.tsx`)**:</description>
+    </item>
+    <item>
+      <title>2.16.0 — Public Pitch Overhaul — 6-Step Math, Capture Huts, Global Capital &amp; 10% Sovereign Pension</title>
+      <link>https://stranded.giveabit.io/changelog</link>
+      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.16.0</guid>
+      <pubDate>Sun, 22 Nov 2026 12:00:00 GMT</pubDate>
+      <description>Added `HowTheMathWorks`, `CaptureHutSizer`, `SovereignPensionPlan`, `GlobalCapitalDirectory`, and the Phase 3 Nuclear SMR vertical (`6b7ddec`).</description>
+    </item>
     <item>
       <title>2.15.0 — One miner card on recorded energy</title>
       <link>https://stranded.giveabit.io/changelog</link>
@@ -75,20 +89,6 @@
       <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.1</guid>
       <pubDate>Thu, 01 Oct 2026 12:00:00 GMT</pubDate>
       <description>**The map HUD had a long dark rectangle stretching past the visible-count pill** on `/map/`. Cause: the jewel-glass rule in `app/globals.css` targets `.map-command-center [class*="hud"]`, which also matched the **full-width outer wrapper** `div.map-top-hud`, not just the inner pill — so the wrapper got a gradient + border + shadow painted across the whole strip. **Fix:** reset the wrapper only (`.map-command-center .map-top-hud` and its `:hover` → `background: transparent; border: none; box-shadow: none; backdrop-filter: none`). The inner `.map-top-hud__inner` pill keeps its own solid background, so the count, `/ 2,611 visible`, **Pin proof** badge, geolocate button and BTC ticker are untouched.</description>
-    </item>
-    <item>
-      <title>2.11.0 — Data refresh to the 2024 GHGRP year + honest recency/flux</title>
-      <link>https://stranded.giveabit.io/changelog</link>
-      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.0</guid>
-      <pubDate>Fri, 11 Sep 2026 12:00:00 GMT</pubDate>
-      <description>**Data is current** — refreshed from ECCC GHGRP's 2024 reporting year (1,745 sites now on 2024 filings, newest `reference_year` 2024); a site's `last_reported_year` is stored and shown so a 2011 figure is never presented as current **Never assert venting/flaring we cannot prove** — the venting/flaring split exists only for facilities that report a fugitive source (oil &amp; gas). Landfill gas is filed under "Waste", so for those sites the flux UI says *no claim* instead of a false "not flaring"; `flux_scope: fugitive | not-applicable` records it</description>
-    </item>
-    <item>
-      <title>2.11.0 — Site cockpit: the miner stack explains itself</title>
-      <link>https://stranded.giveabit.io/changelog</link>
-      <guid isPermaLink="false">https://stranded.giveabit.io/changelog#2.11.0</guid>
-      <pubDate>Fri, 11 Sep 2026 12:00:00 GMT</pubDate>
-      <description>**Hover before click** — a pin hover now teaches: name, measured CH₄/day, Stranded Score and *"Gas supports up to 468 miners ≈ $/day"*, computed with the same helpers the cockpit uses (vector pins **and** DOM markers) **Click → a cockpit, not a form** — header badges first (data recency `ECCC 2023 · high confidence`, flux when the dataset carries it, "verify this yourself"), then **one big number** (sats/day + $/day), then the miner-stack visual, then the readout strip, then **"How this number is made"** (hashprice used, above/below the network-derived estimate, power-cost assumption, data year)</description>
     </item>
   </channel>
 </rss>

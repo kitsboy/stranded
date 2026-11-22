@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ENERGY_VERTICALS } from '@/lib/verticals'
 import { OFFICIAL_PLANT_COUNT, OFFICIAL_PLANT_COUNTS, OFFICIAL_REMOTE_COUNT, OFFICIAL_REMOTE_COUNTS } from '@/lib/energy-build'
+import { NETWORK_DERIVED_BTC_PER_TH_DAY, NETWORK_ESTIMATE_BTC_PER_TH_DAY } from '@/lib/fleet-model'
 import { emissionTierItems } from '@/lib/dashboard-metrics'
+import { useBtcPrice } from '@/components/BtcPriceProvider'
 import type { LiveStats } from '@/types/live-stats'
 
 const VERTICAL_SOURCE_MAP: Record<string, string[]> = {
@@ -38,6 +40,36 @@ function provinceCards(stats: LiveStats, provinces: string[]) {
 
 export default function VerticalsPage() {
   const [stats, setStats] = useState<LiveStats | null>(null)
+  const { fiats } = useBtcPrice()
+  const cadPerBtc = fiats.cad || 115000
+
+  // Upgrades #31, #33, #34: Interactive Nuclear SMR & Grid Frequency-Response Simulator
+  const [smrUnits, setSmrUnits] = useState<number>(2)
+  const [offPeakHoursDay, setOffPeakHoursDay] = useState<number>(10)
+  const [gridFreqCreditCadMwh, setGridFreqCreditCadMwh] = useState<number>(24)
+  const [remoteMicrogridsDeployed, setRemoteMicrogridsDeployed] = useState<number>(35)
+
+  const smrSim = useMemo(() => {
+    const mwPerSmr = 300
+    const computeAllocationRatio = 0.25 // 25% of SMR capacity allocated to interruptible compute
+    const activeMw = smrUnits * mwPerSmr * computeAllocationRatio
+    const miners = Math.floor((activeMw * 1_000_000) / 4050) // S21 XP 4050W
+    const totalThs = miners * 300
+    const dutyFactor = offPeakHoursDay / 24
+    const annualBtcLive = totalThs * NETWORK_DERIVED_BTC_PER_TH_DAY * 0.95 * dutyFactor * 365
+    const annualBtcOpt = totalThs * NETWORK_ESTIMATE_BTC_PER_TH_DAY * 0.95 * dutyFactor * 365
+    const annualGridAncillaryCad = Math.round(activeMw * (24 - offPeakHoursDay) * 365 * gridFreqCreditCadMwh * 0.35)
+    const remoteDieselSavedLitresYr = remoteMicrogridsDeployed * 420_000
+    return {
+      activeMw,
+      miners,
+      annualBtcLive: +annualBtcLive.toFixed(1),
+      annualBtcOpt: +annualBtcOpt.toFixed(1),
+      annualPensionBtcOpt: +(annualBtcOpt * 0.10).toFixed(1),
+      annualGridAncillaryCad,
+      remoteDieselSavedLitresYr,
+    }
+  }, [smrUnits, offPeakHoursDay, gridFreqCreditCadMwh, remoteMicrogridsDeployed])
 
   useEffect(() => {
     fetch('/data/live-stats.json')
@@ -169,6 +201,86 @@ export default function VerticalsPage() {
           )
         })}
       </div>
+
+      <section className="mt-10 rounded-3xl border border-[#A78BFA]/35 bg-gradient-to-br from-[#A78BFA]/10 via-[#0f172a] to-[#5BC0BE]/10 p-6 md:p-8" data-testid="nuclear-smr-simulator">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-4 mb-5">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#A78BFA]/40 bg-[#A78BFA]/15 px-3 py-1 text-xs font-semibold tracking-wider text-[#A78BFA]">
+              ⚛️ PHASE 3 HORIZON SIMULATOR · NUCLEAR SMR + GRID FREQUENCY RESPONSE + 143 REMOTE COMMUNITIES
+            </div>
+            <h2 className="mt-2 text-2xl font-bold text-white">
+              Phase 3: CANDU &amp; Small Modular Reactor (SMR) Interruptible Baseload + Remote Diesel Displacement
+            </h2>
+            <p className="mt-1 text-sm text-gray-300 max-w-3xl">
+              Methane is our verified Lead Story today (2,611 ECCC sites). Once the Sovereign Bitcoin Pension rail is live, Phase 3 pairs 300 MW BWRX-300 / CANDU SMRs in Ontario, New Brunswick, Saskatchewan, and Alberta with millisecond-interruptible ASIC loads and displaces diesel across 143 fossil-dependent remote communities.
+            </p>
+          </div>
+          <Link href="/map" className="rounded-xl border border-[#A78BFA]/50 bg-[#A78BFA]/15 px-4 py-2 text-xs font-semibold text-[#A78BFA] hover:bg-[#A78BFA]/25 transition">
+            Open Nuclear SMR Corridor on Map →
+          </Link>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 bg-black/30 rounded-2xl p-4 border border-white/10 mb-5 text-xs">
+          <div>
+            <label className="flex justify-between text-gray-300 mb-1">
+              <span>300 MW SMR Units Online</span>
+              <span className="font-mono font-bold text-[#A78BFA]">{smrUnits} × 300 MW</span>
+            </label>
+            <input type="range" min={1} max={12} step={1} value={smrUnits} onChange={e => setSmrUnits(Number(e.target.value))} aria-label="Number of 300 MW SMR units" className="w-full accent-[#A78BFA]" />
+            <div className="text-[11px] text-gray-400 mt-1">25% ({smrSim.activeMw} MW) behind-the-meter ASIC buffer</div>
+          </div>
+
+          <div>
+            <label className="flex justify-between text-gray-300 mb-1">
+              <span>Off-Peak Surplus Hours / Day</span>
+              <span className="font-mono font-bold text-[#5BC0BE]">{offPeakHoursDay}h / 24h</span>
+            </label>
+            <input type="range" min={4} max={24} step={1} value={offPeakHoursDay} onChange={e => setOffPeakHoursDay(Number(e.target.value))} aria-label="Off-peak surplus hours per day" className="w-full accent-[#5BC0BE]" />
+            <div className="text-[11px] text-gray-400 mt-1">Drops to 0 MW in &lt;100ms during peak grid demand</div>
+          </div>
+
+          <div>
+            <label className="flex justify-between text-gray-300 mb-1">
+              <span>IESO/AESO Frequency Credit</span>
+              <span className="font-mono font-bold text-[#34D399]">C${gridFreqCreditCadMwh}/MWh</span>
+            </label>
+            <input type="range" min={0} max={60} step={2} value={gridFreqCreditCadMwh} onChange={e => setGridFreqCreditCadMwh(Number(e.target.value))} aria-label="Grid frequency response credit per MWh" className="w-full accent-[#34D399]" />
+            <div className="text-[11px] text-gray-400 mt-1">Ancillary demand-response revenue</div>
+          </div>
+
+          <div>
+            <label className="flex justify-between text-gray-300 mb-1">
+              <span>Remote Diesel Microgrids</span>
+              <span className="font-mono font-bold text-[#FF8C00]">{remoteMicrogridsDeployed} / 143</span>
+            </label>
+            <input type="range" min={5} max={143} step={1} value={remoteMicrogridsDeployed} onChange={e => setRemoteMicrogridsDeployed(Number(e.target.value))} aria-label="Remote diesel microgrids converted" className="w-full accent-[#FF8C00]" />
+            <div className="text-[11px] text-gray-400 mt-1">Of 143 NRCan fossil remote communities</div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+          <div className="rounded-2xl border border-[#A78BFA]/30 bg-black/25 p-4">
+            <div className="text-[10px] uppercase text-[#A78BFA] font-semibold">Interruptible SMR Fleet</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-white">{smrSim.miners.toLocaleString()} ASICs</div>
+            <div className="mt-1 text-gray-400">{smrSim.activeMw} MW instant load-following buffer</div>
+          </div>
+          <div className="rounded-2xl border border-[#34D399]/30 bg-black/25 p-4">
+            <div className="text-[10px] uppercase text-[#34D399] font-semibold">Annual SMR BTC Yield</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-white">{smrSim.annualBtcLive} / {smrSim.annualBtcOpt} BTC</div>
+            <div className="mt-1 text-gray-400">Live Network vs. Optimistic · +{smrSim.annualPensionBtcOpt} BTC/yr to Pension</div>
+          </div>
+          <div className="rounded-2xl border border-[#5BC0BE]/30 bg-black/25 p-4">
+            <div className="text-[10px] uppercase text-[#5BC0BE] font-semibold">Grid Ancillary Credit</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-white">C${(smrSim.annualGridAncillaryCad / 1e6).toFixed(2)}M/yr</div>
+            <div className="mt-1 text-gray-400">Paid for millisecond curtailment during peak hours (${Math.round(cadPerBtc).toLocaleString()} CAD/BTC ref)</div>
+          </div>
+          <div className="rounded-2xl border border-[#FF8C00]/30 bg-black/25 p-4">
+            <div className="text-[10px] uppercase text-[#FF8C00] font-semibold">Remote Diesel Displaced</div>
+            <div className="mt-1 text-2xl font-bold font-mono text-white">{(smrSim.remoteDieselSavedLitresYr / 1e6).toFixed(1)}M L/yr</div>
+            <div className="mt-1 text-gray-400">Across {remoteMicrogridsDeployed} remote communities</div>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-10 rounded-2xl border border-white/10 p-6" data-testid="official-energy-counts">
         <h2 className="text-xl font-semibold mb-2">Official files on the map</h2>

@@ -1102,15 +1102,29 @@ html.theme-high-contrast .bg-white\/\[0\.04\] {
   cursor: grab;
 }
 
-/* Map hover preview tooltip (upgrade 253) */
+/* Map hover preview tooltip (upgrade 253 + interactive hover bridge) */
+.maplibregl-popup.stranded-hover-popup {
+  pointer-events: auto;
+  z-index: 45;
+}
 .maplibregl-popup.stranded-hover-popup .maplibregl-popup-content {
-  padding: 6px 10px;
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(91, 192, 190, 0.35);
-  border-radius: 8px;
+  padding: 8px 11px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(91, 192, 190, 0.45);
+  border-radius: 10px;
   color: #e2e8f0;
   font-size: 11px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
+  position: relative;
+}
+/* Invisible 12px hover bridge around the tooltip so moving the mouse from a pin
+   onto "Click to build it →" never loses hover state. */
+.maplibregl-popup.stranded-hover-popup .maplibregl-popup-content::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  pointer-events: auto;
 }
 .maplibregl-popup.stranded-hover-popup .maplibregl-popup-tip {
   border-top-color: rgba(15, 23, 42, 0.92);
@@ -2336,4 +2350,27 @@ svg polyline[stroke="#5BC0BE"], svg polyline[stroke="#7ee8e6"] {
 .hit-area-44 {
   padding: 0.625rem;
   margin: -0.625rem;
+}
+
+@media print {
+  [data-testid="how-the-math-works"],
+  [data-testid="capture-hut-sizer"],
+  [data-testid="sovereign-pension-plan"],
+  [data-testid="global-capital-directory"],
+  [data-testid="nuclear-smr-simulator"] {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  [data-testid="how-the-math-works"] *,
+  [data-testid="capture-hut-sizer"] *,
+  [data-testid="sovereign-pension-plan"] *,
+  [data-testid="global-capital-directory"] *,
+  [data-testid="nuclear-smr-simulator"] * {
+    color: #000000 !important;
+    background-color: transparent !important;
+    border-color: #cbd5e1 !important;
+  }
 }

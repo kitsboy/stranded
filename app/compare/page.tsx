@@ -10,6 +10,7 @@ import { findPeerSites, findSimilarByEmission } from '@/lib/peers'
 import { exportCompareCsv } from '@/lib/compare-export'
 import { downloadBlob } from '@/lib/export-formats'
 import { buildMapUrl } from '@/lib/map-url'
+import { sizeCaptureHutsForBuild } from '@/lib/capture-huts'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -67,6 +68,21 @@ function CompareContent() {
         pick: s => {
           const roi = computeSiteValue(s)
           return isFinite(roi.paybackDays) ? `${roi.paybackDays.toLocaleString()} d` : '—'
+        },
+      },
+      {
+        label: 'Capture Hut BOM',
+        pick: s => {
+          const kw = s.maxGeneratorPowerKW || 250
+          const bom = sizeCaptureHutsForBuild({ powerKw: kw, minerCount: Math.floor((kw * 1000) / 3500), sourceType: s.properties.source_type })
+          return `${bom.hutCount}× ${bom.hutSpec.footprint.split(' ')[0]} (C$${(bom.totalEnclosureAndGasTrainCad / 1000).toFixed(0)}k)`
+        },
+      },
+      {
+        label: '10% Sovereign Pension BTC/yr',
+        pick: s => {
+          const roi = computeSiteValue(s)
+          return `${(roi.dailyBtc * 365 * 0.10).toFixed(4)} BTC/yr`
         },
       },
     ]

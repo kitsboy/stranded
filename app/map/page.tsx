@@ -1794,6 +1794,32 @@ function StrandedCommandCenter() {
                   >
                     <Maximize2 size={14} /> {t('mapFitToFiltered')}
                   </button>
+                  {selectedSite && (
+                    <button
+                      type="button"
+                      data-testid="cluster-radius-auto-group"
+                      onClick={() => {
+                        const [lng, lat] = selectedSite.geometry.coordinates
+                        setRadiusFilter({ lat, lng, radiusKm: 15 })
+                        const nearby = allSites.filter(s => {
+                          const [slng, slat] = s.geometry.coordinates
+                          return haversineKm(lat, lng, slat, slng) <= 15
+                        })
+                        if (nearby.length) {
+                          const merged = [...portfolio]
+                          for (const n of nearby.slice(0, 20)) {
+                            if (!merged.some(m => m.id === n.id)) merged.push(n)
+                          }
+                          setPortfolio(merged)
+                          savePortfolio(merged)
+                          toast.success(`15 km Cluster grouped: ${nearby.length} sites around ${selectedSite.properties.name || selectedSite.id}`)
+                        }
+                      }}
+                      className="w-full text-xs py-2 rounded-2xl border border-[#5BC0BE]/50 bg-[#5BC0BE]/10 text-[#5BC0BE] hover:bg-[#5BC0BE]/20 flex items-center justify-center gap-2 font-semibold"
+                    >
+                      <Target size={14} /> Cluster 15 km around {selectedSite.id}
+                    </button>
+                  )}
                   <div className="flex gap-2">
                     <button type="button" onClick={cycleViewMode} className="flex-1 text-xs py-2 rounded-2xl border border-white/20 hover:bg-white/5 flex items-center justify-center gap-2">
                       {viewModeLabel[viewMode]}
@@ -1808,7 +1834,7 @@ function StrandedCommandCenter() {
           )}
         </div>
       </div>
-        {isXlViewport && <OnboardingTour key={welcomeKey} layout="stacked" />}
+        {isXlViewport && !showSearchHint && <OnboardingTour key={welcomeKey} layout="stacked" />}
       </div>
 
       {/* Phone chrome: Filters + Layers, side by side, top-left. */}
@@ -2163,7 +2189,9 @@ function StrandedCommandCenter() {
       )}
       {showCompare && <CompareSitesModal sites={compareSites} liveBtc={liveBtcPrice} onClose={() => setShowCompare(false)} />}
       <KeyboardHelpModal open={showKeyboardHelp} onClose={() => setShowKeyboardHelp(false)} />
-      {!isXlViewport && <OnboardingTour key={welcomeKey} layout="floating" />}
+      {!showSearchHint && (
+        <OnboardingTour key={welcomeKey} layout="floating" />
+      )}
 
       {/* Score legend + layer controls — DESKTOP ONLY (≥1280px).
           On a phone this panel used to float over the map (192×950 px bottom-right:

@@ -19,6 +19,10 @@ import dynamic from 'next/dynamic'
 import GensetComparisonTable from '@/components/GensetComparisonTable'
 import BreakevenCalculator from '@/components/BreakevenCalculator'
 import AsicFleetSizer from '@/components/AsicFleetSizer'
+import HowTheMathWorks from '@/components/HowTheMathWorks'
+import CaptureHutSizer from '@/components/CaptureHutSizer'
+import SovereignPensionPlan from '@/components/SovereignPensionPlan'
+import GlobalCapitalDirectory from '@/components/GlobalCapitalDirectory'
 import { SENSITIVITY_PRESETS, type SensitivityPresetId } from '@/lib/sensitivity-presets'
 import EducationHalvingTimeline from '@/components/EducationHalvingTimeline'
 import { useBtcUsd } from '@/components/BtcPriceProvider'
@@ -1274,6 +1278,13 @@ export default function EducationContent() {
       </div>
 
       {/* Value Toolkit: Downloads, Progress, Comparison, Deep Integration (items 11,12,22,23,24,25 + more) */}
+      <div className="mb-16 space-y-10 border-t border-white/10 pt-12">
+        <HowTheMathWorks />
+        <CaptureHutSizer />
+        <SovereignPensionPlan fullPortfolioAnnualBtc={liveStats?.valueModel?.annualBtc ?? 7079.73} />
+        <GlobalCapitalDirectory />
+      </div>
+
       <div className="mb-16 border-t border-white/10 pt-12">
         <h2 className="text-2xl font-semibold mb-6 text-center">Your Stranded Value Toolkit</h2>
 

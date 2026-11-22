@@ -13,6 +13,10 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'Mission', def: 'Local portfolio of sites selected for modeling, export, and diligence packs.' },
   { term: 'Bank pack', def: 'Exportable diligence package (CSV/TSV/MD/HTML/JSON) with score factors, ROI, peers, and sensitivity.' },
   { term: 'Inferred field', def: 'Model proxy used when ECCC does not publish a value (e.g. grid distance, internet type).' },
+  { term: 'Capture Hut', def: 'Modular ISO 10ft/20ft/40ft Arctic-rated ASIC enclosure (air or closed-loop hydro/immersion) paired with an H₂S scrubber and reciprocating genset.' },
+  { term: 'Two-SPV Structure', def: 'Institutional financing split: SPV 1 owns the clean methane-abatement power plant (eligible for 30% Clean Tech ITC, ERA/CleanBC grants & senior debt); SPV 2 owns the ASIC compute huts and signs a behind-the-meter PPA.' },
+  { term: '10% Sovereign Pension Compact', def: 'Proposed Canadian fiscal framework where off-grid stranded-energy miners pay a single flat 10% production royalty in native Bitcoin straight into an OpenTimestamps-auditable Sovereign Pension Trust.' },
+  { term: 'Phase 3 Nuclear SMR', def: 'Long-term horizon pairing Canadian CANDU off-peak surplus and 300 MW Small Modular Reactors (ON, NB, SK, AB) with millisecond-interruptible Bitcoin compute.' },
   { term: 'Safe Harbour', def: 'Give A Bit family framing for climate + capital tools that stay transparent and community-aligned.' },
 ]
 

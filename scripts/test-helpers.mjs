@@ -1287,9 +1287,9 @@ assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele }), nul
 assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: 900 }), 900)
 assert.equal(estimateFleetPaybackDays({ template: exportTpl, site: keele, paybackDays: null }), null)
 
-// (e) v2.16.0: Capture Huts, Sovereign Pension Plan, Global Capital Directory & Nuclear SMR vertical
+// (e) v2.16.0–v2.17.0: Capture Huts, Sovereign Pension Plan, Global Capital Directory & Nuclear SMR vertical
 const { CAPTURE_HUT_SPECS, sizeCaptureHutsForBuild } = await import('../lib/capture-huts.ts')
-const { computeSovereignPension } = await import('../lib/pension-model.ts')
+const { computeSovereignPension, PENSION_TRUST_PROFILES, encodePensionHash, decodePensionHash } = await import('../lib/pension-model.ts')
 const { CAPITAL_DIRECTORY, CAPITAL_JURISDICTIONS } = await import('../lib/capital-directory.ts')
 const { ENERGY_VERTICALS } = await import('../lib/verticals.ts')
 
@@ -1299,6 +1299,7 @@ assert.equal(bomLandfill.hutCount, 1)
 assert.equal(bomLandfill.conditioning.id, 'full-landfill-siloxane')
 assert.ok(bomLandfill.totalEnclosureAndGasTrainCad > 150000)
 
+assert.ok(PENSION_TRUST_PROFILES.length >= 6, 'pension trust profiles must cover National, AB, BC, ON, SK, and First Nations')
 const pension20 = computeSovereignPension({
   annualPortfolioBtc: 2000,
   btcPriceFiat: 115000,
@@ -1311,6 +1312,21 @@ assert.equal(pension20.annualTaxBtc, 200)
 assert.equal(pension20.annualOperatorRetainedBtc, 1500)
 assert.equal(pension20.schedule.length, 20)
 assert.ok(pension20.cumulativeBtcAtHorizon > 2000 && pension20.cumulativeBtcAtHorizon < 4000, 'halving retention factor bounds 20yr BTC accumulation')
+assert.ok(pension20.sovereignAdvantageMultiple > 1, '10% flat BTC compact outperforms status-quo fiat tax regime')
+
+const pensionHash = encodePensionHash({
+  trustId: 'alberta-heritage',
+  capturePct: 35,
+  flatTaxPct: 10,
+  communitySharePct: 15,
+  horizonYears: 25,
+  btcCagrPct: 12,
+  nuclear: true,
+})
+const decodedPension = decodePensionHash(pensionHash)
+assert.equal(decodedPension?.trustId, 'alberta-heritage')
+assert.equal(decodedPension?.capturePct, 35)
+assert.equal(decodedPension?.nuclear, true)
 
 assert.ok(CAPITAL_DIRECTORY.length >= 12, 'global capital directory must cover CA, AB, BC, ON/SK, US, EU, Institutional')
 assert.ok(CAPITAL_JURISDICTIONS.some(j => j.id === 'alberta') && CAPITAL_JURISDICTIONS.some(j => j.id === 'bc') && CAPITAL_JURISDICTIONS.some(j => j.id === 'europe'))

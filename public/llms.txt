@@ -1,12 +1,19 @@
-# Stranded
+# Stranded Value (`stranded.giveabit.io`)
 
-> Data journalism on stranded fossil-fuel assets — provinces, benchmarks, methodology.
+> Canadian & Global Stranded Energy Intelligence Platform — 2,611 ECCC Methane Sites (Lead Story), 1,049 NRCan Renewable Plants, 207 Remote Communities, Phase 3 Nuclear SMR Horizon, Turnkey ASIC & Capture Hut Engineering BOM, Multi-Jurisdiction Capital & Grants Directory, and the 10% Sovereign Canadian Bitcoin Pension Compact.
 
-[Stranded](https://stranded.giveabit.io)
-
-- [https://stranded.giveabit.io/](https://stranded.giveabit.io/)
-- [https://stranded.giveabit.io/map/](https://stranded.giveabit.io/map/)
-- [https://stranded.giveabit.io/docs/](https://stranded.giveabit.io/docs/)
-- [https://stranded.giveabit.io/methodology/](https://stranded.giveabit.io/methodology/)
-- Feed: https://stranded.giveabit.io/feed.xml
+- [Home & 6-Step Math Engine](https://stranded.giveabit.io/)
+- [Command Center Map (2,611 Sites)](https://stranded.giveabit.io/map/)
+- [Live Investor Pitch Deck](https://stranded.giveabit.io/pitch/)
+- [Global Capital, Grants & Two-SPV Calculator](https://stranded.giveabit.io/funding/)
+- [Investor & Sovereign Pension Materials](https://stranded.giveabit.io/investors/)
+- [Energy Verticals & Phase 3 Nuclear SMR Simulator](https://stranded.giveabit.io/verticals/)
+- [Education Center & Toolkits](https://stranded.giveabit.io/education/)
+- [Documentation Index](https://stranded.giveabit.io/docs/)
+- [Methodology & Formulas](https://stranded.giveabit.io/methodology/)
+- [Open Data & Bitcoin OTS Verification](https://stranded.giveabit.io/open-data/)
+- [Investor One-Pager (Markdown)](https://stranded.giveabit.io/docs/investor-onepager.md)
+- [Institutional Ask Sheet (Markdown)](https://stranded.giveabit.io/docs/ask-sheet.md)
+- [Technical Architecture One-Pager (Markdown)](https://stranded.giveabit.io/docs/architecture-onepager.md)
+- Feed (RSS): https://stranded.giveabit.io/feed.xml
 - Feed (JSON): https://stranded.giveabit.io/feed.json

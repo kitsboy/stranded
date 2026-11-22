@@ -467,8 +467,10 @@ export function energyPinTeaserHtml(
   }
   const click = assessment.buildable ? 'Click to build it →' : 'Click for what the file records →'
   return (
-    `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div>`
+    `<div class="cursor-pointer select-none group">`
+    + `<div class="text-xs font-semibold truncate max-w-[220px] text-white group-hover:text-[#5BC0BE] transition">${name}</div>`
     + `<div class="text-micro text-gray-300 mt-0.5">${escapeHtml(mid)}</div>`
-    + `<div class="text-micro text-gray-400 mt-0.5">${click}</div>`
+    + `<button type="button" class="mt-1.5 w-full rounded-md bg-[#5BC0BE]/20 hover:bg-[#5BC0BE] border border-[#5BC0BE]/50 px-2 py-1 text-micro font-semibold text-[#5BC0BE] hover:text-black transition flex items-center justify-between"><span>${click.replace(' →', '')}</span><span>→</span></button>`
+    + `</div>`
   )
 }

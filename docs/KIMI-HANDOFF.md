@@ -1,3 +1,27 @@
+## Session — 2026-11-22 (v2.16.0 → v2.17.0 Public Pitch, Map Hover Fix, Top 25 Upgrades & Full Knowledge Sync)
+
+**Chat Topic:** Hardcore public-pitch overhaul of `stranded.giveabit.io` (`v2.16.0` → `v2.17.0`), fixing the `/map/` hover popup disappearing bug, implementing the Top 25 upgrades across Sovereign Pension, Capture Huts, Global Capital, Phase 3 Nuclear SMRs, and UX/Exports, and syncing all documentation, education, handoffs, and MASTER-BRAIN knowledge bases.
+
+**Key Things We Shipped & Verified Live:**
+1. **Map Hover Popup Fix (`components/Map.tsx`, `app/globals.css`)**:
+   - Fixed the bug where hovering over a pin and moving the mouse toward `"Click to build it →"` caused the popup to vanish before the click could land.
+   - Added a 340ms hover bridge, `pointer-events: auto` with an invisible `-12px` cursor cushion around `.stranded-hover-popup`, and direct click listeners inside the popup so clicking `"Click to build it →"` or `"Click to expand cluster →"` immediately opens the build panel or expands the cluster.
+   - Gated `OnboardingTour` behind `!showSearchHint` so new visitors never see two simultaneous welcome banners on `/map`.
+   - Enabled the 4-tab cockpit navigation (`Overview · Build · Financials · Evidence`) on the desktop docked `SiteDetailsPanel` as well as mobile sheets.
+   - Added a 1-click **"Cluster 15 km around site"** button in the map filter panel, an **Inline QR Code** toggle in `MissionPanel`, and the **⚛️ Nuclear SMR Corridor** layer preset.
+2. **Codified 6-Step Math Walkthrough (`components/HowTheMathWorks.tsx`)**:
+   - Interactive 6-step formula chain (`kg CH₄/day → Nm³/day → average kW [÷ 24h] → ASIC ceiling → Capture Huts & H₂S Scrubber BOM → Daily Sats & 10% Sovereign Pension`) with a 1-click toggle between **Live Network-Derived Hashprice (`~0.41 sat/TH/d`)** and **Optimistic Screening (`0.90 sat/TH/d`)**, an **Interactive Sankey Energy-to-Sats Flow Diagram**, and a downloadable **Excel-Formula Audit Sheet (`.TSV`)**.
+3. **Vendor-Neutral Methane Capture Huts & Engineering BOM (`lib/capture-huts.ts`, `components/CaptureHutSizer.tsx`)**:
+   - 4 modular enclosure classes (10ft Arctic Wellhead Micro-Hut 250 kW, 20ft Biogas Container 850 kW, 40ft Air Hash Hut 1.6 MW, 40ft Closed-Loop Hydro/Immersion Pod 2.4 MW) + 3 gas-conditioning packages + **CH₄ Purity (%) & H₂S (ppm) sliders** + **Waste-Heat Co-Generation Sizer (`MMBtu/hr` & greenhouse acres)** + **Interactive Engineering SVG Schematic** + **Used vs. Next-Gen ASIC Payback Matrix** + **Vendor RFQ Exports (`.MD` / `.CSV`)**.
+4. **The 10% Sovereign Canadian Bitcoin Pension Plan (`lib/pension-model.ts`, `components/SovereignPensionPlan.tsx`)**:
+   - 6 Sovereign Trust Modes (**Canada National**, **Alberta Heritage Trust**, **BC Prosperity Trust**, **Ontario Municipal & SMR Reserve**, **Saskatchewan Resource Fund**, and **First Nations Sovereign Wealth Trust**), **10% Flat BTC Compact vs. Status-Quo 27% Fiat Tax Regime** bar chart, **CPP Investments / Norway GPFG** benchmark overlays, shareable `#pension=...` URL hash, and 1-click **Print Whitepaper PDF**.
+5. **Global Capital & Grants Directory (`lib/capital-directory.ts`, `components/GlobalCapitalDirectory.tsx`)**:
+   - 13+ verified funding programs across Canada Federal, Alberta, BC, ON/SK, USA, Europe, and Institutional debt + **Interactive Two-SPV Stackable Capital Calculator** + **Project Finance DSCR Stress Tester** + **Equipment Lease vs. CapEx Purchase Toggle** + **1-Click Data Room Bundle Export (`.MD`)** + automated link watchdog (`scripts/check-capital-links.mjs`).
+6. **Phase 3 Nuclear SMR & Multi-Energy Simulator (`lib/verticals.ts`, `app/verticals/page.tsx`)**:
+   - Added **Nuclear & SMR Baseload (`⚛️`)** as the Phase 3 horizon alongside the 2,611 ECCC Methane Lead Story, plus an interactive **300 MW SMR + IESO/AESO Grid Frequency-Response + 143 Remote Community Diesel-Displacement Simulator**.
+
+---
+
 ## Session — 2026-11-07
 
 **Next chat: remind Cam of this plan before other work.**

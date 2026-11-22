@@ -1,7 +1,3 @@
-# stranded — Last Updated 2026-11-07 by Grok
+# stranded — Last Updated 2026-11-22 (v2.17.0)
 
-Brief: Docs index is on `/docs`. The financing screen is written down. Next chat reminds Cam of it before other work. Methane stays. The deal is the TransCanada vented-gas pilot. The expansion is the biggest 10% of reported methane.
-
-Commit: `3d2d4865628155b7724786ab679f92bd29035515` (`3d2d486`). Rebased onto the 7 Nov proof recheck `17b82cc`. The methane snapshot is still 2026-10-24, block 966549.
-
-Screen: `docs/FINANCING-SCREEN.md`. Not a page on the site. Version stays 2.15.0.
+Brief: Public Pitch & Sovereign Pension Overhaul (`v2.16.0` → `v2.17.0`) live on `https://stranded.giveabit.io`. Fixed the `/map/` hover popup disappearing bug (added 340ms hover bridge + clickable `"Click to build it →"` button inside pin/cluster popups), shipped the Top 25 upgrades across the 6-Step Math Engine (with Sankey flow & Excel formula export), Vendor-Neutral Capture Huts (with SVG schematic, CH₄/H₂S sliders, Waste-Heat Co-Gen & RFQ export), Global Capital Directory (with Two-SPV Stackable Calculator, DSCR Stress Tester, Lease vs. Buy & Data Room Bundle), 10% Sovereign Canadian Bitcoin Pension Plan (6 National/Provincial/First Nations trust modes, Tax Comparison, CPP/Norway benchmarks, `#pension=` share hash & Print Whitepaper PDF), and Phase 3 Nuclear SMR Simulator. All internal & external links verified via `scripts/check-capital-links.mjs`.

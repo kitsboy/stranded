@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Box, Cpu, Shield, Truck, Globe2, ThermometerSnowflake } from 'lucide-react'
+import { Box, Cpu, Shield, Truck, Globe2, ThermometerSnowflake, Flame, Download, Gauge } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   CAPTURE_HUT_SPECS,
   GAS_CONDITIONING_PACKAGES,
@@ -11,6 +12,7 @@ import {
 import { ASIC_MACHINES } from '@/lib/fleet-template'
 import { GENSET_DATA, type GensetId } from '@/lib/sites'
 import { NETWORK_DERIVED_BTC_PER_TH_DAY, NETWORK_ESTIMATE_BTC_PER_TH_DAY } from '@/lib/fleet-model'
+import { downloadBlob } from '@/lib/export-formats'
 import { useBtcPrice } from '@/components/BtcPriceProvider'
 
 export default function CaptureHutSizer() {
@@ -24,30 +26,38 @@ export default function CaptureHutSizer() {
   const [conditioningId, setConditioningId] = useState<GasConditioningPackage['id']>('h2s-scrubber')
   const [targetKw, setTargetKw] = useState<number>(850)
 
+  // Gas composition sliders (Upgrade #13)
+  const [ch4Pct, setCh4Pct] = useState<number>(68)
+  const [h2sPpm, setH2sPpm] = useState<number>(350)
+
   const asic = ASIC_MACHINES.find(a => a.id === selectedAsicId) || ASIC_MACHINES[0]
   const genset = GENSET_DATA[selectedGensetId] || GENSET_DATA.jenbacher316
 
   const summary = useMemo(() => {
-    const minerCount = Math.max(1, Math.floor((targetKw * 1000) / asic.power_w))
+    // Low CH4 (<50%) or extreme H2S (>1000 ppm) reduces effective continuous kW slightly and increases media OpEx
+    const ch4Derate = ch4Pct >= 55 ? 1.0 : Math.max(0.72, ch4Pct / 55)
+    const effectiveKw = Math.round(targetKw * ch4Derate)
+    const h2sMediaAnnualCad = Math.round((h2sPpm / 100) * (effectiveKw / 250) * 1800)
+
+    const minerCount = Math.max(1, Math.floor((effectiveKw * 1000) / asic.power_w))
     const bom = sizeCaptureHutsForBuild({
-      powerKw: targetKw,
+      powerKw: effectiveKw,
       minerCount,
       hutId: selectedHutId,
       conditioningId,
     })
-    const gensetUnits = Math.max(1, Math.ceil(targetKw / (genset.powerKW * 0.9)))
+    const gensetUnits = Math.max(1, Math.ceil(effectiveKw / (genset.powerKW * 0.9)))
     const gensetCapexCad = gensetUnits * genset.powerKW * genset.capexPerKW
     const asicCapexCad = minerCount * asic.cost_cad
     const totalTurnkeyCad = gensetCapexCad + asicCapexCad + bom.totalEnclosureAndGasTrainCad
 
-    // Compute both network-derived and optimistic payback per ASIC and per Hut
     const totalThs = minerCount * asic.hashrate_ths
     const netFactor = (1 - 0.015) * 0.95
     const dailyBtcNetwork = totalThs * NETWORK_DERIVED_BTC_PER_TH_DAY * netFactor
     const dailyBtcOptimistic = totalThs * NETWORK_ESTIMATE_BTC_PER_TH_DAY * netFactor
 
     const cadPerUsd = cadPerBtc / usdPerBtc
-    const dailyOmCad = targetKw * 24 * 0.018 * cadPerUsd + (asicCapexCad * 0.05) / 365
+    const dailyOmCad = effectiveKw * 24 * 0.018 * cadPerUsd + (asicCapexCad * 0.05 + h2sMediaAnnualCad) / 365
 
     const annualNetNetworkCad = (dailyBtcNetwork * cadPerBtc - dailyOmCad) * 365
     const annualNetOptimisticCad = (dailyBtcOptimistic * cadPerBtc - dailyOmCad) * 365
@@ -55,7 +65,40 @@ export default function CaptureHutSizer() {
     const paybackYearsNetwork = annualNetNetworkCad > 0 ? totalTurnkeyCad / annualNetNetworkCad : Infinity
     const paybackYearsOptimistic = annualNetOptimisticCad > 0 ? totalTurnkeyCad / annualNetOptimisticCad : Infinity
 
+    // Waste-Heat Co-Generation Sizer (Upgrade #12):
+    // 1 kW electrical input to ASICs becomes ~0.92 kW recoverable thermal heat (3,140 BTU/hr per kW)
+    // Plus engine jacket/exhaust heat (~1.15x electrical kW)
+    const asicRecoverableThermalKw = Math.round(effectiveKw * 0.90)
+    const engineJacketThermalKw = Math.round(effectiveKw * 1.10)
+    const totalThermalKw = asicRecoverableThermalKw + engineJacketThermalKw
+    const mmbtuPerHour = +(totalThermalKw * 0.003412).toFixed(2)
+    const greenhouseAcresSupported = +(mmbtuPerHour / 1.8).toFixed(1)
+
+    // Used / Refurb vs. Next-Gen ASIC Payback Matrix (Upgrade #17)
+    const asicMatrix = ASIC_MACHINES.map(m => {
+      const count = Math.max(1, Math.floor((effectiveKw * 1000) / m.power_w))
+      const hwCad = count * m.cost_cad
+      const turnkeyCad = gensetCapexCad + hwCad + bom.totalEnclosureAndGasTrainCad
+      const ths = count * m.hashrate_ths
+      const netBtcOpt = ths * NETWORK_ESTIMATE_BTC_PER_TH_DAY * netFactor
+      const netBtcNet = ths * NETWORK_DERIVED_BTC_PER_TH_DAY * netFactor
+      const om = effectiveKw * 24 * 0.018 * cadPerUsd + (hwCad * 0.05 + h2sMediaAnnualCad) / 365
+      const yrNetOpt = (netBtcOpt * cadPerBtc - om) * 365
+      const yrNetLive = (netBtcNet * cadPerBtc - om) * 365
+      return {
+        ...m,
+        count,
+        turnkeyCad,
+        annualBtcOpt: +(netBtcOpt * 365).toFixed(2),
+        paybackOptYrs: yrNetOpt > 0 ? +(turnkeyCad / yrNetOpt).toFixed(1) : null,
+        paybackLiveYrs: yrNetLive > 0 ? +(turnkeyCad / yrNetLive).toFixed(1) : null,
+      }
+    })
+
     return {
+      ch4Derate,
+      effectiveKw,
+      h2sMediaAnnualCad,
       minerCount,
       bom,
       gensetUnits,
@@ -68,8 +111,57 @@ export default function CaptureHutSizer() {
       annualNetOptimisticCad,
       paybackYearsNetwork,
       paybackYearsOptimistic,
+      asicRecoverableThermalKw,
+      engineJacketThermalKw,
+      totalThermalKw,
+      mmbtuPerHour,
+      greenhouseAcresSupported,
+      asicMatrix,
     }
-  }, [targetKw, asic, selectedHutId, conditioningId, genset, cadPerBtc, usdPerBtc])
+  }, [targetKw, ch4Pct, h2sPpm, asic, selectedHutId, conditioningId, genset, cadPerBtc, usdPerBtc])
+
+  const exportRfqSpecSheet = (fmt: 'md' | 'csv') => {
+    if (fmt === 'csv') {
+      const rows = [
+        ['Item', 'Specification', 'Quantity', 'Est_CapEx_CAD'],
+        ['Capture Hut Enclosure', summary.bom.hutSpec.name, String(summary.bom.hutCount), String(summary.bom.totalHutCapexCad)],
+        ['Prime Reciprocating Generator', genset.name, String(summary.gensetUnits), String(summary.gensetCapexCad)],
+        ['Gas Conditioning & H2S Train', summary.bom.conditioning.name, '1', String(summary.bom.conditioningCapexCad)],
+        ['Starlink + CSA Switchgear Interlocks', 'UL/CSA safety shutdown + PDU', String(summary.bom.hutCount), String(summary.bom.starlinkAndSwitchgearCad)],
+        ['ASIC Compute Fleet', `${asic.name} (${asic.hashrate_ths} TH/s @ ${asic.power_w}W)`, String(summary.minerCount), String(summary.asicCapexCad)],
+        ['TOTAL TURNKEY BOM', `${summary.effectiveKw} kW continuous`, '', String(summary.totalTurnkeyCad)],
+      ]
+      const csv = rows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(',')).join('\n')
+      downloadBlob(csv, `stranded-hut-rfq-${summary.effectiveKw}kw.csv`, 'text/csv')
+      toast.success('Vendor RFQ BOM exported (.csv)')
+      return
+    }
+    const md = [
+      `# Vendor-Neutral Request for Quotation (RFQ) — Stranded Methane Capture Hut BOM`,
+      ``,
+      `- **Generated:** ${new Date().toISOString().slice(0, 10)} via https://stranded.giveabit.io`,
+      `- **Target Electrical Load:** ${summary.effectiveKw.toLocaleString()} kW continuous (${(summary.effectiveKw / 1000).toFixed(2)} MW)`,
+      `- **Gas Quality Basis:** ${ch4Pct}% CH₄ · ${h2sPpm} ppm H₂S (Derate factor ${(summary.ch4Derate * 100).toFixed(0)}%)`,
+      `- **Co-Gen Thermal Output:** ${summary.mmbtuPerHour} MMBtu/hr (${summary.totalThermalKw.toLocaleString()} kWth — supports ~${summary.greenhouseAcresSupported} acres Arctic greenhouse)`,
+      ``,
+      `## Bill of Materials (Indicative CAD Screening Budget)`,
+      `| Line Item | Specification | Qty | Est. CapEx (CAD) |`,
+      `|---|---|---:|---:|`,
+      `| **Capture Hut Enclosure** | ${summary.bom.hutSpec.name} (${summary.bom.hutSpec.footprint}) | ${summary.bom.hutCount} | C$${summary.bom.totalHutCapexCad.toLocaleString()} |`,
+      `| **Reciprocating Generator** | ${genset.name} (${genset.powerKW} kW rated) | ${summary.gensetUnits} | C$${summary.gensetCapexCad.toLocaleString()} |`,
+      `| **Gas Scrubber & Dryer** | ${summary.bom.conditioning.name} | 1 | C$${summary.bom.conditioningCapexCad.toLocaleString()} |`,
+      `| **Switchgear & Telemetry** | CSA/UL transfer switch + Starlink + CH₄/H₂S interlocks | ${summary.bom.hutCount} | C$${summary.bom.starlinkAndSwitchgearCad.toLocaleString()} |`,
+      `| **ASIC Fleet** | ${asic.name} (${asic.hashrate_ths} TH/s · ${asic.efficiency_j_th} J/TH) | ${summary.minerCount} | C$${summary.asicCapexCad.toLocaleString()} |`,
+      `| **Total Turnkey CapEx** | All-in before ITC/grants | — | **C$${summary.totalTurnkeyCad.toLocaleString()}** |`,
+      ``,
+      `## Qualifying Sourcing Regions`,
+      `- ${summary.bom.hutSpec.sourcingRegions.join('\n- ')}`,
+      ``,
+      `> Screening estimate only — request binding factory-gate + freight quotes from 3+ CSA/CE fabricators.`,
+    ].join('\n')
+    downloadBlob(md, `stranded-hut-rfq-${summary.effectiveKw}kw.md`, 'text/markdown')
+    toast.success('Vendor RFQ Spec-Sheet exported (.md)')
+  }
 
   return (
     <section
@@ -88,6 +180,26 @@ export default function CaptureHutSizer() {
           <p className="mt-1 max-w-3xl text-sm text-gray-300">
             We are never locked to one proprietary vendor. Standard ISO 10ft/20ft/40ft Arctic mining huts, H₂S gas scrubbers, and reciprocating generators can be sourced from fabrication yards in Alberta, Ontario, Texas, Europe, or Asia and landed at a Canadian wellhead or landfill in 4–12 weeks.
           </p>
+        </div>
+
+        {/* Upgrade #19: Vendor RFQ Export Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => exportRfqSpecSheet('md')}
+            data-testid="hut-rfq-export-md"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#FF8C00]/40 bg-[#FF8C00]/10 px-3.5 py-2 text-xs font-semibold text-[#FF8C00] hover:bg-[#FF8C00]/20 transition"
+          >
+            <Download size={13} /> Export Vendor RFQ (.MD)
+          </button>
+          <button
+            type="button"
+            onClick={() => exportRfqSpecSheet('csv')}
+            data-testid="hut-rfq-export-csv"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#5BC0BE]/40 bg-[#5BC0BE]/10 px-3.5 py-2 text-xs font-semibold text-[#5BC0BE] hover:bg-[#5BC0BE]/20 transition"
+          >
+            <Download size={13} /> Export BOM (.CSV)
+          </button>
         </div>
       </div>
 
@@ -140,11 +252,11 @@ export default function CaptureHutSizer() {
         })}
       </div>
 
-      {/* Configurator Controls */}
-      <div className="grid gap-4 md:grid-cols-4 bg-black/30 rounded-2xl p-4 border border-white/10 mb-6">
+      {/* Configurator Controls + Gas Composition Sliders (Upgrade #13) */}
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6 bg-black/30 rounded-2xl p-4 border border-white/10 mb-6">
         <div>
           <label className="block text-xs text-gray-400 mb-1">
-            Site Power Target: <strong className="text-white">{targetKw.toLocaleString()} kW</strong>
+            Power Target: <strong className="text-white">{targetKw.toLocaleString()} kW</strong>
           </label>
           <input
             type="range"
@@ -157,7 +269,45 @@ export default function CaptureHutSizer() {
             className="w-full accent-[#FF8C00]"
           />
           <div className="text-[11px] text-gray-500 mt-1">
-            {(targetKw / 1000).toFixed(2)} MW continuous off-grid load
+            Effective: {summary.effectiveKw.toLocaleString()} kW
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">
+            Gas CH₄ Purity: <strong className="text-[#5BC0BE]">{ch4Pct}%</strong>
+          </label>
+          <input
+            type="range"
+            min={35}
+            max={95}
+            step={1}
+            value={ch4Pct}
+            onChange={e => setCh4Pct(Number(e.target.value))}
+            aria-label="Methane gas concentration percentage"
+            className="w-full accent-[#5BC0BE]"
+          />
+          <div className="text-[11px] text-gray-500 mt-1">
+            {ch4Pct < 55 ? `Low-BTU derate: ${(summary.ch4Derate * 100).toFixed(0)}%` : 'Full calorific rating'}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">
+            Sour Gas H₂S: <strong className="text-amber-300">{h2sPpm} ppm</strong>
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={2500}
+            step={50}
+            value={h2sPpm}
+            onChange={e => setH2sPpm(Number(e.target.value))}
+            aria-label="Hydrogen sulfide concentration in ppm"
+            className="w-full accent-amber-400"
+          />
+          <div className="text-[11px] text-gray-500 mt-1">
+            Media OpEx: C${summary.h2sMediaAnnualCad.toLocaleString()}/yr
           </div>
         </div>
 
@@ -171,7 +321,7 @@ export default function CaptureHutSizer() {
           >
             {ASIC_MACHINES.map(a => (
               <option key={a.id} value={a.id}>
-                {a.name} ({a.hashrate_ths} TH/s · {a.power_w}W · C${a.cost_cad.toLocaleString()})
+                {a.name} ({a.hashrate_ths} TH/s · C${a.cost_cad.toLocaleString()})
               </option>
             ))}
           </select>
@@ -211,7 +361,7 @@ export default function CaptureHutSizer() {
       </div>
 
       {/* Turnkey Bill of Materials & Dual-Scenario ROI Output */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3 mb-6">
         <div className="rounded-2xl border border-white/10 bg-black/25 p-5">
           <div className="text-xs font-semibold uppercase tracking-wider text-[#FF8C00] mb-3 flex items-center gap-1.5">
             <Cpu size={14} /> Turnkey Bill of Materials (CAD)
@@ -280,14 +430,21 @@ export default function CaptureHutSizer() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-black/25 p-5 flex flex-col justify-between">
+        {/* Upgrade #12: Waste-Heat Co-Generation Sizer + Global Sourcing */}
+        <div className="rounded-2xl border border-white/10 bg-black/25 p-5 flex flex-col justify-between" data-testid="hut-waste-heat-cogen">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-[#5BC0BE] mb-2 flex items-center gap-1.5">
-              <Globe2 size={14} /> Global Sourcing &amp; Field Specs
+              <Flame size={14} className="text-[#FF8C00]" /> Waste-Heat Co-Gen &amp; Global Sourcing
             </div>
-            <p className="text-xs text-gray-300 leading-relaxed mb-2">
-              {summary.bom.hutSpec.notes}
-            </p>
+            <div className="rounded-xl border border-[#FF8C00]/25 bg-[#FF8C00]/5 p-2.5 mb-2.5 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-300">Recoverable Thermal Output:</span>
+                <span className="font-mono font-bold text-[#FF8C00]">{summary.mmbtuPerHour} MMBtu/hr ({summary.totalThermalKw.toLocaleString()} kWth)</span>
+              </div>
+              <div className="text-[11px] text-gray-400 mt-0.5">
+                ASIC heat ({summary.asicRecoverableThermalKw} kWth) + Engine jacket ({summary.engineJacketThermalKw} kWth) → heats <strong>~{summary.greenhouseAcresSupported} acres</strong> of Canadian winter greenhouse for $0 fuel.
+              </div>
+            </div>
             <div className="text-[11px] text-gray-400 space-y-1">
               <div className="flex items-center gap-1.5">
                 <Truck size={12} className="text-[#FF8C00]" />
@@ -299,8 +456,102 @@ export default function CaptureHutSizer() {
               </div>
             </div>
           </div>
-          <div className="mt-3 pt-2 border-t border-white/10 text-[10px] text-gray-500">
-            Vendor-neutral screening estimates. No manufacturer endorsement or partnership claimed.
+          <div className="mt-2 pt-2 border-t border-white/10 text-[10px] text-gray-500 flex items-center justify-between">
+            <span>Vendor-neutral screening estimates.</span>
+            <Globe2 size={12} />
+          </div>
+        </div>
+      </div>
+
+      {/* Upgrade #11: Interactive SVG Floorplan Blueprint + Upgrade #17: Used vs. Next-Gen ASIC Payback Matrix */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-black/30 p-4" data-testid="hut-svg-blueprint">
+          <div className="flex items-center justify-between text-xs font-semibold text-[#5BC0BE] mb-2">
+            <span>Engineering Schematic: {summary.bom.hutSpec.name} ({summary.bom.hutSpec.footprint})</span>
+            <span className="font-mono text-[11px] text-gray-400">{summary.bom.hutSpec.coolingLabel}</span>
+          </div>
+          <svg viewBox="0 0 560 150" className="w-full h-36 rounded-xl bg-[#09101d] border border-white/10" role="img" aria-label="Capture hut and gas train engineering schematic">
+            {/* Gas Scrubber Skid */}
+            <rect x="12" y="34" width="92" height="82" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" />
+            <text x="58" y="58" textAnchor="middle" fill="#f59e0b" fontSize="9" fontWeight="bold">GAS SCRUBBER</text>
+            <text x="58" y="73" textAnchor="middle" fill="#cbd5e1" fontSize="8">H₂S: {h2sPpm} ppm</text>
+            <text x="58" y="87" textAnchor="middle" fill="#94a3b8" fontSize="8">CH₄: {ch4Pct}%</text>
+            <text x="58" y="102" textAnchor="middle" fill="#34d399" fontSize="8">Knockout + Dryer</text>
+
+            {/* Arrow 1 */}
+            <line x1="104" y1="75" x2="132" y2="75" stroke="#FF8C00" strokeWidth="2" />
+            <polygon points="132,71 140,75 132,79" fill="#FF8C00" />
+
+            {/* Reciprocating Generator */}
+            <rect x="142" y="26" width="130" height="98" rx="8" fill="#1e293b" stroke="#FF8C00" strokeWidth="1.8" />
+            <text x="207" y="48" textAnchor="middle" fill="#FF8C00" fontSize="9" fontWeight="bold">{summary.gensetUnits}× {genset.name.toUpperCase().slice(0, 14)}</text>
+            <text x="207" y="64" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">{summary.effectiveKw.toLocaleString()} kWe Continuous</text>
+            <text x="207" y="80" textAnchor="middle" fill="#94a3b8" fontSize="8">480V / 600V CSA Switchgear</text>
+            <text x="207" y="96" textAnchor="middle" fill="#fb923c" fontSize="8">+{summary.engineJacketThermalKw} kWth Jacket Heat</text>
+            <text x="207" y="111" textAnchor="middle" fill="#34d399" fontSize="8">~98% CH₄ Destruction</text>
+
+            {/* Arrow 2 */}
+            <line x1="272" y1="75" x2="300" y2="75" stroke="#5BC0BE" strokeWidth="2" />
+            <polygon points="300,71 308,75 300,79" fill="#5BC0BE" />
+
+            {/* Modular Capture Hut Container */}
+            <rect x="310" y="18" width="236" height="114" rx="10" fill="#0f172a" stroke="#5BC0BE" strokeWidth="2" />
+            <text x="428" y="38" textAnchor="middle" fill="#5BC0BE" fontSize="9" fontWeight="bold">
+              {summary.bom.hutCount}× {summary.bom.hutSpec.footprint.toUpperCase()} ({summary.bom.hutSpec.soundDbaAt15m} dBA)
+            </text>
+            {/* ASIC Rack Visuals */}
+            {[0, 1, 2, 3, 4].map(i => (
+              <rect key={i} x={326 + i * 42} y="48" width="34" height="44" rx="3" fill="#1e293b" stroke="#38bdf8" strokeWidth="1" />
+            ))}
+            <text x="428" y="108" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">
+              {summary.minerCount.toLocaleString()} × {asic.name} ({((summary.minerCount * asic.hashrate_ths) / 1000).toFixed(1)} PH/s)
+            </text>
+            <text x="428" y="122" textAnchor="middle" fill="#34d399" fontSize="8">
+              Starlink Telemetry · {summary.bom.hutSpec.ambientRangeC} · +{summary.asicRecoverableThermalKw} kWth Co-Gen
+            </text>
+          </svg>
+        </div>
+
+        {/* Upgrade #17: Used / Refurb vs. Next-Gen ASIC Payback Matrix */}
+        <div className="rounded-2xl border border-white/10 bg-black/30 p-4" data-testid="hut-asic-payback-matrix">
+          <div className="flex items-center justify-between text-xs font-semibold text-[#FF8C00] mb-2">
+            <span className="inline-flex items-center gap-1.5"><Gauge size={14} /> Used / Budget vs. Next-Gen ASIC Payback Matrix (@ {summary.effectiveKw} kW)</span>
+            <span className="text-[11px] text-gray-400">Click row to select</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead>
+                <tr className="border-b border-white/10 text-[10px] uppercase text-gray-400">
+                  <th className="py-1.5 pr-2">ASIC Model</th>
+                  <th className="py-1.5 px-2 text-right">Units</th>
+                  <th className="py-1.5 px-2 text-right">Turnkey CapEx</th>
+                  <th className="py-1.5 px-2 text-right">BTC/yr (Opt)</th>
+                  <th className="py-1.5 pl-2 text-right">Payback (Live / Opt)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.asicMatrix.map(row => {
+                  const isSel = row.id === selectedAsicId
+                  return (
+                    <tr
+                      key={row.id}
+                      onClick={() => setSelectedAsicId(row.id)}
+                      className={`border-b border-white/5 cursor-pointer transition ${
+                        isSel ? 'bg-[#FF8C00]/15 text-white font-semibold' : 'hover:bg-white/5 text-gray-300'
+                      }`}
+                    >
+                      <td className="py-1.5 pr-2">{row.name} <span className="text-[10px] text-gray-400">({row.efficiency_j_th} J/TH)</span></td>
+                      <td className="py-1.5 px-2 text-right font-mono">{row.count.toLocaleString()}</td>
+                      <td className="py-1.5 px-2 text-right font-mono">C${(row.turnkeyCad / 1e6).toFixed(2)}M</td>
+                      <td className="py-1.5 px-2 text-right font-mono text-[#5BC0BE]">{row.annualBtcOpt}</td>
+                      <td className="py-1.5 pl-2 text-right font-mono text-[#34D399]">
+                        {row.paybackLiveYrs ? `${row.paybackLiveYrs}y` : 'N/A'} / <span className="text-[#FF8C00]">{row.paybackOptYrs ? `${row.paybackOptYrs}y` : 'N/A'}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

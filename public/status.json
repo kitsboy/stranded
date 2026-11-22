@@ -1,10 +1,10 @@
 {
   "status": "operational",
   "service": "stranded.giveabit.io",
-  "version": "2.16.0",
-  "buildId": "20261122204506",
-  "commit": "ccaf6a407924a871e82c01d9c3e4e42e46768fb4",
-  "commitShort": "ccaf6a4",
+  "version": "2.17.0",
+  "buildId": "20261122215909",
+  "commit": "6b7ddecb2351bc4fcec7a63ad1b27319678ee019",
+  "commitShort": "6b7ddec",
   "siteCount": 2611,
-  "generatedAt": "2026-11-22T20:45:06.205Z"
+  "generatedAt": "2026-11-22T21:59:09.677Z"
 }

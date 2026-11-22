@@ -228,11 +228,13 @@ export function siteTeaserHtml(site: EnrichedSite, btcUsd: number): string {
     ? `Gas supports up to <strong>${formatCount(teaser.miners)} miners</strong> ≈ <strong>${formatMoneyShort(teaser.usdPerDay)}/day</strong>`
     : 'No usable gas measured at this site'
   return (
-    `<div class="text-xs font-semibold truncate max-w-[210px]">${name}</div>`
+    `<div data-build-site-id="${escapeHtml(site.id)}" class="cursor-pointer select-none group">`
+    + `<div class="text-xs font-semibold truncate max-w-[220px] text-white group-hover:text-[#FF8C00] transition">${name}</div>`
     + `<div class="text-micro text-gray-300 mt-0.5">${kg} kg CH₄/day · Stranded Score <span class="text-[#FF8C00] font-mono">${escapeHtml(site.strandedScore)}</span></div>`
     + `<div class="text-micro font-semibold text-[#FF8C00] mt-1">${minerLine}</div>`
     + pinProofTeaserHtml(getPinProof())
-    + `<div class="text-micro text-gray-400 mt-0.5">Click to build it →</div>`
+    + `<button type="button" data-build-site-id="${escapeHtml(site.id)}" class="mt-1.5 w-full rounded-md bg-[#FF8C00]/20 hover:bg-[#FF8C00] border border-[#FF8C00]/50 px-2 py-1 text-micro font-semibold text-[#FF8C00] hover:text-black transition flex items-center justify-between"><span>Click to build it</span><span>→</span></button>`
+    + `</div>`
   )
 }
 
@@ -334,6 +336,10 @@ export default function Map({
   const performanceModeRef = useRef(performanceMode)
   const nativeHandlersAttached = useRef(false)
   const hoverPopupRef = useRef<maplibregl.Popup | null>(null)
+  const hoverHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hoveredPopupOverRef = useRef(false)
+  const lastHoveredEnergyHitRef = useRef<{ coords: [number, number]; props: Record<string, unknown> } | null>(null)
+  const lastHoveredClusterRef = useRef<{ clusterId: number; coords: [number, number] } | null>(null)
   const renewablePopupRef = useRef<maplibregl.Popup | null>(null)
   const renewableLoadRef = useRef<Promise<void> | null>(null)
   const renewableOverlaysRef = useRef(renewableOverlays)
@@ -578,6 +584,97 @@ export default function Map({
     markersRef.current = []
   }
 
+  const cancelHoverHide = useCallback(() => {
+    if (hoverHideTimerRef.current) {
+      clearTimeout(hoverHideTimerRef.current)
+      hoverHideTimerRef.current = null
+    }
+  }, [])
+
+  const scheduleHoverHide = useCallback(() => {
+    cancelHoverHide()
+    hoverHideTimerRef.current = setTimeout(() => {
+      if (!hoveredPopupOverRef.current) {
+        hoverPopupRef.current?.remove()
+      }
+    }, 340)
+  }, [cancelHoverHide])
+
+  const openHoverPopup = useCallback((
+    map: maplibregl.Map,
+    html: string,
+    coords: [number, number],
+    opts?: {
+      site?: EnrichedSite
+      energyHit?: { coords: [number, number]; props: Record<string, unknown> }
+      cluster?: { clusterId: number; coords: [number, number] }
+    },
+  ) => {
+    cancelHoverHide()
+    lastHoveredEnergyHitRef.current = opts?.energyHit ?? null
+    lastHoveredClusterRef.current = opts?.cluster ?? null
+    if (!hoverPopupRef.current) {
+      hoverPopupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: 'stranded-hover-popup',
+        offset: 10,
+      })
+    }
+    hoverPopupRef.current.setLngLat(coords).setHTML(html).addTo(map)
+    const popupEl = hoverPopupRef.current.getElement()
+    if (popupEl && !(popupEl as HTMLElement & { _strandedBound?: boolean })._strandedBound) {
+      ;(popupEl as HTMLElement & { _strandedBound?: boolean })._strandedBound = true
+      popupEl.addEventListener('mouseenter', () => {
+        hoveredPopupOverRef.current = true
+        cancelHoverHide()
+      })
+      popupEl.addEventListener('mouseleave', () => {
+        hoveredPopupOverRef.current = false
+        scheduleHoverHide()
+      })
+      popupEl.addEventListener('click', (ev) => {
+        ev.stopPropagation()
+        const target = ev.target as HTMLElement | null
+        const siteBtn = target?.closest?.('[data-build-site-id]') as HTMLElement | null
+        const siteId = siteBtn?.getAttribute('data-build-site-id')
+        if (siteId) {
+          const found = sitesRef.current.find(s => s.id === siteId)
+          if (found) {
+            hoveredPopupOverRef.current = false
+            hoverPopupRef.current?.remove()
+            onSiteClickRef.current(found)
+            return
+          }
+        }
+        if (lastHoveredEnergyHitRef.current && onEnergyBuildRef.current) {
+          const hit = lastHoveredEnergyHitRef.current
+          hoveredPopupOverRef.current = false
+          hoverPopupRef.current?.remove()
+          onEnergyBuildRef.current({
+            props: hit.props,
+            lng: hit.coords[0],
+            lat: hit.coords[1],
+          })
+          return
+        }
+        if (lastHoveredClusterRef.current && mapRef.current) {
+          const { clusterId, coords: cCoords } = lastHoveredClusterRef.current
+          const m = mapRef.current
+          const source = m.getSource(SITES_SOURCE) as maplibregl.GeoJSONSource | undefined
+          hoveredPopupOverRef.current = false
+          hoverPopupRef.current?.remove()
+          if (source) {
+            void source.getClusterExpansionZoom(clusterId).then((zoom) => {
+              if (performanceModeRef.current) m.jumpTo({ center: cCoords, zoom })
+              else m.easeTo({ center: cCoords, zoom, duration: 420, essential: true })
+            }).catch(() => {})
+          }
+        }
+      })
+    }
+  }, [cancelHoverHide, scheduleHoverHide])
+
   const setNativeVisibility = useCallback((map: maplibregl.Map, visible: boolean) => {
     const vis = visible ? 'visible' : 'none'
     for (const id of [CLUSTER_LAYER, CLUSTER_COUNT_LAYER, UNCLUSTERED_LAYER]) {
@@ -589,26 +686,12 @@ export default function Map({
     if (nativeHandlersAttached.current) return
     nativeHandlersAttached.current = true
 
-    const showHoverPopup = (html: string, coords: [number, number]) => {
-      if (!hoverPopupRef.current) {
-        hoverPopupRef.current = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-          className: 'stranded-hover-popup',
-          offset: 12,
-        })
-      }
-      hoverPopupRef.current.setLngLat(coords).setHTML(html).addTo(map)
-    }
-    const hideHoverPopup = () => {
-      hoverPopupRef.current?.remove()
-    }
-
     map.on('mouseenter', CLUSTER_LAYER, (e) => {
       map.getCanvas().style.cursor = 'pointer'
       const feature = e.features?.[0]
       if (!feature) return
       const count = feature.properties?.point_count
+      const clusterId = Number(feature.properties?.cluster_id)
       const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
       const scoreSum = Number(feature.properties?.score_sum ?? 0)
       const emissionSum = Number(feature.properties?.emission_sum ?? 0)
@@ -616,15 +699,19 @@ export default function Map({
       const totalEmission = emissionSum >= 1000
         ? `${(emissionSum / 1000).toFixed(1)}t`
         : `${Math.round(emissionSum)} kg`
-      showHoverPopup(
-        `<div class="text-xs font-semibold">${count} sites</div>`
+      openHoverPopup(
+        map,
+        `<div class="cursor-pointer select-none">`
+        + `<div class="text-xs font-semibold">${count} sites</div>`
         + `<div class="text-micro text-gray-300 mt-0.5">Avg score <span class="text-[#FF8C00] font-mono">${avgScore}</span></div>`
         + `<div class="text-micro text-gray-400">Total ~${totalEmission}/day</div>`
-        + `<div class="text-micro text-gray-400 mt-0.5">Click to expand cluster</div>`,
+        + `<button type="button" class="mt-1.5 w-full rounded-md bg-[#5BC0BE]/20 hover:bg-[#5BC0BE] border border-[#5BC0BE]/50 px-2 py-1 text-micro font-semibold text-[#5BC0BE] hover:text-black transition flex items-center justify-between"><span>Click to expand cluster</span><span>→</span></button>`
+        + `</div>`,
         coords,
+        Number.isFinite(clusterId) ? { cluster: { clusterId, coords } } : undefined,
       )
     })
-    map.on('mouseleave', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
+    map.on('mouseleave', CLUSTER_LAYER, () => { map.getCanvas().style.cursor = ''; scheduleHoverPopupHide() })
     map.on('mouseenter', UNCLUSTERED_LAYER, (e) => {
       map.getCanvas().style.cursor = 'pointer'
       const feature = e.features?.[0]
@@ -633,9 +720,13 @@ export default function Map({
       const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
       const site = sitesRef.current.find(s => s.id === id)
       if (!site) return
-      showHoverPopup(siteTeaserHtml(site, btcUsdRef.current), coords)
+      openHoverPopup(map, siteTeaserHtml(site, btcUsdRef.current), coords, { site })
     })
-    map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = ''; hideHoverPopup() })
+    map.on('mouseleave', UNCLUSTERED_LAYER, () => { map.getCanvas().style.cursor = ''; scheduleHoverPopupHide() })
+
+    function scheduleHoverPopupHide() {
+      scheduleHoverHide()
+    }
 
     map.on('click', CLUSTER_LAYER, (e) => {
       const feature = e.features?.[0]
@@ -878,24 +969,19 @@ export default function Map({
         )
         el.title = site.properties?.name || site.id
 
-        // Hover teaches before it opens (same teaser as the vector pins). Never opens the panel.
+        // Hover teaches before it opens (same teaser as the vector pins) — and stays open
+        // long enough to click "Click to build it →" directly inside the popup.
         const onEnter = () => {
           const map = mapRef.current
           if (!map) return
-          if (!hoverPopupRef.current) {
-            hoverPopupRef.current = new maplibregl.Popup({
-              closeButton: false,
-              closeOnClick: false,
-              className: 'stranded-hover-popup',
-              offset: 12,
-            })
-          }
-          hoverPopupRef.current
-            .setLngLat(site.geometry.coordinates as [number, number])
-            .setHTML(siteTeaserHtml(site, btcUsdRef.current))
-            .addTo(map)
+          openHoverPopup(
+            map,
+            siteTeaserHtml(site, btcUsdRef.current),
+            site.geometry.coordinates as [number, number],
+            { site },
+          )
         }
-        const onLeave = () => { hoverPopupRef.current?.remove() }
+        const onLeave = () => { scheduleHoverHide() }
         el.addEventListener('mouseenter', onEnter)
         el.addEventListener('mouseleave', onLeave)
         el.addEventListener('focus', onEnter)
@@ -1013,19 +1099,14 @@ export default function Map({
         const feature = e.features?.[0]
         if (!feature || feature.geometry.type !== 'Point') return
         const coords = feature.geometry.coordinates as [number, number]
-        if (!hoverPopupRef.current) {
-          hoverPopupRef.current = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false,
-            className: 'stranded-hover-popup',
-            offset: 12,
-          })
-        }
-        hoverPopupRef.current.setLngLat(coords).setHTML(energyTeaserRef.current(feature.properties as Record<string, unknown>)).addTo(live)
+        const props = (feature.properties || {}) as Record<string, unknown>
+        openHoverPopup(live, energyTeaserRef.current(props), coords, {
+          energyHit: { coords, props },
+        })
       })
       live.on('mouseleave', id, () => {
         live.getCanvas().style.cursor = ''
-        hoverPopupRef.current?.remove()
+        scheduleHoverHide()
       })
     }
 
@@ -1130,22 +1211,15 @@ export default function Map({
         const coords = feature.geometry.type === 'Point'
           ? feature.geometry.coordinates as [number, number]
           : [e.lngLat.lng, e.lngLat.lat] as [number, number]
-        if (!hoverPopupRef.current) {
-          hoverPopupRef.current = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false,
-            className: 'stranded-hover-popup',
-            offset: 12,
-          })
-        }
-        hoverPopupRef.current
-          .setLngLat(coords)
-          .setHTML(atlasTeaserHtml((feature.properties || {}) as Record<string, unknown>))
-          .addTo(map)
+        openHoverPopup(
+          map,
+          atlasTeaserHtml((feature.properties || {}) as Record<string, unknown>),
+          coords,
+        )
       })
       map.on('mouseleave', id, () => {
         map.getCanvas().style.cursor = ''
-        hoverPopupRef.current?.remove()
+        scheduleHoverHide()
       })
     }
 

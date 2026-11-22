@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-22T20:45:06.759Z",
+  "generatedAt": "2026-11-22T21:59:10.038Z",
   "endpoint": "https://api.satohash.io/api/verify",
   "file": "stranded-sites-REAL.geojson",
   "scope": "One digest covers every pin: sha256 of the published stranded-sites-REAL.geojson (byte-identical to /data/stranded-sites.geojson, which the map renders), reproducible with `sha256sum stranded-sites-REAL.geojson`.",

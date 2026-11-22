@@ -8,20 +8,25 @@ export const metadata: Metadata = {
 }
 
 const READ = [
-  { href: '/methodology', title: 'Methodology', body: 'How the score, the generator rule, and the two older hashprice rates are calculated.' },
+  { href: '/methodology', title: 'Methodology', body: 'How the score, the generator rule, the 6-step math engine, and the two hashprice scenarios are calculated.' },
+  { href: '/funding', title: 'Global Capital & Grants Directory', body: '13+ funding programs across Canada Federal, AB, BC, ON/SK, USA, and Europe + Two-SPV Capital Stack & DSCR stress tester.' },
+  { href: '/investors', title: 'Investors & Sovereign Pension Brief', body: 'Diligence one-pagers, the 10% Sovereign Canadian Bitcoin Pension Plan compact, and board decks.' },
   { href: '/open-data', title: 'Open data', body: 'File list, SHA-256 checks, and the Bitcoin timestamp on the methane file.' },
-  { href: '/docs/DATA-SOURCES-RENEWABLES.md', title: 'Energy sources', body: 'Plants, remote communities, shades, and what each layer is allowed to claim.' },
+  { href: '/verticals', title: 'Energy Verticals & Phase 3 SMRs', body: '2,611 ECCC methane sites (Lead Story) + 1,049 renewable plants, 207 remote communities, and Phase 3 Nuclear SMR baseload.' },
   { href: '/docs/api', title: 'Data API', body: 'The public JSON files and the map query parameters.' },
-  { href: '/changelog', title: 'Changelog', body: 'What shipped. The 7 Nov 2026 docs note sits above the 4 Nov data refresh.' },
+  { href: '/changelog', title: 'Changelog', body: 'What shipped through v2.17.0.' },
   { href: '/status', title: 'Status', body: 'Whether the live statistics file is loading.' },
 ]
 
 const FILES = [
-  { href: '/data/live-stats.json', title: 'live-stats.json', body: 'Methane totals from the last statistics build. Version 2.15.0.' },
+  { href: '/data/live-stats.json', title: 'live-stats.json', body: 'Methane totals from the last statistics build. Version 2.17.0.' },
   { href: '/data/methane-capture.json', title: 'methane-capture.json', body: 'Reported methane, largest sites first, with a vent and flare figure only where Ottawa published one.' },
   { href: '/data/statcan-renewables.json', title: 'statcan-renewables.json', body: '2025 generation and 2025 capacity. Pulled 4 Nov 2026.' },
   { href: '/data/dataset-manifest.json', title: 'dataset-manifest.json', body: 'Digests for the methane file and the proof block.' },
   { href: '/data/stranded-sites.geojson', title: 'stranded-sites.geojson', body: 'The 2,611 mapped facilities.' },
+  { href: '/docs/investor-onepager.md', title: 'investor-onepager.md', body: 'Codified 6-step economics, Capture Huts BOM, Two-SPV capital stack, and 10% Sovereign Pension one-pager.' },
+  { href: '/docs/ask-sheet.md', title: 'ask-sheet.md', body: 'Partner & institutional ask sheet with full honesty disclosures.' },
+  { href: '/docs/architecture-onepager.md', title: 'architecture-onepager.md', body: 'Technical architecture and deterministic verification pipeline.' },
 ]
 
 export default function DocsPage() {

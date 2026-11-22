@@ -8,7 +8,7 @@
 
 **GitHub (Source of Truth):** https://github.com/kitsboy/stranded (renamed from stranded-canada to remove "Canada" branding while preserving full commit history and Cloudflare Pages connection)
 **Branch:** main
-**Last Major Update:** 2026-11-07 — Visitor index at `/docs`. Financing screen recorded in `docs/FINANCING-SCREEN.md` (4 Nov 2026 chain window, site machine cards, methane kept in the model). That screen is not a site page. **v2.15.0** stands. Earlier the same week, 2026-11-04: StatCan capacity year is 2025, pulled that day. Remote communities are the 2025 file, 207 places. The miner card still sizes only recorded power (1,049 plants). Methane stays 2,611. Optimistic hashprice stays labelled. `public/data/live-stats.json` is stamped 2.15.0 by `generate-live-stats.js`. The methane counts did not change. The footer shows the Give A Bit wordmark again. Geothermal plants stay for later. Earlier: 2026-07-16 v2.9.0.
+**Last Major Update:** 2026-11-22 — **v2.17.0** Public Pitch, Sovereign Pension, Capture Huts, Global Capital & Map Hover Overhaul. Shipped `HowTheMathWorks` (6-step math engine + Sankey flow + Excel `.TSV` formula export), `CaptureHutSizer` (4 enclosure classes, CH₄/H₂S sliders, Waste-Heat Co-Gen, SVG schematic, Used vs. Next-Gen ASIC matrix, Vendor RFQ export), `SovereignPensionPlan` (6 National/Provincial/First Nations trust modes, 10% Flat BTC vs. Status-Quo tax comparison, CPP/Norway benchmarks, `#pension` share hash, Print Whitepaper PDF), `GlobalCapitalDirectory` (13+ verified programs across Canada, AB, BC, ON/SK, USA, EU + Two-SPV Stackable Calculator, DSCR Stress Tester, Lease vs. Buy, 1-Click Data Room Bundle), Phase 3 Nuclear SMR Simulator on `/verticals`, and interactive Map Hover Popups (`"Click to build it →"`). Earlier: 2026-11-07 `/docs` & `docs/FINANCING-SCREEN.md` (`v2.15.0`).
 
 **Production (live):** https://stranded.giveabit.io (Cloudflare Pages project **`strandedbuild`**, git push `main`)  
 **Local dev:** http://localhost:3003  
@@ -90,7 +90,7 @@ This file + README.md + the live app + Marketing assets are the primary current 
 **Template Rule:** Every future Give A Bit project must include at least this level of documentation: GitHub source, live URLs (dev + prod), deployment details, key docs list, simple pitch, Git snapshot, mission alignment, gaps, and clean hand-off note.
 
 <!-- LIVE-STATS:START -->
-> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T20:45:06.205Z
+> **Auto-synced** from `data/stranded-sites-REAL.geojson` on 2026-11-22T21:59:09.677Z
 
 | Metric | Value |
 |--------|-------|

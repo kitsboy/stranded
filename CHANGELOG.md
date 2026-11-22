@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.17.0] — 2026-11-22 · Top 25 Public Pitch Upgrades, Map Hover Fix & Full Knowledge Sync
+
+- **Map Hover Popup Fix (`components/Map.tsx`, `app/globals.css`)**: Fixed the hover tooltip disappearing before the user could click `"Click to build it →"`. Added a 340ms hover bridge, `pointer-events: auto` with a `-12px` invisible cursor cushion, and interactive click handlers inside the popup so clicking `"Click to build it →"` or `"Click to expand cluster →"` opens the build panel or expands the cluster immediately.
+- **Map Workflow & Clutter Polish (`app/map/page.tsx`, `components/SiteDetailsPanel.tsx`, `components/LayerControls.tsx`, `components/MissionPanel.tsx`)**:
+  - Gated `OnboardingTour` so it no longer renders simultaneously with `FirstRunStrip` on initial map load.
+  - Enabled the 4-tab cockpit navigation (`Overview · Build · Financials · Evidence`) on the desktop docked `SiteDetailsPanel` as well as mobile sheets.
+  - Added a 1-click **"Cluster 15 km around site"** button in the map filter panel and an **Inline QR Code** toggle in `MissionPanel`.
+  - Added the **⚛️ Nuclear SMR Corridor** preset to `LayerControls`.
+- **Top 5 Sovereign Pension & Policy Upgrades (`lib/pension-model.ts`, `components/SovereignPensionPlan.tsx`)**:
+  - Added 6 Sovereign Trust Modes: **Canada National**, **Alberta Heritage Trust**, **BC Prosperity Trust**, **Ontario Municipal & SMR Reserve**, **Saskatchewan Resource Fund**, and **First Nations Sovereign Wealth Trust**.
+  - Added the **10% Flat BTC Compact vs. Status-Quo 27% Fiat Tax Regime** comparison bar and **CPP Investments / Norway GPFG** benchmark overlays.
+  - Added shareable `#pension=...` URL hash state and a 1-click **Print Whitepaper PDF** handout generator.
+- **Top 5 Capture Huts & Engineering BOM Upgrades (`components/CaptureHutSizer.tsx`)**:
+  - Added an interactive **Engineering SVG Schematic** (Gas Scrubber → Prime Genset → Capture Hut & Co-Gen).
+  - Added **Waste-Heat Co-Generation Sizer** (`MMBtu/hr`, `kWth`, and winter greenhouse acres supported).
+  - Added **CH₄ Purity (%) & H₂S (ppm) Gas Composition Sliders** with calorific derate and scrubber media OpEx.
+  - Added **Used / Budget vs. Next-Gen ASIC Payback Matrix** and **Vendor RFQ Spec-Sheet Exports (`.MD` / `.CSV`)**.
+- **Top 5 Global Capital & Institutional Diligence Upgrades (`components/GlobalCapitalDirectory.tsx`)**:
+  - Added the **Interactive Two-SPV Stackable Capital Calculator** (SPV 1 Clean Power Plant vs. SPV 2 ASIC Offtaker).
+  - Added **Project Finance DSCR Stress Tester** (computing DSCR and breakeven BTC price for a 1.35× bank covenant) and **Equipment Lease vs. CapEx Purchase Toggle**.
+  - Added **1-Click Institutional Data Room Bundle Export (`.MD`)** and `scripts/check-capital-links.mjs` link watchdog.
+- **Top 5 Multi-Energy, Sankey, Excel & Knowledge Base Sync**:
+  - Added the **Phase 3 Nuclear SMR + Grid Frequency-Response + 143 Remote Community Diesel-Displacement Simulator** on `/verticals`.
+  - Added the **Interactive Sankey Energy-to-Sats Flow Diagram** and **Excel-Formula Audit Export (`.TSV`)** in `HowTheMathWorks`.
+  - Synced `EducationContent.tsx`, `lib/glossary.ts`, `/compare`, `docs/KIMI-HANDOFF.md`, `LATEST-UPDATE.md`, `STATUS.md`, `docs/SOURCE-OF-TRUTH.md`, `docs/DOCUMENTATION.md`, `.ai_docs/current-status.md`, and MASTER-BRAIN Obsidian records.
+
+## [2.16.0] — 2026-11-22 · Public Pitch Overhaul — 6-Step Math, Capture Huts, Global Capital & 10% Sovereign Pension
+
+- Added `HowTheMathWorks`, `CaptureHutSizer`, `SovereignPensionPlan`, `GlobalCapitalDirectory`, and the Phase 3 Nuclear SMR vertical (`6b7ddec`).
+
 ## [2026-11-07] — Docs index and the financing screen
 
 Version stays 2.15.0.

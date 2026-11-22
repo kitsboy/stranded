@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Flame, Zap, Cpu, Box, Bitcoin, Landmark, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Flame, Zap, Cpu, Box, Bitcoin, Landmark, ArrowRight, CheckCircle2, FileSpreadsheet } from 'lucide-react'
+import { toast } from 'sonner'
 import { GENSET_DATA, type GensetId, computeGeneratorPower } from '@/lib/sites'
 import { ASIC_MACHINES } from '@/lib/fleet-template'
 import { NETWORK_DERIVED_BTC_PER_TH_DAY, NETWORK_ESTIMATE_BTC_PER_TH_DAY } from '@/lib/fleet-model'
 import { CAPTURE_HUT_SPECS, sizeCaptureHutsForBuild, type GasConditioningPackage } from '@/lib/capture-huts'
+import { downloadBlob } from '@/lib/export-formats'
 import { useBtcPrice } from '@/components/BtcPriceProvider'
 
 const PRESET_SITES = [
@@ -130,6 +132,33 @@ export default function HowTheMathWorks() {
       annualOperatorBtc,
     }
   }, [kgDay, gensetId, genset, asic, hutId, conditioningId, rateMode, cadPerBtc, usdPerBtc])
+
+  const exportExcelAuditSheet = () => {
+    const btcPerThDay = rateMode === 'network' ? NETWORK_DERIVED_BTC_PER_TH_DAY : NETWORK_ESTIMATE_BTC_PER_TH_DAY
+    const rows = [
+      ['Row', 'Parameter', 'Value_Or_Excel_Formula', 'Unit', 'Audit_Note'],
+      ['2', 'Daily_Methane_Emission', String(kgDay), 'kg CH4/day', `Preset ${presetId}`],
+      ['3', 'Methane_Density_STP', '0.717', 'kg/Nm3', 'Standard CH4 density'],
+      ['4', 'Daily_Gas_Volume_Nm3', '=C2/C3', 'Nm3/day', 'Step 1: kg/day divided by 0.717'],
+      ['5', 'Genset_Fuel_Draw', String(genset.methaneNm3h), 'Nm3/hr', genset.name],
+      ['6', 'Genset_Rated_Power', String(genset.powerKW), 'kW', `${(genset.eff * 100).toFixed(1)}% electrical efficiency`],
+      ['7', 'Gas_Treatment_Derate', '0.90', 'ratio', 'H2S + altitude + parasitic derate'],
+      ['8', 'Continuous_Average_Power_kW', '=((C4/C5)*C6*C7)/24', 'kW avg', 'Step 2: includes mandatory /24 hour conversion'],
+      ['9', 'ASIC_Power_Draw_W', String(asic.power_w), 'W', asic.name],
+      ['10', 'ASIC_Hashrate_THs', String(asic.hashrate_ths), 'TH/s', `${asic.efficiency_j_th} J/TH`],
+      ['11', 'Powered_ASIC_Ceiling', '=INT((C8*1000)/C9)', 'miners', 'Step 3: gas-bounded miner count'],
+      ['12', 'Total_Fleet_Hashrate_THs', '=C11*C10', 'TH/s', 'Fleet total TH/s'],
+      ['13', 'Hashprice_BTC_per_TH_day', String(btcPerThDay), 'BTC/TH/day', rateMode === 'network' ? 'Live network-derived' : 'Optimistic scenario'],
+      ['14', 'Net_Uptime_After_Pool', String((1 - 0.015) * 0.95), 'ratio', '95% uptime, 1.5% pool fee'],
+      ['15', 'Annual_Gross_BTC', '=C12*C13*C14*365', 'BTC/yr', 'Step 5: annual gross BTC mined'],
+      ['16', 'Sovereign_10Pct_Pension_BTC', '=C15*0.10', 'BTC/yr', 'Step 6: 10% flat BTC tax to Canadian Sovereign Pension'],
+      ['17', 'Operator_90Pct_Retained_BTC', '=C15*0.90', 'BTC/yr', '90% retained by operator & partners'],
+      ['18', 'Total_Turnkey_CapEx_CAD', String(Math.round(math.totalCapexCad)), 'CAD', 'Genset + ASICs + Capture Huts + H2S Scrubber'],
+    ]
+    const tsv = rows.map(r => r.join('\t')).join('\n')
+    downloadBlob(tsv, `stranded-6step-math-audit-${presetId}.tsv`, 'text/tab-separated-values')
+    toast.success('Excel-formula audit sheet exported (.tsv — open directly in Excel/Sheets)')
+  }
 
   return (
     <section
@@ -444,8 +473,68 @@ export default function HowTheMathWorks() {
             >
               Match Grants &amp; Capital →
             </Link>
+            <button
+              type="button"
+              onClick={exportExcelAuditSheet}
+              data-testid="math-excel-export"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-white/10 transition"
+            >
+              <FileSpreadsheet size={13} className="text-[#34D399]" /> Audit in Excel (.TSV Formulas)
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Upgrade #48: Interactive Sankey Energy-to-Sats & Sovereign Pension Flow Diagram */}
+      <div className="mt-5 rounded-2xl border border-white/10 bg-black/30 p-4" data-testid="math-sankey-flow">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-gray-300 mb-2">
+          <span>Energy &amp; Value Sankey Flow: 100% Vented CH₄ → Electrical kW + Co-Gen Heat → Sats &amp; 10% Sovereign Pension</span>
+          <span className="font-mono text-[11px] text-[#5BC0BE]">Zero Grid Draw · ~98% Methane Destruction</span>
+        </div>
+        <svg viewBox="0 0 780 96" className="w-full h-24 rounded-xl bg-[#080e1a] border border-white/10" role="img" aria-label="Sankey energy and value flow from methane to Bitcoin and Sovereign Pension">
+          {/* Node 1: Raw Methane */}
+          <rect x="10" y="16" width="128" height="64" rx="8" fill="#FF8C00" fillOpacity="0.18" stroke="#FF8C00" strokeWidth="1.5" />
+          <text x="74" y="42" textAnchor="middle" fill="#FF8C00" fontSize="10" fontWeight="bold">100% SITE CH₄</text>
+          <text x="74" y="58" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">{kgDay.toLocaleString()} kg/d</text>
+          <text x="74" y="71" textAnchor="middle" fill="#94a3b8" fontSize="8">{Math.round(math.nm3PerDay).toLocaleString()} Nm³/d</text>
+
+          {/* Flow Bands 1 -> 2 */}
+          <path d="M138,34 C175,34 175,26 212,26" stroke="#5BC0BE" strokeWidth="16" strokeOpacity="0.35" fill="none" />
+          <path d="M138,62 C175,62 175,70 212,70" stroke="#f472b6" strokeWidth="18" strokeOpacity="0.28" fill="none" />
+
+          {/* Node 2A: Prime Electrical */}
+          <rect x="212" y="10" width="146" height="36" rx="6" fill="#5BC0BE" fillOpacity="0.18" stroke="#5BC0BE" strokeWidth="1.4" />
+          <text x="285" y="26" textAnchor="middle" fill="#5BC0BE" fontSize="9" fontWeight="bold">~40% PRIME ELECTRICITY</text>
+          <text x="285" y="39" textAnchor="middle" fill="#ffffff" fontSize="9">{Math.round(math.avgPowerKw).toLocaleString()} kWe → {math.minerCount.toLocaleString()} ASICs</text>
+
+          {/* Node 2B: Co-Gen Heat */}
+          <rect x="212" y="52" width="146" height="34" rx="6" fill="#f472b6" fillOpacity="0.14" stroke="#f472b6" strokeWidth="1.2" />
+          <text x="285" y="67" textAnchor="middle" fill="#f472b6" fontSize="9" fontWeight="bold">~50% CO-GEN THERMAL</text>
+          <text x="285" y="79" textAnchor="middle" fill="#cbd5e1" fontSize="8">Hut + Jacket Heat (Greenhouses)</text>
+
+          {/* Flow 2A -> 3 */}
+          <path d="M358,28 C395,28 395,46 432,46" stroke="#34D399" strokeWidth="16" strokeOpacity="0.4" fill="none" />
+
+          {/* Node 3: Gross Bitcoin Mined */}
+          <rect x="432" y="18" width="138" height="58" rx="8" fill="#34D399" fillOpacity="0.16" stroke="#34D399" strokeWidth="1.5" />
+          <text x="501" y="38" textAnchor="middle" fill="#34D399" fontSize="9" fontWeight="bold">GROSS BITCOIN YIELD</text>
+          <text x="501" y="54" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="bold">{math.annualBtc.toFixed(2)} BTC/yr</text>
+          <text x="501" y="68" textAnchor="middle" fill="#94a3b8" fontSize="8">{math.totalPhs.toFixed(1)} PH/s @ 95% uptime</text>
+
+          {/* Split Flows 3 -> 4A (Pension 10%) & 4B (Operator/Partner 90%) */}
+          <path d="M570,32 C600,32 600,24 628,24" stroke="#A78BFA" strokeWidth="8" strokeOpacity="0.55" fill="none" />
+          <path d="M570,56 C600,56 600,68 628,68" stroke="#FF8C00" strokeWidth="18" strokeOpacity="0.45" fill="none" />
+
+          {/* Node 4A: 10% Sovereign Pension */}
+          <rect x="628" y="8" width="142" height="34" rx="6" fill="#A78BFA" fillOpacity="0.22" stroke="#A78BFA" strokeWidth="1.4" />
+          <text x="699" y="22" textAnchor="middle" fill="#A78BFA" fontSize="8.5" fontWeight="bold">10% SOVEREIGN PENSION</text>
+          <text x="699" y="35" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">{math.annualPensionBtc.toFixed(2)} BTC/yr</text>
+
+          {/* Node 4B: 90% Operator & Nation Net */}
+          <rect x="628" y="48" width="142" height="40" rx="6" fill="#FF8C00" fillOpacity="0.2" stroke="#FF8C00" strokeWidth="1.4" />
+          <text x="699" y="64" textAnchor="middle" fill="#FF8C00" fontSize="8.5" fontWeight="bold">90% OPERATOR &amp; NATIONS</text>
+          <text x="699" y="79" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">{math.annualOperatorBtc.toFixed(2)} BTC/yr</text>
+        </svg>
       </div>
     </section>
   )

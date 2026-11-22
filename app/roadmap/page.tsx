@@ -6,6 +6,16 @@ export const metadata = {
   description: 'Public product roadmap: shipped client features and backend-dependent work.',
 }
 
+const SHIPPED_V217 = [
+  'Map Hover Popup Interactive Fix: 340ms hover bridge + clickable "Click to build it →" button inside pin & cluster popups',
+  'Map 15 km Radius Cluster Builder + ⚛️ Nuclear SMR Corridor layer preset + Docked Desktop Section Tabs (Overview / Build / Financials / Evidence)',
+  'Sovereign Pension Trust Modes (National, AB Heritage, BC Prosperity, ON Municipal, SK Resource, First Nations Trust) + Tax Regime Comparison + CPP/Norway GPFG benchmarks + #pension URL hash + Print Whitepaper PDF',
+  'Capture Hut Engineering SVG Schematic + Waste-Heat Co-Gen Sizer (MMBtu/hr & greenhouse acres) + CH₄/H₂S Gas Composition Sliders + Used vs. Next-Gen ASIC Payback Matrix + Vendor RFQ Export (.MD/.CSV)',
+  'Two-SPV Stackable Capital Calculator + Project Finance DSCR Stress Tester + Equipment Lease vs. CapEx Toggle + 1-Click Data Room Bundle Export',
+  'Phase 3 Nuclear SMR + Grid Frequency-Response + 143 Remote Community Diesel-Displacement Simulator on /verticals',
+  'Sankey Energy-to-Sats Flow Diagram + Excel-Formula Audit Sheet (.TSV) in HowTheMathWorks + Automated Capital Link Watchdog (scripts/check-capital-links.mjs)',
+]
+
 const SHIPPED_V216 = [
   'Codified 6-Step Math Walkthrough (HowTheMathWorks): kg CH₄/day → Nm³/day → average kW → ASIC ceiling → Capture Huts → Sats & 10% Pension',
   'Vendor-Neutral Methane Capture Huts & Gas Scrubber BOM Sizer (10ft Arctic Skid, 20ft Biogas Container, 40ft Air Hut, 40ft Immersion Pod)',
@@ -88,10 +98,17 @@ export default function RoadmapPage() {
         subtitle="Transparent plan. Client-first now; backends when Cam configures them."
         badge={
           <span className="inline-block text-xs text-[#5BC0BE] px-2 py-0.5 rounded-full border border-[#5BC0BE]/30 bg-[#5BC0BE]/10">
-            v2.16.0 · Public Pitch &amp; Sovereign Pension Overhaul shipped
+            v2.17.0 · Top 25 Upgrades + Map Hover &amp; Cockpit Overhaul shipped 2026-11-22
           </span>
         }
       />
+
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-[#FF8C00] mb-3">Shipped — v2.17.0 (Top 25 Upgrades + Map Interactive Hover Fix + Full Knowledge Sync)</h2>
+        <ul className="space-y-1.5 text-sm text-gray-300">
+          {SHIPPED_V217.map(i => <li key={i} className="flex gap-2"><span className="text-[#FF8C00]">✓</span>{i}</li>)}
+        </ul>
+      </section>
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-[#34D399] mb-3">Shipped — v2.16.0 (Public Pitch, Capture Huts, Global Capital &amp; Sovereign Pension)</h2>

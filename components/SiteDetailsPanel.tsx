@@ -737,9 +737,9 @@ export default function SiteDetailsPanel({
     }
   }
 
-  // ---- Mobile sections (phone sheet only; desktop keeps the full cockpit) -----
-  /** Overview / Build / Financials / Evidence exist only in the bottom sheet. */
-  const sectionsEnabled = sheet && !compact
+  // ---- Mobile & Desktop sections (tabbed cockpit everywhere for instant scan) -----
+  /** Overview / Build / Financials / Evidence exist in both phone sheet and docked desktop panel. */
+  const sectionsEnabled = !compact
   /**
    * Two jobs in one class string:
    *   - `site-section-<id>` is a permanent marker, so a test (or an audit) can
